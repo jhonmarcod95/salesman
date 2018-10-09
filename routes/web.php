@@ -47,10 +47,18 @@ Route::patch('/users/update/{id}', 'UserController@update');
 Route::delete('/users/destroy/{id}', 'UserController@destroy');
 
 //Customer
-Route::get('/customers', 'CustomerController@index');
-Route::get('/customers/create', 'CustomerController@create');
+Route::post('/customers', 'CustomerController@store');
+Route::get('/customers', 'CustomerController@index')->name('customers_list');
+Route::get('/edit-customers/{id}','CustomerController@edit');
 Route::get('/customers/show/{id}', 'CustomerController@show');
+Route::patch('/customers/{id}', 'CustomerController@update');
+Route::get('/customers/create', 'CustomerController@create');
 
-Route::post('/customers/store', 'CustomerController@store');
-Route::patch('/customers/update/{id}', 'CustomerController@update');
 Route::delete('/customers/destroy/{id}', 'CustomerController@destroy');
+
+
+// Provinces
+Route::get('/provinces', 'ProvinceController@index');
+
+// Regions
+Route::get('/regions', 'RegionController@index');

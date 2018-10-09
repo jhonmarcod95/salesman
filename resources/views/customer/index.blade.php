@@ -28,37 +28,45 @@
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
+                                <th scope="col">Area</th>
+                                <th scope="col">Classification</th>
                                 <th scope="col">Customer Code</th>
+                                <th scope="col">Group</th>
                                 <th scope="col">Name</th>
-                                <th scope="col">Address</th>
-                                <th scope="col">Created At</th>
-                                <th scope="col">Updated At</th>
-                                <th scope="col"></th>
+                                <th scope="col">Street</th>
+                                <th scope="col">Town or City</th>
+                                {{-- <th scope="col">Region</th> --}}
+                                <th scope="col">Province</th>
+                                <th scope="col">Telephone 1</th>
+                                <th scope="col">Telephone 2</th>
+                                <th scope="col">Fax number</th>
+                                <th scope="col">Remarks</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($customers as $customer)
                                 <tr>
-                                    <th scope="row">
+                                    {{-- <th scope="row">
                                         <div class="media align-items-center">
                                             <div class="media-body">
                                                 <span class="mb-0 text-sm">{{ $customer->customer_code }}</span>
                                             </div>
                                         </div>
-                                    </th>
-                                    <td>
-                                        {{ $customer->name }}
-                                    </td>
-                                    <td>
-                                        {{ $customer->address }}
-                                    </td>
-                                    <td>
-                                        {{ Carbon::parse($customer->created_at)->format('Y-m-d h:ia') }}
-                                    </td>
-
-                                    <td>
-                                        {{ Carbon::parse($customer->updated_at)->format('Y-m-d h:ia') }}
-                                    </td>
+                                    </th> --}}
+                                    <td> {{ $customer->area }} </td>
+                                    <td> {{ $customer->classification }} </td>
+                                    <td> {{ $customer->customer }} </td>
+                                    <td> {{ $customer->group }} </td>
+                                    <td> {{ $customer->name }} </td>
+                                    <td> {{ $customer->street }} </td>
+                                    <td> {{ $customer->town_city }} </td>
+                                    <td> {{ $customer->province_id }} </td>
+                                    <td> {{ $customer->telephone_1 }} </td>
+                                    <td> {{ $customer->telephone_2 }} </td>
+                                    <td> {{ $customer->fax_number }} </td>
+                                    <td> {{ $customer->remarks }} </td>
+                                    {{-- <td>  {{ Carbon::parse($customer->created_at)->format('Y-m-d h:ia') }} </td>
+                                    <td> {{ Carbon::parse($customer->updated_at)->format('Y-m-d h:ia') }} </td> --}}
                                     <td class="text-right">
                                         <div class="dropdown">
                                             <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
@@ -66,7 +74,7 @@
                                                 <i class="fas fa-ellipsis-v"></i>
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                <a class="dropdown-item" href="#">Edit</a>
+                                                <a class="dropdown-item" href="{{ url('/edit-customers/'.$customer->id) }}">Edit</a>
                                                 <a class="dropdown-item" href="#">Delete</a>
                                             </div>
                                         </div>
