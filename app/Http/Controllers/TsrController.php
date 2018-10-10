@@ -33,7 +33,6 @@ class TsrController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-
     public function create(){
         return view('tsr.create');
     }

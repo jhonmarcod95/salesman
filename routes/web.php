@@ -33,16 +33,22 @@ Route::patch('/schedules/update/{id}', 'TsrController@update');
 Route::delete('/schedules/destroy/{id}', 'TsrController@destroy');
 
 //User
+// show user page
 Route::get('/users', 'UserController@index');
+// fetch all user
+Route::get('/users-all', 'UserController@indexData');
+//show add user page
 Route::get('/users/create', 'UserController@create');
-Route::get('/users/show/{id}', 'UserController@show');
+//add new user
+Route::post('/user', 'UserController@store');
 
-Route::post('/users/store', 'UserController@store');
+
+Route::get('/users/show/{id}', 'UserController@show');
 Route::patch('/users/update/{id}', 'UserController@update');
 Route::delete('/users/destroy/{id}', 'UserController@destroy');
 
 //Tsr
-// show   tsr page
+// show tsr page
 Route::get('/tsr', 'TsrController@index')->name('tsr_list');
 // fetch all tsr
 Route::get('/tsr-all', 'TsrController@indexData');

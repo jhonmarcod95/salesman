@@ -17,6 +17,11 @@ window.Vue = require('vue');
 
 // Vue.component('example-component', require('./components/ExampleComponent.vue'));
 
+// User
+Vue.component('user-index', require('./components/User/UserIndex.vue'));
+Vue.component('user-form', require('./components/User/UserForm.vue'));
+
+
 // Customer
 Vue.component('customer-index', require('./components/Customer/CustomerIndex.vue'));
 Vue.component('customer-form', require('./components/Customer/CustomerForm.vue'));
