@@ -25,4 +25,4 @@ mix.styles([
 	'node_modules/bootstrap/dist/js/bootstrap.min.js',
 	'public/js/argon.js'
 ], 'public/js/all.js')
-.browserSync('http://localhost');   
+.browserSync('http://localhost');

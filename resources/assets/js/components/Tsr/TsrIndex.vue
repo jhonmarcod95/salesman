@@ -14,7 +14,7 @@
                                     <h3 class="mb-0">TSR List</h3>
                                 </div>
                                 <div class="col text-right">
-                                    <a href="{{ url('/tsr/create') }}" class="btn btn-sm btn-primary">Add New</a>
+                                    <a :href="addLink" class="btn btn-sm btn-primary">Add New</a>
                                 </div>
                             </div>
                         </div>
@@ -31,42 +31,33 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <!-- @foreach($tsrs as $tsr)
-                                <tr>
-                                    <th scope="row">
-                                        <div class="media align-items-center">
-                                            <a href="#" class="avatar rounded-circle mr-3">
-                                                <img alt="Image placeholder" src="{{ url('img/theme/team-4-800x800.jpg') }}">
-                                            </a>
-                                            <div class="media-body">
-                                                <span class="mb-0 text-sm">{{ $tsr->first_name . ' ' . $tsr->last_name }}</span>
+                                    <tr v-for="(tsr, t) in tsrs" v-bind:key="t">
+                                        <th scope="row">
+                                            <div class="media align-items-center">
+                                                <a href="#" class="avatar rounded-circle mr-3">
+                                                    <img alt="Image placeholder" src="/img/theme/team-4-800x800.jpg">
+                                                </a>
+                                                <div class="media-body">
+                                                    <span class="mb-0 text-sm">{{ tsr.first_name + ' ' + tsr.last_name }}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </th>
-                                    <td>
-                                        {{ $tsr->email }}
-                                    </td>
-                                    <td>
-                                        {{ Carbon::parse($tsr->created_at)->format('Y-m-d h:ia') }}
-                                    </td>
-
-                                    <td>
-                                        {{ Carbon::parse($tsr->updated_at)->format('Y-m-d h:ia') }}
-                                    </td>
-                                    <td class="text-right">
-                                        <div class="dropdown">
-                                            <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
-                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                <a class="dropdown-item" href="#">Edit</a>
-                                                <a class="dropdown-item" href="#">Delete</a>
+                                        </th>
+                                        <td> {{ tsr.email }} </td>
+                                        <td> {{ tsr.created_at }} </td>
+                                        <td> {{ tsr.updated_at }}</td>
+                                        <td class="text-right">
+                                            <div class="dropdown">
+                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                    <a class="dropdown-item" :href="editLink+tsr.id">Edit</a>
+                                                    <a class="dropdown-item" href="#">Delete</a>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach -->
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -96,9 +87,6 @@
                                 </ul>
                             </nav>
                         </div>
-
-
-
                     </div>
                 </div>
             </div>
@@ -108,6 +96,33 @@
 
 <script>
 export default {
-
+    data(){
+        return{
+            tsrs: [],
+            errors: []
+        }
+    },
+    created(){
+        this.fetchTsr();
+    },
+    methods:{
+        fetchTsr(){
+            axios.get('/tsr-all')
+            .then(response => { 
+                this.tsrs = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        }
+    },
+    computed:{
+        addLink(){
+            return window.location.origin+'/tsr/create';
+        },
+        editLink(){
+            return window.location.origin+'/tsr-edit/';
+        }   
+    }
 }
 </script>

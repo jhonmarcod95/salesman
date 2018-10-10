@@ -26,7 +26,12 @@ class CustomerController extends Controller
     public function indexData(){
         return  Customer::orderBy('id','desc')->get();
     }
-
+    
+    /**
+     * Display adding customer  page
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function create(){
         return view('customer.create');
     }

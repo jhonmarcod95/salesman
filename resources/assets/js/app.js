@@ -24,6 +24,8 @@ Vue.component('customer-edit-form', require('./components/Customer/CustomerEditF
 
 // Tsr
 Vue.component('tsr-index', require('./components/Tsr/TsrIndex.vue'));
+Vue.component('tsr-form', require('./components/Tsr/TsrForm.vue'));
+Vue.component('tsr-edit-form', require('./components/Tsr/TsrEditForm.vue'));
 
 const app = new Vue({
     el: '#app'

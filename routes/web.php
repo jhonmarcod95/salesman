@@ -28,11 +28,6 @@ Route::patch('/schedules/update/{id}', 'ScheduleController@update');
 Route::patch('/schedules/change/{id}', 'ScheduleController@change');
 Route::delete('/schedules/destroy/{id}', 'ScheduleController@destroy');
 
-//Tsr
-Route::get('/tsr', 'TsrController@index');
-Route::get('/tsr/create', 'TsrController@create');
-Route::get('/tsr/show/{id}', 'TsrController@show');
-
 Route::post('/schedules/store', 'TsrController@store');
 Route::patch('/schedules/update/{id}', 'TsrController@update');
 Route::delete('/schedules/destroy/{id}', 'TsrController@destroy');
@@ -46,20 +41,39 @@ Route::post('/users/store', 'UserController@store');
 Route::patch('/users/update/{id}', 'UserController@update');
 Route::delete('/users/destroy/{id}', 'UserController@destroy');
 
-//Customer
+//Tsr
+// show   tsr page
+Route::get('/tsr', 'TsrController@index')->name('tsr_list');
+// fetch all tsr
+Route::get('/tsr-all', 'TsrController@indexData');
+//show add tsr page
+Route::get('/tsr/create', 'TsrController@create');
 //add new customer
-Route::post('/customers', 'CustomerController@store');
+Route::post('/tsr', 'TsrController@store');
+// show customer edit page
+Route::get('/tsr-edit/{id}','TsrController@edit');
+// show details of specific customer
+Route::get('/tsr/show/{id}', 'TsrController@show');
+// update customer
+Route::patch('/tsr/{customer}', 'TsrController@update');
+// show details of specific tsr
+Route::get('/tsr/show/{id}', 'TsrController@show');
+
+//Customer
 // show customer page
 Route::get('/customers', 'CustomerController@index')->name('customers_list');
 // fetch all customer
 Route::get('/customers-all', 'CustomerController@indexData');
+//show add customer page
+Route::get('/customers/create', 'CustomerController@create');
+//save new customer
+Route::post('/customers', 'CustomerController@store');
 // show customer edit page
 Route::get('/customers-edit/{id}','CustomerController@edit');
+// show details of specific customer
+Route::get('/customers/show/{id}', 'CustomerController@show');
 // update customer
 Route::patch('/customers/{customer}', 'CustomerController@update');
-
-Route::get('/customers/show/{id}', 'CustomerController@show');
-Route::get('/customers/create', 'CustomerController@create');
 
 Route::delete('/customers/destroy/{id}', 'CustomerController@destroy');
 
