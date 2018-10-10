@@ -7,15 +7,24 @@ use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
+    /**
+     * Display customer index page
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index(){
         session(['header_text' => 'Customers']);
+        return view('customer.index');
+    }
 
-        $customers = Customer::orderBy('id','desc')->paginate(10);
+    /**
+     * Get all customer
+     *
+     * @return \Illuminate\Http\Response
+     */
 
-
-        return view('customer.index', compact(
-            'customers'
-        ));
+    public function indexData(){
+        return  Customer::orderBy('id','desc')->get();
     }
 
     public function create(){
@@ -33,7 +42,7 @@ class CustomerController extends Controller
 
         $customers->area = $request->area;
         $customers->classification = $request->classification;
-        $customers->customer = $request->customer_code;
+        $customers->customer_code = $request->customer_code;
         $customers->name = $request->name;
         $customers->group = $request->group;
         $customers->street = $request->street;
@@ -78,7 +87,23 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-        dd($customer);
+        
+        $customer->area = $request->area;
+        $customer->classification = $request->classification;
+        $customer->customer_code = $request->customer_code;
+        $customer->name = $request->name;
+        $customer->group = $request->group;
+        $customer->street = $request->street;
+        $customer->town_city = $request->town_city;
+        $customer->province_id = $request->province_id;
+        $customer->telephone_1 = $request->telephone_1;
+        $customer->telephone_2 = $request->telephone_2;
+        $customer->fax_number = $request->fax_number;
+        $customer->remarks = $request->remarks;
+
+        if($customer->save()){
+            return ['redirect' => route('customers_list')];
+        }
     }
 
 }

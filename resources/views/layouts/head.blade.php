@@ -18,6 +18,7 @@
 <link type="text/css" href="{{ url('css/argon.css?v=1.0.0') }}" rel="stylesheet">
 
 <!-- Scripts -->
+{{-- <script src="{{ asset('js/app.js') }}" defer></script> --}}
 <script src="{{ asset('js/all.js') }}" defer></script>
 
 <!-- Select2 -->

@@ -47,11 +47,18 @@ Route::patch('/users/update/{id}', 'UserController@update');
 Route::delete('/users/destroy/{id}', 'UserController@destroy');
 
 //Customer
+//add new customer
 Route::post('/customers', 'CustomerController@store');
+// show customer page
 Route::get('/customers', 'CustomerController@index')->name('customers_list');
-Route::get('/edit-customers/{id}','CustomerController@edit');
+// fetch all customer
+Route::get('/customers-all', 'CustomerController@indexData');
+// show customer edit page
+Route::get('/customers-edit/{id}','CustomerController@edit');
+// update customer
+Route::patch('/customers/{customer}', 'CustomerController@update');
+
 Route::get('/customers/show/{id}', 'CustomerController@show');
-Route::patch('/customers/{id}', 'CustomerController@update');
 Route::get('/customers/create', 'CustomerController@create');
 
 Route::delete('/customers/destroy/{id}', 'CustomerController@destroy');
