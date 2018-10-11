@@ -64,8 +64,8 @@ export default {
     data(){
         return{
             user:{
-                name: '',
-                email: '',
+                name: ' ',
+                email: ' ',
                 password: ''
             },
             errors: []

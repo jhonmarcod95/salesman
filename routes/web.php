@@ -88,6 +88,12 @@ Route::patch('/customers/{customer}', 'CustomerController@update');
 
 Route::delete('/customers/destroy/{id}', 'CustomerController@destroy');
 
+//Customer Classfication
+// show customer classfication page
+Route::get('/customers-classification', 'CustomerClassificationController@index')->name('classification_list');
+// fetch all customer classfication
+Route::get('/customers-classification-all', 'CustomerClassificationController@indexData');
+
 
 // Provinces
 Route::get('/provinces', 'ProvinceController@index');

@@ -27,6 +27,7 @@
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
+                                    <th scope="col"></th>
                                     <th scope="col">Area</th>
                                     <th scope="col">Classification</th>
                                     <th scope="col">Customer Code</th>
@@ -43,18 +44,6 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="(customer,c) in filteredQueues" v-bind:key="c">
-                                        <td>{{ customer.area }}</td>
-                                        <td>{{ customer.classification }}</td>
-                                        <td>{{ customer.customer_code }}</td>
-                                        <td>{{ customer.group }}</td>
-                                        <td>{{ customer.name }}</td>
-                                        <td>{{ customer.street }}</td>
-                                        <td>{{ customer.town_city }}</td>
-                                        <td>{{ customer.province_id }}</td>
-                                        <td>{{ customer.telephone_1 }}</td>
-                                        <td>{{ customer.telephone_2 }}</td>
-                                        <td>{{ customer.fax_number }}</td>      
-                                        <td>{{ customer.remarks }}</td>
                                         <td class="text-right">
                                             <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
@@ -67,6 +56,18 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <td>{{ customer.area }}</td>
+                                        <td>{{ customer.classification }}</td>
+                                        <td>{{ customer.customer_code }}</td>
+                                        <td>{{ customer.group }}</td>
+                                        <td>{{ customer.name }}</td>
+                                        <td>{{ customer.street }}</td>
+                                        <td>{{ customer.town_city }}</td>
+                                        <td>{{ customer.province_id }}</td>
+                                        <td>{{ customer.telephone_1 }}</td>
+                                        <td>{{ customer.telephone_2 }}</td>
+                                        <td>{{ customer.fax_number }}</td>      
+                                        <td>{{ customer.remarks }}</td>
                                     </tr>
                                 </tbody>
                             </table>

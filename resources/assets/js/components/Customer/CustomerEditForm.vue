@@ -28,9 +28,11 @@
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
-                                            <div class="form-group">
+                                           <div class="form-group">
                                                 <label class="form-control-label" for="classification">Classification</label>
-                                                <input type="text" id="classification" class="form-control form-control-alternative" v-model="customers.classification">
+                                                <select class="form-control" v-model="customers.classification">
+                                                    <option v-for="(classification, c) in classifications" v-bind:key="c" :value="classification.id">{{ classification.description}}</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -145,6 +147,7 @@
             return{
                 customers: [],
                 provinces: [],
+                classifications:[],
                 regions:[],
                 errors: []
             }
@@ -153,6 +156,7 @@
             this.fetchRegion();
             this.fetchProvince();
             this.fetchCustomer();
+            this.fetchClassification();
         },
         methods:{
             updateCustomer(customers){  
@@ -199,6 +203,15 @@
                     this.provinces = response.data;
                 })
                 .catch(error => {
+                    this.errors = error.response.data.errors;
+                })
+            },
+            fetchClassification(){
+                axios.get('/customers-classification-all')
+                .then(response => { 
+                    this.classifications = response.data;
+                })
+                .catch(error =>{
                     this.errors = error.response.data.errors;
                 })
             }

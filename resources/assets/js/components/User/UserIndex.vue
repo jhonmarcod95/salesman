@@ -25,19 +25,15 @@
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
+                                    <th scope="col"></th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Email</th>
                                     <th scope="col">Created At</th>
                                     <th scope="col">Updated At</th>
-                                    <th scope="col"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="(user, u) in filteredQueues" v-bind:key="u">
-                                        <td>{{ user.name }}</td>
-                                        <td>{{ user.email }}</td>
-                                        <td></td>
-                                        <td></td>
                                         <td class="text-right">
                                             <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
@@ -50,6 +46,10 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
                                 </tbody>
                             </table>

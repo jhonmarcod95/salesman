@@ -30,7 +30,9 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="classification">Classification</label>
-                                                <input type="text" id="classification" class="form-control form-control-alternative" v-model="customer.classification">
+                                                  <select class="form-control" v-model="customer.classification">
+                                                    <option v-for="(classification, c) in classifications" v-bind:key="c" :value="classification.id">{{ classification.description}}</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -42,14 +44,6 @@
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label class="form-control-label" for="group">Group</label>
-                                                <input type="text" id="group" class="form-control form-control-alternative" v-model="customer.group">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-12">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-email">Name</label>
                                                 <input type="text" id="name" class="form-control form-control-alternative" v-model="customer.name">
@@ -146,7 +140,6 @@
                     area: '',
                     classfication: '',
                     customer_code: '',
-                    group: '',
                     name: '',
                     street: '',
                     town_city: '',
@@ -159,12 +152,14 @@
                 },
                 provinces: [],
                 regions:[],
+                classifications:[],
                 errors: []
             }
         },
         created(){
             this.fetchRegion();
             this.fetchProvince();
+            this.fetchClassification();
         },
         methods:{
             addCustomer(customer){
@@ -172,7 +167,6 @@
                     area : customer.area,
                     classification : customer.classification,
                     customer_code : customer.customer_code,
-                    group: customer.group,
                     name: customer.name,
                     street: customer.street,
                     town_city: customer.town_city,
@@ -205,6 +199,15 @@
                     this.provinces = response.data;
                 })
                 .catch(error => {
+                    this.errors = error.response.data.errors;
+                })
+            },
+            fetchClassification(){
+                axios.get('/customers-classification-all')
+                .then(response => { 
+                    this.classifications = response.data;
+                })
+                .catch(error =>{
                     this.errors = error.response.data.errors;
                 })
             }

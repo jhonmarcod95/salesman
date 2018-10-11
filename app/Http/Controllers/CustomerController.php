@@ -49,7 +49,6 @@ class CustomerController extends Controller
         $customers->classification = $request->classification;
         $customers->customer_code = $request->customer_code;
         $customers->name = $request->name;
-        $customers->group = $request->group;
         $customers->street = $request->street;
         $customers->town_city = $request->town_city;
         $customers->province_id = $request->province_id;
@@ -97,7 +96,6 @@ class CustomerController extends Controller
         $customer->classification = $request->classification;
         $customer->customer_code = $request->customer_code;
         $customer->name = $request->name;
-        $customer->group = $request->group;
         $customer->street = $request->street;
         $customer->town_city = $request->town_city;
         $customer->province_id = $request->province_id;
