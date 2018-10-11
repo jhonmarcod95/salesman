@@ -43,6 +43,10 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
+        $request->validate([
+            'customer_code' => 'required',
+            'name' => 'required',
+        ]);
         $customers = new Customer;
 
         $customers->area = $request->area;
