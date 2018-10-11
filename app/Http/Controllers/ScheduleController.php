@@ -28,11 +28,12 @@ class ScheduleController extends Controller
                 'id'
             );
 
-        $customers = Customer::get()
+        $customers = Customer::select(DB::raw("CONCAT(name,' - ',town_city) AS name"), 'customer_code')
             ->pluck(
                 'name',
                 'customer_code'
             );
+
 
         return view('schedule.index', compact(
             'schedules',
