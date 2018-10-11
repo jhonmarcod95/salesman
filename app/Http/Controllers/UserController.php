@@ -51,7 +51,59 @@ class UserController extends Controller
         $user->password = bcrypt($request->password);
 
         if($user->save()){
-            return ['redirect' => route('tsr_list')];
+            return ['redirect' => route('user_list')];
+        }
+    }
+
+    /**
+     * Show the edit form
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        return view('user.edit', compact('id'));
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        return User::findOrFail($id);
+    }
+
+    /**
+     * Update the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, User $user)
+    {
+        
+        $user->name = $request->name;
+        $user->email= $request->email;
+
+        if($user->save()){
+            return ['redirect' => route('users_list')];
+        }
+    }
+
+    /* Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $user = User::findOrfail($id);
+
+        if($user->delete()){
+            return $user;
         }
     }
 

@@ -31,18 +31,26 @@ Route::delete('/schedules/destroy/{id}', 'ScheduleController@destroy');
 
 //User
 // show user page
-Route::get('/users', 'UserController@index');
+Route::get('/users', 'UserController@index')->name('users_list');
 // fetch all user
 Route::get('/users-all', 'UserController@indexData');
 //show add user page
 Route::get('/users/create', 'UserController@create');
 //add new user
 Route::post('/user', 'UserController@store');
+// show user edit page
+Route::get('/user-edit/{id}','UserController@edit');
+// show details of specific user
+Route::get('/user/show/{id}', 'UserController@show');
+// update customer
+Route::patch('/user/{user}', 'UserController@update');
+//delete user
+Route::delete('/user/{id}', 'UserController@destroy');
 
 
 Route::get('/users/show/{id}', 'UserController@show');
 Route::patch('/users/update/{id}', 'UserController@update');
-Route::delete('/users/destroy/{id}', 'UserController@destroy');
+
 
 //Tsr
 // show tsr page
@@ -58,7 +66,7 @@ Route::get('/tsr-edit/{id}','TsrController@edit');
 // show details of specific customer
 Route::get('/tsr/show/{id}', 'TsrController@show');
 // update customer
-Route::patch('/tsr/{customer}', 'TsrController@update');
+Route::patch('/tsr/{tsr}', 'TsrController@update');
 // show details of specific tsr
 Route::get('/tsr/show/{id}', 'TsrController@show');
 

@@ -16,6 +16,10 @@
                                 <div class="col text-right">
                                     <a :href="addLink" class="btn btn-sm btn-primary">Add New</a>
                                 </div>
+                                <div class="col-md-12">
+                                    <label for="name">Search</label>
+                                    <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                                </div>
                             </div>
                         </div>
 
@@ -38,10 +42,10 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(customer,c) in customers" v-bind:key="c">
+                                    <tr v-for="(customer,c) in filteredQueues" v-bind:key="c">
                                         <td>{{ customer.area }}</td>
                                         <td>{{ customer.classification }}</td>
-                                        <td>{{ customer.customer }}</td>
+                                        <td>{{ customer.customer_code }}</td>
                                         <td>{{ customer.group }}</td>
                                         <td>{{ customer.name }}</td>
                                         <td>{{ customer.street }}</td>
@@ -67,33 +71,21 @@
                                 </tbody>
                             </table>
                         </div>
-
                         <div class="card-footer py-4">
                             <nav aria-label="...">
                                 <ul class="pagination justify-content-end mb-0">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" tabindex="-1">
-                                            <i class="fas fa-angle-left"></i>
-                                            <span class="sr-only">Previous</span>
-                                        </a>
+                                    <li class="page-item">
+                                        <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
                                     </li>
-                                    <li class="page-item active">
-                                        <a class="page-link" href="#">1</a>
+                                    <li class="page-item">  
+                                        Page {{ currentPage + 1 }} of {{ totalPages }}  
                                     </li>
                                     <li class="page-item">
-                                        <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
-                                    </li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">
-                                            <i class="fas fa-angle-right"></i>
-                                            <span class="sr-only">Next</span>
-                                        </a>
+                                        <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
                                     </li>
                                 </ul>
                             </nav>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -106,7 +98,10 @@ export default {
     data(){
         return{
             customers: [],
-            errors: []
+            errors: [],
+            keywords: '',
+            currentPage: 0,
+            itemsPerPage: 10,
         }
     },
     created(){
@@ -121,9 +116,47 @@ export default {
           .catch(error => {
               this.errors = error.response.data.errors;
           })
-      }  
+      },
+      setPage(pageNumber) {
+            this.currentPage = pageNumber;
+        },
+
+        resetStartRow() {
+            this.currentPage = 0;
+        },
+
+        showPreviousLink() {
+            return this.currentPage == 0 ? false : true;
+        },
+
+        showNextLink() {
+            return this.currentPage == (this.totalPages - 1) ? false : true;
+        }  
     },
     computed:{
+        filteredCustomers(){
+            let self = this;
+            return self.customers.filter(customer => {
+                return customer.name.toLowerCase().includes(this.keywords.toLowerCase())
+            });
+        },
+        totalPages() {
+            return Math.ceil(this.filteredCustomers.length / this.itemsPerPage)
+        },
+        filteredQueues() {
+            var index = this.currentPage * this.itemsPerPage;
+            var queues_array = this.filteredCustomers.slice(index, index + this.itemsPerPage);
+
+            if(this.currentPage >= this.totalPages) {
+                this.currentPage = this.totalPages - 1
+            }
+
+            if(this.currentPage == -1) {
+                this.currentPage = 0;
+            }
+
+            return queues_array;
+        },
         addLink(){
             return window.location.origin+'/customers/create';
         },

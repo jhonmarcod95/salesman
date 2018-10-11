@@ -20,6 +20,7 @@ window.Vue = require('vue');
 // User
 Vue.component('user-index', require('./components/User/UserIndex.vue'));
 Vue.component('user-form', require('./components/User/UserForm.vue'));
+Vue.component('user-edit-form', require('./components/User/UserEditForm.vue'));
 
 
 // Customer
