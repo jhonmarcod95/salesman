@@ -1,4 +1,5 @@
 
+<script src="{{ asset('js/all.js') }}"></script>
 
 <!-- Argon Scripts -->
 <!-- Core -->
@@ -10,16 +11,14 @@
 {{--<script src="{{ url('vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>--}}
 {{-----------------------}}
 
-
 <!-- Optional JS -->
 <script src="{{ url('vendor/chart.js/dist/Chart.min.js') }}"></script>
 <script src="{{ url('vendor/chart.js/dist/Chart.extension.js') }}"></script>
-<!-- Argon JS -->
+
+{{--<!-- Argon JS -->--}}
 <script src="{{ url('js/argon.js?v=1.0.0') }}"></script>
 
 {{-- Fullcalendar --}}
-<link href='{{ url('fullcalendar/fullcalendar.min.css') }}' rel='stylesheet' />
-<link href='{{ url('fullcalendar/fullcalendar.print.min.css') }}' rel='stylesheet' media='print' />
 <script src='{{ url('fullcalendar/moment.min.js') }}'></script>
 <script src='{{ url('fullcalendar/jquery.min.js') }}'></script>
 <script src='{{ url('fullcalendar/jquery-ui.min.js') }}'></script>
@@ -50,6 +49,5 @@ function formatAMPM(time) {
     return time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
 }
 </script>
-
 
 @yield('script')

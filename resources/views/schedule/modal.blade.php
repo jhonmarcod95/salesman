@@ -23,7 +23,7 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <h5>Customer</h5>
-                            {!! Form::select('customer_code', $customers, null, ['class' => 'addScheduleModalSel2', 'required']) !!}
+                            {!! Form::select('customer_codes[]', $customers, null, ['class' => 'addScheduleModalSel2', 'multiple', 'required']) !!}
                         </div>
                     </div>
                 </div>

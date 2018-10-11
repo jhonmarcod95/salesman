@@ -86,7 +86,10 @@
                 dataType: 'json',
                 success: function(data){
                     /*---------- add event to calendar ------------*/
-                    refreshCalendar(data);
+                    var i;
+                    for (i = 0; i < data.length; i++) {
+                        refreshCalendar(data[i]);
+                    }
                     $('#calendar').fullCalendar('unselect');
                     $('#addScheduleModal').modal('hide');
                     /*------------------------------------------------*/

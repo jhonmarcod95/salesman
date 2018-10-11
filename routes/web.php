@@ -28,9 +28,6 @@ Route::patch('/schedules/update/{id}', 'ScheduleController@update');
 Route::patch('/schedules/change/{id}', 'ScheduleController@change');
 Route::delete('/schedules/destroy/{id}', 'ScheduleController@destroy');
 
-Route::post('/schedules/store', 'TsrController@store');
-Route::patch('/schedules/update/{id}', 'TsrController@update');
-Route::delete('/schedules/destroy/{id}', 'TsrController@destroy');
 
 //User
 // show user page

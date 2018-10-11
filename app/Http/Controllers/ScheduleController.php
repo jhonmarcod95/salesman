@@ -19,7 +19,7 @@ class ScheduleController extends Controller
     {
         session(['header_text' => 'Schedules']);
 
-        $schedules = DB::select('CALL p_schedules(\'%%\', \'%%\')');
+        $schedules = DB::select('CALL p_schedules(\'%%\', \'%%\', \'%%\')');
 
         $tsrs = TechnicalSalesRepresentative::select(
             DB::raw("CONCAT(first_name,' ',last_name) AS name"),'id')
@@ -45,23 +45,32 @@ class ScheduleController extends Controller
     {
         $request->validate([
             'tsr_id' => 'required',
-            'customer_code' => 'required',
+            'customer_codes' => 'required',
             'date' => 'required',
             'start_time' => 'required',
             'end_time' => 'required',
         ]);
 
-        $schedule = new Schedule();
-        $schedule->tsr_id = $request->tsr_id;
-        $schedule->customer_code = $request->customer_code;
-        $schedule->date = $request->date;
-        $schedule->start_time = $request->start_time;
-        $schedule->end_time = $request->end_time;
-        $schedule->status = '2';
-        $schedule->remarks = $request->remarks;
-        $schedule->save();
+        $customer_codes = $request->customer_codes;
 
-        $data = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->tsr_id . '\')'))->first();
+        DB::beginTransaction();
+        foreach ($customer_codes as $customer_code){
+            $schedule = new Schedule();
+            $schedule->tsr_id = $request->tsr_id;
+            $schedule->customer_code = $customer_code;
+            $schedule->date = $request->date;
+            $schedule->start_time = $request->start_time;
+            $schedule->end_time = $request->end_time;
+            $schedule->status = '2';
+            $schedule->remarks = $request->remarks;
+            $schedule->save();
+        }
+        DB::commit();
+
+        foreach ($customer_codes as $customer_code){
+            $data[] = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->tsr_id . '\', \'' . $customer_code . '\')'))->first();
+        }
+
         return response()->json($data);
     }
 
@@ -84,7 +93,7 @@ class ScheduleController extends Controller
         $schedule->remarks = $request->remarks;
         $schedule->save();
 
-        $data = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->tsr_id. '\')'))->first();
+        $data = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->tsr_id. '\', \'' . $request->customer_code . '\')'))->first();
         return response()->json($data);
     }
 
