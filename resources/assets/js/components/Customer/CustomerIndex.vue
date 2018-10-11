@@ -40,6 +40,7 @@
                                     <th scope="col">Telephone 2</th>
                                     <th scope="col">Fax number</th>
                                     <th scope="col">Remarks</th>
+                                    <th></th>
                                 </tr>
                                 </thead>
                                 <tbody>
