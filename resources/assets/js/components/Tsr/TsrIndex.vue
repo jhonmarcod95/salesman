@@ -30,8 +30,10 @@
                                     <th scope="col"></th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Email</th>
-                                    <th scope="col">Created At</th>
-                                    <th scope="col">Updated At</th>
+                                    <th scope="col">Contact Number</th>
+                                    <th scope="col">Birthday</th>
+                                    <th scope="col">Contact Person</th>
+                                    <th scope="col">Plate Number</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -59,8 +61,10 @@
                                             </div>
                                         </th>
                                         <td> {{ tsr.email }} </td>
-                                        <td> {{ tsr.created_at }} </td>
-                                        <td> {{ tsr.updated_at }}</td>
+                                        <td> {{ tsr.contact_number }} </td>
+                                        <td> {{ tsr.date_of_birth }}</td>
+                                        <td> {{ tsr.contact_person }}</td>
+                                        <td> {{ tsr.plate_number }}</td>
                                     </tr>
                                 </tbody>
                             </table>

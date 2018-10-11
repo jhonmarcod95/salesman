@@ -49223,6 +49223,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -49271,7 +49273,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 fax_number: customer.fax_number,
                 remarks: customer.remarks
             }).then(function (response) {
-                window.location.href = response.data.redirect;
+                if (confirm('Customer Successful Added')) {
+                    window.location.href = response.data.redirect;
+                }
             }).catch(function (error) {
                 _this.errors = error.response.data.errors;
             });
@@ -49467,7 +49471,13 @@ var render = function() {
                               )
                             }
                           }
-                        })
+                        }),
+                        _vm._v(" "),
+                        _vm.errors.customer_code
+                          ? _c("span", { staticClass: "error" }, [
+                              _vm._v(_vm._s(_vm.errors.customer_code[0]))
+                            ])
+                          : _vm._e()
                       ])
                     ]),
                     _vm._v(" "),
@@ -49506,7 +49516,13 @@ var render = function() {
                               )
                             }
                           }
-                        })
+                        }),
+                        _vm._v(" "),
+                        _vm.errors.name
+                          ? _c("span", { staticClass: "error" }, [
+                              _vm._v(_vm._s(_vm.errors.name[0]))
+                            ])
+                          : _vm._e()
                       ])
                     ])
                   ])
@@ -51002,6 +51018,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -51197,9 +51217,15 @@ var render = function() {
                         _vm._v(" "),
                         _c("td", [_vm._v(" " + _vm._s(tsr.email) + " ")]),
                         _vm._v(" "),
-                        _c("td", [_vm._v(" " + _vm._s(tsr.created_at) + " ")]),
+                        _c("td", [
+                          _vm._v(" " + _vm._s(tsr.contact_number) + " ")
+                        ]),
                         _vm._v(" "),
-                        _c("td", [_vm._v(" " + _vm._s(tsr.updated_at))])
+                        _c("td", [_vm._v(" " + _vm._s(tsr.date_of_birth))]),
+                        _vm._v(" "),
+                        _c("td", [_vm._v(" " + _vm._s(tsr.contact_person))]),
+                        _vm._v(" "),
+                        _c("td", [_vm._v(" " + _vm._s(tsr.plate_number))])
                       ])
                     })
                   )
@@ -51285,9 +51311,13 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Email")]),
         _vm._v(" "),
-        _c("th", { attrs: { scope: "col" } }, [_vm._v("Created At")]),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Contact Number")]),
         _vm._v(" "),
-        _c("th", { attrs: { scope: "col" } }, [_vm._v("Updated At")])
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Birthday")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Contact Person")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Plate Number")])
       ])
     ])
   },
