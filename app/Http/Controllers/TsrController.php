@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\TechnicalSalesRepresentative;
+use App\{
+    User,
+    Role
+};
 use Illuminate\Http\Request;
 
 class TsrController extends Controller
@@ -82,7 +86,21 @@ class TsrController extends Controller
         $tsr->personal_email = $request->personal_email;
 
         if($tsr->save()){
-            return ['redirect' => route('tsr_list')];
+            // Create Temporary code for user
+            $user_password = strtolower($tsr->first_name.'.'.$tsr->last_name);
+            // Save User
+            $user = new User;
+            $user->name = $tsr->first_name. ' ' .$tsr->last_name;
+            $user->email = $tsr->email;
+            $user->password = bcrypt(preg_replace('/\s+/', '', $user_password));
+            if($user->save()){
+                // Attaching role to user
+                $tsrRole = Role::where('name', '=', 'Tsr')->first();
+                $user->syncRoles($tsrRole);
+                // Insert user_id in tsr table
+                $tsr->update(['user_id'=> $user->id]);
+                return ['redirect' => route('tsr_list')];
+            }
         }
     }
     /**
@@ -131,7 +149,6 @@ class TsrController extends Controller
             'plate_number' => 'required'
             
         ]);
-
 
         $technicalSalesRepresentative->last_name = $request->last_name;
         $technicalSalesRepresentative->first_name = $request->first_name;

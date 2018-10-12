@@ -50311,6 +50311,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['customerId'],
@@ -50332,6 +50334,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     methods: {
         updateCustomer: function updateCustomer(customers) {
+            var _this = this;
+
             axios.patch('/customers/' + customers.id, {
                 area: customers.area,
                 classification: customers.classification,
@@ -50348,42 +50352,44 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 remarks: customers.remarks
             }).then(function (response) {
                 window.location.href = response.data.redirect;
-            });
-        },
-        fetchCustomer: function fetchCustomer() {
-            var _this = this;
-
-            axios.get('/customers/show/' + this.customerId).then(function (response) {
-                _this.customers = response.data;
             }).catch(function (error) {
                 _this.errors = error.response.data.errors;
             });
         },
-        fetchRegion: function fetchRegion() {
+        fetchCustomer: function fetchCustomer() {
             var _this2 = this;
 
-            axios.get('/regions').then(function (response) {
-                _this2.regions = response.data;
+            axios.get('/customers/show/' + this.customerId).then(function (response) {
+                _this2.customers = response.data;
             }).catch(function (error) {
                 _this2.errors = error.response.data.errors;
             });
         },
-        fetchProvince: function fetchProvince() {
+        fetchRegion: function fetchRegion() {
             var _this3 = this;
 
-            axios.get('/provinces').then(function (response) {
-                _this3.provinces = response.data;
+            axios.get('/regions').then(function (response) {
+                _this3.regions = response.data;
             }).catch(function (error) {
                 _this3.errors = error.response.data.errors;
             });
         },
-        fetchClassification: function fetchClassification() {
+        fetchProvince: function fetchProvince() {
             var _this4 = this;
 
-            axios.get('/customers-classification-all').then(function (response) {
-                _this4.classifications = response.data;
+            axios.get('/provinces').then(function (response) {
+                _this4.provinces = response.data;
             }).catch(function (error) {
                 _this4.errors = error.response.data.errors;
+            });
+        },
+        fetchClassification: function fetchClassification() {
+            var _this5 = this;
+
+            axios.get('/customers-classification-all').then(function (response) {
+                _this5.classifications = response.data;
+            }).catch(function (error) {
+                _this5.errors = error.response.data.errors;
             });
         }
     }
@@ -50531,13 +50537,13 @@ var render = function() {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.customers.customer,
-                              expression: "customers.customer"
+                              value: _vm.customers.customer_code,
+                              expression: "customers.customer_code"
                             }
                           ],
                           staticClass: "form-control form-control-alternative",
                           attrs: { type: "text", id: "customer_code" },
-                          domProps: { value: _vm.customers.customer },
+                          domProps: { value: _vm.customers.customer_code },
                           on: {
                             input: function($event) {
                               if ($event.target.composing) {
@@ -50545,12 +50551,18 @@ var render = function() {
                               }
                               _vm.$set(
                                 _vm.customers,
-                                "customer",
+                                "customer_code",
                                 $event.target.value
                               )
                             }
                           }
-                        })
+                        }),
+                        _vm._v(" "),
+                        _vm.errors.customer_code
+                          ? _c("span", { staticClass: "error" }, [
+                              _vm._v(_vm._s(_vm.errors.customer_code[0]))
+                            ])
+                          : _vm._e()
                       ])
                     ]),
                     _vm._v(" "),
@@ -50630,7 +50642,13 @@ var render = function() {
                               )
                             }
                           }
-                        })
+                        }),
+                        _vm._v(" "),
+                        _vm.errors.name
+                          ? _c("span", { staticClass: "error" }, [
+                              _vm._v(_vm._s(_vm.errors.name[0]))
+                            ])
+                          : _vm._e()
                       ])
                     ])
                   ])

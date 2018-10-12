@@ -26,21 +26,21 @@ class RolesTableSeeder extends Seeder
             ]);
         }
 
+        if (Role::where('name', '=', 'Tsr')->first() === null) {
+            $tsrRole = Role::create([
+                'name'        => 'Tsr',
+                'slug'        => 'tsr',
+                'description' => 'Tsr Role',
+                'level'       => 0,
+            ]);
+        }
+
         if (Role::where('name', '=', 'User')->first() === null) {
             $userRole = Role::create([
                 'name'        => 'User',
                 'slug'        => 'user',
                 'description' => 'User Role',
                 'level'       => 1,
-            ]);
-        }
-
-        if (Role::where('name', '=', 'Unverified')->first() === null) {
-            $userRole = Role::create([
-                'name'        => 'Unverified',
-                'slug'        => 'unverified',
-                'description' => 'Unverified Role',
-                'level'       => 0,
             ]);
         }
     }

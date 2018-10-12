@@ -7,4 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class TechnicalSalesRepresentative extends Model
 {
     //
+
+    protected $fillable = ['user_id']; 
 }

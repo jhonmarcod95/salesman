@@ -44,7 +44,7 @@ class CustomerController extends Controller
      */
     public function store(Request $request){
         $request->validate([
-            'customer_code' => 'required',
+            'customer_code' => 'required|unique:customers,customer_code',
             'name' => 'required',
         ]);
         $customers = new Customer;
@@ -95,7 +95,11 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-        
+        $request->validate([
+            'customer_code' => 'required|unique:customers,customer_code,'. $customer->id,
+            'name' => 'required',
+        ]);
+
         $customer->area = $request->area;
         $customer->classification = $request->classification;
         $customer->customer_code = $request->customer_code;

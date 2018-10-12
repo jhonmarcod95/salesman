@@ -40,7 +40,8 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="customer_code">Customer Code</label>
-                                                <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customers.customer">
+                                                <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customers.customer_code">
+                                                <span class="error" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -55,6 +56,7 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-email">Name</label>
                                                 <input type="text" id="name" class="form-control form-control-alternative" v-model="customers.name">
+                                                <span class="error" v-if="errors.name">{{ errors.name[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -177,6 +179,9 @@
                 })
                 .then(response => {
                     window.location.href = response.data.redirect;
+                })
+                .catch(error => {
+                    this.errors = error.response.data.errors;
                 })
             },
             fetchCustomer(){
