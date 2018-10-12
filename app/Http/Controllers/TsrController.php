@@ -44,6 +44,26 @@ class TsrController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
+
+        $request->validate([
+            'last_name' => 'required',
+            'first_name' => 'required',
+            'middle_name' => 'required',
+            'middle_initial' => 'required',
+            'suffix' => 'required',
+            'email' => 'required|unique:users,email',
+            'address' => 'required',
+            'contact_number' => 'required',
+            'date_of_birth' => 'required',
+            'date_hired' => 'required',
+            'date_of_birth' => 'required',
+            'contact_person' => 'required',
+            'personal_email' => 'required',
+            'plate_number' => 'required',
+            
+        ]);
+
+
         $tsr = new TechnicalSalesRepresentative;
 
         $tsr->last_name = $request->last_name;
@@ -56,6 +76,10 @@ class TsrController extends Controller
         $tsr->contact_number = $request->contact_number;
         $tsr->date_of_birth = $request->date_of_birth;
         $tsr->date_hired = $request->date_hired;
+        $tsr->contact_person = $request->contact_person;
+        $tsr->plate_number = $request->plate_number;
+        $tsr->contact_person = $request->contact_person;
+        $tsr->personal_email = $request->personal_email;
 
         if($tsr->save()){
             return ['redirect' => route('tsr_list')];
@@ -90,7 +114,25 @@ class TsrController extends Controller
      */
     public function update(Request $request, TechnicalSalesRepresentative $technicalSalesRepresentative)
     {
-        
+        $request->validate([
+            'last_name' => 'required',
+            'first_name' => 'required',
+            'middle_name' => 'required',
+            'middle_initial' => 'required',
+            'suffix' => 'required',
+            'email' => 'required|unique:users,email,' .$technicalSalesRepresentative->id,
+            'address' => 'required',
+            'contact_number' => 'required',
+            'date_of_birth' => 'required',
+            'date_hired' => 'required',
+            'date_of_birth' => 'required',
+            'contact_person' => 'required',
+            'personal_email' => 'required',
+            'plate_number' => 'required'
+            
+        ]);
+
+
         $technicalSalesRepresentative->last_name = $request->last_name;
         $technicalSalesRepresentative->first_name = $request->first_name;
         $technicalSalesRepresentative->middle_name = $request->middle_name;
@@ -101,9 +143,14 @@ class TsrController extends Controller
         $technicalSalesRepresentative->contact_number = $request->contact_number;
         $technicalSalesRepresentative->date_of_birth = $request->date_of_birth;
         $technicalSalesRepresentative->date_hired = $request->date_hired;
+        $technicalSalesRepresentative->contact_person = $request->contact_person;
+        $technicalSalesRepresentative->plate_number = $request->plate_number;
+        $technicalSalesRepresentative->contact_person = $request->contact_person;
+        $technicalSalesRepresentative->personal_email = $request->personal_email;
+
 
         if($technicalSalesRepresentative->save()){
-            return ['redirect' => route('customers_list')];
+            return ['redirect' => route('tsr_list')];
         }
     }
 }

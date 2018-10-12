@@ -43,6 +43,14 @@
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
+                                                <label class="form-control-label" for="middle_initial">Middle Initial</label>
+                                                <input type="text" id="middle_initial" class="form-control form-control-alternative" v-model="tsr.middle_initial">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
                                                 <label class="form-control-label" for="input-last-name">Suffix</label>
                                                 <input type="text" id="input-last-name" class="form-control form-control-alternative" v-model="tsr.suffix">
                                             </div>
@@ -55,24 +63,58 @@
 
                                 <div class="pl-lg-4">
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-address">Address</label>
                                                 <input id="input-address" class="form-control form-control-alternative" type="text" v-model="tsr.address">
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-city">Email</label>
                                                 <input type="text" id="input-city" class="form-control form-control-alternative" v-model="tsr.email">
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-country">Contact Number</label>
                                                 <input type="text" id="input-country" class="form-control form-control-alternative" v-model="tsr.contact_number">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="input-city">Bithday</label>
+                                                <input type="date" id="date_of_birth" class="form-control form-control-alternative" v-model="tsr.date_of_birth">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="input-city">Date Hired</label>
+                                                <input type="date" id="date_hired" class="form-control form-control-alternative" v-model="tsr.date_hired">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="contact_person">Contact Person</label>
+                                                <input type="text" id="contact_person" class="form-control form-control-alternative" v-model="tsr.contact_person">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="personal_email">Personal Email</label>
+                                                <input type="text" id="personal_email" class="form-control form-control-alternative" v-model="tsr.personal_email">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="plate_number">Plate Number</label>
+                                                <input type="text" id="plate_number" class="form-control form-control-alternative" v-model="tsr.plate_number">
                                             </div>
                                         </div>
                                     </div>
@@ -124,7 +166,10 @@ export default {
                 address: tsr.address,
                 contact_number: tsr.contact_number,
                 date_of_birth: tsr.date_of_birth,
-                date_hired: tsr.date_hired
+                date_hired: tsr.date_hired,
+                contact_person: tsr.contact_person,
+                personal_email: tsr.personal_email,
+                plate_number: tsr.plate_number
             })
             .then(response => {
                 window.location.href = response.data.redirect;

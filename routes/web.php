@@ -66,7 +66,7 @@ Route::get('/tsr-edit/{id}','TsrController@edit');
 // show details of specific customer
 Route::get('/tsr/show/{id}', 'TsrController@show');
 // update customer
-Route::patch('/tsr/{tsr}', 'TsrController@update');
+Route::patch('/tsr/{technicalSalesRepresentative}', 'TsrController@update');
 // show details of specific tsr
 Route::get('/tsr/show/{id}', 'TsrController@show');
 

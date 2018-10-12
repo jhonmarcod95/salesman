@@ -33,6 +33,7 @@
                                     <th scope="col">Contact Number</th>
                                     <th scope="col">Birthday</th>
                                     <th scope="col">Contact Person</th>
+                                    <th scope="col">Personal Email</th>
                                     <th scope="col">Plate Number</th>
                                 </tr>
                                 </thead>
@@ -64,6 +65,7 @@
                                         <td> {{ tsr.contact_number }} </td>
                                         <td> {{ tsr.date_of_birth }}</td>
                                         <td> {{ tsr.contact_person }}</td>
+                                        <td> {{ tsr.personal_email }}</td>
                                         <td> {{ tsr.plate_number }}</td>
                                     </tr>
                                 </tbody>
