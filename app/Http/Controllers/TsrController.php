@@ -170,4 +170,33 @@ class TsrController extends Controller
             return ['redirect' => route('tsr_list')];
         }
     }
+
+    /**
+     * Temporary code for inserting of user
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+
+    public function manuallyInsertUser($tsrId){
+        $tsr = TechnicalSalesRepresentative::findOrFail($tsrId);
+
+        // Create Temporary code for user
+        $user_password = strtolower($tsr->first_name.'.'.$tsr->last_name);
+        // Save User
+        $user = new User;
+        $user->name = $tsr->first_name. ' ' .$tsr->last_name;
+        $user->email = $tsr->email;
+        $user->password = bcrypt(preg_replace('/\s+/', '', $user_password));
+        if($user->save()){
+            // Attaching role to user
+            $tsrRole = Role::where('name', '=', 'Tsr')->first();
+            $user->syncRoles($tsrRole);
+            // Insert user_id in tsr table
+            $tsr->update(['user_id'=> $user->id]);
+
+            return $tsr;
+        }
+        
+    }
 }
