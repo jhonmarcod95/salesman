@@ -1,6 +1,6 @@
 <!-- Add Schedule Modal -->
 <div class="modal fade" id="addScheduleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Add New Schedule</h5>
@@ -10,37 +10,73 @@
             </div>
             <div class="modal-body">
                 {!! Form::open(['id' => 'formAddSchedule']) !!}
+
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <h5>Technical Sales Representative</h5>
-                            {!! Form::select('tsr_id', $tsrs, null, ['class' => 'addScheduleModalSel2', 'required']) !!}
+                            {!! Form::select('user_id', $tsrs, null, ['class' => 'addScheduleModalSel2']) !!}
                         </div>
+                    </div>
 
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-group">
-                            <h5>Customer</h5>
-                            {!! Form::select('customer_codes[]', $customers, null, ['class' => 'addScheduleModalSel2', 'multiple', 'required']) !!}
+                            <h5>Schedule Type</h5>
+                            {!! Form::select('type', $scheduleTypes, null, ['id' => 'schedule_type', 'class' => 'addScheduleModalSel2']) !!}
                         </div>
                     </div>
                 </div>
+
+
+                {{-- Customer --}}
+                <div id="customer_schedule">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <h5>Customer</h5>
+                                {!! Form::select('customer_codes[]', $customers, null, ['class' => 'addScheduleModalSel2', 'multiple', 'required']) !!}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Event & Mapping Name --}}
+                <div id="mapping_event_schedule">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <h5>Name</h5>
+                                {!! Form::text('name', null, ['class' => 'form-control']) !!}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <h5>Address</h5>
+                                {!! Form::textarea('address', null, ['class' => 'form-control', 'rows' => '3']) !!}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Start & End Time --}}
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
                             <h5>Start Time</h5>
-                            {!! Form::time('start_time', null, ['class' => 'form-control']) !!}
+                            {!! Form::time('start_time', '08:00', ['class' => 'form-control']) !!}
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <h5>End Time</h5>
-                            {!! Form::time('end_time', null, ['class' => 'form-control']) !!}
+                            {!! Form::time('end_time', '17:00', ['class' => 'form-control']) !!}
                         </div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">

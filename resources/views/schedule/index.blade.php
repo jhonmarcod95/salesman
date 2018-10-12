@@ -34,16 +34,19 @@
 
 @section('script')
     <script>
-
         var selectedSchedule;
         var selectedDate;
 
-        /*------------ reset form values and elements upon selecting a schedule --------------*/
-        function resetElements() {
+        /*-------------------------- reset modal and its contents ----------------------------*/
+        function resetModal() {
             document.getElementById("formAddSchedule").reset();
             document.getElementById("formUpdateSchedule").reset();
+
+            $("#mapping_event_schedule").hide();
+            $("#customer_schedule").hide();
             $("#errorList").html('');
-            $('.select2-selection__choice').remove();
+
+            $('.addScheduleModalSel2').val(null).trigger('change');
         }
         /*------------------------------------------------------------------------------------*/
 
@@ -54,15 +57,15 @@
         }
         
         function setEvents(data) {
-            var fullname = data.first_name + ' ' + data.last_name;
+            var fullname = data.full_name;
 
             var eventData = {
                 id: data.id,
-                tsr_id: data.tsr_id,
-                customer_code: data.customer_code,
-                customer: data.customer,
+                user_id: data.user_id,
+                code: data.code,
+                name: data.name,
                 title: fullname + '\n' +
-                       data.customer + '\n' +
+                       data.name + '\n' +
                        '(' + formatAMPM(data.start_time) + '-' + formatAMPM(data.end_time) +  ')',
                 start: data.date,
                 fullname: fullname,
@@ -177,21 +180,21 @@
 
                 /*-------------- click day for adding schedule ------------------*/
                 dayClick: function(date, allDay, jsEvent, view) {
-                    resetElements();
+                    resetModal();
                     selectedDate = date.format();
                     $('#addScheduleModal').modal('show');
                 },
                 /*----------- click event to update & delete schedule -----------*/
                 eventClick: function(calEvent, jsEvent, view) {
-                    resetElements();
+                    resetModal();
                     selectedSchedule = calEvent;
                     selectedDate = calEvent.start.format();
 
-                    $('#tsr_id').val(calEvent.tsr_id);
+                    $('#user_id').val(calEvent.user_id);
                     $('#tsr_name').val(calEvent.fullname);
 
                     //set a value in select2
-                    $('#customer_code').val(calEvent.customer_code);
+                    $('#code').val(calEvent.code);
                     $('#select2-customer_code-container').text(calEvent.customer);
 
                     $('#start_time').val(calEvent.start_time);
@@ -221,5 +224,19 @@
             });
             /*--------------------------------------------------------------*/
         });
+
+        $('#schedule_type').on('select2:select', function (e) {
+            var data = e.params.data;
+            var type = data.id;
+            if(type == 1) {
+                $("#customer_schedule").show();
+                $("#mapping_event_schedule").hide();
+            }
+            else {
+                $("#customer_schedule").hide();
+                $("#mapping_event_schedule").show();
+            }
+        });
+
     </script>
 @endsection

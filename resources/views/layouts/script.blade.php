@@ -30,7 +30,9 @@
     /*---------- allow select2 in bootstrap modal -----------*/
     $('.addScheduleModalSel2').select2({
         dropdownParent: $('#addScheduleModal'),
-        width: '100%'
+        width: '100%',
+        placeholder: "Select a record"
+
     });
     $('.updateScheduleModalSel2').select2({
         dropdownParent: $('#updateScheduleModal'),

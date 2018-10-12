@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Customer;
+use App\Rules\TimeRule;
 use App\Schedule;
+use App\ScheduleTypes;
 use App\TechnicalSalesRepresentative;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,10 +24,10 @@ class ScheduleController extends Controller
         $schedules = DB::select('CALL p_schedules(\'%%\', \'%%\', \'%%\')');
 
         $tsrs = TechnicalSalesRepresentative::select(
-            DB::raw("CONCAT(first_name,' ',last_name) AS name"),'id')
+            DB::raw("CONCAT(first_name,' ',last_name) AS name"), 'user_id')
             ->pluck(
                 'name',
-                'id'
+                'user_id'
             );
 
         $customers = Customer::select(DB::raw("CONCAT(name,' - ',town_city) AS name"), 'customer_code')
@@ -34,10 +36,16 @@ class ScheduleController extends Controller
                 'customer_code'
             );
 
+        $scheduleTypes = ScheduleTypes::all()
+            ->pluck(
+                'description',
+                'id')
+            ->put('', '');
 
         return view('schedule.index', compact(
             'schedules',
             'tsrs',
+            'scheduleTypes',
             'customers'
         ));
     }
@@ -45,31 +53,59 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tsr_id' => 'required',
-            'customer_codes' => 'required',
+            'user_id' => 'required',
+            'type' => 'required',
             'date' => 'required',
-            'start_time' => 'required',
+            'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
         ]);
 
-        $customer_codes = $request->customer_codes;
+        $schedule_type = $request->type;
 
-        DB::beginTransaction();
-        foreach ($customer_codes as $customer_code){
+        #Customer Visit
+        if($schedule_type == '1'){
+
+            $customer_codes = $request->customer_codes;
+
+            DB::beginTransaction();
+            foreach ($customer_codes as $customer_code){
+                $customer = Customer::where('customer_code', $customer_code)->first();
+
+                $schedule = new Schedule();
+                $schedule->user_id = $request->user_id;
+                $schedule->type = $request->type;
+                $schedule->code = $customer_code;
+                $schedule->name = $customer->name;
+                $schedule->address = $customer->town_city;
+                $schedule->date = $request->date;
+                $schedule->start_time = $request->start_time;
+                $schedule->end_time = $request->end_time;
+                $schedule->status = '2';
+                $schedule->remarks = $request->remarks;
+                $schedule->save();
+            }
+            DB::commit();
+
+            foreach ($customer_codes as $customer_code){
+                $data[] = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->user_id . '\', \'' . $customer_code . '\')'))->first();
+            }
+        }
+        #Event & Mapping
+        else{
             $schedule = new Schedule();
-            $schedule->tsr_id = $request->tsr_id;
-            $schedule->customer_code = $customer_code;
+            $schedule->user_id = $request->user_id;
+            $schedule->type = $request->type;
+            $schedule->code = '';
+            $schedule->name = $request->name;
+            $schedule->address = $request->address;
             $schedule->date = $request->date;
             $schedule->start_time = $request->start_time;
             $schedule->end_time = $request->end_time;
             $schedule->status = '2';
             $schedule->remarks = $request->remarks;
             $schedule->save();
-        }
-        DB::commit();
 
-        foreach ($customer_codes as $customer_code){
-            $data[] = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->tsr_id . '\', \'' . $customer_code . '\')'))->first();
+            $data[] = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->user_id . '\', \'' . $schedule->code . '\')'))->first();
         }
 
         return response()->json($data);
@@ -82,7 +118,7 @@ class ScheduleController extends Controller
             'tsr_id' => 'required',
             'customer_code' => 'required',
             'date' => 'required',
-            'start_time' => 'required',
+            'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
         ]);
 

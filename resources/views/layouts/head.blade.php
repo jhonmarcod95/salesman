@@ -24,3 +24,5 @@
 
 <!-- Fonts -->
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+
+{{--<script src="{{ asset('js/all.js') }}" defer></script>--}}
