@@ -36,4 +36,10 @@ class User extends Authenticatable
      * @var array
      */
     protected $dates = ['deleted_at'];
+    // Relationships
+
+    public function expenses() {
+        return $this->hasMany(Expense::class);
+    }
+
 }
