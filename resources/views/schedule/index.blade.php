@@ -43,7 +43,7 @@
             document.getElementById("formAddSchedule").reset();
             document.getElementById("formUpdateSchedule").reset();
             $("#errorList").html('');
-            $('.select2-selection__rendered').empty();
+            $('.select2-selection__choice').remove();
         }
         /*------------------------------------------------------------------------------------*/
 
@@ -177,9 +177,6 @@
 
                 /*-------------- click day for adding schedule ------------------*/
                 dayClick: function(date, allDay, jsEvent, view) {
-
-
-
                     resetElements();
                     selectedDate = date.format();
                     $('#addScheduleModal').modal('show');
