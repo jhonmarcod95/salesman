@@ -19,3 +19,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('register', 'AuthController@register');
 Route::post('login', 'AuthController@login');
+
+// Route API setup for Mobile Client
+Route::group(['middleware' => 'auth:api'], function() {
+
+    Route::get('expenses/types','AppAPIController@getExpensesType');
+    Route::get('expenses','AppAPIController@getExpenses');
+    Route::post('expenses','AppAPIController@storeExpenses');
+    Route::post('expenses/attach/{expense}','AppAPIController@uploadExpensesReciept');
+
+});
