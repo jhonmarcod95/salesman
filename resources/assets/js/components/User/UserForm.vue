@@ -41,6 +41,14 @@
                                                 <input type="password" id="input-first-name" class="form-control form-control-alternative" v-model="user.password">
                                             </div>
                                         </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="role">Role</label>
+                                                <select class="form-control" v-model="user.role">
+                                                    <option v-for="(role,r) in roles" v-bind:key="r" :value="role.id"> {{ role.name }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="pl-lg-4">
@@ -66,17 +74,23 @@ export default {
             user:{
                 name: ' ',
                 email: ' ',
-                password: ''
+                password: '',
+                role: ''
             },
+            roles: [],
             errors: []
         }
+    },
+    created(){
+        this.fetchRoles();
     },
     methods:{
         addUser(user){
             axios.post('/user', {
                 name: user.name,
                 email: user.email,
-                password: user.password
+                password: user.password,
+                role: user.role
             })
             .then(response => { 
                 window.location.href = response.data.redirect;
@@ -84,6 +98,15 @@ export default {
             .catch(error => {
                 this.errors = error.response.data.errors;
             });
+        },
+        fetchRoles(){
+            axios.get('/roles')
+            .then(response => {
+                this.roles = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
         }
     }
 }

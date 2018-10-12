@@ -17,20 +17,30 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <form>
+                            <form v-if="user.length">
                                 <h6 class="heading-small text-muted mb-4">User Information</h6>
                                 <div class="pl-lg-4">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-username">Name</label>
-                                                <input type="text" id="input-username" class="form-control form-control-alternative" v-model="user.name">
+                                                <input type="text" id="input-username" class="form-control form-control-alternative" v-model="user[0].name">
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-email">Email</label>
-                                                <input type="email" id="input-email" class="form-control form-control-alternative" v-model="user.email">
+                                                <input type="email" id="input-email" class="form-control form-control-alternative" v-model="user[0].email">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="role">Role</label>
+                                                <select class="form-control" v-model="user[0].roles[0].id">
+                                                    <option v-for="(role,r) in roles" v-bind:key="r" :value="role.id"> {{ role.name }}</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -38,7 +48,7 @@
                                 <div class="pl-lg-4">
                                     <div class="row">
                                         <div class="text">
-                                            <button @click="updateUser(user)" type="button" class="btn btn-primary mt-4">Save</button>
+                                            <button @click="updateUser(user[0])" type="button" class="btn btn-primary mt-4">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -57,11 +67,13 @@ export default {
     data(){
         return{
             user:[],
+            roles: [],
             errors:[]
         }
     },
     created(){
         this.fetchUser();
+        this.fetchRoles();
     },
     methods:{
         fetchUser(){
@@ -73,10 +85,20 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
+        fetchRoles(){
+            axios.get('/roles')
+            .then(response => {
+                this.roles = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
         updateUser(user){
             axios.patch(`/user/${user.id}`,{
                 name: user.name,
                 email: user.email,
+                role: user.roles[0].id
             })
             .then(response => {
                 window.location.href = response.data.redirect;

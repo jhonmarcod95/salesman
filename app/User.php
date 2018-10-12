@@ -4,13 +4,14 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use jeremykenedy\LaravelRoles\Traits\HasRoleAndPermission;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable, SoftDeletes;
+    use HasApiTokens, Notifiable, SoftDeletes, HasRoleAndPermission;
 
     /**
      * The attributes that are mass assignable.

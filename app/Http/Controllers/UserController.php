@@ -25,7 +25,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexData(){
-        return  User::orderBy('id','desc')->get();
+        return  User::with('roles')->orderBy('id','desc')->get();
     }
 
     /**
@@ -47,7 +47,8 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required',
-            'password' => 'required'
+            'password' => 'required',
+            'role' => 'required'
         ]);
 
         $user = new User;
@@ -57,6 +58,9 @@ class UserController extends Controller
         $user->password = bcrypt($request->password);
 
         if($user->save()){
+            // Assigning of role
+            $user->syncRoles($request->role); 
+
             return ['redirect' => route('user_list')];
         }
     }
@@ -79,7 +83,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        return User::findOrFail($id);
+        return User::with('roles')->where('id',$id)->get();
     }
 
     /**
@@ -90,11 +94,19 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required',
+            'role' => 'required'
+        ]);
         
         $user->name = $request->name;
         $user->email= $request->email;
 
         if($user->save()){
+            // Assigning of role
+            $user->syncRoles($request->role);
+
             return ['redirect' => route('users_list')];
         }
     }
