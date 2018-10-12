@@ -25,12 +25,14 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-username">Name</label>
                                                 <input type="text" id="input-username" class="form-control form-control-alternative" v-model="user[0].name">
+                                                <span class="text-danger" v-if="errors.name">{{ errors.name[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-email">Email</label>
                                                 <input type="email" id="input-email" class="form-control form-control-alternative" v-model="user[0].email">
+                                                <span class="text-danger" v-if="errors.email">{{ errors.email[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -41,6 +43,7 @@
                                                 <select class="form-control" v-model="user[0].roles[0].id">
                                                     <option v-for="(role,r) in roles" v-bind:key="r" :value="role.id"> {{ role.name }}</option>
                                                 </select>
+                                                <span class="text-danger" v-if="errors.role">{{ errors.role[0] }}</span>
                                             </div>
                                         </div>
                                     </div>

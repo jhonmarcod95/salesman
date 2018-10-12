@@ -15,10 +15,12 @@
                                 <div class="col text-right">
                                     <a :href="addLink" class="btn btn-sm btn-primary">Add New</a>
                                 </div>
-                                <div class="col-md-12">
-                                    <label for="name">Search</label>
-                                    <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
-                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="col-md-4 float-left">
+                                <label for="name">Search</label>
+                                <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                             </div>
                         </div>
                         <div class="table-responsive">

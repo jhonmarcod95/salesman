@@ -49,7 +49,6 @@ class CustomerController extends Controller
         ]);
         $customers = new Customer;
 
-        $customers->area = $request->area;
         $customers->classification = $request->classification;
         $customers->customer_code = $request->customer_code;
         $customers->name = $request->name;
@@ -100,7 +99,6 @@ class CustomerController extends Controller
             'name' => 'required',
         ]);
 
-        $customer->area = $request->area;
         $customer->classification = $request->classification;
         $customer->customer_code = $request->customer_code;
         $customer->name = $request->name;
