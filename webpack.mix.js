@@ -21,8 +21,10 @@ mix.styles([
 ], 'public/css/all.css')
 .js([
 	'resources/assets/js/app.js',
-	'node_modules/popper.js/dist/popper.js',
-	'node_modules/bootstrap/dist/js/bootstrap.min.js',
-	'public/js/argon.js'
+    'node_modules/popper.js/dist/popper.js',
+    'node_modules/bootstrap/dist/js/bootstrap.min.js',
+    'public/vendor/chart.js/dist/Chart.min.js',
+    'public/vendor/chart.js/dist/Chart.extension.js',
+    'public/js/argon.js?'
 ], 'public/js/all.js')
 .browserSync('http://localhost');

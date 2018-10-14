@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+    {{--<div id="loading"></div>--}}
     <div class="header bg-green pb-6 pt-5 pt-md-6">
 
     </div>
@@ -11,14 +12,21 @@
             <div class="col-xl-12 mb-5 mb-xl-0">
                 <div class="card shadow">
                     <div class="card-header border-0">
+                        {!! Form::open(['id' => 'formFilter']) !!}
                         <div class="row align-items-center">
-                            <div class="col">
-                                {{--<h3 class="mb-0">Page visits</h3>--}}
+                            <div class="col-md-3">
+                                <label for="name">Date</label>
+                                <input id="month" type="month" class="form-control" onchange="retrieveSchedules(this.value)" value="{{ Carbon::now()->format('Y-m') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="name">Technical Sales Representative</label>
+                                {!! Form::select('tsrs[]', $tsrs, null, ['class' => 'sel2', 'multiple']) !!}
                             </div>
                             <div class="col text-right">
-                                <a href="#" class="btn btn-sm btn-primary">See all</a>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="retrieveSchedules(document.getElementById('month').value)">Search</button>
                             </div>
                         </div>
+                        {!! Form::close() !!}
                     </div>
                     <div class="card-body">
                         <div id='calendar'></div>
@@ -34,17 +42,25 @@
 
 @section('script')
     <script>
-        var selectedSchedule;
-        var selectedDate;
+
 
         /*-------------------------- reset modal and its contents ----------------------------*/
         function resetModal() {
             document.getElementById("formAddSchedule").reset();
             document.getElementById("formUpdateSchedule").reset();
 
-            $("#mapping_event_schedule").hide();
-            $("#customer_schedule").hide();
+            $('#btn_save').prop('disabled', false);
+            $('#btn_save_changes').prop('disabled', false);
+            $('#btn_delete').prop('disabled', false);
+
+            $("#add_mapping_event_schedule").hide();
+            $("#add_customer_schedule").hide();
+
+            $("#update_mapping_event_schedule").hide();
+            $("#update_customer_schedule").hide();
+
             $("#errorList").html('');
+            $("#updateScheduleErrorList").html('');
 
             $('.addScheduleModalSel2').val(null).trigger('change');
         }
@@ -62,8 +78,10 @@
             var eventData = {
                 id: data.id,
                 user_id: data.user_id,
+                type: data.type,
                 code: data.code,
                 name: data.name,
+                address: data.address,
                 title: fullname + '\n' +
                        data.name + '\n' +
                        '(' + formatAMPM(data.start_time) + '-' + formatAMPM(data.end_time) +  ')',
@@ -80,9 +98,37 @@
         }
         /*------------------------------------------------------------------------------------*/
 
-        /*------------------------ store, update, delete -------------------------------------*/
+        /*-------------------- retrieve store, update, delete --------------------------------*/
+        function retrieveSchedules(date) {
+            var date = new Date(date);
+            var dateFrom = formatDate(new Date(date.getFullYear(), date.getMonth(), 1));
+            var dateTo = formatDate(new Date(date.getFullYear(), date.getMonth() + 1, 0));
+
+            var filterQuery = $('#formFilter').serialize();
+
+            $("#loading").show();
+            $.ajax({
+                type:'GET',
+                url:'/schedules/' + dateFrom + '/' + dateTo + '?' + filterQuery,
+                dataType: 'json',
+                success: function(data){
+                    //retrieve schedules
+                    $('#calendar').fullCalendar('removeEvents');
+                    data.forEach(function(element) {
+                        refreshCalendar(element);
+                    });
+                    $("#loading").hide();
+                    // console.log(data);
+                }
+            });
+
+        }
+
         function storeSchedule(){
+
             var data = $('#formAddSchedule').serialize() + '&date=' + selectedDate;
+
+            $('#btn_save').prop('disabled', true);
 
             $.ajax({
                 type:'POST',
@@ -96,8 +142,8 @@
                     }
                     $('#calendar').fullCalendar('unselect');
                     $('#addScheduleModal').modal('hide');
+                    $("#loading").hide();
                     /*------------------------------------------------*/
-                    // console.log(data);
                 },
                 error: function(data){
                     var errors = $.parseJSON(data.responseText);
@@ -105,6 +151,7 @@
                     $.each(errors.errors, function (key, val) {
                         $("#errorList").append('<li>' + val + '</li>');
                     });
+                    $('#btn_save').prop('disabled', false);
                     // console.log(errors);
                 }
             });
@@ -112,6 +159,8 @@
 
         function updateSchedule() {
             var data = $('#formUpdateSchedule').serialize() + '&date=' + selectedDate;
+
+            $('#btn_save_change').prop('disabled', true);
 
             $.ajax({
                 type:'PATCH',
@@ -123,6 +172,13 @@
                     selectedSchedule.title = eventData.title;
                     selectedSchedule.backgroundColor = eventData.backgroundColor;
                     selectedSchedule.borderColor = eventData.borderColor;
+                    selectedSchedule.code = eventData.code;
+                    selectedSchedule.type = eventData.type;
+                    selectedSchedule.name = eventData.name;
+                    selectedSchedule.address = eventData.address;
+                    selectedSchedule.start_time = eventData.start_time;
+                    selectedSchedule.end_time = eventData.end_time;
+                    selectedSchedule.remarks = eventData.remarks;
 
                     $('#calendar').fullCalendar('updateEvent', selectedSchedule);
                     $('#calendar').fullCalendar('unselect');
@@ -137,6 +193,7 @@
                     $.each(errors.errors, function (key, val) {
                         $("#updateScheduleErrorList").append('<li>' + val + '</li>');
                     });
+                    $('#btn_save_change').prop('disabled', false);
                     // console.log(errors);
                 }
             });
@@ -152,6 +209,9 @@
         }
 
         function destroySchedule() {
+
+            $('#btn_delete').prop('disabled', true);
+
             $.ajax({
                 type:'DELETE',
                 url:'{{ url('/schedules/destroy') }}/' + selectedSchedule.id,
@@ -168,11 +228,40 @@
         }
         /*-----------------------------------------------------------------------------------*/
 
+        function setModalElementVisibility(type){
+            if(type == 1){
+                $("#add_customer_schedule").show();
+                $("#add_mapping_event_schedule").hide();
+
+                $("#update_customer_schedule").show();
+                $("#update_mapping_event_schedule").hide();
+            }
+            else{
+                $("#add_customer_schedule").hide();
+                $("#add_mapping_event_schedule").show();
+
+                $("#update_customer_schedule").hide();
+                $("#update_mapping_event_schedule").show();
+            }
+        }
+
+        //sched type event in add & update modal
+        $('#sel_add_sched_type, #sel_update_sched_type').on('select2:select', function (e) {
+            var type = e.params.data.id;
+            setModalElementVisibility(type);
+        });
+
+
+        /****************************************************
+         * ************* CALENDAR EVENTS ***************
+         * ********************************************/
+
         $(document).ready(function() {
             $('#calendar').fullCalendar({
                 header: {
-                    left: 'prev,next today',
-                    center: 'title'
+                    left:   null,
+                    center: null,
+                    right:  null
                 },
                 defaultDate: '{{ Carbon::now() }}',
                 selectable: true,
@@ -194,8 +283,12 @@
                     $('#tsr_name').val(calEvent.fullname);
 
                     //set a value in select2
-                    $('#code').val(calEvent.code);
-                    $('#select2-customer_code-container').text(calEvent.customer);
+                    $('#sel_update_sched_type').val(calEvent.type).trigger('change');
+                    $('#sel_customer_code').val(calEvent.code).trigger('change');
+                    setModalElementVisibility(calEvent.type);
+
+                    $('#schedule_name').val(calEvent.name);
+                    $('#address').val(calEvent.address);
 
                     $('#start_time').val(calEvent.start_time);
                     $('#end_time').val(calEvent.end_time);
@@ -203,8 +296,8 @@
 
                     $('#updateScheduleModal').modal('show');
                 },
+                /*------------ drag event to another to change date -------------*/
                 eventDrop: function(event, delta, revertFunc) {
-                    
                     if (!confirm("Are you sure about this change?")) {
                         revertFunc();
                     }
@@ -217,26 +310,12 @@
                 eventLimit: 3,
             });
 
-            /*----------------- retrieve schedules -------------------------*/
-            var schedules = JSON.parse('{!! json_encode($schedules) !!}');
-            schedules.forEach(function(element) {
-                refreshCalendar(element);
-            });
-            /*--------------------------------------------------------------*/
+            retrieveSchedules('{{ Carbon::now() }}');
         });
 
-        $('#schedule_type').on('select2:select', function (e) {
-            var data = e.params.data;
-            var type = data.id;
-            if(type == 1) {
-                $("#customer_schedule").show();
-                $("#mapping_event_schedule").hide();
-            }
-            else {
-                $("#customer_schedule").hide();
-                $("#mapping_event_schedule").show();
-            }
-        });
+
+
 
     </script>
+
 @endsection

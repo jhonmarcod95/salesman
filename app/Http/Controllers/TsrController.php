@@ -52,9 +52,6 @@ class TsrController extends Controller
         $request->validate([
             'last_name' => 'required',
             'first_name' => 'required',
-            'middle_name' => 'required',
-            'middle_initial' => 'required',
-            'suffix' => 'required',
             'email' => 'required|unique:users,email',
             'address' => 'required',
             'contact_number' => 'required',
@@ -62,9 +59,7 @@ class TsrController extends Controller
             'date_hired' => 'required',
             'date_of_birth' => 'required',
             'contact_person' => 'required',
-            'personal_email' => 'required',
-            'plate_number' => 'required',
-            
+            'personal_email' => 'email',
         ]);
 
 

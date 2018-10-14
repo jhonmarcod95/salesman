@@ -1,4 +1,5 @@
 <!-- Add Schedule Modal -->
+<div id="loading"></div>
 <div class="modal fade" id="addScheduleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
@@ -22,14 +23,13 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <h5>Schedule Type</h5>
-                            {!! Form::select('type', $scheduleTypes, null, ['id' => 'schedule_type', 'class' => 'addScheduleModalSel2']) !!}
+                            {!! Form::select('type', $scheduleTypes, null, ['id' => 'sel_add_sched_type', 'class' => 'addScheduleModalSel2']) !!}
                         </div>
                     </div>
                 </div>
 
-
                 {{-- Customer --}}
-                <div id="customer_schedule">
+                <div id="add_customer_schedule">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
@@ -41,7 +41,7 @@
                 </div>
 
                 {{-- Event & Mapping Name --}}
-                <div id="mapping_event_schedule">
+                <div id="add_mapping_event_schedule">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
@@ -55,7 +55,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Address</h5>
-                                {!! Form::textarea('address', null, ['class' => 'form-control', 'rows' => '3']) !!}
+                                {!! Form::textarea('address', null, ['class' => 'form-control', 'rows' => '2']) !!}
                             </div>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <h5>Remarks</h5>
-                            {!! Form::textarea('remarks', null, ['class' => 'form-control', 'rows' => '3']) !!}
+                            {!! Form::textarea('remarks', null, ['class' => 'form-control', 'rows' => '2']) !!}
                         </div>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
             </div>
             <div class="modal-footer">
                 {!! Form::button('Close', ['class' => 'btn btn-secondary', 'data-dismiss' => 'modal']) !!}
-                {!! Form::button('Save', ['class' => 'btn btn-primary', 'onclick' => 'storeSchedule()']) !!}
+                {!! Form::button('Save', ['id' => 'btn_save', 'class' => 'btn btn-primary', 'onclick' => 'storeSchedule()']) !!}
             </div>
         </div>
     </div>
@@ -103,7 +103,7 @@
 
 <!-- Update Schedule Modal -->
 <div class="modal fade" id="updateScheduleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Update Schedule</h5>
@@ -113,24 +113,58 @@
             </div>
             <div class="modal-body">
                 {!! Form::open(['id' => 'formUpdateSchedule']) !!}
+
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <h5>Technical Sales Representative</h5>
                             {!! Form::text('tsr_name', null, ['id' => 'tsr_name', 'class' => 'form-control', 'disabled']) !!}
-                            {!! Form::hidden('tsr_id', null, ['id' => 'tsr_id']) !!}
+                            {!! Form::hidden('user_id', null, ['id' => 'user_id']) !!}
                         </div>
+                    </div>
 
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-group">
-                            <h5>Customer</h5>
-                            {!! Form::select('customer_code', $customers, null, ['id' => 'customer_code', 'class' => 'updateScheduleModalSel2', 'required']) !!}
+                            <h5>Schedule Type</h5>
+                            {!! Form::select('type', $scheduleTypes, null, ['id' => 'sel_update_sched_type', 'class' => 'updateScheduleModalSel2']) !!}
                         </div>
                     </div>
                 </div>
+
+                {{-- Customer --}}
+                <div id="update_customer_schedule">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <h5>Customer</h5>
+                                {!! Form::select('customer_code', $customers, null, ['id' => 'sel_customer_code', 'class' => 'updateScheduleModalSel2', 'required']) !!}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Event & Mapping Name --}}
+                <div id="update_mapping_event_schedule">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <h5>Name</h5>
+                                {!! Form::text('name', null, ['id' => 'schedule_name', 'class' => 'form-control']) !!}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <h5>Address</h5>
+                                {!! Form::textarea('address', null, ['id' => 'address', 'class' => 'form-control', 'rows' => '2']) !!}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Start & End Time --}}
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -145,6 +179,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
@@ -163,8 +198,8 @@
             </div>
             <div class="modal-footer">
                 {!! Form::button('Close', ['class' => 'btn btn-secondary', 'data-dismiss' => 'modal']) !!}
-                {!! Form::button('Save Changes', ['class' => 'btn btn-primary', 'onclick' => 'updateSchedule()']) !!}
-                {!! Form::button('Delete', ['class' => 'btn btn-warning', 'onclick' => 'destroySchedule()']) !!}
+                {!! Form::button('Save Changes', ['id' => 'btn_save_changes', 'class' => 'btn btn-primary', 'onclick' => 'updateSchedule()']) !!}
+                {!! Form::button('Delete', ['id' => 'btn_delete', 'class' => 'btn btn-warning', 'onclick' => 'destroySchedule()']) !!}
             </div>
         </div>
     </div>

@@ -7,59 +7,42 @@
         <div class="header-body">
             <!-- Card stats -->
             <div class="row">
+
+                {{-- Current Visiting --}}
                 <div class="col-xl-3 col-lg-6">
                     <div class="card card-stats mb-4 mb-xl-0">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">Traffic</h5>
-                                    <span class="h2 font-weight-bold mb-0">350,897</span>
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Current Visiting</h5>
+                                    <span class="h2 font-weight-bold mb-0">50</span>
                                 </div>
                                 <div class="col-auto">
                                     <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
-                                        <i class="fas fa-chart-bar"></i>
+                                        <i class="fas fa-store"></i>
                                     </div>
                                 </div>
                             </div>
                             <p class="mt-3 mb-0 text-muted text-sm">
                                 <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
-                                <span class="text-nowrap">Since last month</span>
+                                <span class="text-nowrap">Since yesterday</span>
                             </p>
                         </div>
                     </div>
                 </div>
+
+                {{-- Completed Task --}}
                 <div class="col-xl-3 col-lg-6">
                     <div class="card card-stats mb-4 mb-xl-0">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">New users</h5>
-                                    <span class="h2 font-weight-bold mb-0">2,356</span>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
-                                        <i class="fas fa-chart-pie"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="mt-3 mb-0 text-muted text-sm">
-                                <span class="text-danger mr-2"><i class="fas fa-arrow-down"></i> 3.48%</span>
-                                <span class="text-nowrap">Since last week</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6">
-                    <div class="card card-stats mb-4 mb-xl-0">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">Sales</h5>
-                                    <span class="h2 font-weight-bold mb-0">924</span>
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Completed Task</h5>
+                                    <span class="h2 font-weight-bold mb-0">10</span>
                                 </div>
                                 <div class="col-auto">
                                     <div class="icon icon-shape bg-yellow text-white rounded-circle shadow">
-                                        <i class="fas fa-users"></i>
+                                        <i class="fas fa-tasks"></i>
                                     </div>
                                 </div>
                             </div>
@@ -70,17 +53,42 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Today's Schedule --}}
                 <div class="col-xl-3 col-lg-6">
                     <div class="card card-stats mb-4 mb-xl-0">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">Performance</h5>
-                                    <span class="h2 font-weight-bold mb-0">49,65%</span>
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Today's Schedule</h5>
+                                    <span class="h2 font-weight-bold mb-0">60</span>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                                        <i class="fas fa-calendar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mt-3 mb-0 text-muted text-sm">
+                                <span class="text-danger mr-2"><i class="fas fa-arrow-down"></i> 3.48%</span>
+                                <span class="text-nowrap">Since last week</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Request --}}
+                <div class="col-xl-3 col-lg-6">
+                    <div class="card card-stats mb-4 mb-xl-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col">
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Request</h5>
+                                    <span class="h2 font-weight-bold mb-0">5</span>
                                 </div>
                                 <div class="col-auto">
                                     <div class="icon icon-shape bg-info text-white rounded-circle shadow">
-                                        <i class="fas fa-percent"></i>
+                                        <i class="fas fa-bell"></i>
                                     </div>
                                 </div>
                             </div>
@@ -105,26 +113,19 @@
                     <div class="row align-items-center">
                         <div class="col">
                             <h6 class="text-uppercase text-light ls-1 mb-1">Overview</h6>
-                            <h2 class="text-white mb-0">Sales value</h2>
+                            <h2 class="text-white mb-0">Visited Customers</h2>
                         </div>
                         <div class="col">
                             <ul class="nav nav-pills justify-content-end">
                                 <li class="nav-item mr-2 mr-md-0" data-toggle="chart" data-target="#chart-sales"
                                     data-update='{"data":{"datasets":[{"data":[0, 20, 10, 30, 15, 40, 20, 60, 60]}]}}'
-                                    data-prefix="$" data-suffix="k">
+                                    data-prefix="" data-suffix="">
                                     <a href="#" class="nav-link py-2 px-3 active" data-toggle="tab">
                                         <span class="d-none d-md-block">Month</span>
                                         <span class="d-md-none">M</span>
                                     </a>
                                 </li>
-                                <li class="nav-item" data-toggle="chart" data-target="#chart-sales"
-                                    data-update='{"data":{"datasets":[{"data":[0, 20, 5, 25, 10, 30, 15, 40, 40]}]}}'
-                                    data-prefix="$" data-suffix="k">
-                                    <a href="#" class="nav-link py-2 px-3" data-toggle="tab">
-                                        <span class="d-none d-md-block">Week</span>
-                                        <span class="d-md-none">W</span>
-                                    </a>
-                                </li>
+
                             </ul>
                         </div>
                     </div>
@@ -133,7 +134,7 @@
                     <!-- Chart -->
                     <div class="chart">
                         <!-- Chart wrapper -->
-                        <canvas id="chart-sales" class="chart-canvas"></canvas>
+                        <canvas id="chart-sales" class="chart-canvas" ></canvas>
                     </div>
                 </div>
             </div>
@@ -144,7 +145,7 @@
                     <div class="row align-items-center">
                         <div class="col">
                             <h6 class="text-uppercase text-muted ls-1 mb-1">Performance</h6>
-                            <h2 class="mb-0">Total orders</h2>
+                            <h2 class="mb-0">Mapping</h2>
                         </div>
                     </div>
                 </div>

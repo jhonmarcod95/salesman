@@ -44,6 +44,6 @@ class TimeRule implements Rule
      */
     public function message()
     {
-        return 'The start time must no be greater than end time.';
+        return 'The start time must not be greater than end time.';
     }
 }

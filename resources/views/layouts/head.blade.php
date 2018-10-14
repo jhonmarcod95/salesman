@@ -25,4 +25,16 @@
 <!-- Fonts -->
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
 
-{{--<script src="{{ asset('js/all.js') }}" defer></script>--}}
+{{-- Loading Screen --}}
+<style>
+    #loading {
+        background-color: rgba(0, 0, 0, 0.25);
+        z-index: 999;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+    }
+</style>

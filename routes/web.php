@@ -37,6 +37,7 @@ Route::group(['middleware' => 'auth'], function(){
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
+    Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
 
     Route::post('/schedules/store', 'ScheduleController@store');
     Route::patch('/schedules/update/{id}', 'ScheduleController@update');

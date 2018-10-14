@@ -21,8 +21,6 @@ class ScheduleController extends Controller
     {
         session(['header_text' => 'Schedules']);
 
-        $schedules = DB::select('CALL p_schedules(\'%%\', \'%%\', \'%%\')');
-
         $tsrs = TechnicalSalesRepresentative::select(
             DB::raw("CONCAT(first_name,' ',last_name) AS name"), 'user_id')
             ->pluck(
@@ -50,6 +48,24 @@ class ScheduleController extends Controller
         ));
     }
 
+    public function indexData(Request $request, $date_from, $date_to){
+        //search specific
+        if($request->exists('tsrs')){
+            $user_ids = $request->tsrs;
+        }
+        //search all
+        else{
+            $user_ids = TechnicalSalesRepresentative::all()
+                ->pluck('user_id')
+                ->toArray();
+        }
+        $user_ids = implode(",",$user_ids);
+
+
+        $schedules = DB::select("CALL p_schedules ('$date_from','$date_to','$user_ids','%%')");
+        return $schedules;
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -65,15 +81,19 @@ class ScheduleController extends Controller
         #Customer Visit
         if($schedule_type == '1'){
 
+            $request->validate([
+                'customer_codes' => 'required',
+            ]);
+
             $customer_codes = $request->customer_codes;
 
-            DB::beginTransaction();
+
             foreach ($customer_codes as $customer_code){
                 $customer = Customer::where('customer_code', $customer_code)->first();
 
                 $schedule = new Schedule();
                 $schedule->user_id = $request->user_id;
-                $schedule->type = $request->type;
+                $schedule->type = $schedule_type;
                 $schedule->code = $customer_code;
                 $schedule->name = $customer->name;
                 $schedule->address = $customer->town_city;
@@ -83,19 +103,16 @@ class ScheduleController extends Controller
                 $schedule->status = '2';
                 $schedule->remarks = $request->remarks;
                 $schedule->save();
-            }
-            DB::commit();
 
-            foreach ($customer_codes as $customer_code){
-                $data[] = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->user_id . '\', \'' . $customer_code . '\')'))->first();
+                $data[] = $this->dataOutput($request->date,$request->date,$request->user_id,$schedule->code);
             }
         }
         #Event & Mapping
         else{
             $schedule = new Schedule();
             $schedule->user_id = $request->user_id;
-            $schedule->type = $request->type;
-            $schedule->code = '';
+            $schedule->type = $schedule_type;
+            $schedule->code = Schedule::createScheduleCode($schedule_type);
             $schedule->name = $request->name;
             $schedule->address = $request->address;
             $schedule->date = $request->date;
@@ -105,7 +122,7 @@ class ScheduleController extends Controller
             $schedule->remarks = $request->remarks;
             $schedule->save();
 
-            $data[] = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->user_id . '\', \'' . $schedule->code . '\')'))->first();
+            $data[] = $this->dataOutput($request->date,$request->date,$request->user_id,$schedule->code);
         }
 
         return response()->json($data);
@@ -115,22 +132,49 @@ class ScheduleController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'tsr_id' => 'required',
-            'customer_code' => 'required',
+            'user_id' => 'required',
             'date' => 'required',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
         ]);
 
-        $schedule = Schedule::find($id);
-        $schedule->customer_code = $request->customer_code;
-        $schedule->start_time = $request->start_time;
-        $schedule->end_time = $request->end_time;
-        $schedule->status = '2';
-        $schedule->remarks = $request->remarks;
-        $schedule->save();
+        $schedule_type = $request->type;
 
-        $data = collect(DB::select('CALL p_schedules(\''. $request->date .'\', \'' . $request->tsr_id. '\', \'' . $request->customer_code . '\')'))->first();
+        #Customer Visit
+        if($schedule_type == '1'){
+            $request->validate([
+                'customer_code' => 'required',
+            ]);
+
+            $customer = Customer::where('customer_code', $request->customer_code)->first();
+
+            $schedule = Schedule::find($id);
+            $schedule->type = $schedule_type;
+            $schedule->code = $customer->customer_code;
+            $schedule->name = $customer->name;
+            $schedule->address = $customer->town_city;
+            $schedule->start_time = $request->start_time;
+            $schedule->end_time = $request->end_time;
+            $schedule->status = '2';
+            $schedule->remarks = $request->remarks;
+            $schedule->save();
+        }
+        #Event & Mapping
+        else{
+            $schedule = Schedule::find($id);
+            $schedule->user_id = $request->user_id;
+            $schedule->type = $request->type;
+            $schedule->code = Schedule::createScheduleCode($schedule_type);
+            $schedule->name = $request->name;
+            $schedule->address = $request->address;
+            $schedule->start_time = $request->start_time;
+            $schedule->end_time = $request->end_time;
+            $schedule->status = '2';
+            $schedule->remarks = $request->remarks;
+            $schedule->save();
+        }
+
+        $data = $this->dataOutput($request->date,$request->date,$request->user_id,$schedule->code);
         return response()->json($data);
     }
 
@@ -146,5 +190,10 @@ class ScheduleController extends Controller
         $schedule = Schedule::find($id);
         $schedule->delete();
         return $schedule;
+    }
+
+    private function dataOutput($dateFrom, $dateTo, $userId, $code){
+        $data = collect(DB::select("CALL p_schedules('$dateFrom', '$dateTo', '$userId', '$code')"))->first();
+        return $data;
     }
 }
