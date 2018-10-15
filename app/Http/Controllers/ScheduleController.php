@@ -166,6 +166,11 @@ class ScheduleController extends Controller
         }
         #Event & Mapping
         else{
+            $request->validate([
+                'name' => 'required',
+                'address' => 'required',
+            ]);
+
             $schedule = Schedule::find($id);
             $schedule->user_id = $request->user_id;
             $schedule->type = $request->type;
