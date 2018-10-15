@@ -11,4 +11,13 @@ class Schedule extends Model
         $code = collect(DB::select('SELECT f_schedule_id(\'' . $type . '\') AS code'))->first()->code;
         return $type . '-' . $code;
     }
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
 }

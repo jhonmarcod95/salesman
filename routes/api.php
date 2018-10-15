@@ -23,9 +23,18 @@ Route::post('login', 'AuthController@login');
 // Route API setup for Mobile Client
 Route::group(['middleware' => 'auth:api'], function() {
 
+    // Expenses
     Route::get('expenses/types','AppAPIController@getExpensesType');
     Route::get('expenses','AppAPIController@getExpenses');
     Route::post('expenses','AppAPIController@storeExpenses');
+    Route::post('expenses/{expense}','AppAPIController@updateExpense');
     Route::post('expenses/attach/{expense}','AppAPIController@uploadExpensesReciept');
+    Route::delete('expenses/{expense}','AppAPIController@deleteExpense');
+    Route::delete('sweep/expenses','AppAPIController@sweepExpenses');
+
+    //Schedules
+    Route::get('schedules/status','AppAPIController@completedToday');
+    Route::get('schedules/daily','AppAPIController@dailySchedule');
+    Route::post('schedules/visted/{schedule}','AppAPIController@markedVisited');
 
 });
