@@ -74,6 +74,8 @@ class ScheduleController extends Controller
             'date' => 'required',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
+            'remarks' => 'max:191',
+
         ]);
 
         $schedule_type = $request->type;
@@ -110,8 +112,8 @@ class ScheduleController extends Controller
         #Event & Mapping
         else{
             $request->validate([
-                'name' => 'required',
-                'address' => 'required',
+                'name' => 'required|max:191',
+                'address' => 'required|max:191',
             ]);
 
             $schedule = new Schedule();
@@ -141,6 +143,7 @@ class ScheduleController extends Controller
             'date' => 'required',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
+            'remarks' => 'max:191',
         ]);
 
         $schedule_type = $request->type;
@@ -167,8 +170,8 @@ class ScheduleController extends Controller
         #Event & Mapping
         else{
             $request->validate([
-                'name' => 'required',
-                'address' => 'required',
+                'name' => 'required|max:191',
+                'address' => 'required|max:191',
             ]);
 
             $schedule = Schedule::find($id);

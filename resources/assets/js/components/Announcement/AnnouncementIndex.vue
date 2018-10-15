@@ -63,8 +63,8 @@
                                     <li class="page-item">
                                         <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
                                     </li>
-                                    <li class="page-item">  
-                                        Page {{ currentPage + 1 }} of {{ totalPages }}  
+                                    <li class="page-item">
+                                        Page {{ currentPage + 1 }} of {{ totalPages }}
                                     </li>
                                     <li class="page-item">
                                         <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
@@ -188,17 +188,17 @@ export default {
         },
         addAnnouncement(announcement){
             axios.post('/announcement', {
-                message: announcement.message 
+                message: announcement.message
             })
-            .then(response => { 
+            .then(response => {
                 $('#addModal').modal('hide');
                 alert('Announcement successfully added');
                 this.announcements.unshift(response.data);
-                
+
             })
-            .catch(error => { 
+            .catch(error => {
                 this.errors = error.response.data.errors;
-            }) 
+            })
         },
         updateAnnouncement(announcement){
             var index = this.announcements.findIndex(item => item.id == announcement.id);
@@ -210,7 +210,7 @@ export default {
                 alert('Announcement successfully updated');
                 this.announcements.splice(index,1,response.data);
             })
-            .catch(error => { 
+            .catch(error => {
                 this.errors = error.response.data.errors;
             })
         },
@@ -222,7 +222,7 @@ export default {
                 alert('Announcement successfully deleted');
                 this.announcements.splice(index,1);
             })
-            .catch(error => { 
+            .catch(error => {
                 this.errors = error.response.data.errors;
             })
         },
@@ -266,7 +266,7 @@ export default {
 
             return queues_array;
         },
-        addLink(){  
+        addLink(){
 
         },
         editLink(){

@@ -107,7 +107,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/announcements') }}">
-                        <i class="ni ni-calendar-grid-58 text-orange"></i> Announcements
+                        <i class="ni ni-notification-70 text-green"></i> Announcements
                     </a>
                 </li>
                 <li class="nav-item">
