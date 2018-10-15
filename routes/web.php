@@ -44,6 +44,17 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::patch('/schedules/change/{id}', 'ScheduleController@change');
     Route::delete('/schedules/destroy/{id}', 'ScheduleController@destroy');
 
+    //Announcements
+    Route::get('/announcements', 'AnnouncementController@index')->name('announcements_list');
+    // fetch all announcements
+    Route::get('/announcements-all', 'AnnouncementController@indexData');
+    //add new Announcement
+    Route::post('/announcement', 'AnnouncementController@store');
+    // update Announcements
+    Route::patch('/announcement/{announcement}', 'AnnouncementController@update');
+    // delete Announcements
+    Route::delete('/announcement/{announcement}', 'AnnouncementController@destroy');
+
 
     //User
     // show user page
