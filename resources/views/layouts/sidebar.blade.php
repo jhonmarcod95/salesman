@@ -107,7 +107,11 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/announcements') }}">
+<<<<<<< HEAD
                         <i class="ni ni-notification-70 text-purple"></i> Announcements
+=======
+                        <i class="ni ni-notification-70 text-green"></i> Announcements
+>>>>>>> cc2b10200a343348e97df87e1497b8a3128ac9f9
                     </a>
                 </li>
                 <li class="nav-item">

@@ -64164,11 +64164,11 @@ var render = function() {
                     _vm._v(" "),
                     _c("li", { staticClass: "page-item" }, [
                       _vm._v(
-                        "  \n                                      Page " +
+                        "\n                                      Page " +
                           _vm._s(_vm.currentPage + 1) +
                           " of " +
                           _vm._s(_vm.totalPages) +
-                          "  \n                                  "
+                          "\n                                  "
                       )
                     ]),
                     _vm._v(" "),

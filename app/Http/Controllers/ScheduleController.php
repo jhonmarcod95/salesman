@@ -110,8 +110,8 @@ class ScheduleController extends Controller
         #Event & Mapping
         else{
             $request->validate([
-                'name' => 'required',
-                'address' => 'required',
+                'name' => 'required|max:191',
+                'address' => 'required|max:191',
             ]);
 
             $schedule = new Schedule();
@@ -167,8 +167,8 @@ class ScheduleController extends Controller
         #Event & Mapping
         else{
             $request->validate([
-                'name' => 'required',
-                'address' => 'required',
+                'name' => 'required|max:191',
+                'address' => 'required|max:191',
             ]);
 
             $schedule = Schedule::find($id);
