@@ -107,7 +107,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/announcements') }}">
-                        <i class="ni ni-calendar-grid-58 text-orange"></i> Announcements
+                        <i class="ni ni-notification-70 text-purple"></i> Announcements
                     </a>
                 </li>
                 <li class="nav-item">
@@ -127,6 +127,12 @@
                         <i class="ni ni-shop text-blue"></i> Customers
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/messages') }}">
+                        <i class="ni ni-folder-17 text-green"></i> Messages
+                    </a>
+                </li>
+
 
             </ul>
             {{--<!-- Divider -->--}}

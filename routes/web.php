@@ -120,4 +120,13 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/customers-classification', 'CustomerClassificationController@index')->name('classification_list');
     // fetch all customer classfication
     Route::get('/customers-classification-all', 'CustomerClassificationController@indexData');
+
+    //Messages
+    Route::get('/messages', 'MessageController@index')->name('messages_list');
+    //save new customer
+    Route::post('/messages', 'MessageController@store');
+    // fetch all message
+    Route::get('/messages-all', 'MessageController@indexData');
+    // fetch message by user
+    Route::get('/messages-specific/{id}', 'MessageController@messageByuser');
 });

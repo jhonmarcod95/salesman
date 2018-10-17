@@ -36,6 +36,9 @@ Vue.component('tsr-index', require('./components/Tsr/TsrIndex.vue'));
 Vue.component('tsr-form', require('./components/Tsr/TsrForm.vue'));
 Vue.component('tsr-edit-form', require('./components/Tsr/TsrEditForm.vue'));
 
+// Message
+Vue.component('message-index', require('./components/Message/MessageIndex.vue'));
+
 const app = new Vue({
     el: '#app'
 });

@@ -13,7 +13,7 @@
                                     <h3 class="mb-0">Announcement List</h3>
                                 </div>`
                                 <div class="col text-right">
-                                    <a :href="addLink" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addModal">Add New</a>
+                                    <a :href="addLink" class="btn btn-sm btn-primary   text-white " data-toggle="modal" data-target="#addModal">Add New</a>
                                 </div>
                             </div>
                         </div>
