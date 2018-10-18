@@ -7,6 +7,18 @@ use Illuminate\Support\Facades\DB;
 
 class Schedule extends Model
 {
+
+    protected $fillable = [
+        'code',
+        'name',
+        'address',
+        'date',
+        'start_time',
+        'end_time',
+        'status',
+        'remarks'
+    ];
+
     public static function createScheduleCode($type){
         $code = collect(DB::select('SELECT f_schedule_id(\'' . $type . '\') AS code'))->first()->code;
         return $type . '-' . $code;

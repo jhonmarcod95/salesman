@@ -8,8 +8,13 @@ class Expense extends Model
 {
     protected $fillable = [
         'amount',
-        'attachement',
+        'attachment',
         'remarks'
+    ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at'
     ];
 
     public function user() {

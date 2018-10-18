@@ -13,6 +13,8 @@ class ExpensesTypesSeeder extends Seeder
     {
         DB::table('expenses_types')->insert([
             array('name' => 'Food'),
+            array('name' => 'Toll'),
+            array('name' => 'Parking'),
             array('name' => 'Freight & Handling'),
             array('name' => 'Lodging'),
             array('name' => 'Repairs & Maintenance'),

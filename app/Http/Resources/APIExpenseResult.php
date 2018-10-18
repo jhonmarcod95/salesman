@@ -19,7 +19,7 @@ class APIExpenseResult extends JsonResource
             'user_id' => $this->user_id,
             'amount' => $this->amount,
             'types' => $this->expensesType->name,
-            'attachement' => $this->attachement,
+            'attachment' => $this->attachment,
         ];
     }
 }

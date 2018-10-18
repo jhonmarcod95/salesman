@@ -33,8 +33,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::delete('sweep/expenses','AppAPIController@sweepExpenses');
 
     //Schedules
+    Route::get('schedules','AppAPIController@getSchedules');
     Route::get('schedules/status','AppAPIController@completedToday');
     Route::get('schedules/daily','AppAPIController@dailySchedule');
-    Route::post('schedules/visted/{schedule}','AppAPIController@markedVisited');
+    Route::get('schedules/visited/{schedule}','AppAPIController@markedVisited');
 
 });

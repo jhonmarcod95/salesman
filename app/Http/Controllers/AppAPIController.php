@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\APIExpenseResult as expenseResult;
+use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Expense;
 use App\ExpensesType;
 use App\Schedule;
@@ -59,13 +60,13 @@ class AppAPIController extends Controller
      * @param Expense $expense
      * @return response
      */
-    public function uploadExpensesReciept(Expense $expense)
+    public function uploadExpensesReciept(Request $request, Expense $expense)
     {
-        $this->validate($request, [
-            'attachement' => 'required'
-        ]);
 
-        $expense->attachement = $request->file('attachment')->store('expenses','public');
+        $all_headers = apache_request_headers();
+        $newimg = file_put_contents(public_path('storage/expenses/') . $all_headers['File-Name'], file_get_contents('php://input'));
+
+        $expense->attachment = 'expenses/'. $all_headers['File-Name'];
         $expense->save();
 
         return $expense;
@@ -115,6 +116,15 @@ class AppAPIController extends Controller
 
     // Schedules App API
 
+    public function getSchedules() {
+
+        $schedules = Schedule::orderBy('id','DESC')
+                        ->where('user_id', Auth::user()->id)
+                        ->get();
+
+         return SchedulesResource::collection($schedules);
+    }
+
     public function completedToday() {
 
         $totalDaily = $this->dailySchedule()->count();
@@ -133,7 +143,7 @@ class AppAPIController extends Controller
                             ->where('user_id', Auth::user()->id)
                             ->get();
 
-        return $dailySchedule;
+        return SchedulesResource::collection($dailySchedule);
     }
 
     public function markedVisited(Schedule $schedule) {
