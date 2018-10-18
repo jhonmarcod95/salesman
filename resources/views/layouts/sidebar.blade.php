@@ -105,7 +105,15 @@
                         <i class="ni ni-calendar-grid-58 text-orange"></i> Schedules
                     </a>
                 </li>
-
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/announcements') }}">
+<<<<<<< HEAD
+                        <i class="ni ni-notification-70 text-purple"></i> Announcements
+=======
+                        <i class="ni ni-notification-70 text-green"></i> Announcements
+>>>>>>> cc2b10200a343348e97df87e1497b8a3128ac9f9
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/users') }}">
                         <i class="ni ni-single-02 text-yellow"></i> Users
@@ -123,6 +131,12 @@
                         <i class="ni ni-shop text-blue"></i> Customers
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/messages') }}">
+                        <i class="ni ni-folder-17 text-green"></i> Messages
+                    </a>
+                </li>
+
 
             </ul>
             {{--<!-- Divider -->--}}

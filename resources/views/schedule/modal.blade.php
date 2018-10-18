@@ -4,7 +4,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add New Schedule</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Add New Schedule (<span id="addModalLabel"></span>)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -46,7 +46,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Name</h5>
-                                {!! Form::text('name', null, ['class' => 'form-control']) !!}
+                                {!! Form::text('name', null, ['class' => 'form-control', 'maxlength' => '100']) !!}
                             </div>
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Address</h5>
-                                {!! Form::textarea('address', null, ['class' => 'form-control', 'rows' => '2']) !!}
+                                {!! Form::textarea('address', null, ['class' => 'form-control', 'rows' => '2', 'maxlength' => '150']) !!}
                             </div>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <h5>Remarks</h5>
-                            {!! Form::textarea('remarks', null, ['class' => 'form-control', 'rows' => '2']) !!}
+                            {!! Form::textarea('remarks', null, ['class' => 'form-control', 'rows' => '2', 'maxlength' => '1000']) !!}
                         </div>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Update Schedule</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Update Schedule (<span id="updateModalLabel"></span>)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -149,7 +149,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Name</h5>
-                                {!! Form::text('name', null, ['id' => 'schedule_name', 'class' => 'form-control']) !!}
+                                {!! Form::text('name', null, ['id' => 'schedule_name', 'class' => 'form-control', 'maxlength' => '100']) !!}
                             </div>
                         </div>
                     </div>
@@ -158,7 +158,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Address</h5>
-                                {!! Form::textarea('address', null, ['id' => 'address', 'class' => 'form-control', 'rows' => '2']) !!}
+                                {!! Form::textarea('address', null, ['id' => 'address', 'class' => 'form-control', 'rows' => '2', 'maxlength' => '150']) !!}
                             </div>
                         </div>
                     </div>
@@ -184,7 +184,7 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <h5>Remarks</h5>
-                            {!! Form::textarea('remarks', null, ['id' => 'remarks', 'class' => 'form-control', 'rows' => '3']) !!}
+                            {!! Form::textarea('remarks', null, ['id' => 'remarks', 'class' => 'form-control', 'rows' => '3', 'maxlength' => '1000']) !!}
                         </div>
                     </div>
                 </div>

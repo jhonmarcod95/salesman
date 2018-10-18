@@ -271,7 +271,9 @@
                 dayClick: function(date, allDay, jsEvent, view) {
                     resetModal();
                     selectedDate = date.format();
+                    $('#addModalLabel').text(date.format('MMMM D, Y'));
                     $('#addScheduleModal').modal('show');
+
                 },
                 /*----------- click event to update & delete schedule -----------*/
                 eventClick: function(calEvent, jsEvent, view) {
@@ -294,6 +296,7 @@
                     $('#end_time').val(calEvent.end_time);
                     $('#remarks').val(calEvent.remarks);
 
+                    $('#updateModalLabel').text(calEvent.start.format('MMMM D, Y'));
                     $('#updateScheduleModal').modal('show');
                 },
                 /*------------ drag event to another to change date -------------*/

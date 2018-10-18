@@ -17,6 +17,9 @@ window.Vue = require('vue');
 
 // Vue.component('example-component', require('./components/ExampleComponent.vue'));
 
+// Announcement
+Vue.component('announcement-index', require('./components/Announcement/AnnouncementIndex.vue'));
+
 // User
 Vue.component('user-index', require('./components/User/UserIndex.vue'));
 Vue.component('user-form', require('./components/User/UserForm.vue'));
@@ -32,6 +35,9 @@ Vue.component('customer-edit-form', require('./components/Customer/CustomerEditF
 Vue.component('tsr-index', require('./components/Tsr/TsrIndex.vue'));
 Vue.component('tsr-form', require('./components/Tsr/TsrForm.vue'));
 Vue.component('tsr-edit-form', require('./components/Tsr/TsrEditForm.vue'));
+
+// Message
+Vue.component('message-index', require('./components/Message/MessageIndex.vue'));
 
 const app = new Vue({
     el: '#app'

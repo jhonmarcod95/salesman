@@ -109,6 +109,11 @@ class ScheduleController extends Controller
         }
         #Event & Mapping
         else{
+            $request->validate([
+                'name' => 'required|max:191',
+                'address' => 'required|max:191',
+            ]);
+
             $schedule = new Schedule();
             $schedule->user_id = $request->user_id;
             $schedule->type = $schedule_type;
@@ -161,6 +166,11 @@ class ScheduleController extends Controller
         }
         #Event & Mapping
         else{
+            $request->validate([
+                'name' => 'required|max:191',
+                'address' => 'required|max:191',
+            ]);
+
             $schedule = Schedule::find($id);
             $schedule->user_id = $request->user_id;
             $schedule->type = $request->type;
