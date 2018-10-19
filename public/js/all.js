@@ -74850,7 +74850,7 @@ var render = function() {
                     staticClass: "modal-title",
                     attrs: { id: "exampleModalLabel" }
                   },
-                  [_vm._v("Update Schedule")]
+                  [_vm._v("Delete Schedule")]
                 ),
                 _vm._v(" "),
                 _vm._m(3)
@@ -78324,6 +78324,40 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -78331,6 +78365,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             tsrs: [],
             errors: [],
             keywords: '',
+            user: {
+                user_id: '',
+                new_password: '',
+                new_password_confirmation: ''
+            },
             currentPage: 0,
             itemsPerPage: 10
         };
@@ -78340,6 +78379,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
 
     methods: {
+        getTsrId: function getTsrId(id) {
+            this.user.user_id = id;
+        },
         fetchTsr: function fetchTsr() {
             var _this = this;
 
@@ -78347,6 +78389,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this.tsrs = response.data;
             }).catch(function (error) {
                 _this.errors = error.response.data.errors;
+            });
+        },
+        changePassword: function changePassword(user) {
+            var _this2 = this;
+
+            axios.post('/change-password', {
+                user_id: this.user.user_id,
+                new_password: user.new_password,
+                new_password_confirmation: user.new_password_confirmation
+            }).then(function (response) {
+                $('#changePassword').modal('hide');
+                alert('Password successfully changed');
+            }).catch(function (error) {
+                _this2.errors = error.response.data.errors;
             });
         },
         setPage: function setPage(pageNumber) {
@@ -78364,11 +78420,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     computed: {
         filteredTsrs: function filteredTsrs() {
-            var _this2 = this;
+            var _this3 = this;
 
             var self = this;
             return self.tsrs.filter(function (tsr) {
-                return tsr.first_name.toLowerCase().includes(_this2.keywords.toLowerCase());
+                return tsr.first_name.toLowerCase().includes(_this3.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -78490,6 +78546,23 @@ var render = function() {
                                   "a",
                                   {
                                     staticClass: "dropdown-item",
+                                    attrs: {
+                                      "data-toggle": "modal",
+                                      href: "#changePassword"
+                                    },
+                                    on: {
+                                      click: function($event) {
+                                        _vm.getTsrId(tsr.user_id)
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("Change Password")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "dropdown-item",
                                     attrs: { href: "#" }
                                   },
                                   [_vm._v("Delete")]
@@ -78591,7 +78664,151 @@ var render = function() {
           ])
         ])
       ])
-    ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          id: "changePassword",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "addCompanyLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          { staticClass: "modal-dialog", attrs: { role: "document" } },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _vm._m(4),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c("div", { staticClass: "col-lg-12" }, [
+                  _c("div", { staticClass: "form-group" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "form-control-label",
+                        attrs: { for: "new-password" }
+                      },
+                      [_vm._v("New Password")]
+                    ),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.user.new_password,
+                          expression: "user.new_password"
+                        }
+                      ],
+                      staticClass: "form-control form-control-alternative",
+                      attrs: { type: "password", id: "new-password" },
+                      domProps: { value: _vm.user.new_password },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.user,
+                            "new_password",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _vm.errors.new_password
+                      ? _c("span", { staticClass: "text-danger" }, [
+                          _vm._v(_vm._s(_vm.errors.new_password[0]))
+                        ])
+                      : _vm._e()
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-lg-12" }, [
+                  _c("div", { staticClass: "form-group" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "form-control-label",
+                        attrs: { for: "new-password" }
+                      },
+                      [_vm._v("Confirm New Password")]
+                    ),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.user.new_password_confirmation,
+                          expression: "user.new_password_confirmation"
+                        }
+                      ],
+                      staticClass: "form-control form-control-alternative",
+                      attrs: { type: "password", id: "new-password" },
+                      domProps: { value: _vm.user.new_password_confirmation },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.user,
+                            "new_password_confirmation",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _vm.errors.new_password_confirmation
+                      ? _c("span", { staticClass: "text-danger" }, [
+                          _vm._v(
+                            _vm._s(_vm.errors.new_password_confirmation[0])
+                          )
+                        ])
+                      : _vm._e()
+                  ])
+                ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-default btn-round btn-fill",
+                    attrs: { type: "button", "data-dismiss": "modal" }
+                  },
+                  [_vm._v("Close")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.changePassword(_vm.user)
+                      }
+                    }
+                  },
+                  [_vm._v("Save")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
+    )
   ])
 }
 var staticRenderFns = [
@@ -78662,6 +78879,31 @@ var staticRenderFns = [
         })
       ]
     )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-header" }, [
+      _c(
+        "h5",
+        { staticClass: "modal-title", attrs: { id: "addCompanyLabel" } },
+        [_vm._v("Change Password")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "close",
+          attrs: {
+            type: "button",
+            "data-dismiss": "modal",
+            "aria-label": "Close"
+          }
+        },
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+      )
+    ])
   }
 ]
 render._withStripped = true

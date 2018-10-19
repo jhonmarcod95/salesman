@@ -110,11 +110,11 @@
                         <i class="ni ni-notification-70 text-purple"></i> Announcements
                     </a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link" href="{{ url('/users') }}">
                         <i class="ni ni-single-02 text-yellow"></i> Users
                     </a>
-                </li>
+                </li> --}}
 
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/tsr') }}">

@@ -47,6 +47,7 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+tsr.id">Edit</a>
+                                                    <a class="dropdown-item" data-toggle="modal" href="#changePassword" @click="getTsrId(tsr.user_id)">Change Password</a>
                                                     <a class="dropdown-item" href="#">Delete</a>
                                                 </div>
                                             </div>
@@ -90,6 +91,39 @@
                 </div>
             </div>
         </div>
+        <!-- Change Password Modal -->
+        <div  class="modal fade" id="changePassword" tabindex="-1" role="dialog" aria-labelledby="addCompanyLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="addCompanyLabel">Change Password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label class="form-control-label" for="new-password">New Password</label>
+                            <input type="password" id="new-password" class="form-control form-control-alternative" v-model="user.new_password">
+                            <span class="text-danger" v-if="errors.new_password">{{ errors.new_password[0] }}</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label class="form-control-label" for="new-password">Confirm New Password</label>
+                            <input type="password" id="new-password" class="form-control form-control-alternative" v-model="user.new_password_confirmation">
+                            <span class="text-danger" v-if="errors.new_password_confirmation">{{ errors.new_password_confirmation[0] }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal">Close</button>
+                <button @click="changePassword(user)" type="button" class="btn btn-secondary" >Save</button>
+                </div>
+            </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -100,6 +134,11 @@ export default {
             tsrs: [],
             errors: [],
             keywords: '',
+            user: {
+                user_id: '',
+                new_password: '',
+                new_password_confirmation:'',
+            },
             currentPage: 0,
             itemsPerPage: 10,
         }
@@ -108,10 +147,27 @@ export default {
         this.fetchTsr();
     },
     methods:{
+        getTsrId(id){
+            this.user.user_id = id;
+        },
         fetchTsr(){
             axios.get('/tsr-all')
             .then(response => { 
                 this.tsrs = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
+        changePassword(user){
+            axios.post('/change-password', {
+                user_id: this.user.user_id,
+                new_password: user.new_password,
+                new_password_confirmation: user.new_password_confirmation
+            })
+            .then(response => {
+                $('#changePassword').modal('hide');
+                alert('Password successfully changed');
             })
             .catch(error => {
                 this.errors = error.response.data.errors;

@@ -134,4 +134,26 @@ class UserController extends Controller
         }
     }
 
+    
+    /*
+     * Change password 
+     * 
+     * @return \Illuminate\Http\Response
+     */
+
+    public function changePassword(Request $request){
+
+        $validator = $request->validate([
+            'user_id' => 'required',
+            'new_password' => 'required|confirmed',
+            'new_password_confirmation' => 'required'
+        ]);
+    
+        $user = User::findOrFail($request->user_id);
+        $user->password = bcrypt($request->input('new_password'));
+        $user->save();
+
+        return $user;
+    }
+
 }

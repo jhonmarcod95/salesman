@@ -81,7 +81,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <input type="hidden" v-model="user_id">
-                        <h5 class="modal-title" id="exampleModalLabel">Update Schedule</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Delete Schedule</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>

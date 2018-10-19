@@ -135,4 +135,8 @@ Route::group(['middleware' => ['auth', 'role:admin|user']], function () {
     Route::get('/messages-specific/{id}', 'MessageController@messageByuser');
     // fetch all recipients
     Route::get('/recipients', 'MessageController@recipients');
+
+
+    // User
+    Route::post('/change-password', 'UserController@changePassword');
 });
