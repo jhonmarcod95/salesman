@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use Illuminate\Http\Request;
+
+use App\Message;
 
 class HomeController extends Controller
 {
@@ -25,6 +28,8 @@ class HomeController extends Controller
     {
         session(['header_text' => 'Dashboard']);
 
-        return view('home');
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('home',compact('notification'));
     }
 }

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\TechnicalSalesRepresentative;
 use App\{
     User,
-    Role
+    Role,
+    Message
 };
 use Illuminate\Http\Request;
 
@@ -19,7 +21,9 @@ class TsrController extends Controller
     public function index(){
         session(['header_text' => 'Technical Sales Representative']);
 
-        return view('tsr.index');
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('tsr.index', compact('notification'));
     }
 
     /**
@@ -38,7 +42,10 @@ class TsrController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create(){
-        return view('tsr.create');
+
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('tsr.create', compact('notification'));
     }
 
     /**
@@ -105,7 +112,9 @@ class TsrController extends Controller
      */
     public function edit($id)
     {
-        return view('tsr.edit', compact('id'));
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('tsr.edit', compact('id', 'notification'));
     }
 
     /**

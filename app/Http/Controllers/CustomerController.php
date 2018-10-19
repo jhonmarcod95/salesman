@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\Customer;
+use App\Message;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -14,7 +16,10 @@ class CustomerController extends Controller
      */
     public function index(){
         session(['header_text' => 'Customers']);
-        return view('customer.index');
+
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('customer.index', compact('notification'));
     }
 
     /**
@@ -33,7 +38,10 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create(){
-        return view('customer.create');
+
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('customer.create', compact('notification'));
     }
 
     /**
@@ -72,7 +80,9 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        return view('customer.edit', compact('id'));
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('customer.edit', compact('id', 'notification'));
     }
 
     /**

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\User;
+use App\Message;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -15,8 +17,10 @@ class UserController extends Controller
      */
     public function index(){
         session(['header_text' => 'Users']);
-        
-        return view('user.index');
+
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('user.index', compact('notification'));
     }
 
     /**
@@ -34,7 +38,10 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create(){
-        return view('user.create');
+
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('user.create', compact('notification'));
     }
 
     /**
@@ -72,7 +79,9 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        return view('user.edit', compact('id'));
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('user.edit', compact('id', 'notification'));
     }
 
     /**
