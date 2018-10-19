@@ -76569,6 +76569,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }).catch(function (error) {
                 _this4.errors = error.response.data.errors;
             });
+        },
+        checkCustomerCode: function checkCustomerCode() {
+            var _this5 = this;
+
+            if (this.customer.classification == 3) {
+                axios.get('/check-customer-code').then(function (response) {
+                    _this5.customer.customer_code = response.data;
+                    document.getElementById("customer_code").disabled = true;
+                }).catch(function (error) {
+                    _this5.errors = error.response.data.errors;
+                });
+            } else {
+                this.customer.customer_code = '';
+                document.getElementById("customer_code").disabled = false;
+            }
         }
     }
 });
@@ -76714,23 +76729,27 @@ var render = function() {
                             ],
                             staticClass: "form-control",
                             on: {
-                              change: function($event) {
-                                var $$selectedVal = Array.prototype.filter
-                                  .call($event.target.options, function(o) {
-                                    return o.selected
-                                  })
-                                  .map(function(o) {
-                                    var val = "_value" in o ? o._value : o.value
-                                    return val
-                                  })
-                                _vm.$set(
-                                  _vm.customer,
-                                  "classification",
-                                  $event.target.multiple
-                                    ? $$selectedVal
-                                    : $$selectedVal[0]
-                                )
-                              }
+                              change: [
+                                function($event) {
+                                  var $$selectedVal = Array.prototype.filter
+                                    .call($event.target.options, function(o) {
+                                      return o.selected
+                                    })
+                                    .map(function(o) {
+                                      var val =
+                                        "_value" in o ? o._value : o.value
+                                      return val
+                                    })
+                                  _vm.$set(
+                                    _vm.customer,
+                                    "classification",
+                                    $event.target.multiple
+                                      ? $$selectedVal
+                                      : $$selectedVal[0]
+                                  )
+                                },
+                                _vm.checkCustomerCode
+                              ]
                             }
                           },
                           [

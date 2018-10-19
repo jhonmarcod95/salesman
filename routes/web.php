@@ -112,6 +112,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/customers/show/{id}', 'CustomerController@show');
     // update customer
     Route::patch('/customers/{customer}', 'CustomerController@update');
+    // check customer code of prospect
+    Route::get('/check-customer-code', 'CustomerController@checkCustomerCode');
 
     Route::delete('/customers/destroy/{id}', 'CustomerController@destroy');
 

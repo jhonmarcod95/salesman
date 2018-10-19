@@ -37,7 +37,7 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="classification">Classification</label>
-                                                  <select class="form-control" v-model="customer.classification">
+                                                  <select class="form-control" v-model="customer.classification" @change="checkCustomerCode">
                                                     <option v-for="(classification, c) in classifications" v-bind:key="c" :value="classification.id">{{ classification.description}}</option>
                                                     <span class="text-danger" v-if="errors.description">{{ errors.description[0] }}</span>
                                                 </select>
@@ -213,6 +213,22 @@
                 .catch(error =>{
                     this.errors = error.response.data.errors;
                 })
+            },
+            checkCustomerCode(){
+                if(this.customer.classification == 3){
+                    axios.get('/check-customer-code')
+                    .then(response => { 
+                        this.customer.customer_code = response.data;
+                        document.getElementById("customer_code").disabled = true;
+                    })
+                    .catch(error => {
+                        this.errors = error.response.data.errors;
+                    })
+                }
+                else{
+                    this.customer.customer_code = '';
+                    document.getElementById("customer_code").disabled = false;
+                }
             }
         },
     }

@@ -125,4 +125,9 @@ class CustomerController extends Controller
         }
     }
 
+    public function checkCustomerCode(){
+        $customer = Customer::where('classification', 3)->orderBy('id','asc')->get();   
+        return $customer->last()->customer_code + 1; 
+    }
+
 }
