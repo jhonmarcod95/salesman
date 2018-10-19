@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Auth;
 use App\Announcement;
+use App\Message;
 
 class AnnouncementController extends Controller
 {
@@ -16,8 +17,10 @@ class AnnouncementController extends Controller
     public function index()
     {
         session(['header_text' => 'Announcements']);
-        
-        return view('announcement.index');
+
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('announcement.index', compact('notification'));
     }
 
     /**

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Auth;   
 use App\Customer;
 use App\Rules\TimeRule;
 use App\Schedule;
 use App\ScheduleTypes;
 use App\TechnicalSalesRepresentative;
+use App\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -40,11 +42,14 @@ class ScheduleController extends Controller
                 'id')
             ->put('', '');
 
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
         return view('schedule.index', compact(
             'schedules',
             'tsrs',
             'scheduleTypes',
-            'customers'
+            'customers',
+            'notification'
         ));
     }
 

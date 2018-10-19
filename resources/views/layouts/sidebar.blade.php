@@ -107,11 +107,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/announcements') }}">
-<<<<<<< HEAD
                         <i class="ni ni-notification-70 text-purple"></i> Announcements
-=======
-                        <i class="ni ni-notification-70 text-green"></i> Announcements
->>>>>>> cc2b10200a343348e97df87e1497b8a3128ac9f9
                     </a>
                 </li>
                 <li class="nav-item">
@@ -135,6 +131,9 @@
                     <a class="nav-link" href="{{ url('/messages') }}">
                         <i class="ni ni-folder-17 text-green"></i> Messages
                     </a>
+                @if($notification > 0)
+                    <span style="display:inline-block; background: red; position: relative; top: -47px; left: 137px; border-radius: 10px; color: #fff; min-width: 20px; text-align: center;">{{ $notification }}</span>
+                @endif
                 </li>
 
 

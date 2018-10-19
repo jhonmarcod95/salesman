@@ -8,7 +8,19 @@
                         <div class="card-header border-0">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h3 class="mb-0">Message List</h3>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h3 class="mb-0">Message List</h3>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button type="button" class="btn btn-sm btn-primary float-right" data-toggle="modal" data-target="#addModal" @click="fetchRecipient">
+                                                <div>
+                                                    <i class="ni ni-fat-add"></i>
+                                                    <span>New message</span>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -30,12 +42,12 @@
                                             </div>
                                         </div>
                                         <div class="inbox_chat">
-                                            <div :class="[ !message.seen ? 'chat_list active_chat' : 'chat_list']" @click="fetchSpecificMessage(message.user_id, message.id, message.user.name)" v-for="(message, m) in filteredMessage" v-bind:key="m">
+                                            <div :class="[ !message.seen && message.user_id != userId ? 'chat_list active_chat' : 'chat_list']" @click="fetchSpecificMessage(message.last_message_for, message.id, message.recipient.name)" v-for="(message, m) in filteredMessage" v-bind:key="m">
                                                 <div class="chat_people">
                                                     <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
                                                     <div class="chat_ib">
-                                                        <h5 :class="[ !message.seen ? 'unseen_h5' : 'seen_h5']">{{ message.user.name }} <span class="chat_date">{{ moment(message.created_at).format('LLL') }}</span></h5>
-                                                        <p :class="[ !message.seen ? 'font-weight-bold text-dark' : '']">
+                                                        <h5 :class="[ !message.seen && message.user_id != userId ? 'unseen_h5' : 'seen_h5']">{{ message.recipient.name }} <span class="chat_date">{{ moment(message.created_at).format('LLL') }}</span></h5>
+                                                        <p :class="[ !message.seen && message.user_id != userId ? 'font-weight-bold text-dark' : '']">
                                                             {{ message.message | truncate(100, message.message.length > 100 ?' ...' : '' ) }}
                                                         </p>
                                                     </div>
@@ -51,28 +63,27 @@
                                         </div>
                                         <div class="msg_history" id="my_div">
                                             <div v-for="(specific, s) in message_specific" v-bind:key="s">
-                                                <div class="incoming_msg" v-if="!specific.reply_to">
+                                                <div class="incoming_msg" v-if="specific.user_id != userId">
                                                     <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
                                                     <div class="received_msg">
                                                         <div class="received_withd_msg">
                                                             <p>{{ specific.message }}</p>
-                                                            <span class="time_date"> {{ moment(specific.created_at).format('LLL')  }}</span>
+                                                            <span class="time_date"> {{ specific.user.name + ' || ' +  moment(specific.created_at).format('LLL')  }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="outgoing_msg"  v-else>
                                                     <div class="sent_msg">
                                                         <p>{{ specific.message }}</p>
-                                                        <span class="time_date"> {{ moment(specific.created_at).format('LLL')  }}</span> 
+                                                        <span class="time_date"> {{ specific.user.name + ' || ' +  moment(specific.created_at).format('LLL')  }} </span> 
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="type_msg">
-                                            
                                             <div class="input_msg_write">
                                             <input type="text" class="write_msg" placeholder="Type a message" v-model="new_message"/>
-                                            <button class="msg_send_btn" type="button" @click="sendMessage(new_message)"><i class="ni ni-send"></i></button>
+                                            <button class="msg_send_btn" type="button" :disabled="!new_message.length" @click="sendMessage(new_message)"><i class="ni ni-send"></i></button>
                                             </div>
                                         </div>
                                     </div>
@@ -83,25 +94,67 @@
                 </div>
             </div>
         </div>
+
+        <!-- Add Modal -->
+        <div  class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addCompanyLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="addCompanyLabel">New Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="comment">To</label>
+                        <v-select v-model="selected" label="name" :options="recipients" style="width:100%"></v-select>
+                        <label for="admin_new_message">Message:</label>
+                        <textarea class="form-control" rows="5" id="admin_new_message" v-model="admin_new_message"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal">Close</button>
+                <button @click="adminNewMessage(selected, admin_new_message)" type="button" class="btn btn-secondary" >Save</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
     </div>
 </template>
 
 <script>
 import moment from 'moment';
+import Vue from 'vue'
+import vSelect from 'vue-select'
 export default {
+    props:['userId'],
+    components:{
+        vSelect,
+    },
     data(){
         return{
             messages: [],
             message_specific:[],
             message_id: '',
             new_message:'',
+            admin_new_message:'',
             errors: [],
             keywords: '',
-            header_name: ''
+            header_name: '',
+            recipients:[],
+            selected: null
         }
     },
     created(){
         this.fetchMessage();
+        Echo.private('chat')
+            .listen('MessageSent', (e) => {
+                var index = this.messages.findIndex(item => item.last_message_for == e.message[0][0].last_message_for);
+                this.messages.splice(index,1);
+                this.messages.unshift(e.message[0][0]);
+            });
     },
     filters: {
         truncate: function (text, length, suffix) {
@@ -110,6 +163,15 @@ export default {
     },
     methods: {
         moment,
+        fetchRecipient(){
+            axios.get('/recipients')
+            .then(response =>{
+                this.recipients = response.data
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
         fetchMessage(){
             axios.get('/messages-all')
             .then(response => { 
@@ -146,24 +208,39 @@ export default {
                 message_id: this.message_id
             })
             .then(response => { 
-                this.message_specific.push(response.data);
+                this.message_specific.push(response.data[0]);
                 this.new_message = '';
-
                 this.$nextTick(() => {
                     var myDiv = document.getElementById("my_div");
                     myDiv.scrollTop = myDiv.scrollHeight;
+
                 })
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors
+            })  
+        },
+        adminNewMessage(recipient, message){
+              axios.post('/messages', {
+                message: message,
+                message_id: recipient.id
+            })
+            .then(response => { 
+                $('#addModal').modal('hide');
+                var index = this.messages.findIndex(item => item.last_message_for == response.data[0].last_message_for);
+                this.messages.splice(index,1);
+                this.messages.unshift(response.data[0]);
             })
             .catch(error => {
                 this.errors = error.response.data.errors
             })
         }
-    },
+    },  
     computed:{
         filteredMessage(){
             let self = this;
             return self.messages.filter(message => {
-                return message.user.name.toLowerCase().includes(this.keywords.toLowerCase());
+                return message.recipient.name.toLowerCase().includes(this.keywords.toLowerCase());
             });
         },
     }
