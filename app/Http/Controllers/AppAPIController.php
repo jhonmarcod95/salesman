@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\APIExpenseResult as expenseResult;
 use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Expense;
+use App\ExpensesEntry;
 use App\ExpensesType;
 use App\Schedule;
 use Carbon\Carbon;
@@ -114,9 +115,29 @@ class AppAPIController extends Controller
                                 ->where('created_at', Carbon::today())->delete();
     }
 
+    // Expenses Entries App API
+
+    public function storeExpensesEntries(Request $request)
+    {
+        $this->validate($request, [
+            'expenses' => 'required',
+            'totalExpenses' => 'required',
+        ]);
+
+        $expensesEntries = new ExpensesEntry;
+        $expensesEntries->user_id = Auth::user()->id;
+        $expensesEntries->expenses = json_encode($request->input('expenses'));
+        $expensesEntries->totalExpenses = $request->input('totalExpenses');
+        $expensesEntries->save();
+
+        return $expensesEntries;
+
+    }
+
     // Schedules App API
 
-    public function getSchedules() {
+    public function getSchedules()
+    {
 
         $schedules = Schedule::orderBy('id','DESC')
                         ->where('user_id', Auth::user()->id)
@@ -125,7 +146,8 @@ class AppAPIController extends Controller
          return SchedulesResource::collection($schedules);
     }
 
-    public function completedToday() {
+    public function completedToday()
+    {
 
         $totalDaily = $this->dailySchedule()->count();
         $totalVisited = $this->dailySchedule()->where('status',1)->count();
@@ -136,7 +158,8 @@ class AppAPIController extends Controller
 
     }
 
-    public function dailySchedule() {
+    public function dailySchedule()
+    {
 
         $dailySchedule = Schedule::orderBy('id','DESC')
                             ->whereDate('date', Carbon::today())
@@ -146,7 +169,8 @@ class AppAPIController extends Controller
         return SchedulesResource::collection($dailySchedule);
     }
 
-    public function markedVisited(Schedule $schedule) {
+    public function markedVisited(Schedule $schedule)
+    {
 
         $schedule->status = 1;
         $schedule->save();

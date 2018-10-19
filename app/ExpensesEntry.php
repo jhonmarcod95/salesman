@@ -6,12 +6,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExpensesEntry extends Model
 {
-    public function expenses() {
-        return $this->belongsToMany(Expense::class);
+
+    protected $fillable = [
+        'expenses',
+        'totalExpenses'
+    ];
+
+    protected $casts = [
+        'expenses' => 'array',
+    ];
+
+     /**
+     * Convet array to string conversion
+     */
+    public function setExpensesAttribute($value)
+    {
+        $this->attributes['expenses'] = json_encode($value);
     }
 
-    // test function
-    public function getExpensesAttribute() {
-        return $this->expenses()->pluck('id')->all();
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
+
 }
