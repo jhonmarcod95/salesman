@@ -13,7 +13,7 @@ class CreateAttendencesTable extends Migration
      */
     public function up()
     {
-        Schema::create('attendences', function (Blueprint $table) {
+        Schema::create('attendances', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('schedule_id')->unsigned();
@@ -21,7 +21,7 @@ class CreateAttendencesTable extends Migration
             $table->string('sign_in_image')->default('attendance/default.jpg');
             $table->timestamp('sign_out')->nullable();
             $table->string('sign_out_image')->default('attendance/default.jpg');
-            $table->string('remarks');
+            $table->string('remarks')->nullable();
             $table->timestamps();
         });
     }

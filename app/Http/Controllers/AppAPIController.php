@@ -9,6 +9,7 @@ use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Expense;
 use App\ExpensesType;
 use App\Schedule;
+use App\Attendance;
 use Carbon\Carbon;
 
 
@@ -116,6 +117,16 @@ class AppAPIController extends Controller
 
     // Schedules App API
 
+    public function getCurrentSchedule()
+    {
+        $currentSchedule = Schedule::where('user_id', Auth::user()->id)
+                        ->orderBy('id','DESC')
+                        ->where('isCurrent', 1)
+                        ->first();
+
+        return $currentSchedule;
+    }
+
     public function getSchedules() {
 
         $schedules = Schedule::orderBy('id','DESC')
@@ -153,6 +164,64 @@ class AppAPIController extends Controller
 
         return $schedule;
 
+    }
+
+    // Attendance API
+
+    public function signIn(Request $request)
+    {
+
+        $this->validate($request, [
+            'schedule' => 'required'
+        ]);
+
+        $attendance = new Attendance;
+        $attendance->sign_in = Carbon::now();
+        $attendance->user_id = Auth::user()->id;
+        $attendance->schedule_id = $request->input('schedule');
+        $attendance->save();
+
+        $schedule = Schedule::find($request->input('schedule'));
+        $schedule->isCurrent =  1;
+        $schedule->save();
+
+        // $all_headers = apache_request_headers();
+        // $newimg = file_put_contents(public_path('storage/attendance/') . $all_headers['File-Name'], file_get_contents('php://input'));
+
+        // $attendance = new Attendance;
+        // $attendance->user_id = Auth::user()->id;
+        // $attendance->schedule_id = $all_headers['Schedule-Id'];
+        // $attendance->sign_in_image = 'attendance/'. $all_headers['File-Name'];
+        // $attendance->sign_in = $all_headers['Sign-In'];
+        // $attendance->save();
+
+        return $attendance;
+
+    }
+
+    public function signOut(Request $request, Schedule $schedule)
+    {
+
+        $all_headers = apache_request_headers();
+        $signOutImg = file_put_contents(public_path('storage/attendance/') . $all_headers['File-Name'], file_get_contents('php://input'));
+
+        // get assigned attendance
+        $attendance = Attendance::orderBy('id','desc')
+                        ->where('user_id', Auth::user()->id)
+                        ->where('schedule_id', $schedule->id)->first();
+
+        // update attendance
+        $attendance->sign_out_image = 'attendance/'. $all_headers['File-Name'];
+        $attendance->sign_out = Carbon::now();
+        $attendance->remarks = $all_headers['Remarks'];
+        $attendance->save();
+
+        // update schedule
+        $schedule->isCurrent =  0;
+        $schedule->status = 1;
+        $schedule->save();
+
+        return $attendance;
     }
 
 
