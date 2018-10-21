@@ -166,10 +166,6 @@ class AppAPIController extends Controller
 
     // Schedules App API
 
-<<<<<<< HEAD
-    public function getSchedules()
-    {
-=======
     public function getCurrentSchedule()
     {
         $currentSchedule = Schedule::where('user_id', Auth::user()->id)
@@ -181,7 +177,6 @@ class AppAPIController extends Controller
     }
 
     public function getSchedules() {
->>>>>>> SalesmanAttendance
 
         $schedules = Schedule::orderBy('id','DESC')
                         ->where('user_id', Auth::user()->id)
