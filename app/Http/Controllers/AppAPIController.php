@@ -6,11 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\APIExpenseResult as expenseResult;
 use App\Http\Resources\SchedulesResource as SchedulesResource;
+use App\Http\Resources\ExpensesEntriesResult as ExpensesEntriesResult;
 use App\Expense;
 use App\ExpensesEntry;
 use App\ExpensesType;
 use App\Schedule;
 use Carbon\Carbon;
+use DB;
 
 
 class AppAPIController extends Controller
@@ -18,7 +20,9 @@ class AppAPIController extends Controller
     // Expenses App API
 
     public function getExpenses()  {
-        $expenses = Expense::where('user_id',Auth::user()->id)->get();
+        $expenses = Expense::where('user_id',Auth::user()->id)
+                        ->where('expenses_entry_id', 0)
+                        ->get();
         return expenseResult::collection($expenses);
     }
 
@@ -122,6 +126,7 @@ class AppAPIController extends Controller
         $this->validate($request, [
             'expenses' => 'required',
             'totalExpenses' => 'required',
+            'expenseId' => 'required',
         ]);
 
         $expensesEntries = new ExpensesEntry;
@@ -130,7 +135,31 @@ class AppAPIController extends Controller
         $expensesEntries->totalExpenses = $request->input('totalExpenses');
         $expensesEntries->save();
 
+        Expense::whereIn('id', $request->input('expenseId'))
+                ->update(['expenses_entry_id' => $expensesEntries->id]);
+
         return $expensesEntries;
+
+    }
+
+    public function expensesEntries()
+    {
+        $expensesEntries = ExpensesEntry::where('user_id', Auth::user()->id)
+                                        ->take(20)
+                                        ->get();
+
+        return ExpensesEntriesResult::collection($expensesEntries);
+
+    }
+
+    public function showExpensesEntries($expensesEntries)
+    {
+        $showExpensesEntries = ExpensesEntry::where('user_id', Auth::user()->id)
+                                    ->where('id', $expensesEntries)
+                                    ->first();
+
+        $expenses  = Expense::where('expenses_entry_id', $showExpensesEntries->id)->get();
+        return expenseResult::collection($expenses);
 
     }
 

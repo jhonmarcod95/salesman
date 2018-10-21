@@ -33,7 +33,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::delete('sweep/expenses','AppAPIController@sweepExpenses');
 
     //Expenses Entries
+    Route::get('expensesEntries','AppAPIController@expensesEntries');
     Route::post('expensesEntries','AppAPIController@storeExpensesEntries');
+    Route::get('expensesEntries/show/{expensesEntries}','AppAPIController@showExpensesEntries');
 
     //Schedules
     Route::get('schedules','AppAPIController@getSchedules');

@@ -24,7 +24,6 @@ class ExpensesEntry extends Model
         $this->attributes['expenses'] = json_encode($value);
     }
 
-
     public function user()
     {
         return $this->belongsTo(User::class);
