@@ -9,7 +9,7 @@ class Expense extends Model
     protected $fillable = [
         'amount',
         'attachment',
-        'remarks'
+        'remarks',
     ];
 
     protected $hidden = [
