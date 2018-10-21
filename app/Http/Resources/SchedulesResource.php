@@ -23,6 +23,7 @@ class SchedulesResource extends JsonResource
             'date' => Carbon::parse()->format('M d'),
             'start_time' => date('h:i A', strtotime($this->start_time)),
             'end_time' => date('h:i A', strtotime($this->end_time)),
+            'isCurrent' => $this->isCurrent,
             'status' => $this->status,
             'remarks' => $this->remarks
         ];
