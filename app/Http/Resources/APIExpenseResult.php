@@ -17,6 +17,7 @@ class APIExpenseResult extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
+            'currencyAmount' => number_format($this->amount, 2),
             'amount' => $this->amount,
             'types' => $this->expensesType->name,
             'attachment' => $this->attachment,
