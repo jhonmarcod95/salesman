@@ -141,4 +141,11 @@ Route::group(['middleware' => ['auth', 'role:admin|user']], function () {
 
     // User
     Route::post('/change-password', 'UserController@changePassword');
+
+    // Attendance Report
+    Route::get('/attendance-report', 'AttendanceReportController@index')->name('report_list');
+    // fetch all Attendance Report
+    Route::get('/attendance-report-all', 'AttendanceReportController@indexData');
+    // fetch attendance report by date
+    Route::post('/attendance-report-bydate', 'AttendanceReportController@generateBydate');
 });

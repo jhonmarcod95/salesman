@@ -27,6 +27,10 @@ class Schedule extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function attendances(){
+        return $this->hasOne(Attendance::class, 'schedule_id', 'id');
+    }
+
     protected $hidden = [
         'created_at',
         'updated_at'

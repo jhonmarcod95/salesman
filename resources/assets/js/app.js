@@ -39,6 +39,9 @@ Vue.component('tsr-edit-form', require('./components/Tsr/TsrEditForm.vue'));
 // Message
 Vue.component('message-index', require('./components/Message/MessageIndex.vue'));
 
+// Attendance Report
+Vue.component('attendance-report-index', require('./components/AttendanceReport/AttendanceReportIndex.vue'));
+
 const app = new Vue({
     el: '#app',
 });

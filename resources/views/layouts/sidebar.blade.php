@@ -135,6 +135,11 @@
                     <span style="display:inline-block; background: red; position: relative; top: -47px; left: 137px; border-radius: 10px; color: #fff; min-width: 20px; text-align: center;">{{ $notification }}</span>
                 @endif
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/attendance-report') }}">
+                        <i class="ni ni-collection text-gray"></i> Attendance Report
+                    </a>
+                </li>
 
 
             </ul>
