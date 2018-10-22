@@ -114,8 +114,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::patch('/customers/{customer}', 'CustomerController@update');
     // check customer code of prospect
     Route::get('/check-customer-code', 'CustomerController@checkCustomerCode');
-
-    Route::delete('/customers/destroy/{id}', 'CustomerController@destroy');
+    // Delete Customer
+    Route::delete('/customers/{customer}', 'CustomerController@destroy');
 
     //Customer Classfication
     // show customer classfication page

@@ -73989,6 +73989,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 message: ''
             },
             announcement_copied: [],
+            announcement_id: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -76276,11 +76277,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
         return {
             customers: [],
+            customer_id: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -76292,6 +76319,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
 
     methods: {
+        getCustomerId: function getCustomerId(id) {
+            this.customer_id = id;
+        },
         fetchCustomer: function fetchCustomer() {
             var _this = this;
 
@@ -76299,6 +76329,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this.customers = response.data;
             }).catch(function (error) {
                 _this.errors = error.response.data.errors;
+            });
+        },
+        deleteCustomer: function deleteCustomer() {
+            var _this2 = this;
+
+            var index = this.customers.findIndex(function (item) {
+                return item.id == _this2.customer_id;
+            });
+            axios.delete('/customers/' + this.customer_id).then(function (response) {
+                $('#deleteModal').modal('hide');
+                alert('Customer successfully deleted');
+                _this2.customers.splice(index, 1);
+            }).catch(function (error) {
+                _this2.errors = error.response.data.errors;
             });
         },
         setPage: function setPage(pageNumber) {
@@ -76316,11 +76360,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     computed: {
         filteredCustomers: function filteredCustomers() {
-            var _this2 = this;
+            var _this3 = this;
 
             var self = this;
             return self.customers.filter(function (customer) {
-                return customer.name.toLowerCase().includes(_this2.keywords.toLowerCase());
+                return customer.name.toLowerCase().includes(_this3.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -76443,7 +76487,15 @@ var render = function() {
                                   "a",
                                   {
                                     staticClass: "dropdown-item",
-                                    attrs: { href: "#" }
+                                    attrs: {
+                                      href: "#deleteModal",
+                                      "data-toggle": "modal"
+                                    },
+                                    on: {
+                                      click: function($event) {
+                                        _vm.getCustomerId(customer.id)
+                                      }
+                                    }
                                   },
                                   [_vm._v("Delete")]
                                 )
@@ -76536,7 +76588,57 @@ var render = function() {
           ])
         ])
       ])
-    ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          id: "deleteModal",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "exampleModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-dialog-centered",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _vm._m(3),
+              _vm._v(" "),
+              _vm._m(4),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { "data-dismiss": "modal" }
+                  },
+                  [_vm._v("Close")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-warning",
+                    on: { click: _vm.deleteCustomer }
+                  },
+                  [_vm._v("Delete")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
+    )
   ])
 }
 var staticRenderFns = [
@@ -76602,6 +76704,47 @@ var staticRenderFns = [
       },
       [_c("i", { staticClass: "fas fa-ellipsis-v" })]
     )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-header" }, [
+      _c(
+        "h5",
+        { staticClass: "modal-title", attrs: { id: "exampleModalLabel" } },
+        [_vm._v("Delete Customer")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "close",
+          attrs: {
+            type: "button",
+            "data-dismiss": "modal",
+            "aria-label": "Close"
+          }
+        },
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-body" }, [
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col-md-12" }, [
+          _c("div", { staticClass: "form-group" }, [
+            _vm._v(
+              "\n                                Are you sure you want to delete this Customer?\n                            "
+            )
+          ])
+        ])
+      ])
+    ])
   }
 ]
 render._withStripped = true
@@ -82277,7 +82420,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -82322,11 +82464,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         //     })
         // },
         rendered: function rendered(endTime, startTime) {
-            // let total =hours +" hours " + minutes + " minutes";>
-            // let diff = moment(endTime).format('HHmm') -  moment(startTime).format('HHmm');
+            var ms = __WEBPACK_IMPORTED_MODULE_0_moment___default()(endTime, "YYYY/MM/DD HH:mm a").diff(__WEBPACK_IMPORTED_MODULE_0_moment___default()(startTime, "YYYY/MM/DD HH:mm a"));
+            var d = __WEBPACK_IMPORTED_MODULE_0_moment___default.a.duration(ms);
+            var hours = Math.floor(d.asHours());
+            var minutes = __WEBPACK_IMPORTED_MODULE_0_moment___default.a.utc(ms).format("mm");
 
-            console.log(__WEBPACK_IMPORTED_MODULE_0_moment___default()(endTime).format("HH:mm"));
-            // return total;
+            return hours + 'h ' + minutes + ' min.';
         },
         setPage: function setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -82610,7 +82753,7 @@ var render = function() {
                                         schedule.attendances.sign_in
                                       )
                                     ) +
-                                    "\n                                            "
+                                    "\n                                        "
                                 )
                               ])
                             : _vm._e()

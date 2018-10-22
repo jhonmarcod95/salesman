@@ -82,7 +82,6 @@
                                         <td>
                                             <span v-if="schedule.attendances">
                                                 {{ rendered(schedule.attendances.sign_out, schedule.attendances.sign_in) }}
-                                                <!-- {{ (moment(schedule.attendances.sign_out).format('HHmm') -  moment(schedule.attendances.sign_in).format('HHmm')) }} -->
                                             </span>
                                         </td>
                                         <td></td>
@@ -154,12 +153,13 @@ export default {
         //         this.errors = error.response.data.errors;
         //     })
         // },
-        rendered(endTime, startTime){
-            // let total =hours +" hours " + minutes + " minutes";>
-            // let diff = moment(endTime).format('HHmm') -  moment(startTime).format('HHmm');
+        rendered(endTime, startTime){ 
+            var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
+            var d = moment.duration(ms);
+            var hours = Math.floor(d.asHours());
+            var minutes = moment.utc(ms).format("mm");
 
-            console.log(moment(endTime).format("HH:mm"));
-            // return total;
+            return hours + 'h '+ minutes+' min.';
                                             
         },
         setPage(pageNumber) {
