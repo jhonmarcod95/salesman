@@ -276,5 +276,12 @@ class AppAPIController extends Controller
         return $attendance;
     }
 
+    //User API
+
+    public function getCurrentUser()
+    {
+        return explode(' ',trim(Auth::user()->name))[0];
+    }
+
 
 }
