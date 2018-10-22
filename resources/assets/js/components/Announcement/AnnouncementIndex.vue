@@ -161,6 +161,7 @@ export default {
                 message: ''
             },
             announcement_copied:[],
+            announcement_id: '',
             errors: [],
             keywords: '',
             currentPage: 0,

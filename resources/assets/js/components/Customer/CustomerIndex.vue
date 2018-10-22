@@ -53,7 +53,7 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+customer.id">Edit</a>
-                                                    <a class="dropdown-item" href="#">Delete</a>
+                                                    <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getCustomerId(customer.id)">Delete</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -92,6 +92,31 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Delete Customer</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    Are you sure you want to delete this Customer?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
+                        <button class="btn btn-warning" @click="deleteCustomer">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -100,6 +125,7 @@ export default {
     data(){
         return{
             customers: [],
+            customer_id: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -110,6 +136,9 @@ export default {
         this.fetchCustomer();
     },
     methods:{
+      getCustomerId(id){
+          this.customer_id = id;
+      },
       fetchCustomer(){
           axios.get('/customers-all')
           .then(response => {
@@ -118,6 +147,18 @@ export default {
           .catch(error => {
               this.errors = error.response.data.errors;
           })
+      },
+      deleteCustomer(){
+            var index = this.customers.findIndex(item => item.id == this.customer_id);
+            axios.delete(`/customers/${this.customer_id}`)
+            .then(response => {
+                $('#deleteModal').modal('hide');
+                alert('Customer successfully deleted');
+                this.customers.splice(index,1);
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
       },
       setPage(pageNumber) {
             this.currentPage = pageNumber;

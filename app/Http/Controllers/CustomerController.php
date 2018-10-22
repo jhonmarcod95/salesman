@@ -125,9 +125,28 @@ class CustomerController extends Controller
         }
     }
 
+    
+    /**
+     * Return Auto generated customer code.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function checkCustomerCode(){
         $customer = Customer::where('classification', 3)->orderBy('id','asc')->get();   
-        return $customer->last()->customer_code + 1; 
+        return ++$customer->last()->customer_code; 
     }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, Customer $customer)
+    {
+        if($customer->delete()){
+            return $customer;
+        }
+    }
 }
