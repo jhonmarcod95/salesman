@@ -30,7 +30,7 @@ class ScheduleController extends Controller
                 'user_id'
             );
 
-        $customers = Customer::select(DB::raw("CONCAT(name,' - ',town_city) AS name"), 'customer_code')
+        $customers = Customer::select(DB::raw("CONCAT(name, ' - ', street, ' - ',town_city) AS name"), 'customer_code')
             ->pluck(
                 'name',
                 'customer_code'
