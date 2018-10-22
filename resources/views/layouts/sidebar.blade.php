@@ -70,7 +70,7 @@
                 <div class="row">
                     <div class="col-6 collapse-brand">
                         <a href="./index.html">
-                            <img src="{{ url('img/brand/blue.png') }}">
+                            <img src="{{ url('img/brand/PFMC.jpg') }}">
                         </a>
                     </div>
                     <div class="col-6 collapse-close">
