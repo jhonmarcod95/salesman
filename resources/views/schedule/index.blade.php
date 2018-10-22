@@ -245,6 +245,7 @@
             }
         }
 
+
         //sched type event in add & update modal
         $('#sel_add_sched_type, #sel_update_sched_type').on('select2:select', function (e) {
             var type = e.params.data.id;
@@ -256,6 +257,9 @@
          * ************* CALENDAR EVENTS ***************
          * ********************************************/
 
+        var currentDate = '{{ Carbon::now()->format('Y-m-d') }}';
+        var dragEvent;
+
         $(document).ready(function() {
             $('#calendar').fullCalendar({
                 header: {
@@ -263,12 +267,20 @@
                     center: null,
                     right:  null
                 },
-                defaultDate: '{{ Carbon::now() }}',
+
+                defaultDate: currentDate,
                 selectable: true,
                 selectHelper: true,
 
                 /*-------------- click day for adding schedule ------------------*/
                 dayClick: function(date, allDay, jsEvent, view) {
+
+                    //disable add
+                    if(date.isBefore(currentDate)) {
+                        $('#calendar').fullCalendar('unselect');
+                        return false;
+                    }
+
                     resetModal();
                     selectedDate = date.format();
                     $('#addModalLabel').text(date.format('MMMM D, Y'));
@@ -277,6 +289,13 @@
                 },
                 /*----------- click event to update & delete schedule -----------*/
                 eventClick: function(calEvent, jsEvent, view) {
+
+                    //disable update
+                    if(calEvent.start.isBefore(currentDate)) {
+                        $('#calendar').fullCalendar('unselect');
+                        return false;
+                    }
+
                     resetModal();
                     selectedSchedule = calEvent;
                     selectedDate = calEvent.start.format();
@@ -299,8 +318,17 @@
                     $('#updateModalLabel').text(calEvent.start.format('MMMM D, Y'));
                     $('#updateScheduleModal').modal('show');
                 },
+
                 /*------------ drag event to another to change date -------------*/
                 eventDrop: function(event, delta, revertFunc) {
+
+                    //disable update
+                    if(dragEvent.start.isBefore(currentDate) || event.start.isBefore(currentDate)) {
+                        $('#calendar').fullCalendar('unselect');
+                        revertFunc();
+                        return false;
+                    }
+
                     if (!confirm("Are you sure about this change?")) {
                         revertFunc();
                     }
@@ -308,12 +336,15 @@
                         changeDateSchedule(event);
                     }
                 },
+                eventDragStop: function(event, jsEvent, ui, view ) {
+                    dragEvent = event;
+                },
                 /*---------------------------------------------------------------*/
                 editable: true,
                 eventLimit: 3,
             });
 
-            retrieveSchedules('{{ Carbon::now() }}');
+            // retrieveSchedules(currentDate);
         });
 
 
