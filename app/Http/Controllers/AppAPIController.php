@@ -69,10 +69,9 @@ class AppAPIController extends Controller
     public function uploadExpensesReciept(Request $request, Expense $expense)
     {
 
-        $all_headers = apache_request_headers();
-        $newimg = file_put_contents(public_path('storage/expenses/') . $all_headers['File-Name'], file_get_contents('php://input'));
+        $newimg = file_put_contents(public_path('storage/expenses/') . $request->header('File-Name'), file_get_contents('php://input'));
 
-        $expense->attachment = 'expenses/'. $all_headers['File-Name'];
+        $expense->attachment = 'expenses/'. $request->header('File-Name');
         $expense->save();
 
         return $expense;
@@ -254,8 +253,7 @@ class AppAPIController extends Controller
     public function signOut(Request $request, Schedule $schedule)
     {
 
-        $all_headers = apache_request_headers();
-        $signOutImg = file_put_contents(public_path('storage/attendance/') . $all_headers['File-Name'], file_get_contents('php://input'));
+        $signOutImg = file_put_contents(public_path('storage/attendance/') . $request->header('File-Name'), file_get_contents('php://input'));
 
         // get assigned attendance
         $attendance = Attendance::orderBy('id','desc')
@@ -263,9 +261,9 @@ class AppAPIController extends Controller
                         ->where('schedule_id', $schedule->id)->first();
 
         // update attendance
-        $attendance->sign_out_image = 'attendance/'. $all_headers['File-Name'];
+        $attendance->sign_out_image = 'attendance/'. $request->header('File-Name');
         $attendance->sign_out = Carbon::now();
-        $attendance->remarks = $all_headers['Remarks'];
+        $attendance->remarks = $request->header('Remarks');
         $attendance->save();
 
         // update schedule
