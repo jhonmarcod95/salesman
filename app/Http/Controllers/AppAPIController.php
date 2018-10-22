@@ -278,7 +278,7 @@ class AppAPIController extends Controller
 
     public function getCurrentUser()
     {
-        return explode(' ',trim(Auth::user()->name))[0];
+        return ucfirst(strtolower(explode(' ',trim(Auth::user()->name))[0]));
     }
 
 
