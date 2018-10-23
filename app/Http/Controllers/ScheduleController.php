@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Auth;   
+use Auth;
+use Carbon;   
 use App\Customer;
 use App\Rules\TimeRule;
 use App\Schedule;
@@ -210,5 +211,15 @@ class ScheduleController extends Controller
     private function dataOutput($dateFrom, $dateTo, $userId, $code){
         $data = collect(DB::select("CALL p_schedules('$dateFrom', '$dateTo', '$userId', '$code')"))->first();
         return $data;
+    }
+
+    /**
+     * Get all area that has schedule
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function todays(){
+        return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
     }
 }
