@@ -54,8 +54,13 @@ class User extends Authenticatable
     public function messages(){
         return $this->hasMany(Message::class);
     }
-    
+
     public function attendances(){
         return $this->hasMany(Attendance::class);
     }
+
+    public function technicalSales() {
+        return $this->hasMany(TechnicalSalesRepresentative::class,'user_id');
+    }
+
 }

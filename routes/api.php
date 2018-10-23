@@ -47,5 +47,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');
+    // Route::get('users','API\UserApiController@index');
+    Route::post('users/update','API\UserApiController@update');
 
 });
