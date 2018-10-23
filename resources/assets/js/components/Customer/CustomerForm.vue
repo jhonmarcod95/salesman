@@ -22,14 +22,14 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="customer_code">Customer Code</label>
                                                 <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code">
-                                                <span class="text-danger" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
+                                                <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-email">Name</label>
                                                 <input type="text" id="name" class="form-control form-control-alternative" v-model="customer.name">
-                                                <span class="text-danger" v-if="errors.name">{{ errors.name[0] }}</span>
+                                                <span class="text-danger small" v-if="errors.name">{{ errors.name[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -39,8 +39,8 @@
                                                 <label class="form-control-label" for="classification">Classification</label>
                                                   <select class="form-control" v-model="customer.classification" @change="checkCustomerCode">
                                                     <option v-for="(classification, c) in classifications" v-bind:key="c" :value="classification.id">{{ classification.description}}</option>
-                                                    <span class="text-danger" v-if="errors.description">{{ errors.description[0] }}</span>
-                                                </select>
+                                                  </select>
+                                                  <span class="text-danger small" v-if="errors.classification">{{ errors.classification[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -55,34 +55,34 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="street">Street</label>
                                                 <input id="street" class="form-control form-control-alternative" type="text" v-model="customer.street">
-                                                <span class="text-danger" v-if="errors.street">{{ errors.street[0] }}</span>
+                                                <span class="text-danger small" v-if="errors.street">{{ errors.street[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="town">Town or City</label>
                                                 <input id="town" class="form-control form-control-alternative" type="text" v-model="customer.town_city">
-                                                <span class="text-danger" v-if="errors.town_city">{{ errors.town_city[0] }}</span>
+                                                <span class="text-danger small" v-if="errors.town_city">{{ errors.town_city[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
-                                          <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-control-label" for="town">Region</label>
-                                                <select class="form-control" v-model="customer.region">
-                                                    <option v-for="(region, r) in regions" v-bind:key="r" :value="region.id">{{ region.name}}</option>
-                                                </select>
-                                                 <span class="text-danger" v-if="errors.region">{{ errors.region[0] }}</span>
-                                            </div>
-                                        </div>
+                                        <!--<div class="col-md-6">-->
+                                            <!--<div class="form-group">-->
+                                                <!--<label class="form-control-label" for="town">Region</label>-->
+                                                <!--<select class="form-control" v-model="customer.region">-->
+                                                    <!--<option v-for="(region, r) in regions" v-bind:key="r" :value="region.id">{{ region.name}}</option>-->
+                                                <!--</select>-->
+                                                 <!--<span class="text-danger" v-if="errors.region">{{ errors.region[0] }}</span>-->
+                                            <!--</div>-->
+                                        <!--</div>-->
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="street">Province</label>
                                                 <select class="form-control" v-model="customer.province">
                                                     <option v-for="(province, p) in provinces" v-bind:key="p" :value="province.id">{{ province.name}}</option>
-                                                    <span class="text-danger" v-if="errors.province">{{ errors.province[0] }}</span>
                                                 </select>
+                                                <span class="text-danger small" v-if="errors.province">{{ errors.province[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -91,14 +91,14 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-city">Telephone 1</label>
                                                 <input type="text" id="telephone-1" class="form-control form-control-alternative" v-model="customer.telephone_1">
-                                                <span class="text-danger" v-if="errors.telephone_1">{{ errors.telephone_1[0] }}</span>
+                                                <span class="text-danger small" v-if="errors.telephone_1">{{ errors.telephone_1[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-country">Telephone 2</label>
                                                 <input type="text" id="telephone_2" class="form-control form-control-alternative" v-model="customer.telephone_2">
-                                                <span class="text-danger" v-if="errors.telephone_2">{{ errors.telephone_2[0] }}</span>
+                                                <span class="text-danger small" v-if="errors.telephone_2">{{ errors.telephone_2[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -107,14 +107,14 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="fax_umber">Fax Number</label>
                                                 <input type="text" id="fax_umber" class="form-control form-control-alternative" v-model="customer.fax_number">
-                                                <span class="text-danger" v-if="errors.fax_number">{{ errors.fax_number[0] }}</span>
+                                                <span class="text-danger small" v-if="errors.fax_number">{{ errors.fax_number[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="remarks">Remarks</label>
                                                 <input type="text" id="remarks" class="form-control form-control-alternative" v-model="customer.remarks">
-                                                <span class="text-danger" v-if="errors.remarks">{{ errors.remarks[0] }}</span>
+                                                <span class="text-danger small" v-if="errors.remarks">{{ errors.remarks[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -140,7 +140,7 @@
             return{
                 customer:{
                     area: '',
-                    classfication: '',
+                    classification: '',
                     customer_code: '',
                     name: '',
                     street: '',
@@ -217,7 +217,8 @@
             checkCustomerCode(){
                 if(this.customer.classification == 3){
                     axios.get('/check-customer-code')
-                    .then(response => { 
+                    .then(response => {
+                        this.customer.customer_code = '';
                         this.customer.customer_code = response.data;
                         document.getElementById("customer_code").disabled = true;
                     })
@@ -226,7 +227,6 @@
                     })
                 }
                 else{
-                    this.customer.customer_code = '';
                     document.getElementById("customer_code").disabled = false;
                 }
             }

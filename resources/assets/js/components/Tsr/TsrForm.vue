@@ -22,12 +22,14 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-username">Last Name</label>
                                                 <input type="text" id="input-username" class="form-control form-control-alternative" v-model="tsr.last_name">
+                                                <span class="text-danger small" v-if="errors.last_name">{{ errors.last_name[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-email">First Name</label>
                                                 <input type="email" id="input-email" class="form-control form-control-alternative" v-model="tsr.first_name">
+                                                <span class="text-danger small" v-if="errors.first_name">{{ errors.first_name[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -64,12 +66,14 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-address">Address</label>
                                                 <input id="input-address" class="form-control form-control-alternative" type="text" v-model="tsr.address">
+                                                <span class="text-danger small" v-if="errors.address">{{ errors.address[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-city">Email</label>
                                                 <input type="text" id="input-city" class="form-control form-control-alternative" v-model="tsr.email">
+                                                <span class="text-danger small" v-if="errors.email">{{ errors.email[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -78,12 +82,14 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-country">Contact Number</label>
                                                 <input type="text" id="input-country" class="form-control form-control-alternative" v-model="tsr.contact_number">
+                                                <span class="text-danger small" v-if="errors.contact_number">{{ errors.contact_number[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-city">Bithday</label>
                                                 <input type="date" id="date_of_birth" class="form-control form-control-alternative" v-model="tsr.date_of_birth">
+                                                <span class="text-danger small" v-if="errors.date_of_birth">{{ errors.date_of_birth[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -92,6 +98,7 @@
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-city">Date Hired</label>
                                                 <input type="date" id="date_hired" class="form-control form-control-alternative" v-model="tsr.date_hired">
+                                                <span class="text-danger small" v-if="errors.date_hired">{{ errors.date_hired[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
