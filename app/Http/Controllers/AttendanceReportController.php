@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use Carbon;
 use App\Message;
 use App\Attendance;
 use App\Schedule;
@@ -121,4 +122,26 @@ class AttendanceReportController extends Controller
     {
         //
     }
+
+     /**
+     * Get all area that is current visiting
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function visiting(){
+        return Attendance::with('user', 'schedule')->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
+                ->whereNull('sign_out')->orderBy('id','desc')->get();
+    }
+
+    /**
+     * Get all area that is visited
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function completed(){
+        return Attendance::with('user', 'schedule')->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
+                ->whereNotNull('sign_out')->orderBy('id','desc')->get();
+    }
+
 }
