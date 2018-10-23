@@ -20,7 +20,7 @@
                         </div>
                         <div class="mb-3">
                             <div class="col-md-4">
-                                <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                                <input type="text" class="form-control form-control-sm" placeholder="Search" v-model="keywords" id="name">
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -28,14 +28,12 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col"></th>
-                                    <th scope="col">Area</th>
-                                    <th scope="col">Classification</th>
                                     <th scope="col">Customer Code</th>
-                                    <th scope="col">Group</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Street</th>
                                     <th scope="col">Town or City</th>
                                     <th scope="col">Province</th>
+                                    <th scope="col">Classification</th>
                                     <th scope="col">Telephone 1</th>
                                     <th scope="col">Telephone 2</th>
                                     <th scope="col">Fax number</th>
@@ -57,14 +55,12 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ customer.area }}</td>
-                                        <td>{{ customer.classification }}</td>
                                         <td>{{ customer.customer_code }}</td>
-                                        <td>{{ customer.group }}</td>
                                         <td>{{ customer.name }}</td>
                                         <td>{{ customer.street }}</td>
                                         <td>{{ customer.town_city }}</td>
-                                        <td>{{ customer.province_id }}</td>
+                                        <td>{{ customer.province }}</td>
+                                        <td>{{ customer.customer_classification }}</td>
                                         <td>{{ customer.telephone_1 }}</td>
                                         <td>{{ customer.telephone_2 }}</td>
                                         <td>{{ customer.fax_number }}</td>      
@@ -179,6 +175,7 @@ export default {
     computed:{
         filteredCustomers(){
             let self = this;
+
             return self.customers.filter(customer => {
                 return customer.name.toLowerCase().includes(this.keywords.toLowerCase())
             });

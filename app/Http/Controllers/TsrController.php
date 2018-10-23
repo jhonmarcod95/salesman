@@ -63,10 +63,6 @@ class TsrController extends Controller
             'address' => 'required',
             'contact_number' => 'required',
             'date_of_birth' => 'required',
-            'date_hired' => 'required',
-            'date_of_birth' => 'required',
-            'contact_person' => 'required',
-            'personal_email' => 'email',
         ]);
 
 
@@ -139,19 +135,10 @@ class TsrController extends Controller
         $request->validate([
             'last_name' => 'required',
             'first_name' => 'required',
-            'middle_name' => 'required',
-            'middle_initial' => 'required',
-            'suffix' => 'required',
-            'email' => 'required|unique:users,email,' .$technicalSalesRepresentative->id,
+            'email' => 'required|unique:technical_sales_representatives,email,' .$technicalSalesRepresentative->id,
             'address' => 'required',
             'contact_number' => 'required',
             'date_of_birth' => 'required',
-            'date_hired' => 'required',
-            'date_of_birth' => 'required',
-            'contact_person' => 'required',
-            'personal_email' => 'required',
-            'plate_number' => 'required'
-            
         ]);
 
         $technicalSalesRepresentative->last_name = $request->last_name;
@@ -169,8 +156,13 @@ class TsrController extends Controller
         $technicalSalesRepresentative->contact_person = $request->contact_person;
         $technicalSalesRepresentative->personal_email = $request->personal_email;
 
-
         if($technicalSalesRepresentative->save()){
+
+            $user = User::find($technicalSalesRepresentative->user_id);
+            $user->name = $technicalSalesRepresentative->first_name. ' ' .$technicalSalesRepresentative->last_name;
+            $user->email = $technicalSalesRepresentative->email;
+            $user->save();
+
             return ['redirect' => route('tsr_list')];
         }
     }

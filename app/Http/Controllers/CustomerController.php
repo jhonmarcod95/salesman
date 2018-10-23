@@ -29,7 +29,28 @@ class CustomerController extends Controller
      */
 
     public function indexData(){
-        return  Customer::orderBy('id','desc')->get();
+        return  Customer::orderBy('customers.id', 'desc')
+            ->leftJoin('provinces', 'provinces.id', '=', 'customers.province_id')
+            ->leftJoin('customer_classifications', 'customer_classifications.id', '=', 'customers.classification')
+            ->get([
+                'customers.id',
+                'customers.area',
+                'customers.classification',
+                'customers.customer_code',
+                'customers.name',
+                'customers.deleted_at',
+                'customers.street',
+                'customers.town_city',
+                'customers.province_id',
+                'customers.telephone_1',
+                'customers.telephone_2',
+                'customers.fax_number',
+                'customers.remarks',
+                'customers.created_at',
+                'customers.updated_at',
+                'provinces.name AS province',
+                'customer_classifications.description AS customer_classification',
+            ]);
     }
     
     /**
@@ -54,6 +75,10 @@ class CustomerController extends Controller
         $request->validate([
             'customer_code' => 'required|unique:customers,customer_code',
             'name' => 'required',
+            'classification' => 'required',
+            'street' => 'required',
+            'town_city' => 'required',
+            'province' => 'required',
         ]);
         $customers = new Customer;
 
@@ -62,7 +87,7 @@ class CustomerController extends Controller
         $customers->name = $request->name;
         $customers->street = $request->street;
         $customers->town_city = $request->town_city;
-        $customers->province_id = $request->province_id;
+        $customers->province_id = $request->province;
         $customers->telephone_1 = $request->telephone_1;
         $customers->telephone_2 = $request->telephone_2;
         $customers->fax_number = $request->fax_number;
@@ -107,6 +132,10 @@ class CustomerController extends Controller
         $request->validate([
             'customer_code' => 'required|unique:customers,customer_code,'. $customer->id,
             'name' => 'required',
+            'classification' => 'required',
+            'street' => 'required',
+            'town_city' => 'required',
+            'province' => 'required',
         ]);
 
         $customer->classification = $request->classification;
@@ -114,7 +143,7 @@ class CustomerController extends Controller
         $customer->name = $request->name;
         $customer->street = $request->street;
         $customer->town_city = $request->town_city;
-        $customer->province_id = $request->province_id;
+        $customer->province_id = $request->province;
         $customer->telephone_1 = $request->telephone_1;
         $customer->telephone_2 = $request->telephone_2;
         $customer->fax_number = $request->fax_number;
