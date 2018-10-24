@@ -148,4 +148,20 @@ Route::group(['middleware' => ['auth', 'role:admin|user']], function () {
     Route::get('/attendance-report-all', 'AttendanceReportController@indexData');
     // fetch attendance report by date
     Route::post('/attendance-report-bydate', 'AttendanceReportController@generateBydate');
+
+
+    //Schedules
+    // Fetch all todays schedule
+    Route::get('/schedules-todays', 'ScheduleController@todays');
+    // Fetch all todays schedule per user
+    Route::get('/schedules-user-today', 'ScheduleController@todayByUser');
+
+    //Attendances
+    // Fetch all visiting area
+    Route::get('/attendances-visiting', 'AttendanceReportController@visiting');
+    // Fetch all completed visiting area
+    Route::get('/attendances-completed', 'AttendanceReportController@completed');
+
+
+
 });

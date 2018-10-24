@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Auth;   
+use Auth;
+use Carbon;   
 use App\Customer;
 use App\Rules\TimeRule;
 use App\Schedule;
@@ -211,4 +212,23 @@ class ScheduleController extends Controller
         $data = collect(DB::select("CALL p_schedules('$dateFrom', '$dateTo', '$userId', '$code')"))->first();
         return $data;
     }
+
+    /**
+     * Get all todays schedule
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function todays(){
+        return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
+    }
+    /**
+    * Get all todays schedule per user
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function todayByUser(){
+        return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get()->groupBy('user_id');
+    }
+
 }

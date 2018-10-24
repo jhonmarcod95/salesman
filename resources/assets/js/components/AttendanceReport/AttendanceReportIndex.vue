@@ -64,6 +64,7 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                    <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule.attendances.sign_out_image,schedule.user.name,schedule.attendances.remarks)">Show Photo</a>
                                                     <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#editModal">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" >Delete</a>
                                                 </div>
@@ -77,10 +78,10 @@
                                         </td>
                                         <td>
                                             <span v-if="schedule.attendances"> IN: {{ moment(schedule.attendances.sign_in ).format('lll') }}</span> <br>
-                                            <span v-if="schedule.attendances"> OUT: {{ moment(schedule.attendances.sign_out).format('lll') }} </span>
+                                            <span v-if="schedule.attendances && schedule.attendances.sign_out !== null"> OUT: {{ moment(schedule.attendances.sign_out).format('lll') }} </span>
                                         </td>
                                         <td>
-                                            <span v-if="schedule.attendances">
+                                            <span v-if="schedule.attendances && schedule.attendances.sign_out !== null">
                                                 {{ rendered(schedule.attendances.sign_out, schedule.attendances.sign_in) }}
                                             </span>
                                         </td>
@@ -109,6 +110,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Photo Modal -->
+        <div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <span class="closed" data-dismiss="modal">&times;</span>
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                <div class="modal-body text-center">
+                    <img class="w-100 h-75" style="max-height: 700px" :src="image">
+                    <h1 class="mt-3"> {{ tsrName }} </h1>
+                    <span>{{ remarks }} </span>
+                </div>
+                </div>
+            </div>
+        </div>
+
+
     </div>
 </template>
 
@@ -121,6 +138,9 @@ export default {
             schedules: [],
             startDate: '',
             endDate: '',
+            tsrName: '',
+            remarks: '',
+            image: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -138,7 +158,8 @@ export default {
                 endDate: this.endDate
             })
             .then(response => {
-                this.schedules = response.data; 
+                this.schedules = response.data;
+                this.errors = []; 
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -162,6 +183,11 @@ export default {
             return hours + 'h '+ minutes+' min.';
                                             
         },
+        getImage(img,user,remarks){
+            this.image = window.location.origin+'/storage/'+img;
+            this.tsrName = user;
+            this.remarks = remarks;
+        },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
         },
@@ -182,7 +208,7 @@ export default {
         filteredSchedules(){
             let self = this;
             return self.schedules.filter(schedule => {
-                return schedule.name.toLowerCase().includes(this.keywords.toLowerCase())
+                return schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())
             });
         },
         totalPages() {
@@ -207,5 +233,23 @@ export default {
 </script>
 
 <style>
-
+    .modal{
+        background-color: rgba(0,0,0,0.9);
+    }
+    /* The Close Button */
+    .closed {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .closed:hover,
+    .closed:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+    }
 </style>

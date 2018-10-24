@@ -42,6 +42,10 @@ Vue.component('message-index', require('./components/Message/MessageIndex.vue'))
 // Attendance Report
 Vue.component('attendance-report-index', require('./components/AttendanceReport/AttendanceReportIndex.vue'));
 
+// Dashboard
+Vue.component('dashboard-index', require('./components/Dashboard/DashboardIndex.vue'));
+
+
 const app = new Vue({
     el: '#app',
 });
