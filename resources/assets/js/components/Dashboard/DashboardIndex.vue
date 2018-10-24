@@ -181,6 +181,44 @@
                     </div>
                 </div>
             </div>
+            <div class="row mt-5">
+                <div class="col-xl-8 mb-5 mb-xl-0">
+                    <div class="card shadow">
+                        <div class="card-header border-0">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h3 class="mb-0">Schedule Summary</h3>
+                                </div>
+                                <div class="col text-right">
+                                    <!-- <a href="#!" class="btn btn-sm btn-primary">See all</a> -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <!-- Projects table -->
+                            <table class="table align-items-center table-flush">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th scope="col">TSR</th>
+                                    <th scope="col">Scheduled</th>
+                                    <th scope="col">Completed</th>
+                                    <th scope="col"> Percentage</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(tsrUnique, tsrU) in tsrUniques" v-bind:key="tsrU">
+                                        <td>{{ tsrUnique[0].user.name }}</td>
+                                        <td>{{ tsrUnique.length }}</td>
+                                        <td>{{ countCompleted(tsrUnique) }}</td>
+                                        <td v-if="completedPercentage !== 0">{{ completedPercentage }}% </td>
+                                        <td v-else>0% </td>  
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Current Visiting Modal -->
@@ -194,27 +232,27 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                        <div class="table-responsive">
-                            <table class="table align-items-center table-flush">
-                                <thead class="thead-light">
-                                <tr>
-                                    <th scope="col">TSR</th>
-                                    <th scope="col">Customer</th>
-                                    <th scope="col">In</th>
+                    <div class="table-responsive">
+                        <table class="table align-items-center table-flush">
+                            <thead class="thead-light">
+                            <tr>
+                                <th scope="col">TSR</th>
+                                <th scope="col">Customer</th>
+                                <th scope="col">In</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(visit, v) in visiting" v-bind:key="v">
+                                    <td>{{ visit.user.name }}</td>
+                                    <td> Customer: {{ visit.schedule.name }} <br></td>
+                                    <td><span>{{ moment(visit.sign_in ).format('lll') }}</span> </td>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(visit, v) in visiting" v-bind:key="v">
-                                        <td>{{ visit.user.name }}</td>
-                                        <td> Customer: {{ visit.schedule.name }} <br></td>
-                                        <td><span>{{ moment(visit.sign_in ).format('lll') }}</span> </td>
-                                    </tr>
-                                    <tr v-if="!visiting.length">
-                                        <td>No data available in the table</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                                <tr v-if="!visiting.length">
+                                    <td>No data available in the table</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -328,6 +366,7 @@ export default {
             todays: [],
             errors: [],
             recents: [],
+            tsrUniques: [],
             customerCount: '',
             customerCompletedCount: '',
             customerPercentage: '',
@@ -336,7 +375,8 @@ export default {
             mappingPercentage: '',
             eventCount: '',
             eventCompletedCount: '',
-            eventPercentage: ''
+            eventPercentage: '',
+            completedPercentage: 0,
         }
     },
     created(){
@@ -381,6 +421,7 @@ export default {
                 this.countCustomer();
                 this.countMapping();
                 this.countEvent();
+                this.tsrGetUnique();
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -416,6 +457,18 @@ export default {
                 }
             }
         },
+        countCompleted(sched){
+            this.completedPercentage = 0;
+            var attendance = sched.filter(item => item.attendances  !== null);
+            if(attendance.length){
+                var tsr = attendance.filter(item => item.attendances.sign_out !== null);
+                if(tsr.length){
+                    this.completedPercentage = Math.round((attendance.length/tsr.length) * 100);
+                    return tsr.length;
+                }
+            }
+            return 0;
+        },
         rendered(endTime, startTime){
             var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
             var d = moment.duration(ms);
@@ -425,6 +478,15 @@ export default {
             return hours + 'h '+ minutes+' min.';
                                             
         },
+        tsrGetUnique(){  
+            axios.get('/schedules-user-today')
+            .then(response => {
+                this.tsrUniques = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        }   
     }
 }
 </script>

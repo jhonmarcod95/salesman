@@ -83296,6 +83296,44 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -83306,6 +83344,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             todays: [],
             errors: [],
             recents: [],
+            tsrUniques: [],
             customerCount: '',
             customerCompletedCount: '',
             customerPercentage: '',
@@ -83314,7 +83353,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             mappingPercentage: '',
             eventCount: '',
             eventCompletedCount: '',
-            eventPercentage: ''
+            eventPercentage: '',
+            completedPercentage: 0
         };
     },
     created: function created() {
@@ -83361,6 +83401,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this3.countCustomer();
                 _this3.countMapping();
                 _this3.countEvent();
+                _this3.tsrGetUnique();
             }).catch(function (error) {
                 _this3.errors = error.response.data.errors;
             });
@@ -83413,6 +83454,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 }
             }
         },
+        countCompleted: function countCompleted(sched) {
+            this.completedPercentage = 0;
+            var attendance = sched.filter(function (item) {
+                return item.attendances !== null;
+            });
+            if (attendance.length) {
+                var tsr = attendance.filter(function (item) {
+                    return item.attendances.sign_out !== null;
+                });
+                if (tsr.length) {
+                    this.completedPercentage = Math.round(attendance.length / tsr.length * 100);
+                    return tsr.length;
+                }
+            }
+            return 0;
+        },
         rendered: function rendered(endTime, startTime) {
             var ms = __WEBPACK_IMPORTED_MODULE_0_moment___default()(endTime, "YYYY/MM/DD HH:mm a").diff(__WEBPACK_IMPORTED_MODULE_0_moment___default()(startTime, "YYYY/MM/DD HH:mm a"));
             var d = __WEBPACK_IMPORTED_MODULE_0_moment___default.a.duration(ms);
@@ -83420,6 +83477,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var minutes = __WEBPACK_IMPORTED_MODULE_0_moment___default.a.utc(ms).format("mm");
 
             return hours + 'h ' + minutes + ' min.';
+        },
+        tsrGetUnique: function tsrGetUnique() {
+            var _this4 = this;
+
+            axios.get('/schedules-user-today').then(function (response) {
+                _this4.tsrUniques = response.data;
+            }).catch(function (error) {
+                _this4.errors = error.response.data.errors;
+            });
         }
     }
 });
@@ -83668,6 +83734,45 @@ var render = function() {
             ])
           ])
         ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "row mt-5" }, [
+        _c("div", { staticClass: "col-xl-8 mb-5 mb-xl-0" }, [
+          _c("div", { staticClass: "card shadow" }, [
+            _vm._m(11),
+            _vm._v(" "),
+            _c("div", { staticClass: "table-responsive" }, [
+              _c(
+                "table",
+                { staticClass: "table align-items-center table-flush" },
+                [
+                  _vm._m(12),
+                  _vm._v(" "),
+                  _c(
+                    "tbody",
+                    _vm._l(_vm.tsrUniques, function(tsrUnique, tsrU) {
+                      return _c("tr", { key: tsrU }, [
+                        _c("td", [_vm._v(_vm._s(tsrUnique[0].user.name))]),
+                        _vm._v(" "),
+                        _c("td", [_vm._v(_vm._s(tsrUnique.length))]),
+                        _vm._v(" "),
+                        _c("td", [
+                          _vm._v(_vm._s(_vm.countCompleted(tsrUnique)))
+                        ]),
+                        _vm._v(" "),
+                        _vm.completedPercentage !== 0
+                          ? _c("td", [
+                              _vm._v(_vm._s(_vm.completedPercentage) + "% ")
+                            ])
+                          : _c("td", [_vm._v("0% ")])
+                      ])
+                    })
+                  )
+                ]
+              )
+            ])
+          ])
+        ])
       ])
     ]),
     _vm._v(" "),
@@ -83692,7 +83797,7 @@ var render = function() {
           },
           [
             _c("div", { staticClass: "modal-content" }, [
-              _vm._m(11),
+              _vm._m(13),
               _vm._v(" "),
               _c("div", { staticClass: "modal-body" }, [
                 _c("div", { staticClass: "table-responsive" }, [
@@ -83700,7 +83805,7 @@ var render = function() {
                     "table",
                     { staticClass: "table align-items-center table-flush" },
                     [
-                      _vm._m(12),
+                      _vm._m(14),
                       _vm._v(" "),
                       _c(
                         "tbody",
@@ -83745,7 +83850,7 @@ var render = function() {
                 ])
               ]),
               _vm._v(" "),
-              _vm._m(13)
+              _vm._m(15)
             ])
           ]
         )
@@ -83773,7 +83878,7 @@ var render = function() {
           },
           [
             _c("div", { staticClass: "modal-content" }, [
-              _vm._m(14),
+              _vm._m(16),
               _vm._v(" "),
               _c("div", { staticClass: "modal-body" }, [
                 _c("div", { staticClass: "table-responsive" }, [
@@ -83781,7 +83886,7 @@ var render = function() {
                     "table",
                     { staticClass: "table align-items-center table-flush" },
                     [
-                      _vm._m(15),
+                      _vm._m(17),
                       _vm._v(" "),
                       _c(
                         "tbody",
@@ -83849,7 +83954,7 @@ var render = function() {
                 ])
               ]),
               _vm._v(" "),
-              _vm._m(16)
+              _vm._m(18)
             ])
           ]
         )
@@ -83877,7 +83982,7 @@ var render = function() {
           },
           [
             _c("div", { staticClass: "modal-content" }, [
-              _vm._m(17),
+              _vm._m(19),
               _vm._v(" "),
               _c("div", { staticClass: "modal-body" }, [
                 _c("div", { staticClass: "table-responsive" }, [
@@ -83885,7 +83990,7 @@ var render = function() {
                     "table",
                     { staticClass: "table align-items-center table-flush" },
                     [
-                      _vm._m(18),
+                      _vm._m(20),
                       _vm._v(" "),
                       _c(
                         "tbody",
@@ -83951,7 +84056,7 @@ var render = function() {
                 ])
               ]),
               _vm._v(" "),
-              _vm._m(19)
+              _vm._m(21)
             ])
           ]
         )
@@ -84125,6 +84230,36 @@ var staticRenderFns = [
     return _c("thead", { staticClass: "thead-light" }, [
       _c("tr", [
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Type")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Scheduled")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Completed")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v(" Percentage")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "card-header border-0" }, [
+      _c("div", { staticClass: "row align-items-center" }, [
+        _c("div", { staticClass: "col" }, [
+          _c("h3", { staticClass: "mb-0" }, [_vm._v("Schedule Summary")])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col text-right" })
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", { staticClass: "thead-light" }, [
+      _c("tr", [
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("TSR")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Scheduled")]),
         _vm._v(" "),
