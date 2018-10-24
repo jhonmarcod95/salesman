@@ -196,6 +196,17 @@ class AppAPIController extends Controller
 
     }
 
+    public function checkHasSchedule()
+    {
+        $dailySchedule = Schedule::orderBy('id','DESC')
+                            ->whereDate('date', Carbon::today())
+                            ->where('user_id', Auth::user()->id)
+                            ->exists();
+
+        return response()->json($dailySchedule);
+
+    }
+
     public function dailySchedule()
     {
 
