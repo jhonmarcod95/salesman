@@ -79023,7 +79023,7 @@ var render = function() {
                       "label",
                       {
                         staticClass: "form-control-label",
-                        attrs: { for: "new-password" }
+                        attrs: { for: "confirm-password" }
                       },
                       [_vm._v("Confirm New Password")]
                     ),
@@ -79038,7 +79038,7 @@ var render = function() {
                         }
                       ],
                       staticClass: "form-control form-control-alternative",
-                      attrs: { type: "password", id: "new-password" },
+                      attrs: { type: "password", id: "confirm-password" },
                       domProps: { value: _vm.user.new_password_confirmation },
                       on: {
                         input: function($event) {
@@ -82152,7 +82152,7 @@ exports = module.exports = __webpack_require__(7)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n.modal{\n    background-color: rgba(0,0,0,0.9);\n}\n/* The Close Button */\n.closed {\n    position: absolute;\n    top: 15px;\n    right: 35px;\n    color: #f1f1f1;\n    font-size: 40px;\n    font-weight: bold;\n    transition: 0.3s;\n}\n.closed:hover,\n.closed:focus {\n    color: #bbb;\n    text-decoration: none;\n    cursor: pointer;\n}\n", ""]);
 
 // exports
 
@@ -82279,6 +82279,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -82288,6 +82304,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             schedules: [],
             startDate: '',
             endDate: '',
+            tsrName: '',
+            image: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -82308,6 +82326,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 endDate: this.endDate
             }).then(function (response) {
                 _this.schedules = response.data;
+                _this.errors = [];
             }).catch(function (error) {
                 _this.errors = error.response.data.errors;
             });
@@ -82329,6 +82348,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var minutes = __WEBPACK_IMPORTED_MODULE_0_moment___default.a.utc(ms).format("mm");
 
             return hours + 'h ' + minutes + ' min.';
+        },
+        getImage: function getImage(img, user) {
+            this.image = window.location.origin + '/storage/' + img;
+            this.tsrName = user;
         },
         setPage: function setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -82536,7 +82559,70 @@ var render = function() {
                     "tbody",
                     _vm._l(_vm.filteredQueues, function(schedule, s) {
                       return _c("tr", { key: s }, [
-                        _vm._m(2, true),
+                        _c("td", { staticClass: "text-right" }, [
+                          _c("div", { staticClass: "dropdown" }, [
+                            _vm._m(2, true),
+                            _vm._v(" "),
+                            _c(
+                              "div",
+                              {
+                                staticClass:
+                                  "dropdown-menu dropdown-menu-right dropdown-menu-arrow"
+                              },
+                              [
+                                schedule.attendances &&
+                                schedule.attendances.sign_out !== null
+                                  ? _c(
+                                      "a",
+                                      {
+                                        staticClass: "dropdown-item",
+                                        attrs: {
+                                          href: "javascript:void(0)",
+                                          "data-toggle": "modal",
+                                          "data-target": "#photoModal"
+                                        },
+                                        on: {
+                                          click: function($event) {
+                                            _vm.getImage(
+                                              schedule.attendances
+                                                .sign_out_image,
+                                              schedule.user.name
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [_vm._v("Show Photo")]
+                                    )
+                                  : _vm._e(),
+                                _vm._v(" "),
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "dropdown-item",
+                                    attrs: {
+                                      href: "javascript:void(0)",
+                                      "data-toggle": "modal",
+                                      "data-target": "#editModal"
+                                    }
+                                  },
+                                  [_vm._v("Edit")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "dropdown-item",
+                                    attrs: {
+                                      href: "#deleteModal",
+                                      "data-toggle": "modal"
+                                    }
+                                  },
+                                  [_vm._v("Delete")]
+                                )
+                              ]
+                            )
+                          ])
+                        ]),
                         _vm._v(" "),
                         _c("td", [_vm._v(_vm._s(schedule.user.name))]),
                         _vm._v(" "),
@@ -82684,7 +82770,49 @@ var render = function() {
           ])
         ])
       ])
-    ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          id: "photoModal",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "exampleModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "span",
+          { staticClass: "closed", attrs: { "data-dismiss": "modal" } },
+          [_vm._v("×")]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-dialog-centered modal-lg",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-body text-center" }, [
+                _c("img", {
+                  staticClass: "w-100 h-75",
+                  staticStyle: { "max-height": "700px" },
+                  attrs: { src: _vm.image }
+                }),
+                _vm._v(" "),
+                _c("h1", [_vm._v(" " + _vm._s(_vm.tsrName) + " ")])
+              ])
+            ])
+          ]
+        )
+      ]
+    )
   ])
 }
 var staticRenderFns = [
@@ -82724,54 +82852,20 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("td", { staticClass: "text-right" }, [
-      _c("div", { staticClass: "dropdown" }, [
-        _c(
-          "a",
-          {
-            staticClass: "btn btn-sm btn-icon-only text-light",
-            attrs: {
-              href: "#",
-              role: "button",
-              "data-toggle": "dropdown",
-              "aria-haspopup": "true",
-              "aria-expanded": "false"
-            }
-          },
-          [_c("i", { staticClass: "fas fa-ellipsis-v" })]
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
-          {
-            staticClass: "dropdown-menu dropdown-menu-right dropdown-menu-arrow"
-          },
-          [
-            _c(
-              "a",
-              {
-                staticClass: "dropdown-item",
-                attrs: {
-                  href: "javascript:void(0)",
-                  "data-toggle": "modal",
-                  "data-target": "#editModal"
-                }
-              },
-              [_vm._v("Edit")]
-            ),
-            _vm._v(" "),
-            _c(
-              "a",
-              {
-                staticClass: "dropdown-item",
-                attrs: { href: "#deleteModal", "data-toggle": "modal" }
-              },
-              [_vm._v("Delete")]
-            )
-          ]
-        )
-      ])
-    ])
+    return _c(
+      "a",
+      {
+        staticClass: "btn btn-sm btn-icon-only text-light",
+        attrs: {
+          href: "#",
+          role: "button",
+          "data-toggle": "dropdown",
+          "aria-haspopup": "true",
+          "aria-expanded": "false"
+        }
+      },
+      [_c("i", { staticClass: "fas fa-ellipsis-v" })]
+    )
   }
 ]
 render._withStripped = true
