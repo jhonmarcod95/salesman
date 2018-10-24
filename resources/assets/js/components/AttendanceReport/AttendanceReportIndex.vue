@@ -64,6 +64,7 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                    <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule.attendances.sign_out_image,schedule.user.name)">Show Photo</a>
                                                     <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#editModal">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" >Delete</a>
                                                 </div>
@@ -109,6 +110,21 @@
                 </div>
             </div>
         </div>
+
+        <!-- Photo Modal -->
+        <div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <span class="closed" data-dismiss="modal">&times;</span>
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                <div class="modal-body text-center">
+                    <img class="w-100 h-75" style="max-height: 700px" :src="image">
+                    <h1> {{ tsrName }} </h1> 
+                </div>
+                </div>
+            </div>
+        </div>
+
+
     </div>
 </template>
 
@@ -121,6 +137,8 @@ export default {
             schedules: [],
             startDate: '',
             endDate: '',
+            tsrName: '',
+            image: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -138,7 +156,8 @@ export default {
                 endDate: this.endDate
             })
             .then(response => {
-                this.schedules = response.data; 
+                this.schedules = response.data;
+                this.errors = []; 
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -161,6 +180,10 @@ export default {
 
             return hours + 'h '+ minutes+' min.';
                                             
+        },
+        getImage(img,user){
+            this.image = window.location.origin+'/storage/'+img;
+            this.tsrName = user;
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -207,5 +230,23 @@ export default {
 </script>
 
 <style>
-
+    .modal{
+        background-color: rgba(0,0,0,0.9);
+    }
+    /* The Close Button */
+    .closed {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .closed:hover,
+    .closed:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+    }
 </style>
