@@ -214,7 +214,7 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Get all area that has schedule
+     * Get all todays schedule
      *
      * @return \Illuminate\Http\Response
      */
@@ -222,4 +222,13 @@ class ScheduleController extends Controller
     public function todays(){
         return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
     }
+    /**
+    * Get all todays schedule per user
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function todayByUser(){
+        return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get()->groupBy('user_id');
+    }
+
 }

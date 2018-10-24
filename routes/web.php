@@ -153,6 +153,8 @@ Route::group(['middleware' => ['auth', 'role:admin|user']], function () {
     //Schedules
     // Fetch all todays schedule
     Route::get('/schedules-todays', 'ScheduleController@todays');
+    // Fetch all todays schedule per user
+    Route::get('/schedules-user-today', 'ScheduleController@todayByUser');
 
     //Attendances
     // Fetch all visiting area
