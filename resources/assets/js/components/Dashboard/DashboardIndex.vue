@@ -159,6 +159,7 @@
                                     <td> {{ customerCount.length }} </td>
                                     <td> {{ customerCompletedCount.length }}</td>
                                     <td v-if="customerPercentage"> {{ customerPercentage }}% </td>
+                                    <td v-else> 0% </td>
                                 </tr>
                                 <tr>
                                     <th scope="row"> Mapping </th>
@@ -240,6 +241,7 @@
                                     <th scope="col">TSR</th>
                                     <th scope="col">Customer</th>
                                     <th scope="col">In / Out</th>
+                                    <th scope="col">Rendered</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -250,6 +252,7 @@
                                             <span> IN: {{ moment(complete.sign_in ).format('lll') }}</span> <br>
                                             <span> OUT: {{ moment(complete.sign_out ).format('lll') }}</span> 
                                         </td>
+                                        <td> {{ rendered(complete.sign_out, complete.sign_in) }}</td>  
                                     </tr>
                                     <tr v-if="!completed.length">
                                         <td>No data available in the table</td>
@@ -412,7 +415,16 @@ export default {
                     this.eventPercentage = Math.round((this.eventCompletedCount.length/this.eventCount.length) * 100);
                 }
             }
-        }
+        },
+        rendered(endTime, startTime){
+            var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
+            var d = moment.duration(ms);
+            var hours = Math.floor(d.asHours());
+            var minutes = moment.utc(ms).format("mm");
+
+            return hours + 'h '+ minutes+' min.';
+                                            
+        },
     }
 }
 </script>
