@@ -77,10 +77,10 @@
                                         </td>
                                         <td>
                                             <span v-if="schedule.attendances"> IN: {{ moment(schedule.attendances.sign_in ).format('lll') }}</span> <br>
-                                            <span v-if="schedule.attendances"> OUT: {{ moment(schedule.attendances.sign_out).format('lll') }} </span>
+                                            <span v-if="schedule.attendances && schedule.attendances.sign_out !== null"> OUT: {{ moment(schedule.attendances.sign_out).format('lll') }} </span>
                                         </td>
                                         <td>
-                                            <span v-if="schedule.attendances">
+                                            <span v-if="schedule.attendances && schedule.attendances.sign_out !== null">
                                                 {{ rendered(schedule.attendances.sign_out, schedule.attendances.sign_in) }}
                                             </span>
                                         </td>
@@ -182,7 +182,7 @@ export default {
         filteredSchedules(){
             let self = this;
             return self.schedules.filter(schedule => {
-                return schedule.name.toLowerCase().includes(this.keywords.toLowerCase())
+                return schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())
             });
         },
         totalPages() {
