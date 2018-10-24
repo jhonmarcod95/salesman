@@ -64,7 +64,7 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule.attendances.sign_out_image,schedule.user.name)">Show Photo</a>
+                                                    <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule.attendances.sign_out_image,schedule.user.name,schedule.attendances.remarks)">Show Photo</a>
                                                     <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#editModal">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" >Delete</a>
                                                 </div>
@@ -118,7 +118,8 @@
                 <div class="modal-content">
                 <div class="modal-body text-center">
                     <img class="w-100 h-75" style="max-height: 700px" :src="image">
-                    <h1> {{ tsrName }} </h1> 
+                    <h1 class="mt-3"> {{ tsrName }} </h1>
+                    <span>{{ remarks }} </span>
                 </div>
                 </div>
             </div>
@@ -138,6 +139,7 @@ export default {
             startDate: '',
             endDate: '',
             tsrName: '',
+            remarks: '',
             image: '',
             errors: [],
             keywords: '',
@@ -181,9 +183,10 @@ export default {
             return hours + 'h '+ minutes+' min.';
                                             
         },
-        getImage(img,user){
+        getImage(img,user,remarks){
             this.image = window.location.origin+'/storage/'+img;
             this.tsrName = user;
+            this.remarks = remarks;
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;

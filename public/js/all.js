@@ -82295,6 +82295,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -82305,6 +82306,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             startDate: '',
             endDate: '',
             tsrName: '',
+            remarks: '',
             image: '',
             errors: [],
             keywords: '',
@@ -82349,9 +82351,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             return hours + 'h ' + minutes + ' min.';
         },
-        getImage: function getImage(img, user) {
+        getImage: function getImage(img, user, remarks) {
             this.image = window.location.origin + '/storage/' + img;
             this.tsrName = user;
+            this.remarks = remarks;
         },
         setPage: function setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -82586,7 +82589,8 @@ var render = function() {
                                             _vm.getImage(
                                               schedule.attendances
                                                 .sign_out_image,
-                                              schedule.user.name
+                                              schedule.user.name,
+                                              schedule.attendances.remarks
                                             )
                                           }
                                         }
@@ -82806,7 +82810,11 @@ var render = function() {
                   attrs: { src: _vm.image }
                 }),
                 _vm._v(" "),
-                _c("h1", [_vm._v(" " + _vm._s(_vm.tsrName) + " ")])
+                _c("h1", { staticClass: "mt-3" }, [
+                  _vm._v(" " + _vm._s(_vm.tsrName) + " ")
+                ]),
+                _vm._v(" "),
+                _c("span", [_vm._v(_vm._s(_vm.remarks) + " ")])
               ])
             ])
           ]
