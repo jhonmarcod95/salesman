@@ -82984,6 +82984,20 @@ exports.push([module.i, "\n@media (min-width: 768px) {\n.modal-xl {\n        wid
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_moment__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_moment___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_moment__);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -83362,7 +83376,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             eventCount: '',
             eventCompletedCount: '',
             eventPercentage: '',
-            completedPercentage: 0
+            completedPercentage: 0,
+            currentPage: 0,
+            itemsPerPage: 10,
+            keywords: ''
         };
     },
     created: function created() {
@@ -83463,20 +83480,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
         },
         countCompleted: function countCompleted(sched) {
-            this.completedPercentage = 0;
-            var attendance = sched.filter(function (item) {
-                return item.attendances !== null;
-            });
-            if (attendance.length) {
-                var tsr = attendance.filter(function (item) {
-                    return item.attendances.sign_out !== null;
-                });
-                if (tsr.length) {
-                    this.completedPercentage = Math.round(attendance.length / tsr.length * 100);
-                    return tsr.length;
+            var finalArray = [];
+            sched.forEach(function (element) {
+                if (element.attendances !== null) {
+                    finalArray.push(_extends({}, element));
                 }
+            });
+            if (finalArray.length) {
+                var lastArray = [];
+                finalArray.forEach(function (e) {
+                    var status = e.attendances.sign_out !== null;
+                    if (status === true) {
+                        lastArray.push(_extends({}, e));
+                    } else {
+                        return false;
+                    }
+                });
+                if (lastArray.length > 0) {
+                    return lastArray.length;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
             }
-            return 0;
+        },
+        percentageCompleted: function percentageCompleted(schedule, completed) {
+            if (completed !== 0) {
+                return Math.round(completed / schedule * 100);
+            } else {
+                return 0;
+            }
         },
         rendered: function rendered(endTime, startTime) {
             var ms = __WEBPACK_IMPORTED_MODULE_0_moment___default()(endTime, "YYYY/MM/DD HH:mm a").diff(__WEBPACK_IMPORTED_MODULE_0_moment___default()(startTime, "YYYY/MM/DD HH:mm a"));
@@ -83490,10 +83524,61 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var _this4 = this;
 
             axios.get('/schedules-user-today').then(function (response) {
-                _this4.tsrUniques = response.data;
+                _this4.tsrUniques = response.data[0];
             }).catch(function (error) {
                 _this4.errors = error.response.data.errors;
             });
+        },
+        setPage: function setPage(pageNumber) {
+            this.currentPage = pageNumber;
+        },
+        resetStartRow: function resetStartRow() {
+            this.currentPage = 0;
+        },
+        showPreviousLink: function showPreviousLink() {
+            return this.currentPage == 0 ? false : true;
+        },
+        showNextLink: function showNextLink() {
+            return this.currentPage == this.totalPages - 1 ? false : true;
+        }
+    },
+    computed: {
+        filteredTsrUniques: function filteredTsrUniques() {
+            var _this5 = this;
+
+            var self = this;
+            return Object.values(self.tsrUniques).filter(function (tsrUnique) {
+                return tsrUnique[0].user.name.toLowerCase().includes(_this5.keywords.toLowerCase());
+            });
+        },
+        totalPages: function totalPages() {
+            return Math.ceil(Object.values(this.tsrUniques).length / this.itemsPerPage);
+        },
+        filteredQueues: function filteredQueues() {
+            // var totalPercentge = [{
+            //     id: '',
+            //     percentage: ''
+            // }];
+            // Object.values(this.tsrUniques).forEach(function (element){
+            //     var hasAttendance = element.filter(item => item.attendances !== null);
+            //     if(hasAttendance.length > 0){
+            //         var hasSignOut = hasAttendance.filter(item => item.attendances.sign_out !== null);
+            //         var percentage = Math.round((hasSignOut.length/hasAttendance.length) * 100);
+            //         console.log(percentage);
+            //     }
+            // });
+            var index = this.currentPage * this.itemsPerPage;
+            var queues_array = Object.values(this.filteredTsrUniques).slice(index, index + this.itemsPerPage);
+
+            if (this.currentPage >= this.totalPages) {
+                this.currentPage = this.totalPages - 1;
+            }
+
+            if (this.currentPage == -1) {
+                this.currentPage = 0;
+            }
+
+            return queues_array;
         }
     }
 });
@@ -83749,6 +83834,30 @@ var render = function() {
           _c("div", { staticClass: "card shadow" }, [
             _vm._m(11),
             _vm._v(" "),
+            _c("div", { staticClass: "col-xl-4 mb-3 float-right" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.keywords,
+                    expression: "keywords"
+                  }
+                ],
+                staticClass: "form-control",
+                attrs: { type: "text", placeholder: "Search", id: "name" },
+                domProps: { value: _vm.keywords },
+                on: {
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.keywords = $event.target.value
+                  }
+                }
+              })
+            ]),
+            _vm._v(" "),
             _c("div", { staticClass: "table-responsive" }, [
               _c(
                 "table",
@@ -83758,7 +83867,7 @@ var render = function() {
                   _vm._v(" "),
                   _c(
                     "tbody",
-                    _vm._l(_vm.tsrUniques, function(tsrUnique, tsrU) {
+                    _vm._l(_vm.filteredQueues, function(tsrUnique, tsrU) {
                       return _c("tr", { key: tsrU }, [
                         _c("td", [_vm._v(_vm._s(tsrUnique[0].user.name))]),
                         _vm._v(" "),
@@ -83768,17 +83877,73 @@ var render = function() {
                           _vm._v(_vm._s(_vm.countCompleted(tsrUnique)))
                         ]),
                         _vm._v(" "),
-                        _vm.completedPercentage !== 0
-                          ? _c("td", [
-                              _vm._v(_vm._s(_vm.completedPercentage) + "% ")
-                            ])
-                          : _c("td", [_vm._v("0% ")])
+                        _c("td", [
+                          _vm._v(
+                            _vm._s(
+                              _vm.percentageCompleted(
+                                tsrUnique.length,
+                                _vm.countCompleted(tsrUnique)
+                              )
+                            ) + "% "
+                          )
+                        ])
                       ])
                     })
                   )
                 ]
               )
-            ])
+            ]),
+            _vm._v(" "),
+            Object.values(_vm.tsrUniques).length
+              ? _c("div", { staticClass: "row mb-3" }, [
+                  _c("div", { staticClass: "col-6" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-default btn-sm btn-fill",
+                        attrs: { disabled: !_vm.showPreviousLink() },
+                        on: {
+                          click: function($event) {
+                            _vm.setPage(_vm.currentPage - 1)
+                          }
+                        }
+                      },
+                      [_vm._v(" Previous ")]
+                    ),
+                    _vm._v(" "),
+                    _c("span", { staticClass: "text-dark" }, [
+                      _vm._v(
+                        "Page " +
+                          _vm._s(_vm.currentPage + 1) +
+                          " of " +
+                          _vm._s(_vm.totalPages)
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-default btn-sm btn-fill",
+                        attrs: { disabled: !_vm.showNextLink() },
+                        on: {
+                          click: function($event) {
+                            _vm.setPage(_vm.currentPage + 1)
+                          }
+                        }
+                      },
+                      [_vm._v(" Next ")]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-6 text-right" }, [
+                    _c("span", [
+                      _vm._v(
+                        _vm._s(Object.values(_vm.tsrUniques).length) + " Tsr(s)"
+                      )
+                    ])
+                  ])
+                ])
+              : _vm._e()
           ])
         ])
       ])

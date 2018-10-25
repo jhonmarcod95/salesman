@@ -194,6 +194,9 @@
                                 </div>
                             </div>
                         </div>
+                         <div class="col-xl-4 mb-3 float-right">
+                             <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                        </div>  
                         <div class="table-responsive">
                             <!-- Projects table -->
                             <table class="table align-items-center table-flush">
@@ -206,15 +209,24 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(tsrUnique, tsrU) in tsrUniques" v-bind:key="tsrU">
+                                    <tr v-for="(tsrUnique, tsrU) in filteredQueues" v-bind:key="tsrU">
                                         <td>{{ tsrUnique[0].user.name }}</td>
                                         <td>{{ tsrUnique.length }}</td>
                                         <td>{{ countCompleted(tsrUnique) }}</td>
-                                        <td v-if="completedPercentage !== 0">{{ completedPercentage }}% </td>
-                                        <td v-else>0% </td>  
+                                        <td>{{ percentageCompleted(tsrUnique.length,countCompleted(tsrUnique)) }}% </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="row mb-3" v-if="Object.values(tsrUniques).length">
+                            <div class="col-6">
+                                <button :disabled="!showPreviousLink()" class="btn btn-default btn-sm btn-fill" v-on:click="setPage(currentPage - 1)"> Previous </button>
+                                    <span class="text-dark">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+                                <button :disabled="!showNextLink()" class="btn btn-default btn-sm btn-fill" v-on:click="setPage(currentPage + 1)"> Next </button>
+                            </div>
+                            <div class="col-6 text-right">
+                                <span>{{ Object.values(tsrUniques).length }} Tsr(s)</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -377,6 +389,9 @@ export default {
             eventCompletedCount: '',
             eventPercentage: '',
             completedPercentage: 0,
+            currentPage: 0,
+            itemsPerPage: 10,
+            keywords: '',
         }
     },
     created(){
@@ -458,16 +473,37 @@ export default {
             }
         },
         countCompleted(sched){
-            this.completedPercentage = 0;
-            var attendance = sched.filter(item => item.attendances  !== null);
-            if(attendance.length){
-                var tsr = attendance.filter(item => item.attendances.sign_out !== null);
-                if(tsr.length){
-                    this.completedPercentage = Math.round((attendance.length/tsr.length) * 100);
-                    return tsr.length;
+            var finalArray = [];
+            sched.forEach(function(element) {
+                if (element.attendances !== null) {
+                    finalArray.push({...element});
                 }
+            });
+            if(finalArray.length){
+                var lastArray = [];
+                finalArray.forEach(function(e) {
+                    var status = e.attendances.sign_out !== null;
+                    if(status === true){
+                        lastArray.push({...e});
+                    }else{
+                        return false;
+                    }
+                });
+                if(lastArray.length > 0){
+                    return lastArray.length;
+                }else{
+                    return 0;    
+                }
+            }else{
+                return 0;
             }
-            return 0;
+        },
+        percentageCompleted(schedule,completed){
+            if(completed !== 0){
+                return Math.round((completed/schedule) * 100);
+            }else{
+                return 0;
+            }
         },
         rendered(endTime, startTime){
             var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
@@ -481,12 +517,64 @@ export default {
         tsrGetUnique(){  
             axios.get('/schedules-user-today')
             .then(response => {
-                this.tsrUniques = response.data;
+                this.tsrUniques = response.data[0];
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
             })
+        },
+        setPage(pageNumber) {
+            this.currentPage = pageNumber;
+        },
+
+        resetStartRow() {
+            this.currentPage = 0;
+        },
+
+        showPreviousLink() {
+            return this.currentPage == 0 ? false : true;
+        },
+
+        showNextLink() {
+            return this.currentPage == (this.totalPages - 1) ? false : true;
         }   
+    },
+    computed:{
+        filteredTsrUniques(){
+            let self = this;
+            return Object.values(self.tsrUniques).filter(tsrUnique => {
+                return tsrUnique[0].user.name.toLowerCase().includes(this.keywords.toLowerCase())
+            });
+        },
+        totalPages() {
+            return Math.ceil(Object.values(this.tsrUniques).length / this.itemsPerPage)
+        },
+        filteredQueues() {
+            // var totalPercentge = [{
+            //     id: '',
+            //     percentage: ''
+            // }];
+            // Object.values(this.tsrUniques).forEach(function (element){
+            //     var hasAttendance = element.filter(item => item.attendances !== null);
+            //     if(hasAttendance.length > 0){
+            //         var hasSignOut = hasAttendance.filter(item => item.attendances.sign_out !== null);
+            //         var percentage = Math.round((hasSignOut.length/hasAttendance.length) * 100);
+            //         console.log(percentage);
+            //     }
+            // });
+            var index = this.currentPage * this.itemsPerPage;
+            var queues_array = Object.values(this.filteredTsrUniques).slice(index, index + this.itemsPerPage);
+
+            if(this.currentPage >= this.totalPages) {
+                this.currentPage = this.totalPages - 1
+            }
+
+            if(this.currentPage == -1) {
+                this.currentPage = 0;
+            }
+
+            return queues_array;
+        },
     }
 }
 </script>
