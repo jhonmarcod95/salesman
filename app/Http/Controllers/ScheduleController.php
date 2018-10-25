@@ -228,7 +228,10 @@ class ScheduleController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function todayByUser(){
-        return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get()->groupBy('user_id');
+
+         $schedule = Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
+         
+        return  array ($schedule->groupBy('user_id'));
     }
 
 }

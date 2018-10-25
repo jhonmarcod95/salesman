@@ -111,8 +111,8 @@
                     </div>
                     <div class="col-lg-12">
                         <div class="form-group">
-                            <label class="form-control-label" for="new-password">Confirm New Password</label>
-                            <input type="password" id="new-password" class="form-control form-control-alternative" v-model="user.new_password_confirmation">
+                            <label class="form-control-label" for="confirm-password">Confirm New Password</label>
+                            <input type="password" id="confirm-password" class="form-control form-control-alternative" v-model="user.new_password_confirmation">
                             <span class="text-danger" v-if="errors.new_password_confirmation">{{ errors.new_password_confirmation[0] }}</span>
                         </div>
                     </div>
