@@ -122,6 +122,12 @@
                         <i class="ni ni-collection text-gray"></i> Attendance Report
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/expenses') }}">
+                        <i class="ni ni-money-coins text-yellow"></i> Expenses
+                    </a>
+                </li>
+
 
 
             </ul>

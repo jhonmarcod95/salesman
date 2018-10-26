@@ -162,6 +162,12 @@ Route::group(['middleware' => ['auth', 'role:admin|user']], function () {
     // Fetch all completed visiting area
     Route::get('/attendances-completed', 'AttendanceReportController@completed');
 
+    // Expenses
+    Route::get('/expenses', 'ExpenseController@index');
+    // Fetch expense report by date
+    Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
+    // Fetch expense report by date
+    Route::get('/expense/{id}', 'ExpenseController@show');
 
 
 });
