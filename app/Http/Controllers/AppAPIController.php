@@ -145,8 +145,10 @@ class AppAPIController extends Controller
     public function expensesEntries()
     {
         $expensesEntries = ExpensesEntry::where('user_id', Auth::user()->id)
-                                        ->take(20)
-                                        ->get();
+                        ->orderBy('id','desc')
+                        // ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
+                        ->take(20)
+                        ->get();
 
         return ExpensesEntriesResult::collection($expensesEntries);
 
