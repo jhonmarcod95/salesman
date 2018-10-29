@@ -97,38 +97,65 @@
                         <i class="ni ni-single-02 text-yellow"></i> Users
                     </a>
                 </li> --}}
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/tsr') }}">
-                        <i class="ni ni-circle-08 text-pink"></i> TSR
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/customers') }}">
-                        <i class="ni ni-shop text-blue"></i> Customers
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/messages') }}">
-                        <i class="ni ni-folder-17 text-green"></i> Messages
+                        <i class="ni ni-email-83 text-green"></i> Messages
                     </a>
                 @if($notification > 0)
                     <span style="display:inline-block; background: red; position: relative; top: -47px; left: 137px; border-radius: 10px; color: #fff; min-width: 20px; text-align: center;">{{ $notification }}</span>
                 @endif
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/attendance-report') }}">
-                        <i class="ni ni-collection text-gray"></i> Attendance Report
+
+                <li>
+                    <a data-toggle="collapse" href="#Report" class="collapsed" aria-expanded="false">
+                        <div class="nav-link">
+                            <i class="ni ni-ruler-pencil text-pink"></i>
+                            <span>Report</span>
+                        </div>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/expenses') }}">
-                        <i class="ni ni-money-coins text-yellow"></i> Expenses
-                    </a>
+                    <div class="collapse space-left" id="Report" style="">
+                        <ul class="nav" style="list-style-type: none;">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url('/attendance-report') }}">
+                                    <i class="ni ni-books text-gray"></i> Attendance Report
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="{{ url('/expenses-report') }}">
+                                    <i class="ni ni-collection text-indigo"></i> Expense Report
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
 
-
+                <li>
+                    <a data-toggle="collapse" href="#MasterData" class="collapsed" aria-expanded="false">
+                        <div class="nav-link">
+                            <i class="ni ni-folder-17"></i>
+                            <span>Master Data</span>
+                        </div>
+                    </a>
+                    <div class="collapse space-left" id="MasterData" style="">
+                        <ul class="nav" style="list-style-type: none;">
+                            <li>
+                                <a class="nav-link" href="{{ url('/tsr') }}">
+                                    <i class="ni ni-circle-08 text-pink"></i> TSR
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="{{ url('/customers') }}">
+                                    <i class="ni ni-shop text-blue"></i> Customers
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="{{ url('/expenses') }}">
+                                    <i class="ni ni-money-coins text-yellow"></i> Expenses
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
 
             </ul>
             {{--<!-- Divider -->--}}

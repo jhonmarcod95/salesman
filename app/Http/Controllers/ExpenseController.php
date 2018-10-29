@@ -6,7 +6,8 @@ use Auth;
 use App\{
     Message,
     Expense,
-    ExpensesEntry
+    ExpensesEntry,
+    ExpensesType
 };
 use Illuminate\Http\Request;
 
@@ -19,11 +20,11 @@ class ExpenseController extends Controller
      */
     public function index()
     {
-        session(['header_text' => 'Expenses']);
+        session(['header_text' => 'Expenses Report']);
 
         $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
 
-        return view('expense.index', compact('notification'));
+        return view('expense.index-report', compact('notification'));
     }
 
     /**
@@ -47,6 +48,28 @@ class ExpenseController extends Controller
     }
 
     /**
+     * Show Expense page
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexExpense(){
+        session(['header_text' => 'Expenses']);
+
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+
+        return view('expense.index', compact('notification'));
+    }
+
+    /**
+     * Get all expense
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexExpenseData(){
+        return ExpensesType::orderBy('id', 'desc')->get();
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
@@ -64,7 +87,12 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $expensesType = new ExpensesType;
+
+        $expensesType->name = $request->name;
+        $expensesType->save();
+
+        return $expensesType;
     }
 
     /**
@@ -102,9 +130,17 @@ class ExpenseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, ExpensesType $expensesType)
     {
-        //
+        $request->validate([
+            'id' => 'required',
+            'name' => 'required',
+        ]);
+
+        $expensesType->name = $request->name;
+        $expensesType->save();
+
+        return $expensesType;
     }
 
     /**

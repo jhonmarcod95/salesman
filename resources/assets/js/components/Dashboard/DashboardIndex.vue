@@ -550,18 +550,6 @@ export default {
             return Math.ceil(Object.values(this.tsrUniques).length / this.itemsPerPage)
         },
         filteredQueues() {
-            // var totalPercentge = [{
-            //     id: '',
-            //     percentage: ''
-            // }];
-            // Object.values(this.tsrUniques).forEach(function (element){
-            //     var hasAttendance = element.filter(item => item.attendances !== null);
-            //     if(hasAttendance.length > 0){
-            //         var hasSignOut = hasAttendance.filter(item => item.attendances.sign_out !== null);
-            //         var percentage = Math.round((hasSignOut.length/hasAttendance.length) * 100);
-            //         console.log(percentage);
-            //     }
-            // });
             var index = this.currentPage * this.itemsPerPage;
             var queues_array = Object.values(this.filteredTsrUniques).slice(index, index + this.itemsPerPage);
 

@@ -1,6 +1,7 @@
 <template>
     <div>
         <div class="header bg-green pb-6 pt-5 pt-md-6"></div>
+        <!-- Page content -->
         <div class="container-fluid mt--7">
             <!-- Table -->
             <div class="row mt-5">
@@ -10,35 +11,16 @@
                         <div class="card-header border-0">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h3 class="mb-0">Expenses Report</h3>
+                                    <h3 class="mb-0">Expenses</h3>
+                                </div>
+                                <div class="col text-right">
+                                    <a class="btn btn-sm btn-primary" data-toggle="modal" href="#addModal">Add New</a>
                                 </div>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <div class="row ml-2">
-                                <div class="col-md-4 float-left">
-                                    <div class="form-group">
-                                        <label for="name" class="form-control-label">Search</label> 
-                                        <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="start_date" class="form-control-label">Start Date</label> 
-                                        <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
-                                        <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="end_date" class="form-control-label">End Date</label> 
-                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
-                                        <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-sm btn-primary" @click="fetchExpenses"> Filter</button>
-                                </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm" placeholder="Search" v-model="keywords" id="name">
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -46,14 +28,14 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col"></th>
-                                    <th scope="col">TSR</th>
-                                    <th scope="col">Expense Submitted</th>
-                                    <th scope="col">Date</th>
-                                    <th scope="col">Total Expenses</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Name</th> 
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Updated</th>
                                 </tr>
                                 </thead>
-                                <tbody v-if="expenses.length">
-                                    <tr v-for="(expense, e) in filteredQueues" v-bind:key="e">
+                                <tbody>
+                                    <tr v-for="(expense,e) in filteredQueues" v-bind:key="e">
                                         <td class="text-right">
                                             <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
@@ -61,31 +43,26 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</a>
+                                                    <a class="dropdown-item" href="#editModal" data-toggle="modal" @click="copyObject(expense)">Edit</a>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ expense.user.name }}</td>
-                                        <td>{{ expense.expenses.split(',').length  }}</td>
-                                        <td>{{ moment(expense.created_at).format('ll') }}</td>
-                                        <td>PHP {{ expense.totalExpenses.toFixed(2) }}</td>
+                                        <td>{{ expense.id }}</td>
+                                        <td>{{ expense.name }}</td>
+                                        <td>{{ expense.created_at }}</td>
+                                        <td>{{ expense.updated_at }}</td>
                                     </tr>
-                                </tbody>
-                                <tbody v-else>
-                                       <tr>
-                                           <td>No data available in the table</td>
-                                       </tr>
                                 </tbody>
                             </table>
                         </div>
-                       <div class="card-footer py-4" v-if="expenses.length">
+                        <div class="card-footer py-4">
                             <nav aria-label="...">
                                 <ul class="pagination justify-content-end mb-0">
                                     <li class="page-item">
                                         <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
                                     </li>
-                                    <li class="page-item">
-                                        Page {{ currentPage + 1 }} of {{ totalPages }}
+                                    <li class="page-item">  
+                                        Page {{ currentPage + 1 }} of {{ totalPages }}  
                                     </li>
                                     <li class="page-item">
                                         <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
@@ -97,45 +74,83 @@
                 </div>
             </div>
         </div>
-
-        <!-- View Expense Modal -->
-        <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <span class="closed" data-dismiss="modal">&times;</span>
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+             <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addCompanyLabel">Expenses Submitted</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                  <div class="row">
-                        <div class="col"><h3>TSR: {{ this.tsrName }}</h3></div>
-                        <div class="col"><h3>Date: {{ moment(this.date).format('ll') }} </h3></div>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Delete Expense</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table align-items-center table-flush">
-                            <thead class="thead-light">
-                            <tr>
-                                <th scope="col">Attachment</th>
-                                <th scope="col">Type of Expense</th>
-                                <th scope="col">Expenses</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
-                                    <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px"></a></td>
-                                    <td>{{ expenseBy.expenses_type.name }}</td>
-                                    <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    Are you sure you want to delete this Expense?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
+                        <button class="btn btn-warning" >Delete</button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add Expense</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="role">Name</label>
+                                    <input type="text" class="form-control" placeholder="Name" v-model="expense.name" id="name">
+                                    <span class="error" v-if="errors.name">{{ errors.name[0] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
+                        <button class="btn btn-primary" @click="addExpense(expense)">Save</button>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Expense</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="role">Name</label>
+                                    <input type="text" class="form-control" placeholder="Name" v-model="copiedObject.name" id="name">
+                                    <span class="error" v-if="errors.name">{{ errors.name[0] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
+                        <button class="btn btn-primary" @click="editExpense(copiedObject)">Update</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -143,16 +158,14 @@
 </template>
 
 <script>
-import moment from 'moment';
 export default {
     data(){
         return{
-            expenses: [],
-            expenseByTsr: [],
-            startDate: '',
-            endDate: '',
-            tsrName: '',
-            date: '',
+            expenses:[],
+            expense:{
+                name
+            },
+            copiedObject:[],    
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -160,33 +173,48 @@ export default {
         }
     },
     created(){
-
+        this.fetchExpense();
     },
     methods:{
-        moment,
-        fetchExpenses(){
-            axios.post('/expense-report-bydate', {
-                startDate: this.startDate,
-                endDate: this.endDate
-            })
-            .then(response => {
+        copyObject(company){
+            this.copiedObject = Object.assign({}, company)
+        },
+        fetchExpense(){
+            axios.get('/expenses-all')
+            .then(response => { 
                 this.expenses = response.data;
-                this.errors = []; 
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
             })
         },
-        fetchExpenseByTsr(id,name,created){
-            axios.get(`/expense/${id}`)
-            .then(response => { 
-                this.expenseByTsr = response.data;
-                this.tsrName = name;
-                this.date = created;
-                $('#viewModal').modal('show');
+        getExpenseId(id){
+            this.expenseId = id;
+        },
+        addExpense(expense){
+            axios.post('/expenses', {
+                name: expense.name
+            })
+            .then(response => {
+                this.expenses.unshift(response.data);
+                $('#addModal').modal('hide');
+            })
+        },
+        editExpense(expense){
+            let expenseIndex = this.expenses.findIndex(item => item.id == expense.id);
+            axios.patch(`/expenses/${expense.id}`,{
+                id: expense.id,
+                name: expense.name,
+            })
+            .then(response => {
+                this.errors = [],
+                this.expenses.splice(expenseIndex,1,response.data);
+                $('#editModal').modal('hide');
             })
             .catch(error => {
-                this.errors = error.response.data.errors;
+                if(error.response.data) {
+                    this.errors = error.response.data.errors;
+                }
             })
         },
         setPage(pageNumber) {
@@ -203,13 +231,14 @@ export default {
 
         showNextLink() {
             return this.currentPage == (this.totalPages - 1) ? false : true;
-        }
+        }  
     },
     computed:{
         filteredExpenses(){
             let self = this;
+
             return self.expenses.filter(expense => {
-                return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+                return expense.name.toLowerCase().includes(this.keywords.toLowerCase())
             });
         },
         totalPages() {
@@ -228,11 +257,8 @@ export default {
             }
 
             return queues_array;
-        },
-        imageLink(){
-            return window.location.origin+'/storage/';
         }
-    },
+    }
 }
 </script>
 
