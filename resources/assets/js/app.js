@@ -20,6 +20,7 @@ window.Vue = require('vue');
 
 // Expenses
 Vue.component('expense-index', require('./components/Expense/ExpenseIndex.vue'));
+Vue.component('expense-report-index', require('./components/Expense/ExpenseReportIndex.vue'));
 
 // Announcement
 Vue.component('announcement-index', require('./components/Announcement/AnnouncementIndex.vue'));

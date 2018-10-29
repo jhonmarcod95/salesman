@@ -163,11 +163,18 @@ Route::group(['middleware' => ['auth', 'role:admin|user']], function () {
     Route::get('/attendances-completed', 'AttendanceReportController@completed');
 
     // Expenses
-    Route::get('/expenses', 'ExpenseController@index');
+    Route::get('/expenses', 'ExpenseController@indexExpense');
+    // Get all expenses
+    Route::get('/expenses-all', 'ExpenseController@indexExpenseData');
+    // Show Expense Report page
+    Route::get('/expenses-report', 'ExpenseController@index');
     // Fetch expense report by date
     Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
     // Fetch expense report by date
-    Route::get('/expense/{id}', 'ExpenseController@show');
-
+    Route::get('/expense-report/{id}', 'ExpenseController@show');
+    // Add Expenses
+    Route::post('/expenses', 'ExpenseController@store');
+    // Update Expenses
+    Route::patch('/expenses/{expensesType}', 'ExpenseController@update');
 
 });
