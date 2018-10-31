@@ -18,6 +18,10 @@ window.Vue = require('vue');
 // Vue.component('example-component', require('./components/ExampleComponent.vue'));
 
 
+// Companeies
+Vue.component('company-index', require('./components/Company/CompanyIndex.vue'));
+
+
 // Expenses
 Vue.component('expense-index', require('./components/Expense/ExpenseIndex.vue'));
 Vue.component('expense-report-index', require('./components/Expense/ExpenseReportIndex.vue'));
