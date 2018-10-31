@@ -33,7 +33,7 @@ class TsrController extends Controller
      */
 
     public function indexData(){
-        return  TechnicalSalesRepresentative::orderBy('id','desc')->get();
+        return  TechnicalSalesRepresentative::with('company')->orderBy('id','desc')->get();
     }
 
     /**
@@ -63,6 +63,7 @@ class TsrController extends Controller
             'address' => 'required',
             'contact_number' => 'required',
             'date_of_birth' => 'required',
+            'company' => 'required'
         ]);
 
 
@@ -82,6 +83,7 @@ class TsrController extends Controller
         $tsr->plate_number = $request->plate_number;
         $tsr->contact_person = $request->contact_person;
         $tsr->personal_email = $request->personal_email;
+        $tsr->company_id = $request->company;
 
         if($tsr->save()){
             // Create Temporary code for user
@@ -91,6 +93,7 @@ class TsrController extends Controller
             $user->name = $tsr->first_name. ' ' .$tsr->last_name;
             $user->email = $tsr->email;
             $user->password = bcrypt(preg_replace('/\s+/', '', $user_password));
+            $user->company_id = $request->company;
             if($user->save()){
                 // Attaching role to user
                 $tsrRole = Role::where('name', '=', 'Tsr')->first();
@@ -139,6 +142,7 @@ class TsrController extends Controller
             'address' => 'required',
             'contact_number' => 'required',
             'date_of_birth' => 'required',
+            'company' => 'required'
         ]);
 
         $technicalSalesRepresentative->last_name = $request->last_name;
@@ -155,12 +159,14 @@ class TsrController extends Controller
         $technicalSalesRepresentative->plate_number = $request->plate_number;
         $technicalSalesRepresentative->contact_person = $request->contact_person;
         $technicalSalesRepresentative->personal_email = $request->personal_email;
+        $technicalSalesRepresentative->company_id = $request->company;
 
         if($technicalSalesRepresentative->save()){
 
             $user = User::find($technicalSalesRepresentative->user_id);
             $user->name = $technicalSalesRepresentative->first_name. ' ' .$technicalSalesRepresentative->last_name;
             $user->email = $technicalSalesRepresentative->email;
+            $user->company_id = $request->company;
             $user->save();
 
             return ['redirect' => route('tsr_list')];

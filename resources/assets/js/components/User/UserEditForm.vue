@@ -36,6 +36,15 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
+                                                <label class="form-control-label" for="role">Company</label>
+                                                <select class="form-control" v-model="user[0].company.id">
+                                                    <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
+                                                </select>
+                                                <span class="text-danger" v-if="errors.company">{{ errors.company[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
                                                 <label class="form-control-label" for="role">Role</label>
                                                 <select class="form-control" v-model="user[0].roles[0].id">
                                                     <option v-for="(role,r) in roles" v-bind:key="r" :value="role.id"> {{ role.name }}</option>
@@ -68,18 +77,20 @@ export default {
         return{
             user:[],
             roles: [],
+            companies: [],
             errors:[]
         }
     },
     created(){
         this.fetchUser();
-        this.fetchRoles();
     },
     methods:{
         fetchUser(){
             axios.get(`/user/show/${this.userId}`)
             .then(response => {
-                this.user = response.data; 
+                this.user = response.data;
+                this.fetchRoles();
+                this.fetchCompanies();
             })
             .catch(error => { 
                 this.errors = error.response.data.errors;
@@ -94,11 +105,21 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
+        fetchCompanies(){
+            axios.get('/companies-all')
+            .then(response => { 
+                this.companies = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
         updateUser(user){
             axios.patch(`/user/${user.id}`,{
                 name: user.name,
                 email: user.email,
-                role: user.roles[0].id
+                role: user.roles[0].id,
+                company: user.company.id
             })
             .then(response => {
                 window.location.href = response.data.redirect;

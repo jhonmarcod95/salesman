@@ -144,6 +144,11 @@
                                 </a>
                             </li>
                             <li>
+                                <a class="nav-link" href="{{ url('/companies') }}">
+                                    <i class="ni ni-istanbul text-green"></i> Company
+                                </a>
+                            </li>
+                            <li>
                                 <a class="nav-link" href="{{ url('/customers') }}">
                                     <i class="ni ni-shop text-blue"></i> Customers
                                 </a>

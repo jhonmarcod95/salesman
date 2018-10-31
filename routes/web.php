@@ -177,4 +177,16 @@ Route::group(['middleware' => ['auth', 'role:admin|user']], function () {
     // Update Expenses
     Route::patch('/expenses/{expensesType}', 'ExpenseController@update');
 
+    // Companies
+    Route::get('/companies', 'CompanyController@index');
+    // Fetch all companies
+    Route::get('/companies-all', 'CompanyController@indexData');
+    // Add company
+    Route::post('/company', 'CompanyController@store');
+    // Update company
+    Route::patch('/company/{company}', 'CompanyController@update');
+    // Delete company
+    Route::delete('/company/{id}', 'CompanyController@destroy');
+
+
 });

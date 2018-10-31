@@ -51,6 +51,17 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="role">Company</label>
+                                                <select class="form-control" v-model="user.company">
+                                                    <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
+                                                </select>
+                                                <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="pl-lg-4">
                                     <div class="row">
@@ -76,14 +87,17 @@ export default {
                 name: ' ',
                 email: ' ',
                 password: '',
-                role: ''
+                role: '',
+                company: ''
             },
             roles: [],
+            companies: [],
             errors: []
         }
     },
     created(){
         this.fetchRoles();
+        this.fetchCompanies();
     },
     methods:{
         addUser(user){
@@ -91,7 +105,8 @@ export default {
                 name: user.name,
                 email: user.email,
                 password: user.password,
-                role: user.role
+                role: user.role,
+                company: user.company
             })
             .then(response => { 
                 window.location.href = response.data.redirect;
@@ -106,6 +121,15 @@ export default {
                 this.roles = response.data;
             })
             .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
+        fetchCompanies(){
+            axios.get('/companies-all')
+            .then(response => { 
+                this.companies = response.data;
+            })
+            .catch(error => { 
                 this.errors = error.response.data.errors;
             })
         }

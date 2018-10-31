@@ -30,8 +30,7 @@
                                     <th scope="col">Name</th>
                                     <th scope="col">Email</th>
                                     <th scope="col">Role</th>
-                                    <th scope="col">Created At</th>
-                                    <th scope="col">Updated At</th>
+                                    <th scope="col">Company</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -50,8 +49,8 @@
                                         </td>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email }}</td>
-                                        <td>{{ user.roles.name }}</td>
-                                        <td></td>
+                                        <td>{{ user.roles[0].name }}</td>
+                                        <td>{{ user.company.name }}</td>
                                         <td></td>
                                     </tr>
                                 </tbody>

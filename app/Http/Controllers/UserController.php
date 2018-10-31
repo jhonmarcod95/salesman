@@ -29,7 +29,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexData(){
-        return  User::with('roles')->orderBy('id','desc')->get();
+        return  User::with('roles','company')->orderBy('id','desc')->get();
     }
 
     /**
@@ -55,7 +55,8 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required',
             'password' => 'required',
-            'role' => 'required'
+            'role' => 'required',
+            'company' => 'required'            
         ]);
 
         $user = new User;
@@ -63,12 +64,13 @@ class UserController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
+        $user->company_id = $request->company;
 
         if($user->save()){
             // Assigning of role
             $user->syncRoles($request->role); 
 
-            return ['redirect' => route('user_list')];
+            return ['redirect' => route('users_list')];
         }
     }
 
@@ -92,7 +94,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        return User::with('roles')->where('id',$id)->get();
+        return User::with('roles', 'company')->where('id',$id)->get();
     }
 
     /**
@@ -106,11 +108,13 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required',
-            'role' => 'required'
+            'role' => 'required',
+            'company' => 'required'
         ]);
         
         $user->name = $request->name;
         $user->email= $request->email;
+        $user->company_id = $request->company;
 
         if($user->save()){
             // Assigning of role
