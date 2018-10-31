@@ -16,7 +16,7 @@
                         <div class="row align-items-center">
                             <div class="col-md-3">
                                 <label for="name">Date</label>
-                                <input id="month" type="month" class="form-control" onchange="retrieveSchedules(this.value)" value="{{ Carbon::now()->format('Y-m') }}">
+                                <input id="month" type="month" class="form-control" onchange="setCalendarDate(this.value)" value="{{ Carbon::now()->format('Y-m') }}">
                             </div>
                             <div class="col-md-4">
                                 <label for="name">Technical Sales Representative</label>
@@ -103,7 +103,6 @@
             var date = new Date(date);
             var dateFrom = formatDate(new Date(date.getFullYear(), date.getMonth(), 1));
             var dateTo = formatDate(new Date(date.getFullYear(), date.getMonth() + 1, 0));
-
             var filterQuery = $('#formFilter').serialize();
 
             $("#loading").show();
@@ -118,7 +117,7 @@
                         refreshCalendar(element);
                     });
                     $("#loading").hide();
-                    // console.log(data);
+                    console.log(data);
                 }
             });
 
@@ -245,6 +244,9 @@
             }
         }
 
+        function setCalendarDate(date){
+            $('#calendar').fullCalendar('gotoDate', date);
+        }
 
         //sched type event in add & update modal
         $('#sel_add_sched_type, #sel_update_sched_type').on('select2:select', function (e) {
@@ -346,6 +348,7 @@
 
             // retrieveSchedules(currentDate);
         });
+
 
 
 
