@@ -146,7 +146,7 @@ class AppAPIController extends Controller
     {
         $expensesEntries = ExpensesEntry::where('user_id', Auth::user()->id)
                         ->orderBy('id','desc')
-                        // ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
+                        ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
                         ->take(20)
                         ->get();
 
