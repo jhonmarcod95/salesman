@@ -43,5 +43,14 @@ class RolesTableSeeder extends Seeder
                 'level'       => 1,
             ]);
         }
+
+        if (Role::where('name', '=', 'Ap')->first() === null) {
+            $userRole = Role::create([
+                'name'        => 'Ap',
+                'slug'        => 'ap',
+                'description' => 'Ap Role',
+                'level'       => 2,
+            ]);
+        }
     }
 }
