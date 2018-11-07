@@ -126,7 +126,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 });
 
 // Admin Routes
-Route::group(['middleware' => ['auth', 'role:admin|user']], function () {
+Route::group(['middleware' => ['auth', 'role:admin|user|ap']], function () {
     //Messages
     Route::get('/messages', 'MessageController@index')->name('messages_list');
     //save new message
@@ -188,5 +188,15 @@ Route::group(['middleware' => ['auth', 'role:admin|user']], function () {
     // Delete company
     Route::delete('/company/{id}', 'CompanyController@destroy');
 
+
+});
+
+// AP Routes
+Route::group(['middleware' => ['auth', 'role:ap']], function(){
+
+    // Payments
+    Route::get('/payments', 'PaymentController@index');
+    // Store payment expense
+    Route::post('/payments', 'PaymentController@store');
 
 });

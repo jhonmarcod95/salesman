@@ -53,7 +53,7 @@ class AttendanceReportController extends Controller
         $schedule = Schedule::with('user', 'attendances')
                     ->whereDate('date', '>=',  $request->startDate)
                     ->whereDate('date' ,'<=', $request->endDate)
-                    ->orderBy('id', 'desc')->get();
+                    ->orderBy('date', 'desc')->get();
 
         return $schedule;
     }

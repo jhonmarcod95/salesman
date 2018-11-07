@@ -1,5 +1,5 @@
 <template>
-    <div>
+      <div>
         <div class="header bg-green pb-6 pt-5 pt-md-6"></div>
         <div class="container-fluid mt--7">
             <!-- Table -->
@@ -10,7 +10,7 @@
                         <div class="card-header border-0">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h3 class="mb-0">Expenses Report</h3>
+                                    <h3 class="mb-0">Payment</h3>
                                 </div>
                             </div>
                         </div>
@@ -110,7 +110,7 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                  <div class="row">
+                    <div class="row">
                         <div class="col"><h3>TSR: {{ this.tsrName }}</h3></div>
                         <div class="col"><h3>Date: {{ moment(this.date).format('ll') }} </h3></div>
                     </div>
@@ -118,6 +118,7 @@
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
+                                <th scope="col"></th>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Amount</th>
@@ -125,6 +126,8 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
+                                    <td v-if='!expenseBy.payments'> <input type="checkbox" name="vehicle" :value="expenseBy.id" v-model="expenses_id"></td>
+                                    <td v-else>Paid</td>
                                     <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                     <td>{{ expenseBy.expenses_type.name }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
@@ -132,9 +135,12 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="text-center mb-2">
+                        <span v-if="errors.expenseId" class="text-danger">Please Select Expense</span>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-round btn-fill" @click="payExpenses(expenses_id,expenseByTsr[0].user_id)">Submit</button>
                 </div>
                 </div>
             </div>
@@ -148,6 +154,7 @@ export default {
     data(){
         return{
             expenses: [],
+            expenses_id: [],
             expenseByTsr: [],
             startDate: '',
             endDate: '',
@@ -181,6 +188,7 @@ export default {
             })
         },
         fetchExpenseByTsr(id,name,created){
+            this.errors = [];
             axios.get(`/expense-report/${id}`)
             .then(response => { 
                 this.expenseByTsr = response.data;
@@ -191,6 +199,19 @@ export default {
             .catch(error => {
                 this.errors = error.response.data.errors;
             })
+        },
+        payExpenses(expenseId,userId){
+           axios.post('/payments', {
+               expenseId: expenseId,
+               userId: userId,
+           })
+           .then(response => {
+               $('#viewModal').modal('hide');
+               alert('Expense Successfully paid')
+           })
+           .catch(error => { 
+               this.errors= error.response.data.errors;
+           })
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;

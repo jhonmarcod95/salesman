@@ -46,7 +46,7 @@ class ExpenseController extends Controller
 
         return $expense;
     }
-
+ 
     /**
      * Show Expense page
      *
@@ -107,7 +107,7 @@ class ExpenseController extends Controller
 
         $expenseEntry =  ExpensesEntry::findOrFail($id);
         $ids = collect(json_decode($expenseEntry->expenses, true))->pluck('expense_id');
-        $expense = Expense::with('expensesType')->find($ids);
+        $expense = Expense::with('expensesType', 'payments')->find($ids);
 
         return $expense;
     }
