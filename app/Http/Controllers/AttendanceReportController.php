@@ -19,7 +19,15 @@ class AttendanceReportController extends Controller
      */
     public function index()
     {
-        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
 
         return view('attendance-report.index',compact('notification'));
     }

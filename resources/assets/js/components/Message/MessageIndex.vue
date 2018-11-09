@@ -35,19 +35,19 @@
                                             <div class="srch_bar">
                                                 <div class="stylish-input-group">
                                                     <input type="text" class="search-bar"  placeholder="Search" v-model="keywords" >
-                                                    <span class="input-group-addon">
+                                                       <span class="input-group-addon">
                                                         <button type="button"> <i class="fa fa-search" aria-hidden="true"></i> </button>
                                                     </span> 
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="inbox_chat">
-                                            <div :class="[ !message.seen && message.user_id != userId ? 'chat_list active_chat' : 'chat_list']" @click="fetchSpecificMessage(message.last_message_for, message.id, message.recipient.name)" v-for="(message, m) in filteredMessage" v-bind:key="m">
+                                            <div :class="[ !seen(message.seen) && message.user_id != userId ? 'chat_list active_chat' : 'chat_list']" @click="fetchSpecificMessage(message.last_message_for, message.id, message.recipient.name)" v-for="(message, m) in filteredMessage" v-bind:key="m">
                                                 <div class="chat_people">
                                                     <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
                                                     <div class="chat_ib">
-                                                        <h5 :class="[ !message.seen && message.user_id != userId ? 'unseen_h5' : 'seen_h5']">{{ message.recipient.name }} <span class="chat_date">{{ moment(message.created_at).format('LLL') }}</span></h5>
-                                                        <p :class="[ !message.seen && message.user_id != userId ? 'font-weight-bold text-dark' : '']">
+                                                        <h5 :class="[ !seen(message.seen) && message.user_id != userId ? 'unseen_h5' : 'seen_h5']">{{ message.recipient.name }} <span class="chat_date">{{ moment(message.created_at).format('LLL') }}</span></h5>
+                                                        <p :class="[ !seen(message.seen) && message.user_id != userId ? 'font-weight-bold text-dark' : '']">
                                                             {{ message.message | truncate(100, message.message.length > 100 ?' ...' : '' ) }}
                                                         </p>
                                                     </div>
@@ -63,7 +63,7 @@
                                         </div>
                                         <div class="msg_history" id="my_div">
                                             <div v-for="(specific, s) in message_specific" v-bind:key="s">
-                                                <div class="incoming_msg" v-if="specific.user_id != userId">
+                                                <div class="incoming_msg mb-4" v-if="specific.user_id != userId">
                                                     <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
                                                     <div class="received_msg">
                                                         <div class="received_withd_msg">
@@ -232,8 +232,17 @@ export default {
                 this.messages.unshift(response.data[0]);
             })
             .catch(error => {
-                this.errors = error.response.data.errors
+                this.errors = error.response.data.errors; 
             })
+        },
+        seen(ids){
+            var array = JSON.parse(ids);
+            if(!array){
+                return false;
+            }
+            var search = array.filter(item => item.id ===  this.userId);
+            
+            return search.length > 0 ? true: false;
         }
     },  
     computed:{

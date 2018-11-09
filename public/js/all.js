@@ -85546,15 +85546,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }).catch(function (error) {
                 _this6.errors = error.response.data.errors;
             });
+        },
+        seen: function seen(ids) {
+            var _this7 = this;
+
+            var array = JSON.parse(ids);
+            if (!array) {
+                return false;
+            }
+            var search = array.filter(function (item) {
+                return item.id === _this7.userId;
+            });
+
+            return search.length > 0 ? true : false;
         }
     },
     computed: {
         filteredMessage: function filteredMessage() {
-            var _this7 = this;
+            var _this8 = this;
 
             var self = this;
             return self.messages.filter(function (message) {
-                return message.recipient.name.toLowerCase().includes(_this7.keywords.toLowerCase());
+                return message.recipient.name.toLowerCase().includes(_this8.keywords.toLowerCase());
             });
         }
     }
@@ -85654,7 +85667,8 @@ var render = function() {
                           {
                             key: m,
                             class: [
-                              !message.seen && message.user_id != _vm.userId
+                              !_vm.seen(message.seen) &&
+                              message.user_id != _vm.userId
                                 ? "chat_list active_chat"
                                 : "chat_list"
                             ],
@@ -85677,7 +85691,7 @@ var render = function() {
                                   "h5",
                                   {
                                     class: [
-                                      !message.seen &&
+                                      !_vm.seen(message.seen) &&
                                       message.user_id != _vm.userId
                                         ? "unseen_h5"
                                         : "seen_h5"
@@ -85703,7 +85717,7 @@ var render = function() {
                                   "p",
                                   {
                                     class: [
-                                      !message.seen &&
+                                      !_vm.seen(message.seen) &&
                                       message.user_id != _vm.userId
                                         ? "font-weight-bold text-dark"
                                         : ""
@@ -85750,40 +85764,50 @@ var render = function() {
                           _vm._l(_vm.message_specific, function(specific, s) {
                             return _c("div", { key: s }, [
                               specific.user_id != _vm.userId
-                                ? _c("div", { staticClass: "incoming_msg" }, [
-                                    _vm._m(5, true),
-                                    _vm._v(" "),
-                                    _c("div", { staticClass: "received_msg" }, [
+                                ? _c(
+                                    "div",
+                                    { staticClass: "incoming_msg mb-4" },
+                                    [
+                                      _vm._m(5, true),
+                                      _vm._v(" "),
                                       _c(
                                         "div",
-                                        { staticClass: "received_withd_msg" },
+                                        { staticClass: "received_msg" },
                                         [
-                                          _c("p", [
-                                            _vm._v(_vm._s(specific.message))
-                                          ]),
-                                          _vm._v(" "),
                                           _c(
-                                            "span",
-                                            { staticClass: "time_date" },
+                                            "div",
+                                            {
+                                              staticClass: "received_withd_msg"
+                                            },
                                             [
-                                              _vm._v(
-                                                " " +
-                                                  _vm._s(
-                                                    specific.user.name +
-                                                      " || " +
-                                                      _vm
-                                                        .moment(
-                                                          specific.created_at
-                                                        )
-                                                        .format("LLL")
+                                              _c("p", [
+                                                _vm._v(_vm._s(specific.message))
+                                              ]),
+                                              _vm._v(" "),
+                                              _c(
+                                                "span",
+                                                { staticClass: "time_date" },
+                                                [
+                                                  _vm._v(
+                                                    " " +
+                                                      _vm._s(
+                                                        specific.user.name +
+                                                          " || " +
+                                                          _vm
+                                                            .moment(
+                                                              specific.created_at
+                                                            )
+                                                            .format("LLL")
+                                                      )
                                                   )
+                                                ]
                                               )
                                             ]
                                           )
                                         ]
                                       )
-                                    ])
-                                  ])
+                                    ]
+                                  )
                                 : _c("div", { staticClass: "outgoing_msg" }, [
                                     _c("div", { staticClass: "sent_msg" }, [
                                       _c("p", [

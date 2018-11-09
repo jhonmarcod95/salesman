@@ -19,7 +19,7 @@ class CreateMessagesTable extends Migration
             $table->integer('user_id')->unsigned()->index();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->integer('reply_to');
-            $table->integer('seen');
+            $table->string('expenses', 1000);
             $table->timestamps();
         });
     }
