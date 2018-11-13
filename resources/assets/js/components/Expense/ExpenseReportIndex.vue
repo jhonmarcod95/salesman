@@ -54,7 +54,7 @@
                                 </thead>
                                 <tbody v-if="expenses.length">
                                     <tr v-for="(expense, e) in filteredQueues" v-bind:key="e">
-                                        <td class="text-right">
+                                        <td class="text-right" v-if="userLevel != 5">
                                             <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -65,6 +65,7 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <td v-else></td>
                                         <td>{{ expense.user.name }}</td>
                                         <td>{{ expense.expenses.split(',').length  }}</td>
                                         <td>{{ moment(expense.created_at).format('ll') }}</td>
@@ -145,6 +146,7 @@
 <script>
 import moment from 'moment';
 export default {
+    props:['userLevel'],
     data(){
         return{
             expenses: [],

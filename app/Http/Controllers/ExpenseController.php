@@ -41,7 +41,7 @@ class ExpenseController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function generateBydate(Request $request){
+    public function generateBydate(Request $request){   
         $request->validate([
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
@@ -52,7 +52,23 @@ class ExpenseController extends Controller
                     ->whereDate('created_at' ,'<=', $request->endDate)
                     ->orderBy('id', 'desc')->get();
 
-        return $expense;
+        $new_expense = [];
+        // Executive and VP Roles
+        if(Auth::user()->level() >= 6){
+            $new_expense = $expense; 
+        }else{
+            foreach($expense->pluck('user') as $key => $value){
+                // AVP and Coordinator  roles
+                if(Auth::user()->level() < 6){
+                    if($value->roles[0]['level'] < 6){
+                        $new_expense[] = $expense[$key]; 
+                    }
+                }else{
+                    $new_expense = []; 
+                }
+            }
+        }
+        return $new_expense;
     }
  
     /**

@@ -33,8 +33,8 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/roles', 'RoleController@index');
 });
 
-// Admin Routes
-Route::group(['middleware' => ['auth', 'role:admin']], function () {
+// President / IT Routes
+Route::group(['middleware' => ['auth', 'role:president|it']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
@@ -126,7 +126,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 });
 
 // Admin Routes
-Route::group(['middleware' => ['auth', 'role:admin|user|ap']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap']], function () {
     //Messages
     Route::get('/messages', 'MessageController@index')->name('messages_list');
     //save new message

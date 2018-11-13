@@ -76976,7 +76976,7 @@ exports = module.exports = __webpack_require__(3)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -77133,9 +77133,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['userLevel'],
     data: function data() {
         return {
             expenses: [],
@@ -77392,38 +77394,42 @@ var render = function() {
                         "tbody",
                         _vm._l(_vm.filteredQueues, function(expense, e) {
                           return _c("tr", { key: e }, [
-                            _c("td", { staticClass: "text-right" }, [
-                              _c("div", { staticClass: "dropdown" }, [
-                                _vm._m(2, true),
-                                _vm._v(" "),
-                                _c(
-                                  "div",
-                                  {
-                                    staticClass:
-                                      "dropdown-menu dropdown-menu-right dropdown-menu-arrow"
-                                  },
-                                  [
+                            _vm.userLevel != 5
+                              ? _c("td", { staticClass: "text-right" }, [
+                                  _c("div", { staticClass: "dropdown" }, [
+                                    _vm._m(2, true),
+                                    _vm._v(" "),
                                     _c(
-                                      "a",
+                                      "div",
                                       {
-                                        staticClass: "dropdown-item",
-                                        attrs: { href: "javascript:void(0)" },
-                                        on: {
-                                          click: function($event) {
-                                            _vm.fetchExpenseByTsr(
-                                              expense.id,
-                                              expense.user.name,
-                                              expense.created_at
-                                            )
-                                          }
-                                        }
+                                        staticClass:
+                                          "dropdown-menu dropdown-menu-right dropdown-menu-arrow"
                                       },
-                                      [_vm._v("View")]
+                                      [
+                                        _c(
+                                          "a",
+                                          {
+                                            staticClass: "dropdown-item",
+                                            attrs: {
+                                              href: "javascript:void(0)"
+                                            },
+                                            on: {
+                                              click: function($event) {
+                                                _vm.fetchExpenseByTsr(
+                                                  expense.id,
+                                                  expense.user.name,
+                                                  expense.created_at
+                                                )
+                                              }
+                                            }
+                                          },
+                                          [_vm._v("View")]
+                                        )
+                                      ]
                                     )
-                                  ]
-                                )
-                              ])
-                            ]),
+                                  ])
+                                ])
+                              : _c("td"),
                             _vm._v(" "),
                             _c("td", [_vm._v(_vm._s(expense.user.name))]),
                             _vm._v(" "),

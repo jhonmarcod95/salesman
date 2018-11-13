@@ -62,8 +62,23 @@ class AttendanceReportController extends Controller
                     ->whereDate('date', '>=',  $request->startDate)
                     ->whereDate('date' ,'<=', $request->endDate)
                     ->orderBy('date', 'desc')->get();
-
-        return $schedule;
+        $new_schedule = [];
+        // Executive and VP Roles
+        if(Auth::user()->level() >= 6){
+            $new_schedule = $schedule; 
+        }else{
+            foreach($schedule->pluck('user') as $key => $value){
+                // AVP and Coordinator  roles
+                if(Auth::user()->level() < 6){
+                    if($value->roles[0]['level'] < 6){
+                        $new_schedule[] = $schedule[$key]; 
+                    }
+                }else{
+                    $new_schedule = []; 
+                }
+            }
+        }
+        return $new_schedule;
     }
     /**
      * Show the form for creating a new resource.
