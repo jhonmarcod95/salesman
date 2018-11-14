@@ -21,6 +21,7 @@ class APIExpenseResult extends JsonResource
             'amount' => $this->amount,
             'types' => $this->expensesType->name,
             'attachment' => $this->attachment,
+            'expenses_type_id' => $this->expenses_type_id
         ];
     }
 }

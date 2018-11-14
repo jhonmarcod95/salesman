@@ -235,29 +235,32 @@ class AppAPIController extends Controller
     public function signIn(Request $request)
     {
 
-        $this->validate($request, [
-            'schedule' => 'required'
-        ]);
+        file_put_contents(public_path('storage/attendance/') . $request->header('File-Name'), file_get_contents('php://input'));
 
         $attendance = new Attendance;
+        $attendance->sign_in_image = 'attendance/'. $request->header('File-Name');
         $attendance->sign_in = Carbon::now();
         $attendance->user_id = Auth::user()->id;
-        $attendance->schedule_id = $request->input('schedule');
+        $attendance->schedule_id = $request->header('ScheduleId');
         $attendance->save();
 
-        $schedule = Schedule::find($request->input('schedule'));
+        $schedule = Schedule::find($request->header('ScheduleId'));
         $schedule->isCurrent =  1;
         $schedule->save();
 
-        // $all_headers = apache_request_headers();
-        // $newimg = file_put_contents(public_path('storage/attendance/') . $all_headers['File-Name'], file_get_contents('php://input'));
+        // $this->validate($request, [
+        //     'schedule' => 'required'
+        // ]);
 
         // $attendance = new Attendance;
+        // $attendance->sign_in = Carbon::now();
         // $attendance->user_id = Auth::user()->id;
-        // $attendance->schedule_id = $all_headers['Schedule-Id'];
-        // $attendance->sign_in_image = 'attendance/'. $all_headers['File-Name'];
-        // $attendance->sign_in = $all_headers['Sign-In'];
+        // $attendance->schedule_id = $request->input('schedule');
         // $attendance->save();
+
+        // $schedule = Schedule::find($request->input('schedule'));
+        // $schedule->isCurrent =  1;
+        // $schedule->save();
 
         return $attendance;
 
