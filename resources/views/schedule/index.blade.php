@@ -92,7 +92,8 @@
                 remarks: data.remarks,
                 backgroundColor: data.color,
                 borderColor    : data.color,
-                textColor: '#ffffff'
+                textColor: '#ffffff',
+                status: data.status
             };
             return eventData;
         }
@@ -292,8 +293,8 @@
                 /*----------- click event to update & delete schedule -----------*/
                 eventClick: function(calEvent, jsEvent, view) {
 
-                    //disable update
-                    if(calEvent.start.isBefore(currentDate)) {
+                    //disable update if past date or sched already visited
+                    if(calEvent.start.isBefore(currentDate) || calEvent.status == '1') {
                         $('#calendar').fullCalendar('unselect');
                         return false;
                     }
@@ -324,8 +325,8 @@
                 /*------------ drag event to another to change date -------------*/
                 eventDrop: function(event, delta, revertFunc) {
 
-                    //disable update
-                    if(dragEvent.start.isBefore(currentDate) || event.start.isBefore(currentDate)) {
+                    //disable update if past date or sched already visited
+                    if(dragEvent.start.isBefore(currentDate) || event.start.isBefore(currentDate) || event.status == '1') {
                         $('#calendar').fullCalendar('unselect');
                         revertFunc();
                         return false;

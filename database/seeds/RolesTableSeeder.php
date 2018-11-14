@@ -17,12 +17,75 @@ class RolesTableSeeder extends Seeder
          * Add Roles
          *
          */
-        if (Role::where('name', '=', 'Admin')->first() === null) {
-            $adminRole = Role::create([
-                'name'        => 'Admin',
-                'slug'        => 'admin',
-                'description' => 'Admin Role',
+        if (Role::where('name', '=', 'It')->first() === null) {
+            $itRole = Role::create([
+                'name'        => 'It',
+                'slug'        => 'it',
+                'description' => 'It Role',
+                'level'       => 9,
+            ]);
+        }
+
+        if (Role::where('name', '=', 'President')->first() === null) {
+            $presidentRole = Role::create([
+                'name'        => 'President',
+                'slug'        => 'president',
+                'description' => 'President Role',
+                'level'       => 8,
+            ]);
+        }
+
+        if (Role::where('name', '=', 'Evp')->first() === null) {
+            $evpRole = Role::create([
+                'name'        => 'Evp',
+                'slug'        => 'evp',
+                'description' => 'Evp Role',
+                'level'       => 7,
+            ]);
+        }
+
+        if (Role::where('name', '=', 'Vp')->first() === null) {
+            $vpRole = Role::create([
+                'name'        => 'Vp',
+                'slug'        => 'vp',
+                'description' => 'Vp Role',
+                'level'       => 6,
+            ]);
+        }
+
+        if (Role::where('name', '=', 'Avp')->first() === null) {
+            $avpRole = Role::create([
+                'name'        => 'Avp',
+                'slug'        => 'avp',
+                'description' => 'Avp Role',
                 'level'       => 5,
+            ]);
+        }
+
+        if (Role::where('name', '=', 'Coordinator')->first() === null) {
+            $apRole = Role::create([
+                'name'        => 'Coordinator',
+                'slug'        => 'coordinator',
+                'description' => 'Coordinator Role',
+                'level'       => 4,
+            ]);
+        }
+
+        if (Role::where('name', '=', 'Manager')->first() === null) {
+            $managerRole = Role::create([
+                'name'        => 'Manager',
+                'slug'        => 'manager', 
+                'description' => 'Manager Role',
+                'level'       => 3,
+            ]);
+        }
+
+        if (Role::where('name', '=', 'Ap')->first() === null) {
+            $apRole = Role::create([
+                'name'        => 'Ap',
+                'slug'        => 'ap',
+                'description' => 'Ap Role',
+                'level'       => 2,
             ]);
         }
 
@@ -31,17 +94,9 @@ class RolesTableSeeder extends Seeder
                 'name'        => 'Tsr',
                 'slug'        => 'tsr',
                 'description' => 'Tsr Role',
-                'level'       => 0,
-            ]);
-        }
-
-        if (Role::where('name', '=', 'User')->first() === null) {
-            $userRole = Role::create([
-                'name'        => 'User',
-                'slug'        => 'user',
-                'description' => 'User Role',
                 'level'       => 1,
             ]);
         }
+
     }
 }

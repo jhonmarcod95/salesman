@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Auth;
 use App\{
     Message,
-    Company
+    Payment
 };
+
 use Illuminate\Http\Request;
 
-class CompanyController extends Controller
+class PaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,8 +19,8 @@ class CompanyController extends Controller
      */
     public function index()
     {
-        session(['header_text' => 'Companies']);
-
+        session(['header_text' => 'Payment']);
+        
         $message = Message::where('user_id', '!=', Auth::user()->id)->get();
         $notification = 0;  
         foreach($message as $notif){
@@ -30,17 +31,7 @@ class CompanyController extends Controller
             }
         }
 
-        return view('company.index', compact('notification'));
-    }
-
-     /**
-     * Get all company
-     *
-     * @return \Illuminate\Http\Response
-     */
-
-    public function indexData(){
-        return Company::orderBy('id', 'desc')->get();
+        return view('payment.index', compact('notification'));
     }
 
     /**
@@ -61,14 +52,23 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
+        
         $request->validate([
-            'name' => 'required'
+            'expenseId' => 'required',
+            'userId' => 'required'
         ]);
-
-        $company = new Company;
-        $company->name = $request->name;
-        if($company->save()){   
-            return $company;
+        
+        $ids = [];
+        foreach($request->expenseId as $expense){
+            $ids[] = [
+                'expense_id' => $expense,
+                'user_id' => $request->userId,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+        }
+        if(Payment::insert($ids)){
+            return 'true';
         }
     }
 
@@ -101,18 +101,9 @@ class CompanyController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Company $company)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'id' => 'required',
-            'name' => 'required'
-        ]);
-
-        $company->name = $request->name;
-
-        if($company->save()){
-            return $company;
-        }
+        //
     }
 
     /**
@@ -123,10 +114,6 @@ class CompanyController extends Controller
      */
     public function destroy($id)
     {
-        $company = Company::findOrfail($id);
-
-        if($company->delete()){
-            return $company;
-        }
+        //
     }
 }

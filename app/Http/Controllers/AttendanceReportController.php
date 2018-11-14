@@ -19,7 +19,15 @@ class AttendanceReportController extends Controller
      */
     public function index()
     {
-        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
 
         return view('attendance-report.index',compact('notification'));
     }
@@ -53,9 +61,24 @@ class AttendanceReportController extends Controller
         $schedule = Schedule::with('user', 'attendances')
                     ->whereDate('date', '>=',  $request->startDate)
                     ->whereDate('date' ,'<=', $request->endDate)
-                    ->orderBy('id', 'desc')->get();
-
-        return $schedule;
+                    ->orderBy('date', 'desc')->get();
+        $new_schedule = [];
+        // Executive and VP Roles
+        if(Auth::user()->level() >= 6){
+            $new_schedule = $schedule; 
+        }else{
+            foreach($schedule->pluck('user') as $key => $value){
+                // AVP and Coordinator  roles
+                if(Auth::user()->level() < 6){
+                    if($value->roles[0]['level'] < 6){
+                        $new_schedule[] = $schedule[$key]; 
+                    }
+                }else{
+                    $new_schedule = []; 
+                }
+            }
+        }
+        return $new_schedule;
     }
     /**
      * Show the form for creating a new resource.

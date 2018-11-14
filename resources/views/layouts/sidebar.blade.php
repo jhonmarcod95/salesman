@@ -161,6 +161,13 @@
                         </ul>
                     </div>
                 </li>
+                @if(Auth::user()->hasRole('ap'))
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/payments') }}">
+                        <i class="ni ni-briefcase-24 text-yellow"></i> Payment
+                    </a>
+                </li>
+                @endif
 
             </ul>
             {{--<!-- Divider -->--}}

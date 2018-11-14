@@ -22,7 +22,15 @@ class ExpenseController extends Controller
     {
         session(['header_text' => 'Expenses Report']);
 
-        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
 
         return view('expense.index-report', compact('notification'));
     }
@@ -33,7 +41,7 @@ class ExpenseController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function generateBydate(Request $request){
+    public function generateBydate(Request $request){   
         $request->validate([
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
@@ -44,9 +52,25 @@ class ExpenseController extends Controller
                     ->whereDate('created_at' ,'<=', $request->endDate)
                     ->orderBy('id', 'desc')->get();
 
-        return $expense;
+        $new_expense = [];
+        // Executive and VP Roles
+        if(Auth::user()->level() >= 6){
+            $new_expense = $expense; 
+        }else{
+            foreach($expense->pluck('user') as $key => $value){
+                // AVP and Coordinator  roles
+                if(Auth::user()->level() < 6){
+                    if($value->roles[0]['level'] < 6){
+                        $new_expense[] = $expense[$key]; 
+                    }
+                }else{
+                    $new_expense = []; 
+                }
+            }
+        }
+        return $new_expense;
     }
-
+ 
     /**
      * Show Expense page
      *
@@ -55,7 +79,15 @@ class ExpenseController extends Controller
     public function indexExpense(){
         session(['header_text' => 'Expenses']);
 
-        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
 
         return view('expense.index', compact('notification'));
     }
@@ -107,7 +139,7 @@ class ExpenseController extends Controller
 
         $expenseEntry =  ExpensesEntry::findOrFail($id);
         $ids = collect(json_decode($expenseEntry->expenses, true))->pluck('expense_id');
-        $expense = Expense::with('expensesType')->find($ids);
+        $expense = Expense::with('expensesType', 'payments')->find($ids);
 
         return $expense;
     }

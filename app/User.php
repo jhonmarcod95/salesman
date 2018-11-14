@@ -8,9 +8,12 @@ use jeremykenedy\LaravelRoles\Traits\HasRoleAndPermission;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 use Laravel\Passport\HasApiTokens;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     use HasApiTokens, Notifiable, SoftDeletes, HasRoleAndPermission;
 
     /**

@@ -17,6 +17,8 @@ window.Vue = require('vue');
 
 // Vue.component('example-component', require('./components/ExampleComponent.vue'));
 
+// Payment
+Vue.component('payment-index', require('./components/Payment/PaymentIndex.vue'));
 
 // Companeies
 Vue.component('company-index', require('./components/Company/CompanyIndex.vue'));

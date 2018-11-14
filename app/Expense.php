@@ -24,4 +24,8 @@ class Expense extends Model
     public function expensesType() {
         return $this->belongsTo(ExpensesType::class);
     }
+
+    public function payments(){
+        return $this->hasOne(Payment::class);
+    }
 }

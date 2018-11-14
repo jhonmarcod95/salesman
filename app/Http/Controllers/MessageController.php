@@ -21,8 +21,16 @@ class MessageController extends Controller
     {
         session(['header_text' => 'Messages']);
         
-        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
 
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
+        $notification = 0;  
         return view('message.index', compact('notification'));
     }
 
@@ -33,24 +41,47 @@ class MessageController extends Controller
      */
 
     public function indexData(){
-        // $message = Message::with('user', 'recipient')->where('user_id', '!=', Auth::user()->id)->orderBy('id','desc')->get()->unique('user_id')->values()->all();
-        // $first_message_id = Message::with('user', 'recipient')->where('first_message_from', '<>', '')->orderBy('id','desc')->get();
         $message = Message::with('user', 'recipient')->where('last_message_for', '<>', '')->orderBy('id','desc')->get();
         return $message;
-    }
+    }   
     
     /**
      * Get all message by specific user
      *
      * @return \Illuminate\Http\Response
      */
-    public function messageByuser($id){
-        
-        $update = Message::where('last_message_for', $id)->update(['seen' => 1]);
+    public function messageByuser($messageId){
+        $message = Message::where('last_message_for', $messageId)->get();
+        if($message[0]->user_id != Auth::user()->id){
+
+          if($message[0]->seen){
+            $arrayId = array();
+            $ids = collect(json_decode($message[0]->seen, true))->pluck('id');
+            foreach($ids as $id){
+                $arrayId[] = array('id' => $id);
+            }
+            $newId = [];
+            foreach($ids as $new){
+                array_push($newId, $new);
+            }
+
+            if (!in_array(Auth::user()->id, $newId)){
+                $arrayId[] = array('id' => Auth::user()->id);
+            }
+            $update = Message::where('last_message_for', $messageId)
+                ->orWhere('user_id', $messageId)
+                ->orWhere('reply_to', $messageId)
+                ->update(['seen' => json_encode($arrayId)]);
+          }else{
+            $arrayId = array();
+            $arrayId[] = array('id' => Auth::user()->id);
+            $update = Message::where('last_message_for', $messageId)->update(['seen' => json_encode($arrayId)]);
+          }
+        }
 
         return Message::with('user','recipient')
-            ->where('user_id', $id)
-            ->orWhere('reply_to', $id)
+            ->where('user_id', $messageId)
+            ->orWhere('reply_to', $messageId)
             ->orderBy('id', 'asc')
             ->get();
     }   
@@ -84,7 +115,7 @@ class MessageController extends Controller
         
         $message->message = $request->message;
         $message->user_id = Auth::user()->id;
-        if($user->hasRole('admin') || $user->hasRole('user')){
+        if($user->hasRole('admin') || $user->hasRole('user') || $user->hasRole('ap')){
             $message->reply_to = $request->message_id;
         }
         

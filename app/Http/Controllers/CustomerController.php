@@ -17,7 +17,15 @@ class CustomerController extends Controller
     public function index(){
         session(['header_text' => 'Customers']);
 
-        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
 
         return view('customer.index', compact('notification'));
     }
@@ -60,7 +68,15 @@ class CustomerController extends Controller
      */
     public function create(){
 
-        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
 
         return view('customer.create', compact('notification'));
     }
@@ -105,7 +121,15 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
 
         return view('customer.edit', compact('id', 'notification'));
     }
