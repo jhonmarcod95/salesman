@@ -37,7 +37,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexData(){
-        return  User::with('roles','company')->orderBy('id','desc')->get();
+        return  User::with('roles','companies')->orderBy('id','desc')->get();
     }
 
     /**
@@ -80,11 +80,12 @@ class UserController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
-        $user->company_id = $request->company;
 
         if($user->save()){
             // Assigning of role
-            $user->syncRoles($request->role); 
+            $user->syncRoles($request->role);
+            // Assigning of companies
+            $user->companies()->sync( (array) $request->company);
 
             return ['redirect' => route('users_list')];
         }
@@ -118,7 +119,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        return User::with('roles', 'company')->where('id',$id)->get();
+        return User::with('roles', 'companies')->where('id',$id)->get();
     }
 
     /**
@@ -138,11 +139,12 @@ class UserController extends Controller
         
         $user->name = $request->name;
         $user->email= $request->email;
-        $user->company_id = $request->company;
 
         if($user->save()){
             // Assigning of role
             $user->syncRoles($request->role);
+            // Assigning of companies
+            $user->companies()->sync( (array) $request->company);
 
             return ['redirect' => route('users_list')];
         }

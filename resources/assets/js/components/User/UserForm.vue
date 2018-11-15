@@ -55,9 +55,16 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="role">Company</label>
-                                                <select class="form-control" v-model="user.company">
-                                                    <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
-                                                </select>
+                                                <multiselect
+                                                        v-model="user.company"
+                                                        :options="companies"
+                                                        :multiple="true"
+                                                        track-by="id"
+                                                        :custom-label="customLabelCompany"
+                                                        placeholder="Select Company"
+                                                        id="selected_company"
+                                                    >
+                                                </multiselect>
                                                 <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
                                             </div>
                                         </div>
@@ -78,9 +85,14 @@
         </div>
     </div>
 </template>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <script>
+import Multiselect from 'vue-multiselect';
 export default {
+    components:{
+        Multiselect
+    },
     data(){
         return{
             user:{
@@ -100,13 +112,24 @@ export default {
         this.fetchCompanies();
     },
     methods:{
+        customLabelCompany (company) {
+            return `${company.name  }`
+        },
         addUser(user){
+            let comapanyids = [];
+            let selected_company = user.company;
+            if(selected_company)
+            {
+                selected_company.forEach((selected_company) => {
+                comapanyids.push(selected_company.id);
+                });
+            }
             axios.post('/user', {
                 name: user.name,
                 email: user.email,
                 password: user.password,
                 role: user.role,
-                company: user.company
+                company: comapanyids
             })
             .then(response => { 
                 window.location.href = response.data.redirect;
