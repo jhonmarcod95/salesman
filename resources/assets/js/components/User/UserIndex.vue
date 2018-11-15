@@ -50,7 +50,11 @@
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email }}</td>
                                         <td>{{ user.roles[0].name }}</td>
-                                        <td>{{ user.company.name }}</td>
+                                        <td>
+                                            <span v-for="(company, c) in user.companies" :key="c">
+                                                {{ company.name }} <br/>
+                                            </span>
+                                        </td>
                                         <td></td>
                                     </tr>
                                 </tbody>

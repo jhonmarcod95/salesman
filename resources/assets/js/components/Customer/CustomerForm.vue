@@ -215,7 +215,7 @@
                 })
             },
             checkCustomerCode(){
-                if(this.customer.classification == 3){
+                if(this.customer.classification != 1 && this.customer.classification != 2){
                     axios.get('/check-customer-code')
                     .then(response => {
                         this.customer.customer_code = '';
@@ -227,6 +227,7 @@
                     })
                 }
                 else{
+                    this.customer.customer_code = '';
                     document.getElementById("customer_code").disabled = false;
                 }
             }

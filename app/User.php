@@ -70,4 +70,8 @@ class User extends Authenticatable implements Auditable
         return $this->belongsTo(Company::class);
     }
 
+    public function companies() {
+        return $this->belongsToMany(Company::class);
+    }
+    
 }
