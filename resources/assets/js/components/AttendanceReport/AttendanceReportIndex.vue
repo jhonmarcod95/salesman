@@ -64,7 +64,8 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule.attendances.sign_out_image,schedule.user.name,schedule.attendances.remarks)">Show Photo</a>
+                                                    <a v-if="schedule.attendances && schedule.attendances.sign_in !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#singInphotoModal" @click="getSingInImage(schedule.attendances.sign_in_image,schedule.user.name)">Sign In Photo</a>
+                                                    <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule.attendances.sign_out_image,schedule.user.name,schedule.attendances.remarks)">Sign out Photo</a>
                                                     <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#editModal">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" >Delete</a>
                                                 </div>
@@ -125,6 +126,20 @@
             </div>
         </div>
 
+        <!-- Sign in Photo Modal -->
+        <div class="modal fade" id="singInphotoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <span class="closed" data-dismiss="modal">&times;</span>
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                <div class="modal-body text-center">
+                    <img class="w-100 h-75" style="max-height: 700px" :src="signImage">
+                    <h1 class="mt-3"> {{ tsrName }} </h1>
+                </div>
+                </div>
+            </div>
+        </div>
+
+
 
     </div>
 </template>
@@ -141,6 +156,7 @@ export default {
             tsrName: '',
             remarks: '',
             image: '',
+            signImage: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -187,6 +203,10 @@ export default {
             this.image = window.location.origin+'/storage/'+img;
             this.tsrName = user;
             this.remarks = remarks;
+        },
+        getSingInImage(image, user){
+            this.signImage = window.location.origin+'/storage/'+image;
+            this.tsrName = user;
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;

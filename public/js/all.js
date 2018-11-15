@@ -86468,6 +86468,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -86480,6 +86495,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             tsrName: '',
             remarks: '',
             image: '',
+            signImage: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -86527,6 +86543,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.image = window.location.origin + '/storage/' + img;
             this.tsrName = user;
             this.remarks = remarks;
+        },
+        getSingInImage: function getSingInImage(image, user) {
+            this.signImage = window.location.origin + '/storage/' + image;
+            this.tsrName = user;
         },
         setPage: function setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -86746,6 +86766,31 @@ var render = function() {
                               },
                               [
                                 schedule.attendances &&
+                                schedule.attendances.sign_in !== null
+                                  ? _c(
+                                      "a",
+                                      {
+                                        staticClass: "dropdown-item",
+                                        attrs: {
+                                          href: "javascript:void(0)",
+                                          "data-toggle": "modal",
+                                          "data-target": "#singInphotoModal"
+                                        },
+                                        on: {
+                                          click: function($event) {
+                                            _vm.getSingInImage(
+                                              schedule.attendances
+                                                .sign_in_image,
+                                              schedule.user.name
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [_vm._v("Sign In Photo")]
+                                    )
+                                  : _vm._e(),
+                                _vm._v(" "),
+                                schedule.attendances &&
                                 schedule.attendances.sign_out !== null
                                   ? _c(
                                       "a",
@@ -86767,7 +86812,7 @@ var render = function() {
                                           }
                                         }
                                       },
-                                      [_vm._v("Show Photo")]
+                                      [_vm._v("Sign out Photo")]
                                     )
                                   : _vm._e(),
                                 _vm._v(" "),
@@ -86987,6 +87032,50 @@ var render = function() {
                 ]),
                 _vm._v(" "),
                 _c("span", [_vm._v(_vm._s(_vm.remarks) + " ")])
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          id: "singInphotoModal",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "exampleModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "span",
+          { staticClass: "closed", attrs: { "data-dismiss": "modal" } },
+          [_vm._v("×")]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-dialog-centered modal-lg",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-body text-center" }, [
+                _c("img", {
+                  staticClass: "w-100 h-75",
+                  staticStyle: { "max-height": "700px" },
+                  attrs: { src: _vm.signImage }
+                }),
+                _vm._v(" "),
+                _c("h1", { staticClass: "mt-3" }, [
+                  _vm._v(" " + _vm._s(_vm.tsrName) + " ")
+                ])
               ])
             ])
           ]
