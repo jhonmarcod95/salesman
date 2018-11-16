@@ -37,7 +37,7 @@
                                         <div class="col-lg-6">
                                            <div class="form-group">
                                                 <label class="form-control-label" for="classification">Classification</label>
-                                                <select class="form-control" v-model="customers.classification">
+                                                <select class="form-control" v-model="customers.classification" @change="checkCustomerCode">
                                                     <option v-for="(classification, c) in classifications" v-bind:key="c" :value="classification.id">{{ classification.description}}</option>
                                                 </select>
                                                 <span class="text-danger small" v-if="errors.classification">{{ errors.classification[0] }}</span>
@@ -143,7 +143,8 @@
                 provinces: [],
                 classifications:[],
                 regions:[],
-                errors: []
+                errors: [],
+                default_code: '',
             }
         },
         created(){
@@ -179,6 +180,12 @@
                 axios.get(`/customers/show/${this.customerId}`)
                 .then(response => {
                     this.customers = response.data;
+                    this.default_code = this.customers.customer_code;
+                    if(this.customers.classification != 1 && this.customers.classification != 2){
+                        document.getElementById("customer_code").disabled = true;
+                    }else{
+                        document.getElementById("customer_code").disabled = false;
+                    }
                 })
                 .catch(error =>{
                     this.errors = error.response.data.errors;
@@ -210,6 +217,16 @@
                 .catch(error =>{
                     this.errors = error.response.data.errors;
                 })
+            },
+            checkCustomerCode(){
+                if(this.customers.classification != 1 && this.customers.classification != 2){
+                    this.customers.customer_code = this.default_code;
+                    document.getElementById("customer_code").disabled = true;
+                }
+                else{
+                    this.customers.customer_code = '';
+                    document.getElementById("customer_code").disabled = false;
+                }
             }
         },
     }
