@@ -9,8 +9,14 @@ class Attendance extends Model
     protected $fillable = [
         'sign_in',
         'sign_in_image',
+        'sign_in_latitude',
+        'sign_in_longitude',
+        'sign_in_speed',
         'sign_out',
         'sign_out_image',
+        'sign_out_latitude',
+        'sign_out_longitude',
+        'sign_out_speed',
         'remarks'
     ];
 

@@ -181,6 +181,7 @@ class AppAPIController extends Controller
 
         $schedules = Schedule::orderBy('id','DESC')
                         ->where('user_id', Auth::user()->id)
+                        ->take(25)
                         ->get();
 
          return SchedulesResource::collection($schedules);
@@ -240,6 +241,9 @@ class AppAPIController extends Controller
         $attendance = new Attendance;
         $attendance->sign_in_image = 'attendance/'. $request->header('File-Name');
         $attendance->sign_in = Carbon::now();
+        $attendance->sign_in_latitude = $request->header('Latitude');
+        $attendance->sign_in_longitude = $request->header('Longitude');
+        $attendance->sign_in_speed = $request->header('Speed');
         $attendance->user_id = Auth::user()->id;
         $attendance->schedule_id = $request->header('ScheduleId');
         $attendance->save();
@@ -279,6 +283,9 @@ class AppAPIController extends Controller
         // update attendance
         $attendance->sign_out_image = 'attendance/'. $request->header('File-Name');
         $attendance->sign_out = Carbon::now();
+        $attendance->sign_out_latitude = $request->header('Latitude');
+        $attendance->sign_out_longitude = $request->header('Longitude');
+        $attendance->sign_out_speed = $request->header('Speed');
         $attendance->remarks = $request->header('Remarks');
         $attendance->save();
 
