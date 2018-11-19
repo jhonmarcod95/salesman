@@ -186,16 +186,16 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function checkCustomerCode(){
-        $customer = Customer::where('classification', 3)->orderBy('id','asc')->get();
+        $customer = Customer::withTrashed()->whereNotIn('classification', [1,2])->orderBy('id','asc')->get();
         $customer_code = $customer->last()->customer_code;
 
         //generate until to become unique
-        generate:
-        if(Customer::where('customer_code', $customer_code)->exists()){
-            $customer_code = $customer_code + 1;
-            goto generate;
-        }
-        return $customer_code;
+        // generate:
+        // if(Customer::where('customer_code', $customer_code)->exists()){
+        //     $customer_code = $customer_code + 1;
+        //     goto generate;
+        // }
+        return ++$customer_code;
     }
 
     /**
