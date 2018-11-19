@@ -86483,6 +86483,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -86496,6 +86498,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             remarks: '',
             image: '',
             signImage: '',
+            signInLink: '',
+            signOutLink: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -86539,14 +86543,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             return hours + 'h ' + minutes + ' min.';
         },
-        getImage: function getImage(img, user, remarks) {
-            this.image = window.location.origin + '/storage/' + img;
-            this.tsrName = user;
-            this.remarks = remarks;
+        getImage: function getImage(schedule) {
+            this.image = window.location.origin + '/storage/' + schedule.attendances.sign_out_image;
+            this.tsrName = schedule.user.name;
+            this.remarks = schedule.attendances.remarks;
+            this.signOutLink = 'https://www.google.com/maps/place/' + schedule.attendances.sign_out_latitude + ',' + schedule.attendances.sign_out_longitude;
         },
-        getSingInImage: function getSingInImage(image, user) {
-            this.signImage = window.location.origin + '/storage/' + image;
-            this.tsrName = user;
+        getSingInImage: function getSingInImage(schedule) {
+            this.signImage = window.location.origin + '/storage/' + schedule.attendances.sign_in_image;
+            this.tsrName = schedule.user.name;
+            this.signInLink = 'https://www.google.com/maps/place/' + schedule.attendances.sign_in_latitude + ',' + schedule.attendances.sign_in_longitude;
         },
         setPage: function setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -86778,11 +86784,7 @@ var render = function() {
                                         },
                                         on: {
                                           click: function($event) {
-                                            _vm.getSingInImage(
-                                              schedule.attendances
-                                                .sign_in_image,
-                                              schedule.user.name
-                                            )
+                                            _vm.getSingInImage(schedule)
                                           }
                                         }
                                       },
@@ -86803,12 +86805,7 @@ var render = function() {
                                         },
                                         on: {
                                           click: function($event) {
-                                            _vm.getImage(
-                                              schedule.attendances
-                                                .sign_out_image,
-                                              schedule.user.name,
-                                              schedule.attendances.remarks
-                                            )
+                                            _vm.getImage(schedule)
                                           }
                                         }
                                       },
@@ -87031,7 +87028,14 @@ var render = function() {
                   _vm._v(" " + _vm._s(_vm.tsrName) + " ")
                 ]),
                 _vm._v(" "),
-                _c("span", [_vm._v(_vm._s(_vm.remarks) + " ")])
+                _c("span", [_vm._v(_vm._s(_vm.remarks) + " ")]),
+                _c("br"),
+                _vm._v(" "),
+                _c(
+                  "a",
+                  { attrs: { href: _vm.signOutLink, target: "__blank" } },
+                  [_vm._v("Sign Out link")]
+                )
               ])
             ])
           ]
@@ -87075,7 +87079,13 @@ var render = function() {
                 _vm._v(" "),
                 _c("h1", { staticClass: "mt-3" }, [
                   _vm._v(" " + _vm._s(_vm.tsrName) + " ")
-                ])
+                ]),
+                _vm._v(" "),
+                _c(
+                  "a",
+                  { attrs: { href: _vm.signInLink, target: "__blank" } },
+                  [_vm._v("Sign In link")]
+                )
               ])
             ])
           ]
