@@ -152,7 +152,6 @@ class ScheduleController extends Controller
         return response()->json($data);
     }
 
-
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -235,11 +234,13 @@ class ScheduleController extends Controller
     public function todays(){
         return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
     }
+
     /**
     * Get all todays schedule per user
      *
      * @return \Illuminate\Http\Response
      */
+
     public function todayByUser(){
 
          $schedule = Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();

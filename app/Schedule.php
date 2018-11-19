@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -27,11 +28,16 @@ class Schedule extends Model implements Auditable
     }
 
     public static function filter($from, $to, $uids, $codes){
+        $login_level = Auth::user()->roles->first()->level; //this is used to control the filter level of each user
+
         return Schedule::join('schedule_types', 'schedule_types.id', 'schedules.type')
             ->join('users', 'users.id', 'schedules.user_id')
             ->join('background_colors', 'background_colors.id', 'schedule_types.color')
+            ->join('role_user', 'role_user.user_id', 'users.id')
+            ->join('roles', 'roles.id', 'role_user.role_id')
+            ->where('roles.level', '<', $login_level)
             ->whereBetween('date', [$from, $to])
-            ->whereIn('user_id', $uids)
+            ->whereIn('schedules.user_id', $uids)
             ->whereIn('code', $codes)
             ->get([
                 'schedules.id',

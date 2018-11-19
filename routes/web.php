@@ -35,15 +35,6 @@ Route::group(['middleware' => 'auth'], function(){
 
 // President / IT Routes
 Route::group(['middleware' => ['auth', 'role:president|it']], function () {
-    //Schedules
-    Route::get('/schedules', 'ScheduleController@index');
-    Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
-
-    Route::post('/schedules/store', 'ScheduleController@store');
-    Route::patch('/schedules/update/{id}', 'ScheduleController@update');
-    Route::patch('/schedules/change/{id}', 'ScheduleController@change');
-    Route::delete('/schedules/destroy/{id}', 'ScheduleController@destroy');
-
     //Announcements
     Route::get('/announcements', 'AnnouncementController@index')->name('announcements_list');
     // fetch all announcements
@@ -127,6 +118,16 @@ Route::group(['middleware' => ['auth', 'role:president|it']], function () {
 
 // Admin Routes
 Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap']], function () {
+    //Schedules
+    Route::get('/schedules', 'ScheduleController@index');
+    Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
+
+    Route::post('/schedules/store', 'ScheduleController@store');
+    Route::patch('/schedules/update/{id}', 'ScheduleController@update');
+    Route::patch('/schedules/change/{id}', 'ScheduleController@change');
+    Route::delete('/schedules/destroy/{id}', 'ScheduleController@destroy');
+
+
     //Messages
     Route::get('/messages', 'MessageController@index')->name('messages_list');
     //save new message
