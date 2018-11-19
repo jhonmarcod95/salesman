@@ -64,8 +64,8 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a v-if="schedule.attendances && schedule.attendances.sign_in !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#singInphotoModal" @click="getSingInImage(schedule.attendances.sign_in_image,schedule.user.name)">Sign In Photo</a>
-                                                    <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule.attendances.sign_out_image,schedule.user.name,schedule.attendances.remarks)">Sign out Photo</a>
+                                                    <a v-if="schedule.attendances && schedule.attendances.sign_in !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#singInphotoModal" @click="getSingInImage(schedule)">Sign In Photo</a>
+                                                    <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule)">Sign out Photo</a>
                                                     <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#editModal">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" >Delete</a>
                                                 </div>
@@ -120,7 +120,8 @@
                 <div class="modal-body text-center">
                     <img class="w-100 h-75" style="max-height: 700px" :src="image">
                     <h1 class="mt-3"> {{ tsrName }} </h1>
-                    <span>{{ remarks }} </span>
+                    <span>{{ remarks }} </span><br>
+                    <a :href="signOutLink" target="__blank">Sign Out link</a>
                 </div>
                 </div>
             </div>
@@ -134,6 +135,7 @@
                 <div class="modal-body text-center">
                     <img class="w-100 h-75" style="max-height: 700px" :src="signImage">
                     <h1 class="mt-3"> {{ tsrName }} </h1>
+                    <a :href="signInLink" target="__blank">Sign In link</a>
                 </div>
                 </div>
             </div>
@@ -157,6 +159,8 @@ export default {
             remarks: '',
             image: '',
             signImage: '',
+            signInLink: '',
+            signOutLink: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -199,14 +203,16 @@ export default {
             return hours + 'h '+ minutes+' min.';
                                             
         },
-        getImage(img,user,remarks){
-            this.image = window.location.origin+'/storage/'+img;
-            this.tsrName = user;
-            this.remarks = remarks;
+        getImage(schedule){
+            this.image = window.location.origin+'/storage/'+schedule.attendances.sign_out_image;
+            this.tsrName = schedule.user.name;
+            this.remarks = schedule.attendances.remarks;
+            this.signOutLink = 'https://www.google.com/maps/place/'+schedule.attendances.sign_out_latitude+','+schedule.attendances.sign_out_longitude;
         },
-        getSingInImage(image, user){
-            this.signImage = window.location.origin+'/storage/'+image;
-            this.tsrName = user;
+        getSingInImage(schedule){
+            this.signImage = window.location.origin+'/storage/'+schedule.attendances.sign_in_image;
+            this.tsrName = schedule.user.name;
+            this.signInLink = 'https://www.google.com/maps/place/'+schedule.attendances.sign_in_latitude+','+schedule.attendances.sign_in_longitude;
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
