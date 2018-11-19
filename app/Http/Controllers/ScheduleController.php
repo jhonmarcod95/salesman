@@ -20,6 +20,8 @@ class ScheduleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+
     public function index()
     {
         session(['header_text' => 'Schedules']);
@@ -55,20 +57,31 @@ class ScheduleController extends Controller
     }
 
     public function indexData(Request $request, $date_from, $date_to){
-        //search specific
+
+        /* search specific user ***********************************/
         if($request->exists('tsrs')){
             $user_ids = $request->tsrs;
         }
         //search all
         else{
             $user_ids = TechnicalSalesRepresentative::all()
-                ->pluck('user_id')
-                ->toArray();
+                ->pluck('user_id');
         }
-        $user_ids = implode(",",$user_ids);
+        /* ********************************************************/
 
+        /* search specific customer (sap bdcsased only) **************/
+        if($request->exists('customer_codes')){
+            $customer_codes = $request->customer_codes;
+        }
+        //search all
+        else{
+            $customer_codes = Schedule::whereBetween('date', [$date_from, $date_to])
+                ->get()
+                ->pluck('code');
+        }
+        /* *********************************************************/
 
-        $schedules = DB::select("CALL p_schedules ('$date_from','$date_to','$user_ids','%%')");
+        $schedules = Schedule::filter($date_from, $date_to, $user_ids, $customer_codes);
         return $schedules;
     }
 

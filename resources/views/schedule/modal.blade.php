@@ -72,7 +72,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <h5>End Time</h5>
-                            {!! Form::time('end_time', '17:00', ['class' => 'form-control']) !!}
+                            {!! Form::time('end_time', '18:00', ['class' => 'form-control']) !!}
                         </div>
                     </div>
                 </div>

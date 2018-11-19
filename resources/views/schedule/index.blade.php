@@ -14,17 +14,37 @@
                     <div class="card-header border-0">
                         {!! Form::open(['id' => 'formFilter']) !!}
                         <div class="row align-items-center">
+
                             <div class="col-md-3">
-                                <label for="name">Date</label>
+                                <label>Date</label>
                                 <input id="month" type="month" class="form-control" onchange="setCalendarDate(this.value)" value="{{ Carbon::now()->format('Y-m') }}">
                             </div>
-                            <div class="col-md-4">
-                                <label for="name">Technical Sales Representative</label>
+
+                            <div class="col-md-7">
+                                <label>Technical Sales Representative</label>
                                 {!! Form::select('tsrs[]', $tsrs, null, ['class' => 'sel2', 'multiple']) !!}
                             </div>
-                            <div class="col text-right">
-                                <button type="button" class="btn btn-sm btn-primary" onclick="retrieveSchedules(document.getElementById('month').value)">Search</button>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-3">
                             </div>
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <label>Customer</label>
+                                    {!! Form::select('customer_codes[]', $customers, null, ['class' => 'sel2', 'multiple', 'required']) !!}
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="col text-right">
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="retrieveSchedules(document.getElementById('month').value)">Search</button>
+                                </div>
+                            </div>
+
                         </div>
                         {!! Form::close() !!}
                     </div>
@@ -118,7 +138,7 @@
                         refreshCalendar(element);
                     });
                     $("#loading").hide();
-                    console.log(data);
+                    // console.log(data);
                 }
             });
 
@@ -179,6 +199,8 @@
                     selectedSchedule.start_time = eventData.start_time;
                     selectedSchedule.end_time = eventData.end_time;
                     selectedSchedule.remarks = eventData.remarks;
+
+                    console.log(eventData);
 
                     $('#calendar').fullCalendar('updateEvent', selectedSchedule);
                     $('#calendar').fullCalendar('unselect');
