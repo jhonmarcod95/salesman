@@ -34,7 +34,7 @@ Route::group(['middleware' => 'auth'], function(){
 });
 
 // Admin Routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
