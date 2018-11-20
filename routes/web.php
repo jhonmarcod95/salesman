@@ -123,6 +123,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // fetch all customer classfication
     Route::get('/customers-classification-all', 'CustomerClassificationController@indexData');
 
+    
     //Messages
     Route::get('/messages', 'MessageController@index')->name('messages_list');
     //save new message
