@@ -127,6 +127,7 @@ Route::group(['middleware' => ['auth', 'role:president|it']], function () {
 
 // Admin Routes
 Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap']], function () {
+    
     //Messages
     Route::get('/messages', 'MessageController@index')->name('messages_list');
     //save new message
