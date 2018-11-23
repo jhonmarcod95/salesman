@@ -232,6 +232,17 @@ class ScheduleController extends Controller
      */
 
     public function todays(){
+
+        if(Auth::user()->level() < 8){
+
+            return Schedule::with('user','attendances')->whereHas('user' , function($q){
+                $q->whereHas('companies', function ($q){
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                });
+            })->where('date', Carbon\Carbon::now()->toDateString())->get();
+    
+        }
+
         return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
     }
 
@@ -242,6 +253,16 @@ class ScheduleController extends Controller
      */
 
     public function todayByUser(){
+
+        if(Auth::user()->level() < 8){
+            $schedule = Schedule::with('user','attendances')->whereHas('user' , function($q){
+                $q->whereHas('companies', function ($q){
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                });
+            })->where('date', Carbon\Carbon::now()->toDateString())->get();
+             
+            return  array ($schedule->groupBy('user_id'));
+        }
 
          $schedule = Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
          

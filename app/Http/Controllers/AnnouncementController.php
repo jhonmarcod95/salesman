@@ -37,6 +37,14 @@ class AnnouncementController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexData(){
+        if(Auth::user()->level() < 8){
+            return  Announcement::with('user')->whereHas('user' , function($q){
+                $q->whereHas('companies', function ($q){
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                });
+            })->orderBy('id','desc')->get();
+        }
+
         return  Announcement::with('user')->orderBy('id','desc')->get();
     }
 

@@ -46,11 +46,23 @@ class ExpenseController extends Controller
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
-
-        $expense = ExpensesEntry::with('user')
-                    ->whereDate('created_at', '>=',  $request->startDate)
-                    ->whereDate('created_at' ,'<=', $request->endDate)
-                    ->orderBy('id', 'desc')->get();
+        
+        if(Auth::user()->level() < 8){
+            $expense = ExpensesEntry::with('user')
+            ->whereHas('user' , function($q){
+                $q->whereHas('companies', function ($q){
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                });
+            })
+            ->whereDate('created_at', '>=',  $request->startDate)
+            ->whereDate('created_at' ,'<=', $request->endDate)
+            ->orderBy('id', 'desc')->get();
+        }else{
+            $expense = ExpensesEntry::with('user')
+                ->whereDate('created_at', '>=',  $request->startDate)
+                ->whereDate('created_at' ,'<=', $request->endDate)
+                ->orderBy('id', 'desc')->get();
+        }
 
         $new_expense = [];
         // Executive and VP Roles

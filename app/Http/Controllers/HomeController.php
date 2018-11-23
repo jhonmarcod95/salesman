@@ -26,18 +26,23 @@ class HomeController extends Controller
      */
     public function index()
     {
-        session(['header_text' => 'Dashboard']);
+        if(!Auth::user()->hasRole('hr')){
+            session(['header_text' => 'Dashboard']);
 
-        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
-        $notification = 0;  
-        foreach($message as $notif){
-
-            $ids = collect(json_decode($notif->seen, true))->pluck('id');
-            if(!$ids->contains(Auth::user()->id)){
-                $notification++;
+            $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+            $notification = 0;  
+            foreach($message as $notif){
+    
+                $ids = collect(json_decode($notif->seen, true))->pluck('id');
+                if(!$ids->contains(Auth::user()->id)){
+                    $notification++;
+                }
             }
+    
+            return view('home',compact('notification'));
         }
+        session(['header_text' => 'Attendance Report']);
 
-        return view('home',compact('notification'));
+        return view('attendance-report.index');
     }
 }
