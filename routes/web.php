@@ -20,6 +20,9 @@ Auth::routes();
 
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('logout', function(){
+    return redirect('/');
+  });
 
 // Authenticated Routes
 Route::group(['middleware' => 'auth'], function(){
@@ -139,14 +142,6 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // User
     Route::post('/change-password', 'UserController@changePassword');
 
-    // Attendance Report
-    Route::get('/attendance-report', 'AttendanceReportController@index')->name('report_list');
-    // fetch all Attendance Report
-    Route::get('/attendance-report-all', 'AttendanceReportController@indexData');
-    // fetch attendance report by date
-    Route::post('/attendance-report-bydate', 'AttendanceReportController@generateBydate');
-
-
     //Schedules
     // Fetch all todays schedule
     Route::get('/schedules-todays', 'ScheduleController@todays');
@@ -195,5 +190,16 @@ Route::group(['middleware' => ['auth', 'role:ap']], function(){
     Route::get('/payments', 'PaymentController@index');
     // Store payment expense
     Route::post('/payments', 'PaymentController@store');
+    // Fetch expense report by company
+    Route::get('/expense-by-company/{company}', 'ExpenseController@generateByCompany');
 
+});
+
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr']], function () {
+    // Attendance Report
+    Route::get('/attendance-report', 'AttendanceReportController@index')->name('report_list');
+    // fetch all Attendance Report
+    Route::get('/attendance-report-all', 'AttendanceReportController@indexData');
+    // fetch attendance report by date
+    Route::post('/attendance-report-bydate', 'AttendanceReportController@generateBydate');
 });

@@ -98,5 +98,14 @@ class RolesTableSeeder extends Seeder
             ]);
         }
 
+        if (Role::where('name', '=', 'Hr')->first() === null) {
+            $hrRole = Role::create([
+                'name'        => 'Hr',
+                'slug'        => 'hr',
+                'description' => 'Hr Role',
+                'level'       => 0,
+            ]);
+        }
+
     }
 }
