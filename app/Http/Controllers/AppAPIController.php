@@ -179,7 +179,8 @@ class AppAPIController extends Controller
 
     public function getSchedules() {
 
-        $schedules = Schedule::orderBy('id','DESC')
+        $schedules = Schedule::orderBy('id','ASC')
+                        ->where('date', '>=', Carbon::today())
                         ->where('user_id', Auth::user()->id)
                         ->take(25)
                         ->get();
@@ -287,6 +288,7 @@ class AppAPIController extends Controller
         $attendance->sign_out_longitude = $request->header('Longitude');
         $attendance->sign_out_speed = $request->header('Speed');
         $attendance->remarks = $request->header('Remarks');
+        $attendance->isSync = 1;
         $attendance->save();
 
         // update schedule
@@ -302,6 +304,95 @@ class AppAPIController extends Controller
     public function getCurrentUser()
     {
         return ucfirst(strtolower(explode(' ',trim(Auth::user()->name))[0]));
+    }
+
+    // Sync API
+
+    public function syncSignIn(Request $request)
+    {
+
+        file_put_contents(public_path('storage/attendance/') . $request->header('Sign-In-Image'), file_get_contents('php://input'));
+
+        $attendance = new Attendance;
+        $attendance->user_id = Auth::user()->id;
+        $attendance->schedule_id = $request->header('Schedule-Id');
+        $attendance->sign_in_image = 'attendance/'. $request->header('Sign-In-Image');
+        $attendance->sign_in = $request->header('Sign-In');
+        $attendance->sign_in_latitude = $request->header('Sign-In-Latitude');
+        $attendance->sign_in_longitude = $request->header('Sign-In-Longitude');
+        $attendance->sign_in_speed = $request->header('Sign-In-Speed');
+        $attendance->save();
+
+        $schedule = Schedule::find($request->header('Schedule-Id'));
+        $schedule->isCurrent =  1;
+        $schedule->save();
+
+        return $attendance;
+
+    }
+
+    public function syncSignOut(Request $request, Schedule $schedule)
+    {
+        $signOutImg = file_put_contents(public_path('storage/attendance/') . $request->header('Sign-Out-Image'), file_get_contents('php://input'));
+
+        // get assigned attendance
+        $attendance = Attendance::orderBy('id','desc')
+                        ->where('user_id', Auth::user()->id)
+                        ->where('schedule_id', $schedule->id)->first();
+
+        // update attendance
+        $attendance->sign_out_image = 'attendance/'. $request->header('Sign-Out-Image');
+        $attendance->sign_out = $request->header('Sign-Out');
+        $attendance->sign_out_latitude = $request->header('Sign-Out-Latitude');
+        $attendance->sign_out_longitude = $request->header('Sign-Out-Longitude');
+        $attendance->sign_out_speed = $request->header('Sign-Out-Speed');
+        $attendance->remarks = $request->header('Remarks');
+        $attendance->isSync = 1;
+        $attendance->save();
+
+        // update schedule
+        $schedule->isCurrent =  0;
+        $schedule->status = 1;
+        $schedule->save();
+
+        return $attendance;
+    }
+
+    public function syncAttendances(Request $request)
+    {
+
+        file_put_contents(public_path('storage/attendance/') . $request->header('Sign-In-Image'), file_get_contents('php://input'));
+        file_put_contents(public_path('storage/attendance/') . $request->header('Sign-Out-Image'), file_get_contents('php://input'));
+
+
+
+        // Storage::putFile($request->header('Sign-In-Image'), new File(public_path('storage/attendance/')));
+        // Storage::putFile($request->header('Sign-Out-Image'), new File(public_path('storage/attendance/')));
+
+        $attendance = new Attendance;
+        $attendance->user_id = Auth::user()->id;
+        $attendance->schedule_id = $request->header('Schedule-Id');
+        $attendance->sign_in_image = 'attendance/'. $request->header('Sign-In-Image');
+        $attendance->sign_in = $request->header('Sign-In');
+        $attendance->sign_in_latitude = $request->header('Sign-In-Latitude');
+        $attendance->sign_in_longitude = $request->header('Sign-In-Longitude');
+        $attendance->sign_in_speed = $request->header('Sign-In-Speed');
+        $attendance->sign_out_image = 'attendance/'. $request->header('Sign-Out-Image');
+        $attendance->sign_out = $request->header('Sign-Out');
+        $attendance->sign_out_latitude = $request->header('Sign-Out-Latitude');
+        $attendance->sign_out_longitude = $request->header('Sign-Out-Longitude');
+        $attendance->sign_out_speed = $request->header('Sign-Out-Speed');
+        $attendance->remarks = $request->header('Remarks');
+        $attendance->isSync = 1;
+        $attendance->save();
+
+        $schedule = Schedule::find($request->header('Schedule-Id'));
+        $schedule->isCurrent =  0;
+        $schedule->status = 1;
+        $schedule->save();
+
+        return $attendance;
+
     }
 
 

@@ -45,6 +45,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     //Attendance
     Route::post('attendances/signin','AppAPIController@signIn');
     Route::post('attendances/signout/{schedule}','AppAPIController@signOut');
+    Route::post('attendances/sync/signin','AppAPIController@syncSignIn');
+    Route::post('attendances/sync/signout/{schedule}','AppAPIController@syncSignOut');
+    Route::post('attendances/sync','AppAPIController@syncAttendances');
 
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');
