@@ -47,7 +47,8 @@ class ExpenseController extends Controller
             'endDate' => 'required|after_or_equal:startDate'
         ]);
         
-        if(Auth::user()->level() < 8){
+        if(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap')){
+            
             $expense = ExpensesEntry::with('user')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
@@ -66,7 +67,7 @@ class ExpenseController extends Controller
 
         $new_expense = [];
         // Executive and VP Roles
-        if(Auth::user()->level() >= 6){
+        if(Auth::user()->level() >= 6 || Auth::user()->hasRole('ap')){
             $new_expense = $expense; 
         }else{
             foreach($expense->pluck('user') as $key => $value){
@@ -82,7 +83,24 @@ class ExpenseController extends Controller
         }
         return $new_expense;
     }
- 
+
+    /**
+     * Get all Expenses by company
+     *
+     * @return \Illuminate\Http\Response
+     */
+    
+    public function generateByCompany($company){
+        $expense = ExpensesEntry::with('user')
+        ->whereHas('user' , function($q) use($company){
+            $q->whereHas('companies', function ($q) use($company){
+                $q->where('company_id', $company);
+            });
+        })->orderBy('id', 'desc')->get();
+
+        return $expense;
+    }
+
     /**
      * Show Expense page
      *

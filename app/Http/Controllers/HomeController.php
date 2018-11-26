@@ -26,7 +26,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if(!Auth::user()->hasRole('hr')){
+        if(!Auth::user()->hasRole('hr') && !Auth::user()->hasRole('ap')){
             session(['header_text' => 'Dashboard']);
 
             $message = Message::where('user_id', '!=', Auth::user()->id)->get();
@@ -40,9 +40,16 @@ class HomeController extends Controller
             }
     
             return view('home',compact('notification'));
-        }
-        session(['header_text' => 'Attendance Report']);
+        }elseif(Auth::user()->hasRole('ap')){
+            session(['header_text' => 'Payment']);
 
-        return view('attendance-report.index');
+            return view('payment.index');
+
+        }else{
+            session(['header_text' => 'Attendance Report']);
+
+            return view('attendance-report.index');
+        }
+
     }
 }

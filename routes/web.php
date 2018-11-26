@@ -190,6 +190,8 @@ Route::group(['middleware' => ['auth', 'role:ap']], function(){
     Route::get('/payments', 'PaymentController@index');
     // Store payment expense
     Route::post('/payments', 'PaymentController@store');
+    // Fetch expense report by company
+    Route::get('/expense-by-company/{company}', 'ExpenseController@generateByCompany');
 
 });
 

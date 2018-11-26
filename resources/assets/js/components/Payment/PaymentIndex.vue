@@ -22,14 +22,23 @@
                                         <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="role">Company</label>
+                                        <select class="form-control" v-model="company" @change="fetchExpenseByCompany">
+                                            <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
+                                        </select>
+                                        <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="start_date" class="form-control-label">Start Date</label> 
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">End Date</label> 
                                         <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
@@ -67,7 +76,7 @@
                                         </td>
                                         <td>{{ expense.user.name }}</td>
                                         <td>{{ expense.expenses.split(',').length  }}</td>
-                                        <td>{{ moment(expense.created_at).format('ll') }}</td>
+                                        <td>{{ moment(expense.created_at).format('LLL') }}</td>
                                         <td>PHP {{ expense.totalExpenses.toFixed(2) }}</td>
                                     </tr>
                                 </tbody>
@@ -140,7 +149,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-round btn-fill" @click="payExpenses(expenses_id,expenseByTsr[0].user_id)">Submit</button>
+                    <button type="button" class="btn btn-primary btn-round btn-fill" v-if="submit" @click="payExpenses(expenses_id,expenseByTsr[0].user_id)">Submit</button>
                 </div>
                 </div>
             </div>
@@ -160,6 +169,9 @@ export default {
             endDate: '',
             tsrName: '',
             date: '',
+            submit: '',
+            companies: [],
+            company: '',
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -167,13 +179,22 @@ export default {
         }
     },
     created(){
-
+        this.fetchCompanies();
     },
     methods:{
         moment,
         noImage(event){
             event.target.src = window.location.origin+'/img/brand/no-image.png';
         },
+        fetchCompanies(){
+            axios.get('/companies-all')
+            .then(response => { 
+                this.companies = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        }, 
         fetchExpenses(){
             axios.post('/expense-report-bydate', {
                 startDate: this.startDate,
@@ -194,6 +215,8 @@ export default {
                 this.expenseByTsr = response.data;
                 this.tsrName = name;
                 this.date = created;
+                var array = this.expenseByTsr.filter(item => item.payments == null);
+                this.submit = array.length > 0 ? true : false;
                 $('#viewModal').modal('show');
             })
             .catch(error => {
@@ -212,6 +235,16 @@ export default {
            .catch(error => { 
                this.errors= error.response.data.errors;
            })
+        },
+        fetchExpenseByCompany(){
+            axios.get(`/expense-by-company/${this.company}`)
+            .then(response => {
+                this.expenses = [];
+                this.expenses = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors
+            })
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;

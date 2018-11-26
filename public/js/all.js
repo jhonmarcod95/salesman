@@ -73878,7 +73878,7 @@ exports = module.exports = __webpack_require__(3)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -74074,6 +74074,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -74086,47 +74095,65 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             endDate: '',
             tsrName: '',
             date: '',
+            submit: '',
+            companies: [],
+            company: '',
             errors: [],
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10
         };
     },
-    created: function created() {},
+    created: function created() {
+        this.fetchCompanies();
+    },
 
     methods: {
         moment: __WEBPACK_IMPORTED_MODULE_0_moment___default.a,
         noImage: function noImage(event) {
             event.target.src = window.location.origin + '/img/brand/no-image.png';
         },
-        fetchExpenses: function fetchExpenses() {
+        fetchCompanies: function fetchCompanies() {
             var _this = this;
+
+            axios.get('/companies-all').then(function (response) {
+                _this.companies = response.data;
+            }).catch(function (error) {
+                _this.errors = error.response.data.errors;
+            });
+        },
+        fetchExpenses: function fetchExpenses() {
+            var _this2 = this;
 
             axios.post('/expense-report-bydate', {
                 startDate: this.startDate,
                 endDate: this.endDate
             }).then(function (response) {
-                _this.expenses = response.data;
-                _this.errors = [];
-            }).catch(function (error) {
-                _this.errors = error.response.data.errors;
-            });
-        },
-        fetchExpenseByTsr: function fetchExpenseByTsr(id, name, created) {
-            var _this2 = this;
-
-            this.errors = [];
-            axios.get('/expense-report/' + id).then(function (response) {
-                _this2.expenseByTsr = response.data;
-                _this2.tsrName = name;
-                _this2.date = created;
-                $('#viewModal').modal('show');
+                _this2.expenses = response.data;
+                _this2.errors = [];
             }).catch(function (error) {
                 _this2.errors = error.response.data.errors;
             });
         },
-        payExpenses: function payExpenses(expenseId, userId) {
+        fetchExpenseByTsr: function fetchExpenseByTsr(id, name, created) {
             var _this3 = this;
+
+            this.errors = [];
+            axios.get('/expense-report/' + id).then(function (response) {
+                _this3.expenseByTsr = response.data;
+                _this3.tsrName = name;
+                _this3.date = created;
+                var array = _this3.expenseByTsr.filter(function (item) {
+                    return item.payments == null;
+                });
+                _this3.submit = array.length > 0 ? true : false;
+                $('#viewModal').modal('show');
+            }).catch(function (error) {
+                _this3.errors = error.response.data.errors;
+            });
+        },
+        payExpenses: function payExpenses(expenseId, userId) {
+            var _this4 = this;
 
             axios.post('/payments', {
                 expenseId: expenseId,
@@ -74135,7 +74162,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 $('#viewModal').modal('hide');
                 alert('Expense Successfully paid');
             }).catch(function (error) {
-                _this3.errors = error.response.data.errors;
+                _this4.errors = error.response.data.errors;
+            });
+        },
+        fetchExpenseByCompany: function fetchExpenseByCompany() {
+            var _this5 = this;
+
+            axios.get('/expense-by-company/' + this.company).then(function (response) {
+                _this5.expenses = [];
+                _this5.expenses = response.data;
+            }).catch(function (error) {
+                _this5.errors = error.response.data.errors;
             });
         },
         setPage: function setPage(pageNumber) {
@@ -74153,11 +74190,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     computed: {
         filteredExpenses: function filteredExpenses() {
-            var _this4 = this;
+            var _this6 = this;
 
             var self = this;
             return self.expenses.filter(function (expense) {
-                return expense.user.name.toLowerCase().includes(_this4.keywords.toLowerCase());
+                return expense.user.name.toLowerCase().includes(_this6.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -74509,7 +74546,66 @@ var render = function() {
                   ])
                 ]),
                 _vm._v(" "),
-                _c("div", { staticClass: "col-md-3" }, [
+                _c("div", { staticClass: "col-md-2" }, [
+                  _c("div", { staticClass: "form-group" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "form-control-label",
+                        attrs: { for: "role" }
+                      },
+                      [_vm._v("Company")]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.company,
+                            expression: "company"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: [
+                            function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.company = $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            },
+                            _vm.fetchExpenseByCompany
+                          ]
+                        }
+                      },
+                      _vm._l(_vm.companies, function(company, c) {
+                        return _c(
+                          "option",
+                          { key: c, domProps: { value: company.id } },
+                          [_vm._v(" " + _vm._s(company.name))]
+                        )
+                      })
+                    ),
+                    _vm._v(" "),
+                    _vm.errors.company
+                      ? _c("span", { staticClass: "text-danger" }, [
+                          _vm._v(_vm._s(_vm.errors.company[0]))
+                        ])
+                      : _vm._e()
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-2" }, [
                   _c("div", { staticClass: "form-group" }, [
                     _c(
                       "label",
@@ -74550,7 +74646,7 @@ var render = function() {
                   ])
                 ]),
                 _vm._v(" "),
-                _c("div", { staticClass: "col-md-3" }, [
+                _c("div", { staticClass: "col-md-2" }, [
                   _c("div", { staticClass: "form-group" }, [
                     _c(
                       "label",
@@ -74658,7 +74754,7 @@ var render = function() {
                             _c("td", [
                               _vm._v(
                                 _vm._s(
-                                  _vm.moment(expense.created_at).format("ll")
+                                  _vm.moment(expense.created_at).format("LLL")
                                 )
                               )
                             ]),
@@ -74897,22 +74993,24 @@ var render = function() {
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "modal-footer" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-primary btn-round btn-fill",
-                    attrs: { type: "button" },
-                    on: {
-                      click: function($event) {
-                        _vm.payExpenses(
-                          _vm.expenses_id,
-                          _vm.expenseByTsr[0].user_id
-                        )
-                      }
-                    }
-                  },
-                  [_vm._v("Submit")]
-                )
+                _vm.submit
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary btn-round btn-fill",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            _vm.payExpenses(
+                              _vm.expenses_id,
+                              _vm.expenseByTsr[0].user_id
+                            )
+                          }
+                        }
+                      },
+                      [_vm._v("Submit")]
+                    )
+                  : _vm._e()
               ])
             ])
           ]

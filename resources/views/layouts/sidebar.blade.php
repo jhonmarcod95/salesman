@@ -76,7 +76,7 @@
                 </div>
             </form>
             <!-- Navigation -->
-            @if(!Auth::user()->hasRole('hr'))
+            @if(!Auth::user()->hasRole('hr') && !Auth::user()->hasRole('ap'))
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('/home') }}">
@@ -162,22 +162,23 @@
                             </ul>
                         </div>
                     </li>
-                    @if(Auth::user()->hasRole('ap'))
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('/payments') }}">
-                            <i class="ni ni-briefcase-24 text-yellow"></i> Payment
-                        </a>
-                    </li>
-                    @endif
-
                 </ul>
             @else
             <ul class="navbar-nav">
+                @if(Auth::user()->hasRole('hr'))
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/attendance-report') }}">
                         <i class="ni ni-books text-gray"></i> Attendance Report
                     </a>
                 </li>
+                @endif
+                @if(Auth::user()->hasRole('ap'))
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/payments') }}">
+                        <i class="ni ni-briefcase-24 text-yellow"></i> Payment
+                    </a>
+                </li>
+                @endif
             </ul>
             @endif
             {{--<!-- Divider -->--}}
