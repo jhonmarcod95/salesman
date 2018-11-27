@@ -73878,7 +73878,7 @@ exports = module.exports = __webpack_require__(3)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -74122,38 +74122,25 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this.errors = error.response.data.errors;
             });
         },
-        fetchExpenses: function fetchExpenses() {
+        fetchExpenseByTsr: function fetchExpenseByTsr(id, name, created) {
             var _this2 = this;
 
-            axios.post('/expense-report-bydate', {
-                startDate: this.startDate,
-                endDate: this.endDate
-            }).then(function (response) {
-                _this2.expenses = response.data;
-                _this2.errors = [];
+            this.errors = [];
+            axios.get('/expense-report/' + id).then(function (response) {
+                _this2.expenseByTsr = response.data;
+                _this2.tsrName = name;
+                _this2.date = created;
+                var array = _this2.expenseByTsr.filter(function (item) {
+                    return item.payments == null;
+                });
+                _this2.submit = array.length > 0 ? true : false;
+                $('#viewModal').modal('show');
             }).catch(function (error) {
                 _this2.errors = error.response.data.errors;
             });
         },
-        fetchExpenseByTsr: function fetchExpenseByTsr(id, name, created) {
-            var _this3 = this;
-
-            this.errors = [];
-            axios.get('/expense-report/' + id).then(function (response) {
-                _this3.expenseByTsr = response.data;
-                _this3.tsrName = name;
-                _this3.date = created;
-                var array = _this3.expenseByTsr.filter(function (item) {
-                    return item.payments == null;
-                });
-                _this3.submit = array.length > 0 ? true : false;
-                $('#viewModal').modal('show');
-            }).catch(function (error) {
-                _this3.errors = error.response.data.errors;
-            });
-        },
         payExpenses: function payExpenses(expenseId, userId) {
-            var _this4 = this;
+            var _this3 = this;
 
             axios.post('/payments', {
                 expenseId: expenseId,
@@ -74162,17 +74149,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 $('#viewModal').modal('hide');
                 alert('Expense Successfully paid');
             }).catch(function (error) {
-                _this4.errors = error.response.data.errors;
+                _this3.errors = error.response.data.errors;
             });
         },
-        fetchExpenseByCompany: function fetchExpenseByCompany() {
-            var _this5 = this;
+        fetchExpenses: function fetchExpenses() {
+            var _this4 = this;
 
-            axios.get('/expense-by-company/' + this.company).then(function (response) {
-                _this5.expenses = [];
-                _this5.expenses = response.data;
+            axios.post('/expense-by-company', {
+                startDate: this.startDate,
+                endDate: this.endDate,
+                company: this.company
+            }).then(function (response) {
+                _this4.expenses = response.data;
+                _this4.errors = [];
             }).catch(function (error) {
-                _this5.errors = error.response.data.errors;
+                _this4.errors = error.response.data.errors;
             });
         },
         setPage: function setPage(pageNumber) {
@@ -74190,11 +74181,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     computed: {
         filteredExpenses: function filteredExpenses() {
-            var _this6 = this;
+            var _this5 = this;
 
             var self = this;
             return self.expenses.filter(function (expense) {
-                return expense.user.name.toLowerCase().includes(_this6.keywords.toLowerCase());
+                return expense.user.name.toLowerCase().includes(_this5.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -74570,22 +74561,19 @@ var render = function() {
                         ],
                         staticClass: "form-control",
                         on: {
-                          change: [
-                            function($event) {
-                              var $$selectedVal = Array.prototype.filter
-                                .call($event.target.options, function(o) {
-                                  return o.selected
-                                })
-                                .map(function(o) {
-                                  var val = "_value" in o ? o._value : o.value
-                                  return val
-                                })
-                              _vm.company = $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            },
-                            _vm.fetchExpenseByCompany
-                          ]
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.company = $event.target.multiple
+                              ? $$selectedVal
+                              : $$selectedVal[0]
+                          }
                         }
                       },
                       _vm._l(_vm.companies, function(company, c) {
@@ -86583,9 +86571,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['userRole'],
     data: function data() {
         return {
             tsrs: [],
@@ -86599,28 +86597,40 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             signInLink: '',
             signOutLink: '',
             errors: [],
+            companies: [],
+            company: '',
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10
         };
     },
     created: function created() {
-        // this.fetchTsrs();
+        this.fetchCompanies();
     },
 
     methods: {
         moment: __WEBPACK_IMPORTED_MODULE_0_moment___default.a,
-        fetchSchedules: function fetchSchedules() {
+        fetchCompanies: function fetchCompanies() {
             var _this = this;
+
+            axios.get('/companies-all').then(function (response) {
+                _this.companies = response.data;
+            }).catch(function (error) {
+                _this.errors = error.response.data.errors;
+            });
+        },
+        fetchSchedules: function fetchSchedules() {
+            var _this2 = this;
 
             axios.post('/attendance-report-bydate', {
                 startDate: this.startDate,
-                endDate: this.endDate
+                endDate: this.endDate,
+                company: this.company
             }).then(function (response) {
-                _this.schedules = response.data;
-                _this.errors = [];
+                _this2.schedules = response.data;
+                _this2.errors = [];
             }).catch(function (error) {
-                _this.errors = error.response.data.errors;
+                _this2.errors = error.response.data.errors;
             });
         },
 
@@ -86667,11 +86677,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     computed: {
         filteredSchedules: function filteredSchedules() {
-            var _this2 = this;
+            var _this3 = this;
 
             var self = this;
             return self.schedules.filter(function (schedule) {
-                return schedule.user.name.toLowerCase().includes(_this2.keywords.toLowerCase());
+                return schedule.user.name.toLowerCase().includes(_this3.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -86752,7 +86762,65 @@ var render = function() {
                   ])
                 ]),
                 _vm._v(" "),
-                _c("div", { staticClass: "col-md-3" }, [
+                _vm.userRole == 1 || _vm.userRole == 2 || _vm.userRole == 10
+                  ? _c("div", { staticClass: "col-md-2" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "form-control-label",
+                            attrs: { for: "role" }
+                          },
+                          [_vm._v("Company")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.company,
+                                expression: "company"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.company = $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              }
+                            }
+                          },
+                          _vm._l(_vm.companies, function(company, c) {
+                            return _c(
+                              "option",
+                              { key: c, domProps: { value: company.id } },
+                              [_vm._v(" " + _vm._s(company.name))]
+                            )
+                          })
+                        ),
+                        _vm._v(" "),
+                        _vm.errors.company
+                          ? _c("span", { staticClass: "text-danger" }, [
+                              _vm._v(_vm._s(_vm.errors.company[0]))
+                            ])
+                          : _vm._e()
+                      ])
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-2" }, [
                   _c("div", { staticClass: "form-group" }, [
                     _c(
                       "label",
@@ -86793,7 +86861,7 @@ var render = function() {
                   ])
                 ]),
                 _vm._v(" "),
-                _c("div", { staticClass: "col-md-3" }, [
+                _c("div", { staticClass: "col-md-2" }, [
                   _c("div", { staticClass: "form-group" }, [
                     _c(
                       "label",
