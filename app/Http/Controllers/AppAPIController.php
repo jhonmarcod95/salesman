@@ -7,11 +7,13 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\APIExpenseResult as expenseResult;
 use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Http\Resources\ExpensesEntriesResult as ExpensesEntriesResult;
+use App\Http\Resources\PaymentsResource as PaymentsResource;
 use App\Expense;
 use App\ExpensesEntry;
 use App\ExpensesType;
 use App\Schedule;
 use App\Attendance;
+use App\Payment;
 use Carbon\Carbon;
 use DB;
 
@@ -392,6 +394,19 @@ class AppAPIController extends Controller
         $schedule->save();
 
         return $attendance;
+
+    }
+
+    // Payments API
+
+    public function getPayments()
+    {
+        $payments = Expense::where('user_id',Auth::user()->id)
+                        ->orderBy('id','DESC')
+                        ->take(25)
+                        ->get();
+
+        return PaymentsResource::collection($payments);
 
     }
 

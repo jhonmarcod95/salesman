@@ -73,5 +73,14 @@ class User extends Authenticatable implements Auditable
     public function companies() {
         return $this->belongsToMany(Company::class);
     }
-    
+
+    public function requestSchedules() {
+        return $this->hasMany(RequestSchedule::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
 }
