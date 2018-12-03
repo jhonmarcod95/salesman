@@ -69,7 +69,7 @@ class ScheduleController extends Controller
         }
         /* ********************************************************/
 
-        /* search specific customer (sap bdcsased only) **************/
+        /* search specific customer (sap based only) **************/
         if($request->exists('customer_codes')){
             $customer_codes = $request->customer_codes;
         }
