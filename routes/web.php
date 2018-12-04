@@ -168,19 +168,6 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::post('/expenses', 'ExpenseController@store');
     // Update Expenses
     Route::patch('/expenses/{expensesType}', 'ExpenseController@update');
-
-    // Companies
-    Route::get('/companies', 'CompanyController@index');
-    // Fetch all companies
-    Route::get('/companies-all', 'CompanyController@indexData');
-    // Add company
-    Route::post('/company', 'CompanyController@store');
-    // Update company
-    Route::patch('/company/{company}', 'CompanyController@update');
-    // Delete company
-    Route::delete('/company/{id}', 'CompanyController@destroy');
-
-
 });
 
 // AP Routes
@@ -191,10 +178,11 @@ Route::group(['middleware' => ['auth', 'role:ap']], function(){
     // Store payment expense
     Route::post('/payments', 'PaymentController@store');
     // Fetch expense report by company
-    Route::get('/expense-by-company/{company}', 'ExpenseController@generateByCompany');
+    Route::post('/expense-by-company', 'ExpenseController@generateByCompany');
 
 });
 
+// Hr routes
 Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr']], function () {
     // Attendance Report
     Route::get('/attendance-report', 'AttendanceReportController@index')->name('report_list');
@@ -202,4 +190,15 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/attendance-report-all', 'AttendanceReportController@indexData');
     // fetch attendance report by date
     Route::post('/attendance-report-bydate', 'AttendanceReportController@generateBydate');
+
+    // Companies
+    Route::get('/companies', 'CompanyController@index');
+    // Fetch all companies
+    Route::get('/companies-all', 'CompanyController@indexData');
+    // Add company  
+    Route::post('/company', 'CompanyController@store');
+    // Update company
+    Route::patch('/company/{company}', 'CompanyController@update');
+    // Delete company
+    Route::delete('/company/{id}', 'CompanyController@destroy');
 });

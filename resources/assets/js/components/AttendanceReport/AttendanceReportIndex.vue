@@ -22,14 +22,23 @@
                                         <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="role">Company</label>
+                                        <select class="form-control" v-model="company">
+                                            <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
+                                        </select>
+                                        <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="start_date" class="form-control-label">Start Date</label> 
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">End Date</label> 
                                         <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
@@ -149,6 +158,7 @@
 <script>
 import moment from 'moment';
 export default {
+    props: ['userRole'],
     data(){
         return{
             tsrs: [],
@@ -162,20 +172,32 @@ export default {
             signInLink: '',
             signOutLink: '',
             errors: [],
+            companies: [],
+            company: '',
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
         }
     },
     created(){
-        // this.fetchTsrs();
+        this.fetchCompanies();
     },
     methods:{
         moment,
+        fetchCompanies(){
+            axios.get('/companies-all')
+            .then(response => {
+                this.companies = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
         fetchSchedules(){
             axios.post('/attendance-report-bydate', {
                 startDate: this.startDate,
-                endDate: this.endDate
+                endDate: this.endDate,
+                company: this.company
             })
             .then(response => {
                 this.schedules = response.data;
