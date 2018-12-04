@@ -26,6 +26,7 @@ class CreateRequestSchedulesTable extends Migration
             $table->integer('status');
             $table->string('remarks');
             $table->boolean('isCurrent')->default(0);
+            $table->boolean('isApproved')->default(0);
             $table->timestamps();
         });
     }
