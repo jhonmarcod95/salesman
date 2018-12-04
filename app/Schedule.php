@@ -35,7 +35,7 @@ class Schedule extends Model implements Auditable
             ->join('background_colors', 'background_colors.id', 'schedule_types.color')
             ->join('role_user', 'role_user.user_id', 'users.id')
             ->join('roles', 'roles.id', 'role_user.role_id')
-            ->where('roles.level', '<', $login_level)
+            ->where('roles.level', '<=', $login_level)
             ->whereBetween('date', [$from, $to])
             ->whereIn('schedules.user_id', $uids)
             ->whereIn('code', $codes)
