@@ -14,6 +14,7 @@ use App\ExpensesType;
 use App\Schedule;
 use App\Attendance;
 use App\Payment;
+use App\RequestSchedule;
 use Carbon\Carbon;
 use DB;
 
@@ -140,17 +141,18 @@ class AppAPIController extends Controller
         Expense::whereIn('id', $request->input('expenseId'))
                 ->update(['expenses_entry_id' => $expensesEntries->id]);
 
-        return $expensesEntries;
+        return new ExpensesEntriesResult(ExpensesEntry::find($expensesEntries->id));
 
     }
 
     public function expensesEntries()
     {
-        $expensesEntries = ExpensesEntry::where('user_id', Auth::user()->id)
-                        ->orderBy('id','desc')
-                        ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
-                        ->take(20)
-                        ->get();
+
+        $expensesEntries = ExpensesEntry::
+                            where('user_id', Auth::user()->id)
+                            ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
+                            ->has('expensesModel')
+                            ->get();
 
         return ExpensesEntriesResult::collection($expensesEntries);
 
@@ -401,7 +403,9 @@ class AppAPIController extends Controller
 
     public function getPayments()
     {
+        // Fetch expenses from last week's start of the week up to current week's end week
         $payments = Expense::where('user_id',Auth::user()->id)
+                        ->whereBetween('created_at', [Carbon::today()->subWeek()->startOfWeek()->toDateString(), Carbon::today()->endOfWeek()->toDateString()])
                         ->orderBy('id','DESC')
                         ->take(25)
                         ->get();

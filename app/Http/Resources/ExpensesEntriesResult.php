@@ -18,8 +18,8 @@ class ExpensesEntriesResult extends JsonResource
         return [
             'id' => $this->id,
             'date_created' => Carbon::parse($this->created_at)->format('Y-m-d'),
-            'totalEntries' => count(json_decode($this->expenses)),
-            'totalExpenses' => number_format($this->totalExpenses, 2),
+            'totalEntries' => $this->expensesModel->count(),
+            'totalExpenses' => number_format($this->expensesModel->sum('amount'),2),
         ];
     }
 }
