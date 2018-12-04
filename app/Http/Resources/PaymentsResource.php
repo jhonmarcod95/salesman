@@ -23,7 +23,8 @@ class PaymentsResource extends JsonResource
             'types' => $this->expensesType->name,
             'attachment' => $this->attachment,
             'expenses_type_id' => $this->expenses_type_id,
-            'is_paid' => !empty($this->payments) ? 1 :0
+            'is_paid' => !empty($this->payments) ? 1 :0,
+            'created_at' => Carbon::parse($this->created_at)->format('Y-m-d')
         ];
     }
 }
