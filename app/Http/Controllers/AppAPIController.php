@@ -152,6 +152,7 @@ class AppAPIController extends Controller
                             where('user_id', Auth::user()->id)
                             ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
                             ->has('expensesModel')
+                            ->orderBy('id','DESC')
                             ->get();
 
         return ExpensesEntriesResult::collection($expensesEntries);
@@ -407,7 +408,7 @@ class AppAPIController extends Controller
         $payments = Expense::where('user_id',Auth::user()->id)
                         ->whereBetween('created_at', [Carbon::today()->subWeek()->startOfWeek()->toDateString(), Carbon::today()->endOfWeek()->toDateString()])
                         ->orderBy('id','DESC')
-                        ->take(25)
+                        // ->take(25)
                         ->get();
 
         return PaymentsResource::collection($payments);

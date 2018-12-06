@@ -23,8 +23,8 @@ class CreateRequestSchedulesTable extends Migration
             $table->date('date');
             $table->time('start_time');
             $table->time('end_time');
-            $table->integer('status');
-            $table->string('remarks');
+            $table->integer('status')->default(2);
+            $table->string('remarks')->nullable();
             $table->boolean('isCurrent')->default(0);
             $table->boolean('isApproved')->default(0);
             $table->timestamps();
