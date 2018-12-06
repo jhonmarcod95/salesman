@@ -17,6 +17,9 @@ window.Vue = require('vue');
 
 // Vue.component('example-component', require('./components/ExampleComponent.vue'));
 
+// Schedule
+Vue.component('request-schedule-index', require('./components/Schedule/RequestScheduleIndex.vue'));
+
 // Payment
 Vue.component('payment-index', require('./components/Payment/PaymentIndex.vue'));
 

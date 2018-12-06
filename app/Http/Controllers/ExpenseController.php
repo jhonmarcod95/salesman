@@ -57,11 +57,15 @@ class ExpenseController extends Controller
             })
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
+            ->has('expensesModel')
+            ->withCount('expensesModel')
             ->orderBy('id', 'desc')->get();
         }else{
             $expense = ExpensesEntry::with('user')
                 ->whereDate('created_at', '>=',  $request->startDate)
                 ->whereDate('created_at' ,'<=', $request->endDate)
+                ->has('expensesModel')
+                ->withCount('expensesModel')
                 ->orderBy('id', 'desc')->get();
         }
 
@@ -106,10 +110,15 @@ class ExpenseController extends Controller
                 });
             })->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
+            ->has('expensesModel')
+            ->withCount('expensesModel')
             ->orderBy('id', 'desc')->get();
         }else{
-            $expense = ExpensesEntry::with('user')->whereDate('created_at', '>=',  $request->startDate)
+            $expense = ExpensesEntry::with('user')
+            ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
+            ->has('expensesModel')
+            ->withCount('expensesModel')
             ->orderBy('id', 'desc')->get();
         }
 
@@ -180,13 +189,9 @@ class ExpenseController extends Controller
      */
     public function show($id)
     {
-        // return array (ExpensesEntry::with('user')->findOrFail($id));
-
-        $expenseEntry =  ExpensesEntry::findOrFail($id);
-        $ids = collect(json_decode($expenseEntry->expenses, true))->pluck('expense_id');
-        $expense = Expense::with('expensesType', 'payments')->find($ids);
-
-        return $expense;
+        return Expense::with('expensesType', 'payments')->whereHas('expensesEntry', function($q) use ($id){
+            $q->where('id', $id);
+        })->get();
     }
 
     /**

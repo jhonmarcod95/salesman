@@ -162,6 +162,25 @@
                             </ul>
                         </div>
                     </li>
+                    @if(Auth::user()->level() > 5)
+                    <li>
+                        <a data-toggle="collapse" href="#Request" class="collapsed" aria-expanded="false">
+                            <div class="nav-link">
+                                <i class="ni ni-book-bookmark text-red"></i>
+                                <span>Request</span>
+                            </div>
+                        </a>
+                        <div class="collapse space-left" id="Request" style="">
+                            <ul class="nav" style="list-style-type: none;">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/change-schedule') }}">
+                                        <i class="ni ni-books text-gray"></i> Change Schedule
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    @endif
                 </ul>
             @else
             <ul class="navbar-nav">
