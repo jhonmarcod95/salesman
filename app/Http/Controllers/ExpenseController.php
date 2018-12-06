@@ -90,13 +90,28 @@ class ExpenseController extends Controller
      * @return \Illuminate\Http\Response
      */
     
-    public function generateByCompany($company){
-        $expense = ExpensesEntry::with('user')
-        ->whereHas('user' , function($q) use($company){
-            $q->whereHas('companies', function ($q) use($company){
-                $q->where('company_id', $company);
-            });
-        })->orderBy('id', 'desc')->get();
+    public function generateByCompany(Request $request){
+
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate',
+        ]);
+        
+        $company = $request->company;
+        if($company){
+            $expense = ExpensesEntry::with('user')
+            ->whereHas('user' , function($q) use($company){
+                $q->whereHas('companies', function ($q) use($company){
+                    $q->where('company_id', $company);
+                });
+            })->whereDate('created_at', '>=',  $request->startDate)
+            ->whereDate('created_at' ,'<=', $request->endDate)
+            ->orderBy('id', 'desc')->get();
+        }else{
+            $expense = ExpensesEntry::with('user')->whereDate('created_at', '>=',  $request->startDate)
+            ->whereDate('created_at' ,'<=', $request->endDate)
+            ->orderBy('id', 'desc')->get();
+        }
 
         return $expense;
     }

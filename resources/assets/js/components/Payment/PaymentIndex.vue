@@ -25,7 +25,7 @@
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label class="form-control-label" for="role">Company</label>
-                                        <select class="form-control" v-model="company" @change="fetchExpenseByCompany">
+                                        <select class="form-control" v-model="company">
                                             <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
                                         </select>
                                         <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
@@ -194,19 +194,6 @@ export default {
             .catch(error => { 
                 this.errors = error.response.data.errors;
             })
-        }, 
-        fetchExpenses(){
-            axios.post('/expense-report-bydate', {
-                startDate: this.startDate,
-                endDate: this.endDate
-            })
-            .then(response => {
-                this.expenses = response.data;
-                this.errors = []; 
-            })
-            .catch(error => {
-                this.errors = error.response.data.errors;
-            })
         },
         fetchExpenseByTsr(id,name,created){
             this.errors = [];
@@ -236,14 +223,18 @@ export default {
                this.errors= error.response.data.errors;
            })
         },
-        fetchExpenseByCompany(){
-            axios.get(`/expense-by-company/${this.company}`)
+        fetchExpenses(){
+            axios.post('/expense-by-company', {
+                startDate: this.startDate,
+                endDate: this.endDate,
+                company: this.company
+            })
             .then(response => {
-                this.expenses = [];
                 this.expenses = response.data;
+                this.errors = []; 
             })
             .catch(error => {
-                this.errors = error.response.data.errors
+                this.errors = error.response.data.errors;
             })
         },
         setPage(pageNumber) {

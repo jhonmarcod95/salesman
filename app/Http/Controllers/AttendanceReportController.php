@@ -59,6 +59,8 @@ class AttendanceReportController extends Controller
             'endDate' => 'required|after_or_equal:startDate'
         ]);
 
+        $company = $request->company;
+        
         if(Auth::user()->level() < 8 && !Auth::user()->hasRole('hr')){
             $schedule = Schedule::with('user', 'attendances')
             ->whereHas('user' , function($q){
@@ -71,6 +73,13 @@ class AttendanceReportController extends Controller
             ->orderBy('date', 'desc')->get();
         }else{
             $schedule = Schedule::with('user', 'attendances')
+            ->when($company, function ($query) use ($company) {
+                $query->whereHas('user', function($q) use ($company){
+                    $q->whereHas('companies', function ($q) use ($company){
+                        $q->where('company_id', $company);   
+                    });
+                });
+            })
             ->whereDate('date', '>=',  $request->startDate)
             ->whereDate('date' ,'<=', $request->endDate)
             ->orderBy('date', 'desc')->get();
