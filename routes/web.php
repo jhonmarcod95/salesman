@@ -204,3 +204,14 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Delete company
     Route::delete('/company/{id}', 'CompanyController@destroy');
 });
+
+// Request Routes
+
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp']], function () {
+    // Request schedules
+    Route::get('/change-schedule', 'ScheduleController@changeScheduleIndex');
+    // Fetch all companies
+    Route::post('/change-schedule-bydate', 'ScheduleController@changeScheduleIndexData');
+    // Disapproved request schedules
+    Route::post('/change-schedule-disapproved', 'ScheduleController@changeScheduleDisapproved');
+});
