@@ -66,6 +66,7 @@
                                     <th scope="col">Date</th>
                                     <th scope="col">Start time</th>
                                     <th scope="col">End time</th>
+                                    <th scope="col">Status</th>
                                 </tr>
                                 </thead>
                                 <tbody v-if="requests.length">
@@ -78,7 +79,7 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" href="#approveModal" data-toggle="modal" @click="getRequestId(requests)">Approve</a>
-                                                    <a class="dropdown-item" href="#disapproveModal" data-toggle="modal" @click="getRequestId(requests)">Disapproved</a>
+                                                    <a class="dropdown-item" href="#disapproveModal" data-toggle="modal" @click="getRequestId(requests)">Disapprove</a>
                                                 </div>
                                             </div>
                                             <div v-else></div>
@@ -91,6 +92,11 @@
                                         <td>{{ requests.date }}</td>
                                         <td>{{ requests.start_time }}</td>
                                         <td>{{ requests.end_time }}</td>
+                                        <td>
+                                            <span v-if="requests.isApproved == 0">PENDING</span>
+                                            <span class="text-green" v-else-if="requests.isApproved == 1">APPROVED</span>
+                                            <span class="text-danger" v-else-if="requests.isApproved == 2">DISAPPROVED</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                                 <tbody v-else>
@@ -141,7 +147,7 @@
                         </div>
                         <div class="modal-footer">
                             <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
-                            <button class="btn btn-warning" @click="approveSched(request)">Delete</button>
+                            <button class="btn btn-primary" @click="approveSched(request)">Approve</button>
                         </div>
                     </div>
                 </div>
@@ -168,7 +174,7 @@
                         </div>
                         <div class="modal-footer">
                             <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
-                            <button class="btn btn-warning" @click="disapproveSched(request)">Delete</button>
+                            <button class="btn btn-warning" @click="disApproveSched(request)">Disapprove</button>
                         </div>
                     </div>
                 </div>
@@ -227,7 +233,10 @@ export default {
                 address: request.address
             })
             .then(response => {
+                var index = this.requests.findIndex(item => item.id == this.request.id);
+                this.requests[index].isApproved = 1;
                 $('#approveModal').modal('hide');
+                alert('Schedule approved succesfully');
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -238,7 +247,10 @@ export default {
                 id: request.id
             })
             .then(response => { 
+                var index = this.requests.findIndex(item => item.id == this.request.id);
+                this.requests[index].isApproved = 2;
                 $('#disapproveModal').modal('hide');
+                alert('Schedule disapproved succesfully');
             })
             .catch(error => { 
                 this.errors = error.response.errors.data;

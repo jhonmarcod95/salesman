@@ -74028,6 +74028,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -74079,7 +74085,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 name: request.name,
                 address: request.address
             }).then(function (response) {
+                var index = _this2.requests.findIndex(function (item) {
+                    return item.id == _this2.request.id;
+                });
+                _this2.requests[index].isApproved = 1;
                 $('#approveModal').modal('hide');
+                alert('Schedule approved succesfully');
             }).catch(function (error) {
                 _this2.errors = error.response.data.errors;
             });
@@ -74090,7 +74101,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.post('/change-schedule-disapproved', {
                 id: request.id
             }).then(function (response) {
+                var index = _this3.requests.findIndex(function (item) {
+                    return item.id == _this3.request.id;
+                });
+                _this3.requests[index].isApproved = 2;
                 $('#disapproveModal').modal('hide');
+                alert('Schedule disapproved succesfully');
             }).catch(function (error) {
                 _this3.errors = error.response.errors.data;
             });
@@ -74409,7 +74425,7 @@ var render = function() {
                                               }
                                             }
                                           },
-                                          [_vm._v("Disapproved")]
+                                          [_vm._v("Disapprove")]
                                         )
                                       ]
                                     )
@@ -74431,7 +74447,23 @@ var render = function() {
                             _vm._v(" "),
                             _c("td", [_vm._v(_vm._s(requests.start_time))]),
                             _vm._v(" "),
-                            _c("td", [_vm._v(_vm._s(requests.end_time))])
+                            _c("td", [_vm._v(_vm._s(requests.end_time))]),
+                            _vm._v(" "),
+                            _c("td", [
+                              requests.isApproved == 0
+                                ? _c("span", [_vm._v("PENDING")])
+                                : requests.isApproved == 1
+                                  ? _c("span", { staticClass: "text-green" }, [
+                                      _vm._v("APPROVED")
+                                    ])
+                                  : requests.isApproved == 2
+                                    ? _c(
+                                        "span",
+                                        { staticClass: "text-danger" },
+                                        [_vm._v("DISAPPROVED")]
+                                      )
+                                    : _vm._e()
+                            ])
                           ])
                         })
                       )
@@ -74535,14 +74567,14 @@ var render = function() {
                   _c(
                     "button",
                     {
-                      staticClass: "btn btn-warning",
+                      staticClass: "btn btn-primary",
                       on: {
                         click: function($event) {
                           _vm.approveSched(_vm.request)
                         }
                       }
                     },
-                    [_vm._v("Delete")]
+                    [_vm._v("Approve")]
                   )
                 ])
               ])
@@ -74592,11 +74624,11 @@ var render = function() {
                       staticClass: "btn btn-warning",
                       on: {
                         click: function($event) {
-                          _vm.disapproveSched(_vm.request)
+                          _vm.disApproveSched(_vm.request)
                         }
                       }
                     },
-                    [_vm._v("Delete")]
+                    [_vm._v("Disapprove")]
                   )
                 ])
               ])
@@ -74642,7 +74674,9 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Start time")]),
         _vm._v(" "),
-        _c("th", { attrs: { scope: "col" } }, [_vm._v("End time")])
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("End time")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Status")])
       ])
     ])
   },
