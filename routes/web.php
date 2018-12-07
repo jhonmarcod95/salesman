@@ -141,6 +141,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     // User
     Route::post('/change-password', 'UserController@changePassword');
+    // Show change password page
+    Route::get('/user/change-password', 'UserController@changePasswordIndex')->name('change_password');
 
     //Schedules
     // Fetch all todays schedule
