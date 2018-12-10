@@ -17,6 +17,9 @@ window.Vue = require('vue');
 
 // Vue.component('example-component', require('./components/ExampleComponent.vue'));
 
+// Schedule
+Vue.component('request-schedule-index', require('./components/Schedule/RequestScheduleIndex.vue'));
+
 // Payment
 Vue.component('payment-index', require('./components/Payment/PaymentIndex.vue'));
 
@@ -35,7 +38,7 @@ Vue.component('announcement-index', require('./components/Announcement/Announcem
 Vue.component('user-index', require('./components/User/UserIndex.vue'));
 Vue.component('user-form', require('./components/User/UserForm.vue'));
 Vue.component('user-edit-form', require('./components/User/UserEditForm.vue'));
-
+Vue.component('user-change-password-index', require('./components/User/UserChangePasswordIndex.vue'));
 
 // Customer
 Vue.component('customer-index', require('./components/Customer/CustomerIndex.vue'));

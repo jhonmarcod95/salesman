@@ -10,6 +10,7 @@ use App\Schedule;
 use App\ScheduleTypes;
 use App\TechnicalSalesRepresentative;
 use App\Message;
+use App\RequestSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -104,7 +105,7 @@ class ScheduleController extends Controller
                 'customer_codes' => 'required',
             ]);
 
-            $customer_codes = $request->customer_codes;
+            $customer_codes = $request->has('id') ? array($request->customer_codes) :  $request->customer_codes;
 
 
             foreach ($customer_codes as $customer_code){
@@ -147,6 +148,10 @@ class ScheduleController extends Controller
             $schedule->save();
 
             $data[] = $this->dataOutput($request->date,$request->date,$request->user_id,$schedule->code);
+        }
+        
+        if($request->has('id')){
+           RequestSchedule::where('id', $request->id)->update(array('isApproved' => 1));
         }
 
         return response()->json($data);
@@ -267,6 +272,63 @@ class ScheduleController extends Controller
          $schedule = Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
          
         return  array ($schedule->groupBy('user_id'));
+    }
+
+
+    /**
+    *  show changed schedule 
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function changeScheduleIndex(){
+        session(['header_text' => 'Change Schedule']);
+
+        $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
+        return view('schedule.change-schedule', compact('notification'));
+    }
+
+   /**
+    * Get all request for changing of schedule
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function changeScheduleIndexData(Request $request){
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate'
+        ]);
+        
+        $request_status = $request->request_status;
+
+        return RequestSchedule::with('user')
+            ->when(Auth::user()->level() == 6 || Auth::user()->level() == 7 , function($q){
+                $q->whereHas('user', function ($q){
+                    $q->whereHas('companies', function($q){
+                        $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                    });
+                });
+            })
+            ->when($request_status || $request_status == '0'  , function($q) use ($request_status){
+                $q->where('isApproved', $request_status);
+            })
+            ->whereDate('created_at', '>=',  $request->startDate)
+            ->whereDate('created_at' ,'<=', $request->endDate)
+            ->orderBy('id','desc')->get();
+    }
+
+     /**
+    * Disapproving request for changing of schedule
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function changeScheduleDisapproved(Request $request){
+
+        $request->validate([
+            'id' => 'required'
+        ]);
+
+        return RequestSchedule::where('id', $request->id)->update(array('isApproved' => 2));
     }
 
 }

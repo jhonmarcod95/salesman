@@ -164,6 +164,26 @@ class UserController extends Controller
         }
     }
 
+    /*
+     * Return change password page
+     * 
+     * @return \Illuminate\Http\Response
+     */
+
+    public function changePasswordIndex(){
+        session(['header_text' => 'Change Password']);
+
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
+        return view('user.change-password', compact('notification'));
+    }
     
     /*
      * Change password 

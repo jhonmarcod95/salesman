@@ -75,7 +75,7 @@
                                             </div>
                                         </td>
                                         <td>{{ expense.user.name }}</td>
-                                        <td>{{ expense.expenses.split(',').length  }}</td>
+                                        <td>{{ expense.expenses_model_count }}</td>
                                         <td>{{ moment(expense.created_at).format('LLL') }}</td>
                                         <td>PHP {{ expense.totalExpenses.toFixed(2) }}</td>
                                     </tr>
