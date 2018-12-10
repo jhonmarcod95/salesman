@@ -16,6 +16,7 @@ class RequesetScheduleResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'code' => $this->code,
             'type' => $this->type,
             'name' => $this->name,
             'address' => $this->address,

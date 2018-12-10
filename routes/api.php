@@ -56,6 +56,8 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('customers','RequestsAPIController@customers');
     Route::get('requests','RequestsAPIController@index');
     Route::post('requests','RequestsAPIController@store');
+    Route::post('requests/{requestSchedule}','RequestsAPIController@update');
+    Route::delete('requests/{requestSchedule}','RequestsAPIController@destroy');
 
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');

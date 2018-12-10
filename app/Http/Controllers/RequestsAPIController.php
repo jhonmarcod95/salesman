@@ -41,16 +41,6 @@ class RequestsAPIController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -68,10 +58,10 @@ class RequestsAPIController extends Controller
         // If customer was selected
         if($request->input('type') == '1') {
             $this->validate($request, [
-                'customer_codes' => 'required',
+                'code' => 'required',
             ]);
             //Find Customer
-            $customer = Customer::where('customer_code', $request->customer_codes)->first();
+            $customer = Customer::where('customer_code', $request->code)->first();
         }
         // Mapping and Event Condition
         else {
@@ -85,7 +75,7 @@ class RequestsAPIController extends Controller
             $requestSchedule = new RequestSchedule();
             $requestSchedule->user_id = Auth::user()->id;
             $requestSchedule->type = $request->input('type');
-            $requestSchedule->code = $request->type == '1' ?  $request->input('customer_codes') : Schedule::createScheduleCode($request->input('type'));
+            $requestSchedule->code = $request->type == '1' ?  $request->input('code') : Schedule::createScheduleCode($request->input('type'));
             $requestSchedule->name = $request->type == '1' ? $customer->name : $request->input('name');
             $requestSchedule->address = $request->type == '1' ? $customer->town_city : $request->input('address');
             $requestSchedule->date = $request->input('date');
@@ -111,26 +101,50 @@ class RequestsAPIController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, RequestSchedule $requestSchedule)
     {
-        //
+        $this->validate($request, [
+            'type' => 'required',
+            'date' => 'required',
+            'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
+            'end_time' => 'required'
+        ]);
+
+        // If customer was selected
+        if($request->input('type') == '1') {
+            $this->validate($request, [
+                'code' => 'required',
+            ]);
+            //Find Customer
+            $customer = Customer::where('customer_code', $request->code)->first();
+        }
+        // Mapping and Event Condition
+        else {
+            $this->validate($request, [
+                'name' => 'required|max:191',
+                'address' => 'required|max:191',
+            ]);
+        }
+
+         // Store to Request Model
+        $requestSchedule->type = $request->input('type');
+        $requestSchedule->code = $request->type == '1' ?  $request->input('code') : Schedule::createScheduleCode($request->input('type'));
+        $requestSchedule->name = $request->type == '1' ? $customer->name : $request->input('name');
+        $requestSchedule->address = $request->type == '1' ? $customer->town_city : $request->input('address');
+        $requestSchedule->date = $request->input('date');
+        $requestSchedule->start_time = $request->input('start_time');
+        $requestSchedule->end_time = $request->input('end_time');
+        $requestSchedule->status = '2';
+        $requestSchedule->remarks = $request->input('remarks');
+        $requestSchedule->save();
+
+        return new RequesetScheduleResource(RequestSchedule::find($requestSchedule->id));
     }
 
     /**
@@ -139,8 +153,10 @@ class RequestsAPIController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(RequestSchedule $requestSchedule)
     {
-        //
+        $requestSchedule->delete();
+        return response('Accepted', 202 )->header('Content-Type', 'application/json');
+
     }
 }
