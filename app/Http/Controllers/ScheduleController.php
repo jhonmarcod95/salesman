@@ -10,6 +10,9 @@ use App\Schedule;
 use App\ScheduleTypes;
 use App\TechnicalSalesRepresentative;
 use App\Message;
+use DateInterval;
+use DatePeriod;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -64,8 +67,7 @@ class ScheduleController extends Controller
         }
         //search all
         else{
-            $user_ids = TechnicalSalesRepresentative::all()
-                ->pluck('user_id');
+            $user_ids = [];
         }
         /* ********************************************************/
 
@@ -90,64 +92,71 @@ class ScheduleController extends Controller
         $request->validate([
             'user_id' => 'required',
             'type' => 'required',
-            'date' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required|after_or_equal:start_date',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
         ]);
 
         $schedule_type = $request->type;
+        $schedule_code = Schedule::createScheduleCode($schedule_type); //for events and mapping customer
 
-        #Customer Visit
-        if($schedule_type == '1'){
+        $dates = $this->fetchDatePeriod($request->start_date, $request->end_date);
 
-            $request->validate([
-                'customer_codes' => 'required',
-            ]);
+        DB::beginTransaction();
+        foreach ($dates as $date){
+            #Customer Visit
+            if($schedule_type == '1'){
 
-            $customer_codes = $request->customer_codes;
+                $request->validate([
+                    'customer_codes' => 'required',
+                ]);
 
+                $customer_codes = $request->customer_codes;
 
-            foreach ($customer_codes as $customer_code){
-                $customer = Customer::where('customer_code', $customer_code)->first();
+                foreach ($customer_codes as $customer_code){
+                    $customer = Customer::where('customer_code', $customer_code)->first();
+
+                    $schedule = new Schedule();
+                    $schedule->user_id = $request->user_id;
+                    $schedule->type = $schedule_type;
+                    $schedule->code = $customer_code;
+                    $schedule->name = $customer->name;
+                    $schedule->address = $customer->town_city;
+                    $schedule->date = $date;
+                    $schedule->start_time = $request->start_time;
+                    $schedule->end_time = $request->end_time;
+                    $schedule->status = '2';
+                    $schedule->remarks = $request->remarks;
+                    $schedule->save();
+
+                    $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
+                }
+            }
+            #Event & Mapping
+            else{
+                $request->validate([
+                    'name' => 'required|max:191',
+                    'address' => 'required|max:191',
+                ]);
 
                 $schedule = new Schedule();
                 $schedule->user_id = $request->user_id;
                 $schedule->type = $schedule_type;
-                $schedule->code = $customer_code;
-                $schedule->name = $customer->name;
-                $schedule->address = $customer->town_city;
-                $schedule->date = $request->date;
+                $schedule->code = $schedule_code;
+                $schedule->name = $request->name;
+                $schedule->address = $request->address;
+                $schedule->date = $date;
                 $schedule->start_time = $request->start_time;
                 $schedule->end_time = $request->end_time;
                 $schedule->status = '2';
                 $schedule->remarks = $request->remarks;
                 $schedule->save();
 
-                $data[] = $this->dataOutput($request->date,$request->date,$request->user_id,$schedule->code);
+                $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
             }
         }
-        #Event & Mapping
-        else{
-            $request->validate([
-                'name' => 'required|max:191',
-                'address' => 'required|max:191',
-            ]);
-
-            $schedule = new Schedule();
-            $schedule->user_id = $request->user_id;
-            $schedule->type = $schedule_type;
-            $schedule->code = Schedule::createScheduleCode($schedule_type);
-            $schedule->name = $request->name;
-            $schedule->address = $request->address;
-            $schedule->date = $request->date;
-            $schedule->start_time = $request->start_time;
-            $schedule->end_time = $request->end_time;
-            $schedule->status = '2';
-            $schedule->remarks = $request->remarks;
-            $schedule->save();
-
-            $data[] = $this->dataOutput($request->date,$request->date,$request->user_id,$schedule->code);
-        }
+        DB::commit();
 
         return response()->json($data);
     }
@@ -245,7 +254,25 @@ class ScheduleController extends Controller
 
          $schedule = Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
          
-        return  array ($schedule->groupBy('user_id'));
+        return array ($schedule->groupBy('user_id'));
     }
 
+    function fetchDatePeriod($startDate, $endDate){
+
+        $end = date_create($endDate);
+        date_add($end,date_interval_create_from_date_string("1 days"));
+        $end = date_format($end,"Y-m-d");
+
+        $period = new DatePeriod(
+            new DateTime($startDate),
+            new DateInterval('P1D'),
+            new DateTime($end)
+        );
+
+        foreach ($period as $key => $value) {
+            $result[] = $value->format('Y-m-d');
+        }
+
+        return $result;
+    }
 }

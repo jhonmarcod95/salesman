@@ -61,6 +61,22 @@
                     </div>
                 </div>
 
+                {{-- Start & End Date --}}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <h5>Start Date</h5>
+                            {!! Form::date('start_date', '', ['class' => 'form-control', 'id' => 'start-date']) !!}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <h5>End Date</h5>
+                            {!! Form::date('end_date', '', ['class' => 'form-control', 'id' => 'end-date']) !!}
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Start & End Time --}}
                 <div class="row">
                     <div class="col-md-6">

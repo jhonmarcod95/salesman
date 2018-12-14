@@ -308,6 +308,12 @@
 
                     resetModal();
                     selectedDate = date.format();
+
+                    $('#start-date').val(selectedDate);
+                    $('#end-date').val(selectedDate);
+                    $("#start-date").attr("min", selectedDate);
+                    $("#end-date").attr("min", selectedDate);
+
                     $('#addModalLabel').text(date.format('MMMM D, Y'));
                     $('#addScheduleModal').modal('show');
 
