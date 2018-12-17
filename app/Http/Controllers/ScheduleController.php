@@ -30,12 +30,17 @@ class ScheduleController extends Controller
     {
         session(['header_text' => 'Schedules']);
 
+        $company_id = Auth::user()->companies->first()->id; //used to filter with same company
+
         $tsrs = TechnicalSalesRepresentative::select(
-            DB::raw("CONCAT(first_name,' ',last_name) AS name"), 'user_id')
+            DB::raw("CONCAT(first_name,' ',last_name) AS name"), 'company_user.user_id')
+            ->join('company_user', 'company_user.user_id', 'technical_sales_representatives.user_id')
+            ->where('company_user.company_id', $company_id)
             ->pluck(
                 'name',
-                'user_id'
+                'company_user.user_id'
             );
+
 
         $customers = Customer::select(DB::raw("CONCAT(name, ' - ', street, ' - ',town_city) AS name"), 'customer_code')
             ->pluck(
@@ -158,7 +163,6 @@ class ScheduleController extends Controller
                 $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
             }
         }
-
         DB::commit();
 
         return response()->json($data);
