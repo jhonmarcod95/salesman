@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class APIExpenseResult extends JsonResource
 {
@@ -21,7 +22,8 @@ class APIExpenseResult extends JsonResource
             'amount' => $this->amount,
             'types' => $this->expensesType->name,
             'attachment' => $this->attachment,
-            'expenses_type_id' => $this->expenses_type_id
+            'expenses_type_id' => $this->expenses_type_id,
+            'date_created' => Carbon::parse($this->created_at)->format('Y-m-d'),
         ];
     }
 }
