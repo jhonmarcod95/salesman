@@ -184,8 +184,8 @@ class AppAPIController extends Controller
 
     public function getSchedules() {
 
-        $schedules = Schedule::orderBy('id','ASC')
-                        ->where('date', '>=', Carbon::today())
+        $schedules = Schedule::orderBy('date','ASC')
+                        ->where('date', '>=', Carbon::today()->format('Y-m-d'))
                         ->where('user_id', Auth::user()->id)
                         ->take(25)
                         ->get();
