@@ -16,6 +16,7 @@ use DatePeriod;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\Geocoder\Facades\Geocoder;
 
 class ScheduleController extends Controller
 {
@@ -124,6 +125,8 @@ class ScheduleController extends Controller
                 foreach ($customer_codes as $customer_code){
                     $customer = Customer::where('customer_code', $customer_code)->first();
 
+                    $geocode = Geocoder::getCoordinatesForAddress($customer->name.' - '.$customer->street.' - '.$customer->town_city);
+
                     $schedule = new Schedule();
                     $schedule->user_id = $request->user_id;
                     $schedule->type = $schedule_type;
@@ -135,6 +138,9 @@ class ScheduleController extends Controller
                     $schedule->end_time = $request->end_time;
                     $schedule->status = '2';
                     $schedule->remarks = $request->remarks;
+                    $schedule->lat = $geocode['lat'];
+                    $schedule->lng = $geocode['lng'];
+                    $schedule->km_distance = '2';
                     $schedule->save();
 
                     $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -146,6 +152,8 @@ class ScheduleController extends Controller
                     'name' => 'required|max:191',
                     'address' => 'required|max:191',
                 ]);
+                
+                $geocode = Geocoder::getCoordinatesForAddress($request->address);
 
                 $schedule = new Schedule();
                 $schedule->user_id = $request->user_id;
@@ -158,6 +166,9 @@ class ScheduleController extends Controller
                 $schedule->end_time = $request->end_time;
                 $schedule->status = '2';
                 $schedule->remarks = $request->remarks;
+                $schedule->lat = $geocode['lat'];
+                $schedule->lng = $geocode['lng'];
+                $schedule->km_distance = '10';
                 $schedule->save();
 
                 $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
