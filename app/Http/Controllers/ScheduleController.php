@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\GeocodeCustomerRule;
 use Auth;
 use Carbon;   
 use App\Customer;
@@ -117,7 +118,7 @@ class ScheduleController extends Controller
             if($schedule_type == '1'){
 
                 $request->validate([
-                    'customer_codes' => 'required',
+                    'customer_codes' => [new GeocodeCustomerRule(), 'required'],
                 ]);
 
                 $customer_codes = $request->customer_codes;
@@ -193,7 +194,7 @@ class ScheduleController extends Controller
         #Customer Visit
         if($schedule_type == '1'){
             $request->validate([
-                'customer_code' => 'required',
+                'customer_codes' => [new GeocodeCustomerRule(), 'required'],
             ]);
 
             $customer = Customer::where('customer_code', $request->customer_code)->first();
