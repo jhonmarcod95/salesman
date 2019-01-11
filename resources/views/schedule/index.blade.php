@@ -93,6 +93,7 @@
         }
         
         function setEvents(data) {
+
             var fullname = data.full_name;
 
             var eventData = {
@@ -110,6 +111,9 @@
                 start_time: data.start_time,
                 end_time: data.end_time,
                 remarks: data.remarks,
+                lat: data.lat,
+                lng: data.lng,
+                km_distance: data.km_distance,
                 backgroundColor: data.color,
                 borderColor    : data.color,
                 textColor: '#ffffff',
@@ -200,7 +204,6 @@
                     selectedSchedule.end_time = eventData.end_time;
                     selectedSchedule.remarks = eventData.remarks;
 
-                    console.log(eventData);
 
                     $('#calendar').fullCalendar('updateEvent', selectedSchedule);
                     $('#calendar').fullCalendar('unselect');
@@ -345,6 +348,8 @@
                     $('#start_time').val(calEvent.start_time);
                     $('#end_time').val(calEvent.end_time);
                     $('#remarks').val(calEvent.remarks);
+
+                    $('#a-map-preview').attr("href", "https://www.google.com/maps/place/" + calEvent.lat + "," + calEvent.lng + "");
 
                     $('#updateModalLabel').text(calEvent.start.format('MMMM D, Y'));
                     $('#updateScheduleModal').modal('show');

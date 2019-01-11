@@ -153,7 +153,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Customer</h5>
-                                {!! Form::select('customer_code', $customers, null, ['id' => 'sel_customer_code', 'class' => 'updateScheduleModalSel2', 'required']) !!}
+                                {!! Form::select('customer_code[]', $customers, null, ['id' => 'sel_customer_code', 'class' => 'updateScheduleModalSel2', 'required']) !!}
                             </div>
                         </div>
                     </div>
@@ -201,6 +201,9 @@
                         <div class="form-group">
                             <h5>Remarks</h5>
                             {!! Form::textarea('remarks', null, ['id' => 'remarks', 'class' => 'form-control', 'rows' => '3', 'maxlength' => '1000']) !!}
+                        </div>
+                        <div class="form-group">
+                            <a id="a-map-preview" href="#" target="_blank">Map preview</a>
                         </div>
                     </div>
                 </div>

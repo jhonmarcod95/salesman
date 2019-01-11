@@ -50,6 +50,8 @@ class GeocodeCustomerRule implements Rule
                 $this->customer_name = $customer->name;
                 $result = false;
             }
+
+
         }
         return $result;
     }

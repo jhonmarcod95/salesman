@@ -56,6 +56,9 @@ class Schedule extends Model implements Auditable
                 'schedules.remarks',
                 'schedules.created_at',
                 'schedules.updated_at',
+                'schedules.lat',
+                'schedules.lng',
+                'schedules.km_distance',
                 'users.name as full_name',
                 'background_colors.color'
             ]);
