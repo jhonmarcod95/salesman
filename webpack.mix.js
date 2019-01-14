@@ -27,4 +27,4 @@ mix.styles([
     'public/vendor/chart.js/dist/Chart.extension.js',
     'public/js/argon.js?'
 ], 'public/js/all.js')
-.browserSync('http://localhost');
+.browserSync('http://salesman.local');

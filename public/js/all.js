@@ -74884,7 +74884,7 @@ exports = module.exports = __webpack_require__(3)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -75089,6 +75089,29 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -75097,6 +75120,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             expenses: [],
             expenses_id: [],
             expenseByTsr: [],
+            weeks: [],
+            year: '',
+            week: '',
             startDate: '',
             endDate: '',
             tsrName: '',
@@ -75128,14 +75154,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this.errors = error.response.data.errors;
             });
         },
-        fetchExpenseByTsr: function fetchExpenseByTsr(id, name, created) {
+        fetchExpenseByTsr: function fetchExpenseByTsr(expenses, name) {
             var _this2 = this;
 
             this.errors = [];
-            axios.get('/expense-report/' + id).then(function (response) {
+            var ids = [];
+            expenses.forEach(function (element) {
+                ids.push(element.id);
+            });
+
+            axios.get('/expense-report-bydate-peruser/' + ids).then(function (response) {
                 _this2.expenseByTsr = response.data;
                 _this2.tsrName = name;
-                _this2.date = created;
                 var array = _this2.expenseByTsr.filter(function (item) {
                     return item.payments == null;
                 });
@@ -75161,6 +75191,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         fetchExpenses: function fetchExpenses() {
             var _this4 = this;
 
+            var dates = this.week.split('-');
+            var date1 = dates[0];
+            var date2 = dates[1];
+
+            var moment1 = __WEBPACK_IMPORTED_MODULE_0_moment___default()(date1);
+            var moment2 = __WEBPACK_IMPORTED_MODULE_0_moment___default()(date2);
+            this.startDate = moment1.format('YYYY-MM-DD');
+            this.endDate = moment2.format('YYYY-MM-DD');
             axios.post('/expense-by-company', {
                 startDate: this.startDate,
                 endDate: this.endDate,
@@ -75171,6 +75209,33 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }).catch(function (error) {
                 _this4.errors = error.response.data.errors;
             });
+        },
+        getyear: function getyear() {
+            var start = __WEBPACK_IMPORTED_MODULE_0_moment___default()(this.year).day('Monday');
+            var end = __WEBPACK_IMPORTED_MODULE_0_moment___default()();
+            var day = 1;
+
+            var result = [];
+            var current = start.clone();
+            result.push(__WEBPACK_IMPORTED_MODULE_0_moment___default()(start).format('ll') + ' - ' + __WEBPACK_IMPORTED_MODULE_0_moment___default()(start.add(6, 'days')).format('ll'));
+            while (current.day(7 + day).isBefore(end)) {
+                result.push(__WEBPACK_IMPORTED_MODULE_0_moment___default()(current.clone()).format('ll') + ' - ' + __WEBPACK_IMPORTED_MODULE_0_moment___default()(current.clone().add(6, 'days')).format('ll'));
+            }
+            this.weeks = result;
+        },
+        countExpenseSubmitted: function countExpenseSubmitted(expenses) {
+            var totalSubmitted = 0;
+            expenses.forEach(function (element) {
+                totalSubmitted = totalSubmitted + element.expenses_model_count;
+            });
+            return totalSubmitted;
+        },
+        countTotalExpenses: function countTotalExpenses(expenses) {
+            var totalExpenses = 0;
+            expenses.forEach(function (element) {
+                totalExpenses = totalExpenses + element.totalExpenses;
+            });
+            return totalExpenses.toFixed(2);
         },
         setPage: function setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -75190,16 +75255,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var _this5 = this;
 
             var self = this;
-            return self.expenses.filter(function (expense) {
-                return expense.user.name.toLowerCase().includes(_this5.keywords.toLowerCase());
+            return Object.values(self.expenses[0]).filter(function (expense) {
+                return expense[0].user.name.toLowerCase().includes(_this5.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
-            return Math.ceil(this.filteredExpenses.length / this.itemsPerPage);
+            return Math.ceil(Object.values(this.filteredExpenses).length / this.itemsPerPage);
         },
         filteredQueues: function filteredQueues() {
             var index = this.currentPage * this.itemsPerPage;
-            var queues_array = this.filteredExpenses.slice(index, index + this.itemsPerPage);
+            var queues_array = Object.values(this.filteredExpenses).slice(index, index + this.itemsPerPage);
 
             if (this.currentPage >= this.totalPages) {
                 this.currentPage = this.totalPages - 1;
@@ -75213,6 +75278,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         imageLink: function imageLink() {
             return window.location.origin + '/storage/';
+        },
+        years: function years() {
+            var year = new Date().getFullYear();
+            return Array.from({ length: year - 2010 }, function (value, index) {
+                return 2011 + index;
+            });
         }
     }
 });
@@ -75605,36 +75676,50 @@ var render = function() {
                       "label",
                       {
                         staticClass: "form-control-label",
-                        attrs: { for: "start_date" }
+                        attrs: { for: "year" }
                       },
-                      [_vm._v("Start Date")]
+                      [_vm._v("Year")]
                     ),
                     _vm._v(" "),
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.startDate,
-                          expression: "startDate"
-                        }
-                      ],
-                      staticClass: "form-control form-control-alternative",
-                      attrs: { type: "date", id: "start_date" },
-                      domProps: { value: _vm.startDate },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.year,
+                            expression: "year"
                           }
-                          _vm.startDate = $event.target.value
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: [
+                            function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.year = $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            },
+                            _vm.getyear
+                          ]
                         }
-                      }
-                    }),
+                      },
+                      _vm._l(_vm.years, function(year, y) {
+                        return _c("option", { key: y }, [_vm._v(_vm._s(year))])
+                      })
+                    ),
                     _vm._v(" "),
-                    _vm.errors.startDate
+                    _vm.errors.year
                       ? _c("span", { staticClass: "text-danger" }, [
-                          _vm._v(" " + _vm._s(_vm.errors.startDate[0]) + " ")
+                          _vm._v(_vm._s(_vm.errors.year[0]))
                         ])
                       : _vm._e()
                   ])
@@ -75646,36 +75731,49 @@ var render = function() {
                       "label",
                       {
                         staticClass: "form-control-label",
-                        attrs: { for: "end_date" }
+                        attrs: { for: "year" }
                       },
-                      [_vm._v("End Date")]
+                      [_vm._v("Date")]
                     ),
                     _vm._v(" "),
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.endDate,
-                          expression: "endDate"
-                        }
-                      ],
-                      staticClass: "form-control form-control-alternative",
-                      attrs: { type: "date", id: "end_date" },
-                      domProps: { value: _vm.endDate },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.week,
+                            expression: "week"
                           }
-                          _vm.endDate = $event.target.value
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.week = $event.target.multiple
+                              ? $$selectedVal
+                              : $$selectedVal[0]
+                          }
                         }
-                      }
-                    }),
+                      },
+                      _vm._l(_vm.weeks, function(week, w) {
+                        return _c("option", { key: w }, [
+                          _vm._v(_vm._s(week) + " ")
+                        ])
+                      })
+                    ),
                     _vm._v(" "),
-                    _vm.errors.endDate
+                    _vm.errors.week
                       ? _c("span", { staticClass: "text-danger" }, [
-                          _vm._v(" " + _vm._s(_vm.errors.endDate[0]) + " ")
+                          _vm._v(_vm._s(_vm.errors.week[0]))
                         ])
                       : _vm._e()
                   ])
@@ -75725,9 +75823,8 @@ var render = function() {
                                         on: {
                                           click: function($event) {
                                             _vm.fetchExpenseByTsr(
-                                              expense.id,
-                                              expense.user.name,
-                                              expense.created_at
+                                              expense,
+                                              expense[0].user.name
                                             )
                                           }
                                         }
@@ -75739,24 +75836,15 @@ var render = function() {
                               ])
                             ]),
                             _vm._v(" "),
-                            _c("td", [_vm._v(_vm._s(expense.user.name))]),
+                            _c("td", [_vm._v(_vm._s(expense[0].user.name))]),
                             _vm._v(" "),
                             _c("td", [
-                              _vm._v(_vm._s(expense.expenses_model_count))
+                              _vm._v(_vm._s(_vm.countExpenseSubmitted(expense)))
                             ]),
                             _vm._v(" "),
                             _c("td", [
                               _vm._v(
-                                _vm._s(
-                                  _vm.moment(expense.created_at).format("LLL")
-                                )
-                              )
-                            ]),
-                            _vm._v(" "),
-                            _c("td", [
-                              _vm._v(
-                                "PHP " +
-                                  _vm._s(expense.totalExpenses.toFixed(2))
+                                "PHP " + _vm._s(_vm.countTotalExpenses(expense))
                               )
                             ])
                           ])
@@ -75858,16 +75946,6 @@ var render = function() {
                 _c("div", { staticClass: "row" }, [
                   _c("div", { staticClass: "col" }, [
                     _c("h3", [_vm._v("TSR: " + _vm._s(this.tsrName))])
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col" }, [
-                    _c("h3", [
-                      _vm._v(
-                        "Date: " +
-                          _vm._s(_vm.moment(this.date).format("ll")) +
-                          " "
-                      )
-                    ])
                   ])
                 ]),
                 _vm._v(" "),
@@ -75965,6 +76043,14 @@ var render = function() {
                             _vm._v(" "),
                             _c("td", [
                               _vm._v(
+                                _vm._s(
+                                  _vm.moment(expenseBy.created_at).format("ll")
+                                )
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _vm._v(
                                 "PHP " +
                                   _vm._s(expenseBy.amount.toFixed(2)) +
                                   " "
@@ -76038,8 +76124,6 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Expense Submitted")]),
         _vm._v(" "),
-        _c("th", { attrs: { scope: "col" } }, [_vm._v("Date")]),
-        _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Total Expenses")])
       ])
     ])
@@ -76105,6 +76189,8 @@ var staticRenderFns = [
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Attachment")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Type of Expense")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Date")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Amount")])
       ])

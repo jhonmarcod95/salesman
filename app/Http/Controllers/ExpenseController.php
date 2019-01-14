@@ -112,19 +112,34 @@ class ExpenseController extends Controller
             ->whereDate('created_at' ,'<=', $request->endDate)
             ->has('expensesModel')
             ->withCount('expensesModel')
-            ->orderBy('id', 'desc')->get();
+            ->orderBy('id', 'desc')
+            ->get();
+          
         }else{
             $expense = ExpensesEntry::with('user')
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
             ->has('expensesModel')
             ->withCount('expensesModel')
-            ->orderBy('id', 'desc')->get();
+            ->orderBy('id', 'desc')
+            ->get();
+
         }
 
-        return $expense;
+        return array($expense->groupBy('user_id'));
     }
 
+    /**
+     * Get all Expenses of user per week
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function generateBydatePerUser(Request $request, $ids){
+        $explode_id = array_map('intval', explode(',', $ids));
+        return Expense::with('expensesType', 'payments')->whereHas('expensesEntry', function($q) use ($explode_id){
+            $q->whereIn('id', $explode_id);
+        })->get();
+    }
     /**
      * Show Expense page
      *
@@ -153,16 +168,6 @@ class ExpenseController extends Controller
      */
     public function indexExpenseData(){
         return ExpensesType::orderBy('id', 'desc')->get();
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -195,17 +200,6 @@ class ExpenseController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -223,16 +217,5 @@ class ExpenseController extends Controller
         $expensesType->save();
 
         return $expensesType;
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

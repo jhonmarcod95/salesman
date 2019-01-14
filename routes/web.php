@@ -164,6 +164,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/expenses-report', 'ExpenseController@index');
     // Fetch expense report by date
     Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
+    // Fetch expense report by date per user
+    Route::get('/expense-report-bydate-peruser/{ids}', 'ExpenseController@generateBydatePerUser');
     // Fetch expense report by date
     Route::get('/expense-report/{id}', 'ExpenseController@show');
     // Add Expenses

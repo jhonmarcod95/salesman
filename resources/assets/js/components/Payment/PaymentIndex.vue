@@ -33,6 +33,25 @@
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
+                                        <label for="year" class="form-control-label">Year</label> 
+                                        <select class="form-control" v-model="year" @change="getyear">
+                                            <option v-for="(year, y) in years" v-bind:key="y">{{ year }}</option>
+                                        </select> 
+                                        <span class="text-danger" v-if="errors.year  ">{{ errors.year[0] }}</span>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="year" class="form-control-label">Date</label> 
+                                        <select class="form-control" v-model="week">
+                                            <option v-for="(week, w) in weeks" v-bind:key="w">{{ week }} </option>
+                                        </select> 
+                                        <span class="text-danger" v-if="errors.week">{{ errors.week[0] }}</span>
+                                    </div>
+                                </div>
+                                <!-- <div class="col-md-2">
+                                    <div class="form-group">
                                         <label for="start_date" class="form-control-label">Start Date</label> 
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
@@ -44,7 +63,7 @@
                                         <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
                                         <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="col-md-2">
                                     <button class="btn btn-sm btn-primary" @click="fetchExpenses"> Filter</button>
                                 </div>
@@ -57,7 +76,6 @@
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Expense Submitted</th>
-                                    <th scope="col">Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
                                 </thead>
@@ -70,14 +88,17 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</a>
+                                                    <!-- <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense[0].user.name, expense.created_at)">View</a> -->
+                                                    <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense, expense[0].user.name)">View</a>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ expense.user.name }}</td>
-                                        <td>{{ expense.expenses_model_count }}</td>
-                                        <td>{{ moment(expense.created_at).format('LLL') }}</td>
-                                        <td>PHP {{ expense.totalExpenses.toFixed(2) }}</td>
+                                        <td>{{ expense[0].user.name }}</td>
+                                        <td>{{ countExpenseSubmitted(expense) }}</td>
+                                         <td>PHP {{ countTotalExpenses(expense) }}</td>
+                                        <!-- <td>{{ expense.expenses_model_count }}</td> -->
+                                        <!-- <td>{{ moment(expense.created_at).format('LLL') }}</td>
+                                        <td>PHP {{ expense.totalExpenses.toFixed(2) }}</td> -->
                                     </tr>
                                 </tbody>
                                 <tbody v-else>
@@ -121,7 +142,7 @@
                 <div class="modal-body text-center">
                     <div class="row">
                         <div class="col"><h3>TSR: {{ this.tsrName }}</h3></div>
-                        <div class="col"><h3>Date: {{ moment(this.date).format('ll') }} </h3></div>
+                        <!-- <div class="col"><h3>Date: {{ moment(this.date).format('ll') }} </h3></div> -->
                     </div>
                     <div class="table-responsive">
                         <table class="table align-items-center table-flush">
@@ -130,6 +151,7 @@
                                 <th scope="col"></th>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
+                                <th scope="col">Date</th>
                                 <th scope="col">Amount</th>
                             </tr>
                             </thead>
@@ -139,6 +161,7 @@
                                     <td v-else>Paid</td>
                                     <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                     <td>{{ expenseBy.expenses_type.name }}</td>
+                                    <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
                                 </tr>
                             </tbody>
@@ -165,6 +188,9 @@ export default {
             expenses: [],
             expenses_id: [],
             expenseByTsr: [],
+            weeks: [],
+            year: '',
+            week: '',
             startDate: '',
             endDate: '',
             tsrName: '',
@@ -195,13 +221,17 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        fetchExpenseByTsr(id,name,created){
+        fetchExpenseByTsr(expenses, name){
             this.errors = [];
-            axios.get(`/expense-report/${id}`)
+            let ids = [];
+            expenses.forEach(element => {
+                ids.push(element.id);
+            });
+         
+            axios.get(`/expense-report-bydate-peruser/${ids}`)
             .then(response => { 
                 this.expenseByTsr = response.data;
                 this.tsrName = name;
-                this.date = created;
                 var array = this.expenseByTsr.filter(item => item.payments == null);
                 this.submit = array.length > 0 ? true : false;
                 $('#viewModal').modal('show');
@@ -224,6 +254,14 @@ export default {
            })
         },
         fetchExpenses(){
+            var dates = this.week.split('-');
+            var date1 = dates[0];
+            var date2= dates[1];
+            
+            var moment1 = moment(date1);
+            var moment2 = moment(date2);
+            this.startDate = moment1.format('YYYY-MM-DD');
+            this.endDate = moment2.format('YYYY-MM-DD');
             axios.post('/expense-by-company', {
                 startDate: this.startDate,
                 endDate: this.endDate,
@@ -236,6 +274,33 @@ export default {
             .catch(error => {
                 this.errors = error.response.data.errors;
             })
+        },
+        getyear(){
+            var start = moment(this.year).day('Monday');
+            var end   = moment();
+            var day   = 1;
+
+            var result = [];
+            var current = start.clone();
+            result.push(moment(start).format('ll') +' - ' + moment(start.add(6, 'days')).format('ll'));
+            while (current.day(7 + day).isBefore(end)) {
+                result.push(moment(current.clone()).format('ll') +' - ' + moment(current.clone().add(6, 'days')).format('ll'));
+            }
+            this.weeks = result;
+        },
+        countExpenseSubmitted(expenses){
+            var totalSubmitted = 0;
+            expenses.forEach(element => {
+              totalSubmitted = totalSubmitted + element.expenses_model_count;
+            });
+            return totalSubmitted;
+        },
+         countTotalExpenses(expenses){
+            var totalExpenses = 0;
+            expenses.forEach(element => {
+              totalExpenses = totalExpenses + element.totalExpenses;
+            });
+            return totalExpenses.toFixed(2);
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -256,16 +321,16 @@ export default {
     computed:{
         filteredExpenses(){
             let self = this;
-            return self.expenses.filter(expense => {
-                return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+            return Object.values(self.expenses[0]).filter(expense => {
+                return expense[0].user.name.toLowerCase().includes(this.keywords.toLowerCase())
             });
         },
         totalPages() {
-            return Math.ceil(this.filteredExpenses.length / this.itemsPerPage)
+            return Math.ceil(Object.values(this.filteredExpenses).length / this.itemsPerPage)
         },
         filteredQueues() {
             var index = this.currentPage * this.itemsPerPage;
-            var queues_array = this.filteredExpenses.slice(index, index + this.itemsPerPage);
+            var queues_array = Object.values(this.filteredExpenses).slice(index, index + this.itemsPerPage);
 
             if(this.currentPage >= this.totalPages) {
                 this.currentPage = this.totalPages - 1
@@ -279,6 +344,10 @@ export default {
         },
         imageLink(){
             return window.location.origin+'/storage/';
+        },
+        years () {
+            const year = new Date().getFullYear()
+            return Array.from({length: year - 2010}, (value, index) => 2011 + index)
         }
     },
 }
