@@ -6,7 +6,6 @@
         </button>
         <!-- Brand -->
         <a class="navbar-brand pt-0" href="{{ url('/home') }}">
-            {{-- <img src="{{ url('img/brand/PFMC.jpg') }}" class="navbar-brand-img" alt="...">&nbsp; Salesforce --}}
             <img src="{{ url(Auth::user()->companies->pluck('company_logo')[0]) }}" class="navbar-brand-img" alt="...">&nbsp; Salesforce
         </a>
 

@@ -21,7 +21,7 @@
                     <div class="card-header bg-transparent pb-5">
                         <div class="text-muted text-center mt-2 mb-3"><large>Salesforce Portal</large></div>
                         <div class="btn-wrapper text-center">
-                            <img src="{{ url('img/brand/PFMC.jpg') }}" class="navbar-brand-img" style="height: 80px">&nbsp;
+                            <img src="{{ url('img/brand/group-of-companies.png') }}" class="navbar-brand-img" style="height: 100px">&nbsp;
                         </div>
                     </div>
                     <div class="card-body px-lg-4 py-lg-4">
