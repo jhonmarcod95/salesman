@@ -28,7 +28,10 @@ class SchedulesResource extends JsonResource
             'status' => $this->status,
             'remarks' => $this->remarks,
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            'updated_at' => $this->updated_at,
+            'lat' => $this->lat,
+            'lng' => $this->lng,
+            'km_distance' => $this->km_distance,
         ];
     }
 }
