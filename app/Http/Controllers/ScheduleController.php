@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\GeocodeCustomerRule;
+use App\Rules\GeocodeEventRule;
 use Auth;
 use Carbon;   
 use App\Customer;
@@ -111,13 +113,14 @@ class ScheduleController extends Controller
 
         $dates = $this->fetchDatePeriod($request->start_date, $request->end_date);
 
+
         DB::beginTransaction();
         foreach ($dates as $date){
             #Customer Visit
             if($schedule_type == '1'){
 
                 $request->validate([
-                    'customer_codes' => 'required',
+                    'customer_codes' => [new GeocodeCustomerRule(), 'required'],
                 ]);
 
                 $customer_codes = $request->customer_codes;
@@ -140,7 +143,7 @@ class ScheduleController extends Controller
                     $schedule->remarks = $request->remarks;
                     $schedule->lat = $geocode['lat'];
                     $schedule->lng = $geocode['lng'];
-                    $schedule->km_distance = '2';
+                    $schedule->km_distance = '0.5';
                     $schedule->save();
 
                     $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -148,11 +151,12 @@ class ScheduleController extends Controller
             }
             #Event & Mapping
             else{
+
                 $request->validate([
-                    'name' => 'required|max:191',
                     'address' => 'required|max:191',
+                    'name' => ['required', 'max:191', new GeocodeEventRule($request->address)],
                 ]);
-                
+
                 $geocode = Geocoder::getCoordinatesForAddress($request->address);
 
                 $schedule = new Schedule();
@@ -168,7 +172,7 @@ class ScheduleController extends Controller
                 $schedule->remarks = $request->remarks;
                 $schedule->lat = $geocode['lat'];
                 $schedule->lng = $geocode['lng'];
-                $schedule->km_distance = '10';
+                $schedule->km_distance = '5';
                 $schedule->save();
 
                 $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -193,10 +197,11 @@ class ScheduleController extends Controller
         #Customer Visit
         if($schedule_type == '1'){
             $request->validate([
-                'customer_code' => 'required',
+                'customer_code' => [new GeocodeCustomerRule(), 'required'],
             ]);
 
             $customer = Customer::where('customer_code', $request->customer_code)->first();
+            $geocode = Geocoder::getCoordinatesForAddress($customer->name.' - '.$customer->street.' - '.$customer->town_city);
 
             $schedule = Schedule::find($id);
             $schedule->type = $schedule_type;
@@ -207,14 +212,19 @@ class ScheduleController extends Controller
             $schedule->end_time = $request->end_time;
             $schedule->status = '2';
             $schedule->remarks = $request->remarks;
+            $schedule->lat = $geocode['lat'];
+            $schedule->lng = $geocode['lng'];
+            $schedule->km_distance = '0.5';
             $schedule->save();
         }
         #Event & Mapping
         else{
             $request->validate([
-                'name' => 'required|max:191',
                 'address' => 'required|max:191',
+                'name' => ['required', 'max:191', new GeocodeEventRule($request->address)],
             ]);
+
+            $geocode = Geocoder::getCoordinatesForAddress($request->address);
 
             $schedule = Schedule::find($id);
             $schedule->user_id = $request->user_id;
@@ -226,6 +236,9 @@ class ScheduleController extends Controller
             $schedule->end_time = $request->end_time;
             $schedule->status = '2';
             $schedule->remarks = $request->remarks;
+            $schedule->lat = $geocode['lat'];
+            $schedule->lng = $geocode['lng'];
+            $schedule->km_distance = '5';
             $schedule->save();
         }
 
