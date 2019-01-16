@@ -41,7 +41,11 @@ class TsrController extends Controller
      */
 
     public function indexData(){
-        return  TechnicalSalesRepresentative::with('company')->orderBy('id','desc')->get();
+        return  TechnicalSalesRepresentative::with('company')
+        ->when(Auth::user()->level() < 8, function($q){
+            $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+        })
+        ->orderBy('id','desc')->get();
     }
 
     /**
