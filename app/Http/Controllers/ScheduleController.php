@@ -294,19 +294,17 @@ class ScheduleController extends Controller
 
     public function todayByUser(){
 
-        if(Auth::user()->level() < 8){
-            $schedule = Schedule::with('user','attendances')->whereHas('user' , function($q){
-                $q->whereHas('companies', function ($q){
-                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+         $schedule = Schedule::with('user','attendances')
+            ->when(Auth::user()->level() < 8, function ($q) {
+                $q->whereHas('user', function ($q){
+                    $q->whereHas('companies', function($q){
+                        $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                    });
                 });
-            })->where('date', Carbon\Carbon::now()->toDateString())->get();
-             
-            return  array ($schedule->groupBy('user_id'));
-        }
-
-         $schedule = Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
+            })
+            ->where('date', Carbon\Carbon::now()->toDateString())->get();
          
-        return array ($schedule->groupBy('user_id'));
+         return  array ($schedule->sortBy('user.name')->groupBy('user.name'));
     }
 
 
