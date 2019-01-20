@@ -36,17 +36,9 @@ class GeocodeCustomerRule implements Rule
         foreach ($customer_codes as $customer_code) {
             $customer = Customer::where('customer_code', $customer_code)->first();
 
-            $geoCustomerNameAddress = Geocoder::getCoordinatesForAddress($customer->name.' - '.$customer->street.' - '.$customer->town_city);
-            $geoCustomerAddress = Geocoder::getCoordinatesForAddress($customer->street.' - '.$customer->town_city);
+            $geoCustomerAddress = Geocoder::getCoordinatesForAddress($customer->street . ' ' . $customer->town_city);
 
-            // combination of name + address
-            if ($geoCustomerNameAddress['lat'] == 0 && $geoCustomerNameAddress['lng'] == 0){
-                $this->customer_name = $customer->name;
-                $result = false;
-            }
-
-            // if not found above, customer name will not be included
-            else if($geoCustomerAddress['lat'] == 0 && $geoCustomerAddress['lng'] == 0){
+            if($geoCustomerAddress['lat'] == 0 && $geoCustomerAddress['lng'] == 0){
                 $this->customer_name = $customer->name;
                 $result = false;
             }

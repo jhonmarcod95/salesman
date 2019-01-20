@@ -102,6 +102,7 @@ class ScheduleController extends Controller
             'user_id' => 'required',
             'type' => 'required',
             'start_date' => 'required',
+            'radius' => 'required',
             'end_date' => 'required|after_or_equal:start_date',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
@@ -128,7 +129,7 @@ class ScheduleController extends Controller
                 foreach ($customer_codes as $customer_code){
                     $customer = Customer::where('customer_code', $customer_code)->first();
 
-                    $geocode = Geocoder::getCoordinatesForAddress($customer->name.' - '.$customer->street.' - '.$customer->town_city);
+                    $geocode = Geocoder::getCoordinatesForAddress($customer->street . ' ' . $customer->town_city);
 
                     $schedule = new Schedule();
                     $schedule->user_id = $request->user_id;
@@ -143,7 +144,7 @@ class ScheduleController extends Controller
                     $schedule->remarks = $request->remarks;
                     $schedule->lat = $geocode['lat'];
                     $schedule->lng = $geocode['lng'];
-                    $schedule->km_distance = '0.5';
+                    $schedule->km_distance = $request->radius;
                     $schedule->save();
 
                     $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -153,8 +154,8 @@ class ScheduleController extends Controller
             else{
 
                 $request->validate([
-                    'address' => 'required|max:191',
-                    'name' => ['required', 'max:191', new GeocodeEventRule($request->address)],
+                    'name' => 'required|max:191',
+                    'address' => ['required', 'max:191', new GeocodeEventRule()],
                 ]);
 
                 $geocode = Geocoder::getCoordinatesForAddress($request->address);
@@ -172,7 +173,7 @@ class ScheduleController extends Controller
                 $schedule->remarks = $request->remarks;
                 $schedule->lat = $geocode['lat'];
                 $schedule->lng = $geocode['lng'];
-                $schedule->km_distance = '5';
+                $schedule->km_distance = $request->radius;
                 $schedule->save();
 
                 $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -188,6 +189,7 @@ class ScheduleController extends Controller
         $request->validate([
             'user_id' => 'required',
             'date' => 'required',
+            'radius' => 'required',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
         ]);
@@ -201,7 +203,8 @@ class ScheduleController extends Controller
             ]);
 
             $customer = Customer::where('customer_code', $request->customer_code)->first();
-            $geocode = Geocoder::getCoordinatesForAddress($customer->name.' - '.$customer->street.' - '.$customer->town_city);
+
+            $geocode = Geocoder::getCoordinatesForAddress($customer->street . ' ' . $customer->town_city);
 
             $schedule = Schedule::find($id);
             $schedule->type = $schedule_type;
@@ -214,14 +217,14 @@ class ScheduleController extends Controller
             $schedule->remarks = $request->remarks;
             $schedule->lat = $geocode['lat'];
             $schedule->lng = $geocode['lng'];
-            $schedule->km_distance = '0.5';
+            $schedule->km_distance = $request->radius;
             $schedule->save();
         }
         #Event & Mapping
         else{
             $request->validate([
-                'address' => 'required|max:191',
-                'name' => ['required', 'max:191', new GeocodeEventRule($request->address)],
+                'name' => 'required|max:191',
+                'address' => ['required', 'max:191', new GeocodeEventRule()],
             ]);
 
             $geocode = Geocoder::getCoordinatesForAddress($request->address);
@@ -238,7 +241,7 @@ class ScheduleController extends Controller
             $schedule->remarks = $request->remarks;
             $schedule->lat = $geocode['lat'];
             $schedule->lng = $geocode['lng'];
-            $schedule->km_distance = '5';
+            $schedule->km_distance = $request->radius;
             $schedule->save();
         }
 

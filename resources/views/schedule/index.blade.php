@@ -203,6 +203,9 @@
                     selectedSchedule.start_time = eventData.start_time;
                     selectedSchedule.end_time = eventData.end_time;
                     selectedSchedule.remarks = eventData.remarks;
+                    selectedSchedule.lat = eventData.lat;
+                    selectedSchedule.lng = eventData.lng;
+                    selectedSchedule.km_distance = eventData.km_distance;
 
 
                     $('#calendar').fullCalendar('updateEvent', selectedSchedule);
@@ -277,6 +280,17 @@
         //sched type event in add & update modal
         $('#sel_add_sched_type, #sel_update_sched_type').on('select2:select', function (e) {
             var type = e.params.data.id;
+
+            /* revise this code, radius must be defined in schedule type table */
+            if(type == '1'){
+                $("#radius-add").val('2');
+                $("#radius-update").val('2');
+            }
+            else{
+                $("#radius-add").val('5');
+                $("#radius-update").val('5');
+            }
+
             setModalElementVisibility(type);
         });
 
@@ -347,6 +361,7 @@
 
                     $('#start_time').val(calEvent.start_time);
                     $('#end_time').val(calEvent.end_time);
+                    $('#radius-update').val(calEvent.km_distance);
                     $('#remarks').val(calEvent.remarks);
 
                     $('#a-map-preview').attr("href", "https://www.google.com/maps/place/" + calEvent.lat + "," + calEvent.lng + "");

@@ -13,12 +13,11 @@ class GeocodeEventRule implements Rule
      * @return void
      */
 
-    private $event_name;
     private $address;
 
-    public function __construct($address)
+    public function __construct()
     {
-        $this->address = $address;
+
     }
 
     /**
@@ -31,22 +30,13 @@ class GeocodeEventRule implements Rule
 
     public function passes($attribute, $value)
     {
-        $event_name = $value;
-
-        $geoEventNameAddress = Geocoder::getCoordinatesForAddress($event_name . ' ' . $this->address);
-        $geoEventAddress = Geocoder::getCoordinatesForAddress($this->address);
+        $geoEventAddress = Geocoder::getCoordinatesForAddress($value);
 
         $result = true;
 
-        // combination of name + address
-        if ($geoEventNameAddress['lat'] == 0 && $geoEventNameAddress['lng'] == 0){
-            $this->event_name = $event_name;
-            $result = false;
-        }
-
         // if not found above, customer name will not be included
-        else if($geoEventAddress['lat'] == 0 && $geoEventAddress['lng'] == 0){
-            $this->event_name = $event_name;
+        if($geoEventAddress['lat'] == 0 && $geoEventAddress['lng'] == 0){
+            $this->address = $value;
             $result = false;
         }
         return $result;
@@ -59,7 +49,7 @@ class GeocodeEventRule implements Rule
      */
     public function message()
     {
-        return 'Cannot locate ' . $this->event_name . ' coordinates, please update the address.';
+        return 'Cannot locate ' . $this->address . ' coordinates, please update the address.';
 
     }
 }
