@@ -81959,6 +81959,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -81979,27 +81981,36 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         getCustomerId: function getCustomerId(id) {
             this.customer_id = id;
         },
-        fetchCustomer: function fetchCustomer() {
+        getGeocode: function getGeocode(address) {
             var _this = this;
 
-            axios.get('/customers-all').then(function (response) {
-                _this.customers = response.data;
+            axios.get('/customers-geocode/' + address.replace(/[/#]/g, '')).then(function (response) {
+                window.open('https://www.google.com/maps/place/' + response.data, '_blank');
             }).catch(function (error) {
                 _this.errors = error.response.data.errors;
             });
         },
-        deleteCustomer: function deleteCustomer() {
+        fetchCustomer: function fetchCustomer() {
             var _this2 = this;
 
+            axios.get('/customers-all').then(function (response) {
+                _this2.customers = response.data;
+            }).catch(function (error) {
+                _this2.errors = error.response.data.errors;
+            });
+        },
+        deleteCustomer: function deleteCustomer() {
+            var _this3 = this;
+
             var index = this.customers.findIndex(function (item) {
-                return item.id == _this2.customer_id;
+                return item.id == _this3.customer_id;
             });
             axios.delete('/customers/' + this.customer_id).then(function (response) {
                 $('#deleteModal').modal('hide');
                 alert('Customer successfully deleted');
-                _this2.customers.splice(index, 1);
+                _this3.customers.splice(index, 1);
             }).catch(function (error) {
-                _this2.errors = error.response.data.errors;
+                _this3.errors = error.response.data.errors;
             });
         },
         setPage: function setPage(pageNumber) {
@@ -82017,12 +82028,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     computed: {
         filteredCustomers: function filteredCustomers() {
-            var _this3 = this;
+            var _this4 = this;
 
             var self = this;
 
             return self.customers.filter(function (customer) {
-                return customer.name.toLowerCase().includes(_this3.keywords.toLowerCase());
+                return customer.name.toLowerCase().includes(_this4.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -82156,6 +82167,23 @@ var render = function() {
                                     }
                                   },
                                   [_vm._v("Delete")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "dropdown-item",
+                                    on: {
+                                      click: function($event) {
+                                        _vm.getGeocode(
+                                          customer.street +
+                                            " " +
+                                            customer.town_city
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("View address")]
                                 )
                               ]
                             )

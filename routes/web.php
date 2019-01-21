@@ -119,6 +119,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/check-customer-code', 'CustomerController@checkCustomerCode');
     // Delete Customer
     Route::delete('/customers/{customer}', 'CustomerController@destroy');
+    // Get customers address geocode
+    Route::get('/customers-geocode/{address}', 'CustomerController@getGeocode');
 
     //Customer Classfication
     // show customer classfication page

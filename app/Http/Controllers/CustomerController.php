@@ -6,6 +6,7 @@ use Auth;
 use App\Customer;
 use App\Message;
 use Illuminate\Http\Request;
+use Spatie\Geocoder\Facades\Geocoder;
 
 class CustomerController extends Controller
 {
@@ -178,7 +179,6 @@ class CustomerController extends Controller
         }
     }
 
-    
     /**
      * Return Auto generated customer code.
      *
@@ -189,15 +189,21 @@ class CustomerController extends Controller
         $customer = Customer::withTrashed()->whereNotIn('classification', [1,2])->orderBy('id','asc')->get();
         $customer_code = $customer->last()->customer_code;
 
-        //generate until to become unique
-        // generate:
-        // if(Customer::where('customer_code', $customer_code)->exists()){
-        //     $customer_code = $customer_code + 1;
-        //     goto generate;
-        // }
         return ++$customer_code;
     }
 
+    /**
+     * Return geocode base on customer's address.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function getGeocode($address){
+        $geocode = Geocoder::getCoordinatesForAddress($address);
+
+        return $geocode['lat'].','.$geocode['lng'];
+    }
+    
     /**
      * Remove the specified resource from storage.
      *
