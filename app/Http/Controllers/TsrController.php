@@ -118,6 +118,8 @@ class TsrController extends Controller
                 // Attaching role to user
                 $tsrRole = Role::where('name', '=', 'Tsr')->first();
                 $user->syncRoles($tsrRole);
+                // Assigning of companies
+                $user->companies()->sync( (array) $request->company);
                 // Insert user_id in tsr table
                 $tsr->update(['user_id'=> $user->id]);
                 return ['redirect' => route('tsr_list')];
