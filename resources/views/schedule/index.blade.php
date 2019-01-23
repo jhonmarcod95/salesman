@@ -283,8 +283,8 @@
 
             /* revise this code, radius must be defined in schedule type table */
             if(type == '1'){
-                $("#radius-add").val('2');
-                $("#radius-update").val('2');
+                $("#radius-add").val('0.5');
+                $("#radius-update").val('0.5');
             }
             else{
                 $("#radius-add").val('5');
