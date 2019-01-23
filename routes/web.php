@@ -205,6 +205,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::patch('/company/{company}', 'CompanyController@update');
     // Delete company
     Route::delete('/company/{id}', 'CompanyController@destroy');
+
+    // Locations
+    Route::get('/locations', 'LocationController@index');
+    // Fetch all companies
+    Route::get('/locations-all', 'LocationController@indexData');
 });
 
 // Request Routes

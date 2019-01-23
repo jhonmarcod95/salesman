@@ -54,13 +54,22 @@
                                                 <input type="text" id="input-last-name" class="form-control form-control-alternative" v-model="tsr.suffix">
                                             </div>
                                         </div>
-                                        <div class="col-lg-6">
+                                        <div class="col-lg-3">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="role">Company</label>
                                                 <select class="form-control" v-model="tsr.company">
                                                     <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
                                                 </select>
                                                 <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="role">Locations</label>
+                                                <select class="form-control" v-model="tsr.location">
+                                                    <option v-for="(location,l) in locations" v-bind:key="l" :value="location.id"> {{ location.name }}</option>
+                                                </select>
+                                                <span class="text-danger" v-if="errors.location  ">{{ errors.location[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -165,19 +174,31 @@ export default {
                 personal_email: '',
                 plate_number: '',
                 company: '',
+                location: ''
             },
             companies: [],
+            locations: [],
             errors: []
         }
     },
     created(){
         this.fetchCompanies();
+        this.fetchLocations();
     },
     methods:{
         fetchCompanies(){
             axios.get('/companies-all')
             .then(response => { 
                 this.companies = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
+        fetchLocations(){
+            axios.get('/locations-all')
+            .then(response => { 
+                this.locations = response.data;
             })
             .catch(error => { 
                 this.errors = error.response.data.errors;
@@ -198,7 +219,8 @@ export default {
                 contact_person: tsr.contact_person,
                 personal_email: tsr.personal_email,
                 plate_number: tsr.plate_number,
-                company: tsr.company
+                company: tsr.company,
+                location: tsr.location
 
             })
             .then(response => {

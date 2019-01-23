@@ -83,7 +83,8 @@ class TsrController extends Controller
             'address' => 'required',
             'contact_number' => 'required',
             'date_of_birth' => 'required',
-            'company' => 'required'
+            'company' => 'required',
+            'location' => 'required',
         ]);
 
 
@@ -118,6 +119,10 @@ class TsrController extends Controller
                 // Attaching role to user
                 $tsrRole = Role::where('name', '=', 'Tsr')->first();
                 $user->syncRoles($tsrRole);
+
+
+                // Assigning of locations
+                $user->locations()->sync( (array) $request->location);
                 // Insert user_id in tsr table
                 $tsr->update(['user_id'=> $user->id]);
                 return ['redirect' => route('tsr_list')];
@@ -152,7 +157,7 @@ class TsrController extends Controller
      */
     public function show($id)
     {
-        return TechnicalSalesRepresentative::findOrFail($id);
+        return TechnicalSalesRepresentative::with('user.locations')->where('id',$id)->get();
     }
 
     /**
@@ -170,7 +175,8 @@ class TsrController extends Controller
             'address' => 'required',
             'contact_number' => 'required',
             'date_of_birth' => 'required',
-            'company' => 'required'
+            'company' => 'required',
+            'location' => 'required'
         ]);
 
         $technicalSalesRepresentative->last_name = $request->last_name;
@@ -196,6 +202,10 @@ class TsrController extends Controller
             $user->email = $technicalSalesRepresentative->email;
             $user->company_id = $request->company;
             $user->save();
+            // Assigning of companies
+            $user->companies()->sync( (array) $request->company);
+            // Assigning of locations
+            $user->locations()->sync( (array) $request->location);
 
             return ['redirect' => route('tsr_list')];
         }
