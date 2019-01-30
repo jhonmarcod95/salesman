@@ -283,12 +283,12 @@
 
             /* revise this code, radius must be defined in schedule type table */
             if(type == '1'){
-                $("#radius-add").val('0.5');
-                $("#radius-update").val('0.5');
-            }
-            else{
                 $("#radius-add").val('5');
                 $("#radius-update").val('5');
+            }
+            else{
+                $("#radius-add").val('10');
+                $("#radius-update").val('10');
             }
 
             setModalElementVisibility(type);

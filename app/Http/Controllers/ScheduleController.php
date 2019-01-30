@@ -114,7 +114,6 @@ class ScheduleController extends Controller
 
         $dates = $this->fetchDatePeriod($request->start_date, $request->end_date);
 
-
         DB::beginTransaction();
         foreach ($dates as $date){
             #Customer Visit
@@ -144,7 +143,7 @@ class ScheduleController extends Controller
                     $schedule->remarks = $request->remarks;
                     $schedule->lat = $geocode['lat'];
                     $schedule->lng = $geocode['lng'];
-                    $schedule->km_distance = $request->radius;
+                    $schedule->km_distance = $this->getRadius($geocode['lat'], $geocode['lng'], $request->radius);
                     $schedule->save();
 
                     $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -384,5 +383,39 @@ class ScheduleController extends Controller
         }
 
         return $result;
+    }
+
+    function getRadius($p_lat, $p_lng, $p_radius){
+        $radius = 25;
+        $lat = 14.579842;
+        $lng = 121.037349;
+
+        $km_distance = $this->haversineGreatCircleDistance($p_lat, $p_lng,$lat, $lng);
+
+        //within metro manila
+        if ($km_distance <= $radius){
+            $result = 0.5;
+        }
+        else{
+            $result = $p_radius;
+        }
+        return $result;
+    }
+
+    function haversineGreatCircleDistance(
+        $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
+    {
+        // convert from degrees to radians
+        $latFrom = deg2rad($latitudeFrom);
+        $lonFrom = deg2rad($longitudeFrom);
+        $latTo = deg2rad($latitudeTo);
+        $lonTo = deg2rad($longitudeTo);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+                cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+        return $angle * $earthRadius;
     }
 }
