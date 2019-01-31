@@ -16,7 +16,7 @@ class CreateReceiptTypesTable extends Migration
         Schema::create('receipt_types', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->string('tax_code');
+            $table->string('tax_code')->nullable();
             $table->timestamps();
         });
     }
