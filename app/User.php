@@ -83,4 +83,9 @@ class User extends Authenticatable implements Auditable
         return $this->hasMany(Payment::class);
     }
 
+    public function receiptExpenses()
+    {
+        return $this->hasMany(ReceiptExpense::class);
+    }
+
 }

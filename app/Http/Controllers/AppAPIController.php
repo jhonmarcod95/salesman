@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\APIExpenseResult as expenseResult;
-use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Http\Resources\ExpensesEntriesResult as ExpensesEntriesResult;
+use App\Http\Resources\TinNumbersResource as TinNumbersResource;
+use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Http\Resources\PaymentsResource as PaymentsResource;
-use App\Expense;
+use App\Http\Resources\APIExpenseResult as expenseResult;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use App\ReceiptExpense;
+use App\RequestSchedule;
 use App\ExpensesEntry;
 use App\ExpensesType;
-use App\Schedule;
 use App\Attendance;
-use App\Payment;
-use App\RequestSchedule;
 use Carbon\Carbon;
+use App\Schedule;
+use App\Expense;
+use App\Payment;
 use DB;
 
 
@@ -412,6 +414,53 @@ class AppAPIController extends Controller
                         ->get();
 
         return PaymentsResource::collection($payments);
+
+    }
+
+    // Receipt Expenses API
+
+    public function storeReceiptExpense(Request $request) {
+
+        $this->validate($request, [
+            'expense_id' => 'required',
+            'receipt_transaction' => 'required', // VAT or NON-VAT
+            'receipt_type' => 'required', // Sales Invoice or Official Receipt
+            'receipt_number' => 'required', // OR# or SI#
+            'date_receipt' => 'required' // date of receipt
+        ]);
+
+        if($request->input('receipt_transaction') == 1) {
+            $this->validate($request, [
+                'vendor_name' => 'required',
+                'vendor_address' => 'required',
+                'tin_number' => 'required',
+            ]);
+        }
+
+        $receiptExpense = new ReceiptExpense;
+        $receiptExpense->user_id = Auth::user()->id;
+        $receiptExpense->expense()->associate($request->input('expense_id'));
+
+        $receiptExpense->receipt_transaction = $request->input('receipt_transaction');
+        $receiptExpense->receipt_type = $request->input('receipt_type');
+        $receiptExpense->receipt_number = $request->input('receipt_number');
+        $receiptExpense->date_receipt = $request->input('date_receipt');
+
+        $receiptExpense->vendor_name = $request->input('vendor_name');
+        $receiptExpense->vendor_address = $request->input('vendor_address');
+        $receiptExpense->tin_number = $request->input('tin_number');
+
+        $receiptExpense->save();
+
+        return $receiptExpense;
+
+    }
+
+    public function getTinNumbers() {
+
+        $tinNumbers = ReceiptExpense::orderBy('id','DESC')->get()->unique('tin_number');
+
+        return TinNumbersResource::collection($tinNumbers);
 
     }
 
