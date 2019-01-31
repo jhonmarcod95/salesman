@@ -172,8 +172,10 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::post('/expenses', 'ExpenseController@store');
     // Update Expenses
     Route::patch('/expenses/{expensesType}', 'ExpenseController@update');
+    
 });
 
+Route::get('/ginahambal', 'PaymentController@store');
 // AP Routes
 Route::group(['middleware' => ['auth', 'role:ap']], function(){
 
@@ -183,6 +185,10 @@ Route::group(['middleware' => ['auth', 'role:ap']], function(){
     Route::post('/payments', 'PaymentController@store');
     // Fetch expense report by company
     Route::post('/expense-by-company', 'ExpenseController@generateByCompany');
+    // Show expenses submitted
+    Route::get('/expense-submitted/{id}', 'ExpenseController@showExpenseSubmitted');
+    // Simulate expenses submitted
+    Route::get('/expense-simulate/{id}', 'ExpenseController@simulateExpenseSubmitted');
 
 });
 

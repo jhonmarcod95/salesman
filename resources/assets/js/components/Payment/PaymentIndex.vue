@@ -89,7 +89,7 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <!-- <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense[0].user.name, expense.created_at)">View</a> -->
-                                                    <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense, expense[0].user.name)">View</a>
+                                                    <a class="dropdown-item" :href="expenseSubmittedLink+expense[0].id">View</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -172,14 +172,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-round btn-fill" v-if="submit" @click="payExpenses(expenses_id,expenseByTsr[0].user_id)">Submit</button>
+                    <button type="button" class="btn btn-primary btn-round btn-fill" v-if="submit" @click="payExpenses(expenses_id,expenseByTsr[0].user_id)">Simulate</button>
                 </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
-
 <script>
 import moment from 'moment';
 export default {
@@ -221,38 +220,48 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        fetchExpenseByTsr(expenses, name){
+        fetchExpenseByTsr(id){
+
             this.errors = [];
-            let ids = [];
-            expenses.forEach(element => {
-                ids.push(element.id);
-            });
-         
-            axios.get(`/expense-report-bydate-peruser/${ids}`)
+            axios.get(`/expense-submitted/${id}`)
             .then(response => { 
-                this.expenseByTsr = response.data;
-                this.tsrName = name;
-                var array = this.expenseByTsr.filter(item => item.payments == null);
-                this.submit = array.length > 0 ? true : false;
-                $('#viewModal').modal('show');
+
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
             })
+
+            // this.errors = [];
+            // let ids = [];
+            // expenses.forEach(element => {
+            //     ids.push(element.id);
+            // });
+         
+            // axios.get(`/expense-report-bydate-peruser/${ids}`)
+            // .then(response => { 
+            //     this.expenseByTsr = response.data;
+            //     this.tsrName = name;
+            //     var array = this.expenseByTsr.filter(item => item.payments == null);
+            //     this.submit = array.length > 0 ? true : false;
+            //     $('#viewModal').modal('show');
+            // })
+            // .catch(error => {
+            //     this.errors = error.response.data.errors;
+            // })
         },
-        payExpenses(expenseId,userId){
-           axios.post('/payments', {
-               expenseId: expenseId,
-               userId: userId,
-           })
-           .then(response => {
-               $('#viewModal').modal('hide');
-               alert('Expense Successfully paid')
-           })
-           .catch(error => { 
-               this.errors= error.response.data.errors;
-           })
-        },
+        // payExpenses(expenseId,userId){
+        //    axios.post('/payments', {
+        //        expenseId: expenseId,
+        //        userId: userId,
+        //    })
+        //    .then(response => {
+        //        $('#viewModal').modal('hide');
+        //        alert('Expense Successfully paid')
+        //    })
+        //    .catch(error => { 
+        //        this.errors= error.response.data.errors;
+        //    })
+        // },
         fetchExpenses(){
             var dates = this.week.split('-');
             var date1 = dates[0];
@@ -342,12 +351,15 @@ export default {
 
             return queues_array;
         },
-        imageLink(){
-            return window.location.origin+'/storage/';
-        },
+        // imageLink(){
+        //     return window.location.origin+'/storage/';
+        // },
         years () {
             const year = new Date().getFullYear()
             return Array.from({length: year - 2010}, (value, index) => 2011 + index)
+        },
+        expenseSubmittedLink(){
+            return window.location.origin+'/expense-submitted/';
         }
     },
 }

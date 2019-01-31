@@ -7,12 +7,16 @@ use App\{
     Message,
     Expense,
     ExpensesEntry,
-    ExpensesType
+    ExpensesType,
+    User,
+    SapUser,
+    SapServer,
 };
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      *
@@ -95,12 +99,13 @@ class ExpenseController extends Controller
      */
     
     public function generateByCompany(Request $request){
-
         $request->validate([
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate',
         ]);
         
+        session(['dateEntry' => $request->startDate. ' to ' . $request->endDate]);
+
         $company = $request->company;
         if($company){
             $expense = ExpensesEntry::with('user')
@@ -136,7 +141,7 @@ class ExpenseController extends Controller
      */
     public function generateBydatePerUser(Request $request, $ids){
         $explode_id = array_map('intval', explode(',', $ids));
-        return Expense::with('expensesType', 'payments')->whereHas('expensesEntry', function($q) use ($explode_id){
+        return Expense::with('user','user.companies','user.vendor','expensesType', 'payments')->whereHas('expensesEntry', function($q) use ($explode_id){
             $q->whereIn('id', $explode_id);
         })->get();
     }
@@ -217,5 +222,38 @@ class ExpenseController extends Controller
         $expensesType->save();
 
         return $expensesType;
+    }
+    
+    /**
+     * Show Expense Submitted page
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showExpenseSubmitted($id){
+
+        $expenseEntry = ExpensesEntry::findOrfail($id);
+        $date = session('dateEntry');
+        // $date = 1;
+        if($expenseEntry){
+            return view("expense.index-submitted", compact('id', 'date'));
+        }
+    }
+
+    public function simulateExpenseSubmitted($id){
+        $expenseEntry = ExpensesEntry::findOrfail($id);
+
+        if($expenseEntry){
+            $tsr = User::findOrFail($expenseEntry->user_id);
+            $tsr_company_code = $tsr->companies->pluck('code');
+            $sap_user = SapUser::where('user_id', Auth::user()->id)->where('sap_server', $tsr_company_code)->first();
+            $sap_server = SapServer::where('sap_server', $tsr_company_code)->first();
+            
+            $data = [
+                'sap_user' => $sap_user,
+                'sap_server' => $sap_server
+            ];
+
+            return array ($data);
+        }
     }
 }
