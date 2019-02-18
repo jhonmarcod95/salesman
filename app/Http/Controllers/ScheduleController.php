@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\GeocodeCustomerRule;
+use App\Rules\GeocodeEventRule;
 use Auth;
 use Carbon;   
 use App\Customer;
@@ -16,6 +18,7 @@ use DatePeriod;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\Geocoder\Facades\Geocoder;
 
 class ScheduleController extends Controller
 {
@@ -99,6 +102,7 @@ class ScheduleController extends Controller
             'user_id' => 'required',
             'type' => 'required',
             'start_date' => 'required',
+            'radius' => 'required',
             'end_date' => 'required|after_or_equal:start_date',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
@@ -110,19 +114,22 @@ class ScheduleController extends Controller
 
         $dates = $this->fetchDatePeriod($request->start_date, $request->end_date);
 
+
         DB::beginTransaction();
         foreach ($dates as $date){
             #Customer Visit
             if($schedule_type == '1'){
 
                 $request->validate([
-                    'customer_codes' => 'required',
+                    'customer_codes' => [new GeocodeCustomerRule(), 'required'],
                 ]);
 
                 $customer_codes = $request->customer_codes;
 
                 foreach ($customer_codes as $customer_code){
                     $customer = Customer::where('customer_code', $customer_code)->first();
+
+                    $geocode = Geocoder::getCoordinatesForAddress($customer->street . ' ' . $customer->town_city);
 
                     $schedule = new Schedule();
                     $schedule->user_id = $request->user_id;
@@ -135,6 +142,9 @@ class ScheduleController extends Controller
                     $schedule->end_time = $request->end_time;
                     $schedule->status = '2';
                     $schedule->remarks = $request->remarks;
+                    $schedule->lat = $geocode['lat'];
+                    $schedule->lng = $geocode['lng'];
+                    $schedule->km_distance = $request->radius;
                     $schedule->save();
 
                     $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -142,10 +152,13 @@ class ScheduleController extends Controller
             }
             #Event & Mapping
             else{
+
                 $request->validate([
                     'name' => 'required|max:191',
-                    'address' => 'required|max:191',
+                    'address' => ['required', 'max:191', new GeocodeEventRule()],
                 ]);
+
+                $geocode = Geocoder::getCoordinatesForAddress($request->address);
 
                 $schedule = new Schedule();
                 $schedule->user_id = $request->user_id;
@@ -158,6 +171,9 @@ class ScheduleController extends Controller
                 $schedule->end_time = $request->end_time;
                 $schedule->status = '2';
                 $schedule->remarks = $request->remarks;
+                $schedule->lat = $geocode['lat'];
+                $schedule->lng = $geocode['lng'];
+                $schedule->km_distance = $request->radius;
                 $schedule->save();
 
                 $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -173,6 +189,7 @@ class ScheduleController extends Controller
         $request->validate([
             'user_id' => 'required',
             'date' => 'required',
+            'radius' => 'required',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
             'end_time' => 'required',
         ]);
@@ -182,10 +199,12 @@ class ScheduleController extends Controller
         #Customer Visit
         if($schedule_type == '1'){
             $request->validate([
-                'customer_code' => 'required',
+                'customer_code' => [new GeocodeCustomerRule(), 'required'],
             ]);
 
             $customer = Customer::where('customer_code', $request->customer_code)->first();
+
+            $geocode = Geocoder::getCoordinatesForAddress($customer->street . ' ' . $customer->town_city);
 
             $schedule = Schedule::find($id);
             $schedule->type = $schedule_type;
@@ -196,14 +215,19 @@ class ScheduleController extends Controller
             $schedule->end_time = $request->end_time;
             $schedule->status = '2';
             $schedule->remarks = $request->remarks;
+            $schedule->lat = $geocode['lat'];
+            $schedule->lng = $geocode['lng'];
+            $schedule->km_distance = $request->radius;
             $schedule->save();
         }
         #Event & Mapping
         else{
             $request->validate([
                 'name' => 'required|max:191',
-                'address' => 'required|max:191',
+                'address' => ['required', 'max:191', new GeocodeEventRule()],
             ]);
+
+            $geocode = Geocoder::getCoordinatesForAddress($request->address);
 
             $schedule = Schedule::find($id);
             $schedule->user_id = $request->user_id;
@@ -215,6 +239,9 @@ class ScheduleController extends Controller
             $schedule->end_time = $request->end_time;
             $schedule->status = '2';
             $schedule->remarks = $request->remarks;
+            $schedule->lat = $geocode['lat'];
+            $schedule->lng = $geocode['lng'];
+            $schedule->km_distance = $request->radius;
             $schedule->save();
         }
 
@@ -270,19 +297,17 @@ class ScheduleController extends Controller
 
     public function todayByUser(){
 
-        if(Auth::user()->level() < 8){
-            $schedule = Schedule::with('user','attendances')->whereHas('user' , function($q){
-                $q->whereHas('companies', function ($q){
-                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+         $schedule = Schedule::with('user','attendances')
+            ->when(Auth::user()->level() < 8, function ($q) {
+                $q->whereHas('user', function ($q){
+                    $q->whereHas('companies', function($q){
+                        $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                    });
                 });
-            })->where('date', Carbon\Carbon::now()->toDateString())->get();
-             
-            return  array ($schedule->groupBy('user_id'));
-        }
-
-         $schedule = Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
+            })
+            ->where('date', Carbon\Carbon::now()->toDateString())->get();
          
-        return array ($schedule->groupBy('user_id'));
+         return  array ($schedule->sortBy('user.name')->groupBy('user.name'));
     }
 
 

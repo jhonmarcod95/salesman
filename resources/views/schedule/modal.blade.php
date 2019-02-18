@@ -77,18 +77,24 @@
                     </div>
                 </div>
 
-                {{-- Start & End Time --}}
+                {{-- Start & End Time & Radius --}}
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <h5>Start Time</h5>
                             {!! Form::time('start_time', '08:00', ['class' => 'form-control']) !!}
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <h5>End Time</h5>
                             {!! Form::time('end_time', '18:00', ['class' => 'form-control']) !!}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <h5>Radius (KM)</h5>
+                            {!! Form::number('radius', 2, ['class' => 'form-control', 'min' => '0', 'max' => '6371', 'id' => 'radius-add']) !!}
                         </div>
                     </div>
                 </div>
@@ -153,7 +159,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Customer</h5>
-                                {!! Form::select('customer_code', $customers, null, ['id' => 'sel_customer_code', 'class' => 'updateScheduleModalSel2', 'required']) !!}
+                                {!! Form::select('customer_code[]', $customers, null, ['id' => 'sel_customer_code', 'class' => 'updateScheduleModalSel2', 'required']) !!}
                             </div>
                         </div>
                     </div>
@@ -182,16 +188,22 @@
 
                 {{-- Start & End Time --}}
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <h5>Start Time</h5>
                             {!! Form::time('start_time', null, ['id' => 'start_time', 'class' => 'form-control']) !!}
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <h5>End Time</h5>
                             {!! Form::time('end_time', null, ['id' => 'end_time', 'class' => 'form-control']) !!}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <h5>Radius (KM)</h5>
+                            {!! Form::number('radius', 2, ['class' => 'form-control', 'min' => '0', 'max' => '6371', 'id' => 'radius-update']) !!}
                         </div>
                     </div>
                 </div>
@@ -201,6 +213,9 @@
                         <div class="form-group">
                             <h5>Remarks</h5>
                             {!! Form::textarea('remarks', null, ['id' => 'remarks', 'class' => 'form-control', 'rows' => '3', 'maxlength' => '1000']) !!}
+                        </div>
+                        <div class="form-group">
+                            <a id="a-map-preview" href="#" target="_blank">Map preview</a>
                         </div>
                     </div>
                 </div>

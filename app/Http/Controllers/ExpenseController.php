@@ -141,7 +141,7 @@ class ExpenseController extends Controller
      */
     public function generateBydatePerUser(Request $request, $ids){
         $explode_id = array_map('intval', explode(',', $ids));
-        return Expense::with('user','user.companies','user.vendor','expensesType', 'payments')->whereHas('expensesEntry', function($q) use ($explode_id){
+        return Expense::with('user','user.companies','user.companies.businessArea','user.companies.glTaxcode','user.location','user.vendor','user.internalOrders','expensesType','expensesType.expenseChargeType.chargeType.expenseGl', 'payments','receiptExpenses','receiptExpenses.receiptType')->whereHas('expensesEntry', function($q) use ($explode_id){
             $q->whereIn('id', $explode_id);
         })->get();
     }
@@ -230,7 +230,6 @@ class ExpenseController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showExpenseSubmitted($id){
-
         $expenseEntry = ExpensesEntry::findOrfail($id);
         $date = session('dateEntry');
         // $date = 1;

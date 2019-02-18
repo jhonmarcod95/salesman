@@ -6,7 +6,7 @@
         </button>
         <!-- Brand -->
         <a class="navbar-brand pt-0" href="{{ url('/home') }}">
-            <img src="{{ url('img/brand/PFMC.jpg') }}" class="navbar-brand-img" alt="...">&nbsp; Salesforce
+            <img src="{{ url(Auth::user()->companies->pluck('company_logo')[0]) }}" class="navbar-brand-img" alt="...">&nbsp; Salesforce
         </a>
 
         {{--Mobile Navigation--}}
@@ -144,11 +144,11 @@
                                         <i class="ni ni-circle-08 text-pink"></i> TSR
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a class="nav-link" href="{{ url('/companies') }}">
                                         <i class="ni ni-istanbul text-green"></i> Company
                                     </a>
-                                </li>
+                                </li> --}}
                                 <li>
                                     <a class="nav-link" href="{{ url('/customers') }}">
                                         <i class="ni ni-shop text-blue"></i> Customers

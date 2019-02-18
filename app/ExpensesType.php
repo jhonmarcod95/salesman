@@ -18,4 +18,8 @@ class ExpensesType extends Model
     public function expenses() {
         return $this->hasMany(Expenses::class);
     }
+
+    public function expenseChargeType() {
+        return $this->hasOne(ExpenseChargeType::class, 'expense_type_id', 'id');
+    }
 }

@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2a7c14635bf65b6c2f76dc71085ed764",
+    "content-hash": "899ecc930b6dd17bd4219232acdb3de5",
     "packages": [
         {
             "name": "defuse/php-encryption",
@@ -1415,7 +1415,7 @@
                 {
                     "name": "Luís Otávio Cobucci Oblonczyk",
                     "email": "lcobucci@gmail.com",
-                    "role": "Developer"
+                    "role": "developer"
                 }
             ],
             "description": "A simple library to work with JSON Web Token and JSON Web Signature",
@@ -2516,6 +2516,66 @@
                 "uuid"
             ],
             "time": "2018-07-19T23:38:55+00:00"
+        },
+        {
+            "name": "spatie/geocoder",
+            "version": "3.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/geocoder.git",
+                "reference": "7fff6e758016d67dee17512f9c77422cf054403d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/geocoder/zipball/7fff6e758016d67dee17512f9c77422cf054403d",
+                "reference": "7fff6e758016d67dee17512f9c77422cf054403d",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "~6.0",
+                "illuminate/support": "^5.0",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.4",
+                "vlucas/phpdotenv": "^2.4"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\Geocoder\\GeocoderServiceProvider"
+                    ],
+                    "aliases": {
+                        "Geocoder": "Spatie\\Geocoder\\Facades\\Geocoder"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Geocoder\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be"
+                }
+            ],
+            "description": "Geocoding addresses to coordinates",
+            "homepage": "https://github.com/spatie/geocoder",
+            "keywords": [
+                "coordinate",
+                "geocode",
+                "laravel",
+                "location",
+                "map"
+            ],
+            "time": "2018-05-15T08:27:30+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",

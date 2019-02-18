@@ -79214,17 +79214,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['expenseEntryId', 'dateEntry'],
     data: function data() {
         return {
+            errorsExpense: false,
             simulatedExpenses: [],
             lineOneExpenses: {},
             checkedExpenses: [],
             expenseByTsr: [],
             simulate: [],
+            gl_account_i7: [],
+            gl_account_i3: [],
             payment_terms: 'NCOD',
             header_text: 'REIMBURSEMENT',
             document_type: 'KR',
@@ -79259,9 +79269,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         simulateExpenses: function simulateExpenses(userId) {
             var _this2 = this;
 
+            var vm = this;
             this.simulatedExpenses = [];
             var expenses_id = [];
             var checked = document.querySelectorAll("input[type=checkbox]:checked");
+            if (!checked.length) {
+                this.errorsExpense = true;
+                return false;
+            }this.errorsExpense = false;
             checked.forEach(function (element) {
                 expenses_id.push(parseInt(element.value));
             });
@@ -79270,11 +79285,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
 
             var sum = 0;
-            this.checkedExpenses.filter(function (item) {
-                sum = sum + item.amount;
+
+            this.checkedExpenses.filter(function (checkedExpense) {
+                //Get the sum of all checked expenes
+                sum = sum + checkedExpense.amount;
             });
 
-            this.lineOneExpenses = {
+            var filteredBusinessArea = this.checkedExpenses[0].user.companies[0].business_area.filter(function (businessArea) {
+                // loop business area to get correct business area
+                return businessArea.location_id == vm.checkedExpenses[0].user.location[0].id;
+            });
+
+            this.lineOneExpenses = { //Generate the line 1 paramater to post
                 item: 1,
                 item_text: 'REIMBURSEMENT; ' + this.dateEntry,
                 gl_account: this.expenseByTsr[0].user.vendor.vendor_code,
@@ -79284,7 +79306,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 internal_order: '',
                 amount: sum * -1,
                 charge_type: '',
-                business_area: '',
+                business_area: filteredBusinessArea[0].business_area,
                 or_number: '',
                 supplier_name: '',
                 supplier_address: '',
@@ -79293,6 +79315,115 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             this.simulatedExpenses.push(this.lineOneExpenses);
 
+            var item = 1;
+            var tax_amountI3 = 0;
+            var tax_amountI7 = 0;
+            var tax_amount = 0;
+            this.checkedExpenses.filter(function (checkedExpense) {
+                //Generate the line 2 to n paramater to post
+                var filteredGl = checkedExpense.expenses_type.expense_charge_type.charge_type.expense_gl.filter(function (gl_account) {
+                    // loop expense gl to get correct gl account and description
+                    return gl_account.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name && gl_account.company_code == checkedExpense.user.companies[0].code;
+                });
+                var filteredInternalOrders = checkedExpense.user.internal_orders.filter(function (internal_order) {
+                    // loop internal order to get correct internal order
+                    return internal_order.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name;
+                });
+                item = item + 1;
+                var amount = "";
+                var tax_code = "";
+                var bol_tax_amount = false;
+                if (checkedExpense.user.companies[0].code == "1100" || checkedExpense.user.companies[0].code == "CSCI") {
+                    amount = checkedExpense.amount;
+                    tax_code = "IX";
+                    bol_tax_amount = false;
+                } else if (checkedExpense.user.companies[0].code == "PFMC" && filteredBusinessArea[0].business_area.substring(0, 2) == "FD") {
+                    amount = checkedExpense.amount;
+                    tax_code = "IX";
+                } else {
+                    var round_off = checkedExpense.amount / 1.12; //(Round off to two digit)
+                    amount = round_off.toFixed(2);
+                    // amount = checkedExpense.amount;
+                    tax_code = checkedExpense.receipt_expenses.receipt_type.tax_code;
+                    var round_off_tax_amount = checkedExpense.amount - checkedExpense.amount / 1.12;
+                    tax_amount = round_off_tax_amount.toFixed(2);
+                    bol_tax_amount = true;
+                }
+
+                var expenses = {
+                    item: item,
+                    item_text: checkedExpense.expenses_type.name + ' ' + checkedExpense.created_at,
+                    gl_account: filteredGl[0].gl_account,
+                    description: filteredGl[0].gl_description,
+                    assignment: '',
+                    // input_tax_code : checkedExpense.receipt_expenses.receipt_type.tax_code,
+                    input_tax_code: tax_code,
+                    internal_order: filteredInternalOrders[0].internal_order,
+                    // amount: checkedExpense.amount,
+                    amount: amount,
+                    charge_type: checkedExpense.expenses_type.expense_charge_type.charge_type.name,
+                    business_area: filteredBusinessArea[0].business_area,
+                    or_number: checkedExpense.receipt_expenses.receipt_number,
+                    supplier_name: checkedExpense.receipt_expenses.vendor_name,
+                    supplier_address: checkedExpense.receipt_expenses.vendor_address,
+                    supplier_tin_number: checkedExpense.receipt_expenses.tin_number
+
+                };
+                if (bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I3') {
+                    // expenses.tax_amountI3 = tax_amount;
+                    tax_amountI3 = parseFloat(tax_amountI3) + parseFloat(tax_amount);
+                } else if (bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I7') {
+                    // expenses.tax_amountI7 = tax_amount;
+                    tax_amountI7 = parseFloat(tax_amountI7) + parseFloat(tax_amount);
+                } else {}
+                item + 1;
+                vm.simulatedExpenses.push(expenses);
+            });
+            this.gl_account_i7 = Object.values(this.checkedExpenses[0].user.companies[0].gl_taxcode).filter(function (tax_code) {
+                return tax_code.tax_code == 'I7';
+            });
+
+            if (tax_amountI7) {
+                var expenses = {
+                    item: item + 1,
+                    item_text: '',
+                    gl_account: this.gl_account_i7[0].gl_account,
+                    description: this.gl_account_i7[0].gl_description,
+                    assignment: '',
+                    input_tax_code: 'I7',
+                    internal_order: '',
+                    amount: tax_amountI7,
+                    charge_type: '',
+                    business_area: filteredBusinessArea[0].business_area,
+                    or_number: '',
+                    supplier_name: '',
+                    supplier_address: '',
+                    supplier_tin_number: ''
+                };
+                vm.simulatedExpenses.push(expenses);
+            }
+            this.gl_account_i3 = Object.values(this.checkedExpenses[0].user.companies[0].gl_taxcode).filter(function (tax_code) {
+                return tax_code.tax_code == 'I3';
+            });
+            if (tax_amountI3) {
+                var expenses = {
+                    item: item + 1,
+                    item_text: '',
+                    gl_account: this.gl_account_i3[0].gl_account,
+                    description: this.gl_account_i3[0].gl_description,
+                    assignment: '',
+                    input_tax_code: 'I7',
+                    internal_order: '',
+                    amount: tax_amountI3,
+                    charge_type: '',
+                    business_area: filteredBusinessArea[0].business_area,
+                    or_number: '',
+                    supplier_name: '',
+                    supplier_address: '',
+                    supplier_tin_number: ''
+                };
+                vm.simulatedExpenses.push(expenses);
+            }
             axios.get('/expense-simulate/' + this.expenseEntryId).then(function (response) {
                 _this2.simulate = response.data;
                 $('#simulateModal').modal('show');
@@ -79300,12 +79431,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this2.errors = error.response.data.errors;
             });
         },
-        checkExpenses: function checkExpenses(expenseByTsr, document_type, document_date, payment_terms, posting_date, header_text, baseline_date) {
+        checkExpenses: function checkExpenses(expenseByTsr, simulatedExpenses, document_type, document_date, payment_terms, posting_date, header_text, baseline_date, posting_type) {
             var _this3 = this;
 
             axios.post('/payments', {
                 expenseEntryId: this.expenseEntryId,
-                posting_type: 'CHECK',
+                posting_type: posting_type,
                 app_server: this.simulate[0].sap_server.app_server, // sap_server.app_server
                 system_id: this.simulate[0].sap_server.system_id, // sap_server.system_id
                 instance_number: this.simulate[0].sap_server.system_number, // sap_server.system_number
@@ -79315,18 +79446,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 sap_password: this.simulate[0].sap_user.sap_password, // sap_user.password need to check first the server of tsr
                 header_text: header_text,
                 company_code: expenseByTsr[0].user.companies[0].code,
-                document_date: document_date,
-                posting_date: posting_date,
+                document_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()(document_date).format('L'),
+                posting_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()(posting_date).format('L'),
                 // document_date: '01-29-2019',
                 // posting_date: '01-29-2019',
                 document_type: document_type,
                 reference_number: 'sample1',
                 // baseline_date: '01-29-2019',
-                baseline_date: baseline_date,
+                baseline_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()(baseline_date).format('L'),
                 vendor_code: expenseByTsr[0].user.vendor.vendor_code,
                 payment_terms: payment_terms,
-                gl_account_i7: '0010180003',
-                gl_account_i3: '0010180001'
+                // gl_account_i7: '0010180003',
+                // gl_account_i3: '0010180001',
+                gl_account_i7: this.gl_account_i7[0].gl_account,
+                gl_account_i3: this.gl_account_i3[0].gl_account,
+                simulatedExpenses: simulatedExpenses
             }).then(function (response) {
                 _this3.responses = response.data;
             }).catch(function (error) {
@@ -79412,12 +79546,10 @@ var render = function() {
                                   _c("input", {
                                     attrs: {
                                       type: "checkbox",
-                                      name: "expenses_id"
+                                      name: "expenses_id",
+                                      checked: "checked"
                                     },
-                                    domProps: {
-                                      value: expenseBy.id,
-                                      checked: true
-                                    }
+                                    domProps: { value: expenseBy.id }
                                   })
                                 ])
                               : _c("td", [_vm._v("Paid")]),
@@ -79475,6 +79607,14 @@ var render = function() {
               _vm._v(" "),
               _c("span", { staticClass: "ml-3" }, [
                 _vm._v(_vm._s(_vm.expenseByTsr.length) + " item(s)")
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "text-center mb-2" }, [
+                _vm.errorsExpense
+                  ? _c("span", { staticClass: "text-danger" }, [
+                      _vm._v("Please Select Expense")
+                    ])
+                  : _vm._e()
               ]),
               _vm._v(" "),
               _vm.expenseByTsr.length
@@ -79557,7 +79697,11 @@ var render = function() {
                               ],
                               staticClass:
                                 "form-control form-control-alternative",
-                              attrs: { type: "text", id: "company-code" },
+                              attrs: {
+                                type: "text",
+                                id: "company-code",
+                                disabled: ""
+                              },
                               domProps: {
                                 value:
                                   _vm.expenseByTsr[0].user.companies[0].code
@@ -80168,64 +80312,73 @@ var render = function() {
                       )
                     ]),
                     _vm._v(" "),
-                    _vm.responses.length
+                    _vm.responses.length &&
+                    _vm.responses[0].return_message_type == "E"
                       ? _c(
                           "div",
-                          {
-                            staticClass: "table-responsive mt-5",
-                            staticStyle: { width: "45% !important" }
-                          },
-                          [
-                            _c(
-                              "table",
-                              {
-                                staticClass:
-                                  "table align-items-center table-flush"
-                              },
-                              [
-                                _vm._m(3),
-                                _vm._v(" "),
-                                _c(
-                                  "tbody",
-                                  _vm._l(_vm.responses, function(response, r) {
-                                    return _c("tr", { key: r }, [
-                                      _c("td", [
-                                        _vm._v(
-                                          _vm._s(response.return_message_type)
-                                        )
-                                      ]),
-                                      _vm._v(" "),
-                                      _c("td", [
-                                        _vm._v(
-                                          _vm._s(response.return_message_id)
-                                        )
-                                      ]),
-                                      _vm._v(" "),
-                                      _c("td", [
-                                        _vm._v(
-                                          _vm._s(response.return_message_number)
-                                        )
-                                      ]),
-                                      _vm._v(" "),
-                                      _c("td", [
-                                        _vm._v(
-                                          _vm._s(
-                                            response.return_message_description
-                                          )
-                                        )
-                                      ])
-                                    ])
-                                  })
-                                )
-                              ]
-                            )
-                          ]
+                          { staticClass: "text-danger text-center mt-3 mt-3" },
+                          [_c("span", [_vm._v("Unable to post due to errors")])]
                         )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.responses.length
+                      ? _c("div", { staticClass: "table-responsive" }, [
+                          _c(
+                            "table",
+                            {
+                              staticClass:
+                                "table align-items-center table-flush"
+                            },
+                            [
+                              _vm._m(3),
+                              _vm._v(" "),
+                              _c(
+                                "tbody",
+                                _vm._l(_vm.responses, function(response, r) {
+                                  return _c("tr", { key: r }, [
+                                    _c("td", [
+                                      _vm._v(
+                                        _vm._s(response.return_message_type)
+                                      )
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("td", [
+                                      _vm._v(_vm._s(response.return_message_id))
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("td", [
+                                      _vm._v(
+                                        _vm._s(response.return_message_number)
+                                      )
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("td", [
+                                      _vm._v(
+                                        _vm._s(
+                                          response.return_message_description
+                                        )
+                                      )
+                                    ])
+                                  ])
+                                })
+                              )
+                            ]
+                          )
+                        ])
                       : _vm._e()
                   ])
                 : _vm._e(),
               _vm._v(" "),
               _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary btn-round btn-fill disabled",
+                    attrs: { type: "button" }
+                  },
+                  [_vm._v("POST")]
+                ),
+                _vm._v(" "),
                 _c(
                   "button",
                   {
@@ -80235,12 +80388,14 @@ var render = function() {
                       click: function($event) {
                         _vm.checkExpenses(
                           _vm.expenseByTsr,
+                          _vm.simulatedExpenses,
                           _vm.document_type,
                           _vm.document_date,
                           _vm.payment_terms,
                           _vm.posting_date,
                           _vm.header_text,
-                          _vm.baseline_date
+                          _vm.baseline_date,
+                          "CHECK"
                         )
                       }
                     }
@@ -83476,6 +83631,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -83496,27 +83652,36 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         getCustomerId: function getCustomerId(id) {
             this.customer_id = id;
         },
-        fetchCustomer: function fetchCustomer() {
+        getGeocode: function getGeocode(address) {
             var _this = this;
 
-            axios.get('/customers-all').then(function (response) {
-                _this.customers = response.data;
+            axios.get('/customers-geocode/' + address.replace(/[/#]/g, '')).then(function (response) {
+                window.open('https://www.google.com/maps/place/' + response.data, '_blank');
             }).catch(function (error) {
                 _this.errors = error.response.data.errors;
             });
         },
-        deleteCustomer: function deleteCustomer() {
+        fetchCustomer: function fetchCustomer() {
             var _this2 = this;
 
+            axios.get('/customers-all').then(function (response) {
+                _this2.customers = response.data;
+            }).catch(function (error) {
+                _this2.errors = error.response.data.errors;
+            });
+        },
+        deleteCustomer: function deleteCustomer() {
+            var _this3 = this;
+
             var index = this.customers.findIndex(function (item) {
-                return item.id == _this2.customer_id;
+                return item.id == _this3.customer_id;
             });
             axios.delete('/customers/' + this.customer_id).then(function (response) {
                 $('#deleteModal').modal('hide');
                 alert('Customer successfully deleted');
-                _this2.customers.splice(index, 1);
+                _this3.customers.splice(index, 1);
             }).catch(function (error) {
-                _this2.errors = error.response.data.errors;
+                _this3.errors = error.response.data.errors;
             });
         },
         setPage: function setPage(pageNumber) {
@@ -83534,12 +83699,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     computed: {
         filteredCustomers: function filteredCustomers() {
-            var _this3 = this;
+            var _this4 = this;
 
             var self = this;
 
             return self.customers.filter(function (customer) {
-                return customer.name.toLowerCase().includes(_this3.keywords.toLowerCase());
+                return customer.name.toLowerCase().includes(_this4.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -83673,6 +83838,23 @@ var render = function() {
                                     }
                                   },
                                   [_vm._v("Delete")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "dropdown-item",
+                                    on: {
+                                      click: function($event) {
+                                        _vm.getGeocode(
+                                          customer.street +
+                                            " " +
+                                            customer.town_city
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("View address")]
                                 )
                               ]
                             )

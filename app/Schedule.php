@@ -19,7 +19,10 @@ class Schedule extends Model implements Auditable
         'start_time',
         'end_time',
         'status',
-        'remarks'
+        'remarks',
+        'lat',
+        'lng',
+        'km_distance'
     ];
 
     public static function createScheduleCode($type){
@@ -56,6 +59,9 @@ class Schedule extends Model implements Auditable
                 'schedules.remarks',
                 'schedules.created_at',
                 'schedules.updated_at',
+                'schedules.lat',
+                'schedules.lng',
+                'schedules.km_distance',
                 'users.name as full_name',
                 'background_colors.color'
             ]);

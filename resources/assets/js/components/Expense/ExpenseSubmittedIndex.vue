@@ -30,7 +30,7 @@
                                 <tbody v-if="expenseByTsr.length">
                                     <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">  
                                         <!-- <td v-if='!expenseBy.payments'> <input type="checkbox" checkedname="expenses_id" :value="expenseBy.id" v-model="expenses_id"></td> -->
-                                        <td v-if='!expenseBy.payments'> <input type="checkbox" name="expenses_id" :value="expenseBy.id" :checked="true"></td>
+                                        <td v-if='!expenseBy.payments'> <input type="checkbox" name="expenses_id" :value="expenseBy.id" checked="checked"></td>
                                         <td v-else>Paid</td>
                                         <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                         <td>{{ expenseBy.expenses_type.name }}</td>
@@ -40,6 +40,9 @@
                                 </tbody>
                             </table>
                             <span class="ml-3">{{ expenseByTsr.length }} item(s)</span>
+                            <div class="text-center mb-2">
+                                <span v-if="errorsExpense" class="text-danger">Please Select Expense</span>
+                            </div>
                             <button v-if="expenseByTsr.length" type="button" class="btn btn-primary btn-round btn-fill float-right mb-3 mr-3"  @click="simulateExpenses(expenseByTsr[0].user_id)">Simulate</button>
                         </div>
                     </div>
@@ -64,7 +67,7 @@
                             <div class="col-lg-3">
                                 <div class="form-group">
                                     <label class="form-control-label" for="company-code">Company Code</label>
-                                    <input type="text" id="company-code" class="form-control form-control-alternative" v-model="expenseByTsr[0].user.companies[0].code">
+                                    <input type="text" id="company-code" class="form-control form-control-alternative" v-model="expenseByTsr[0].user.companies[0].code" disabled>
                                     <span class="text-danger" v-if="errors.company_code">{{ errors.company_code }}</span>
                                 </div>
                             </div>
@@ -191,7 +194,10 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="table-responsive mt-5" v-if="responses.length" style="width: 45% !important">
+                    <div class="text-danger text-center mt-3 mt-3" v-if="responses.length && responses[0].return_message_type == 'E'">
+                        <span>Unable to post due to errors</span>
+                    </div>
+                    <div class="table-responsive" v-if="responses.length">
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
@@ -213,7 +219,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,document_type,document_date,payment_terms,posting_date,header_text,baseline_date)">Check</button>
+                    <button type="button" class="btn btn-primary btn-round btn-fill disabled">POST</button>
+                    <button type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,'CHECK')">Check</button>
                 </div>
                 </div>
             </div>
@@ -227,11 +234,14 @@ export default {
     props: ['expenseEntryId', 'dateEntry'],
     data(){
         return {
+            errorsExpense: false,
             simulatedExpenses: [],
             lineOneExpenses: {},
             checkedExpenses: [],
             expenseByTsr: [],
             simulate: [],
+            gl_account_i7: [],
+            gl_account_i3: [],
             payment_terms: 'NCOD',
             header_text: 'REIMBURSEMENT',
             document_type: 'KR',
@@ -263,9 +273,14 @@ export default {
             });
         },
         simulateExpenses(userId){
+            let vm = this;
             this.simulatedExpenses = [];         
             var expenses_id = [];
             var checked = document.querySelectorAll("input[type=checkbox]:checked");
+            if(!checked.length){
+                this.errorsExpense = true;
+                return false;
+            } this.errorsExpense = false;
             checked.forEach(function(element) {
                expenses_id.push(parseInt(element.value));
             });
@@ -274,11 +289,16 @@ export default {
             });
 
             var sum = 0;
-            this.checkedExpenses.filter(function(item) {
-                sum = sum + item.amount;
+
+            this.checkedExpenses.filter(function(checkedExpense) { //Get the sum of all checked expenes
+                sum = sum + checkedExpense.amount;
             });
 
-            this.lineOneExpenses = {
+            var filteredBusinessArea = this.checkedExpenses[0].user.companies[0].business_area.filter(function(businessArea){ // loop business area to get correct business area
+                return businessArea.location_id == vm.checkedExpenses[0].user.location[0].id;
+            });
+            
+            this.lineOneExpenses = { //Generate the line 1 paramater to post
                 item: 1,
                 item_text: 'REIMBURSEMENT; ' + this.dateEntry,
                 gl_account: this.expenseByTsr[0].user.vendor.vendor_code,
@@ -288,7 +308,7 @@ export default {
                 internal_order: '',
                 amount: sum * -1,
                 charge_type: '',
-                business_area: '',
+                business_area: filteredBusinessArea[0].business_area,
                 or_number: '',
                 supplier_name: '',
                 supplier_address: '',
@@ -297,6 +317,112 @@ export default {
 
             this.simulatedExpenses.push(this.lineOneExpenses);
 
+            var item = 1;
+            var tax_amountI3 = 0;
+            var tax_amountI7 = 0;
+            var tax_amount = 0;
+            this.checkedExpenses.filter(function(checkedExpense) {  //Generate the line 2 to n paramater to post
+                var filteredGl = checkedExpense.expenses_type.expense_charge_type.charge_type.expense_gl.filter(function(gl_account){ // loop expense gl to get correct gl account and description
+                                    return gl_account.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name && gl_account.company_code == checkedExpense.user.companies[0].code;
+                                });
+                var filteredInternalOrders =  checkedExpense.user.internal_orders.filter(function(internal_order){ // loop internal order to get correct internal order
+                                    return internal_order.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name;
+                                });
+                item = item + 1;
+                var amount = "";
+                var tax_code = "";
+                var bol_tax_amount = false;
+                if(checkedExpense.user.companies[0].code == "1100" || checkedExpense.user.companies[0].code == "CSCI"){
+                    amount = checkedExpense.amount;
+                    tax_code = "IX";
+                    bol_tax_amount = false;
+                }else if(checkedExpense.user.companies[0].code == "PFMC" && filteredBusinessArea[0].business_area.substring(0,2) == "FD"){
+                    amount = checkedExpense.amount;
+                    tax_code = "IX";
+                }else{
+                    var round_off = checkedExpense.amount / 1.12; //(Round off to two digit)
+                    amount = round_off.toFixed(2);
+                    // amount = checkedExpense.amount;
+                    tax_code = checkedExpense.receipt_expenses.receipt_type.tax_code;
+                    var round_off_tax_amount = checkedExpense.amount - (checkedExpense.amount / 1.12);
+                    tax_amount = round_off_tax_amount.toFixed(2);
+                    bol_tax_amount = true;
+                }
+
+                var expenses = { 
+                    item: item,
+                    item_text: checkedExpense.expenses_type.name+ ' '+checkedExpense.created_at,
+                    gl_account: filteredGl[0].gl_account,
+                    description: filteredGl[0].gl_description,
+                    assignment: '',
+                    // input_tax_code : checkedExpense.receipt_expenses.receipt_type.tax_code,
+                    input_tax_code : tax_code,
+                    internal_order: filteredInternalOrders[0].internal_order,
+                    // amount: checkedExpense.amount,
+                    amount: amount,
+                    charge_type: checkedExpense.expenses_type.expense_charge_type.charge_type.name,
+                    business_area: filteredBusinessArea[0].business_area,
+                    or_number: checkedExpense.receipt_expenses.receipt_number,
+                    supplier_name: checkedExpense.receipt_expenses.vendor_name,
+                    supplier_address: checkedExpense.receipt_expenses.vendor_address,
+                    supplier_tin_number: checkedExpense.receipt_expenses.tin_number,
+
+                }
+                if(bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I3'){
+                    // expenses.tax_amountI3 = tax_amount;
+                    tax_amountI3 = parseFloat(tax_amountI3) + parseFloat(tax_amount);
+                }else if (bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I7'){
+                    // expenses.tax_amountI7 = tax_amount;
+                    tax_amountI7 = parseFloat(tax_amountI7) + parseFloat(tax_amount);
+                }else {}
+                item + 1;
+                vm.simulatedExpenses.push(expenses);
+            });
+            this.gl_account_i7 = Object.values(this.checkedExpenses[0].user.companies[0].gl_taxcode).filter(function (tax_code){
+                return tax_code.tax_code == 'I7';
+            });
+                    
+            if(tax_amountI7){
+                var expenses = {
+                    item: item + 1,
+                    item_text: '',
+                    gl_account: this.gl_account_i7[0].gl_account,
+                    description: this.gl_account_i7[0].gl_description,
+                    assignment: '',
+                    input_tax_code : 'I7',
+                    internal_order: '',
+                    amount: tax_amountI7,
+                    charge_type: '',
+                    business_area: filteredBusinessArea[0].business_area,
+                    or_number: '',
+                    supplier_name: '',
+                    supplier_address: '',
+                    supplier_tin_number: '',
+                }
+                vm.simulatedExpenses.push(expenses);
+            }
+            this.gl_account_i3 = Object.values(this.checkedExpenses[0].user.companies[0].gl_taxcode).filter(function (tax_code){
+                return tax_code.tax_code == 'I3';
+            });
+            if(tax_amountI3){
+                var expenses = { 
+                    item: item + 1,
+                    item_text: '',
+                    gl_account: this.gl_account_i3[0].gl_account,
+                    description: this.gl_account_i3[0].gl_description,
+                    assignment: '',
+                    input_tax_code : 'I7',
+                    internal_order: '',
+                    amount: tax_amountI3,
+                    charge_type: '',
+                    business_area: filteredBusinessArea[0].business_area,
+                    or_number: '',
+                    supplier_name: '',
+                    supplier_address: '',
+                    supplier_tin_number: '',
+                }
+                vm.simulatedExpenses.push(expenses);
+            }
             axios.get(`/expense-simulate/${this.expenseEntryId}`)
             .then(response => {
                 this.simulate = response.data;
@@ -306,10 +432,10 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        checkExpenses(expenseByTsr,document_type,document_date,payment_terms,posting_date,header_text,baseline_date){
+        checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,posting_type){
            axios.post('/payments', {
             expenseEntryId: this.expenseEntryId,
-            posting_type: 'CHECK',
+            posting_type: posting_type,
             app_server: this.simulate[0].sap_server.app_server, // sap_server.app_server
             system_id: this.simulate[0].sap_server.system_id, // sap_server.system_id
             instance_number: this.simulate[0].sap_server.system_number, // sap_server.system_number
@@ -319,18 +445,21 @@ export default {
             sap_password: this.simulate[0].sap_user.sap_password, // sap_user.password need to check first the server of tsr
             header_text: header_text,
             company_code: expenseByTsr[0].user.companies[0].code,
-            document_date: document_date,
-            posting_date: posting_date,
+            document_date: moment(document_date).format('L'),
+            posting_date: moment(posting_date).format('L'),
             // document_date: '01-29-2019',
             // posting_date: '01-29-2019',
             document_type: document_type,
             reference_number: 'sample1',
             // baseline_date: '01-29-2019',
-            baseline_date: baseline_date,
+            baseline_date: moment(baseline_date).format('L'),
             vendor_code: expenseByTsr[0].user.vendor.vendor_code,
             payment_terms: payment_terms,
-            gl_account_i7: '0010180003',
-            gl_account_i3: '0010180001'
+            // gl_account_i7: '0010180003',
+            // gl_account_i3: '0010180001',
+            gl_account_i7: this.gl_account_i7[0].gl_account,
+            gl_account_i3: this.gl_account_i3[0].gl_account,
+            simulatedExpenses: simulatedExpenses
         })
         .then(response => {
             this.responses = response.data;

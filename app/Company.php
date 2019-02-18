@@ -8,4 +8,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Company extends Model
 {
     use SoftDeletes;
+
+
+    public function businessArea(){
+        return $this->hasMany(BusinessArea::class);
+    }
+
+    public function glTaxcode(){
+        return $this->hasMany(GlTaxcode::class, 'company_code', 'code');
+    }
 }

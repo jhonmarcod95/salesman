@@ -159,6 +159,7 @@ return [
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Spatie\Geocoder\GeocoderServiceProvider::class
 
     ],
 
@@ -209,6 +210,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Carbon' => \Carbon\Carbon::class,
+        'Geocoder' => Spatie\Geocoder\Facades\Geocoder::class,
 
     ],
 
