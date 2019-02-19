@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class ReceiptExpense extends Model
 {
     protected $fillable = [
-        'receipt_transaction',
-        'receipt_type',
+        'receipt_transaction_id',
+        'receipt_type_id',
         'receipt_number',
         'vendor_name',
         'vendor_address',

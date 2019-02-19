@@ -24,7 +24,8 @@ class APIExpenseResult extends JsonResource
             'attachment' => $this->attachment,
             'expenses_type_id' => $this->expenses_type_id,
             'date_created' => Carbon::parse($this->created_at)->format('Y-m-d'),
-            'is_receipt_identified' => $this->receiptExpenses()->exists()
+            'is_receipt_identified' => $this->receiptExpenses()->exists(),
+            'receipt_expense_id' => $this->receiptExpenses()->exists() ? $this->receiptExpenses->id : 0,
         ];
     }
 }
