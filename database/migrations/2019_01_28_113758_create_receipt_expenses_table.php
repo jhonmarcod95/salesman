@@ -17,8 +17,8 @@ class CreateReceiptExpensesTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('expense_id')->unsigned();
-            $table->string('receipt_transaction')->nullable(); // VAT or NON-VAT
-            $table->string('receipt_type')->nullable(); // Sales Invoice or Official Receipt
+            $table->integer('receipt_transaction_id')->unsigned(); // VAT or NON-VAT
+            $table->integer('receipt_type_id')->unsigned(); // Sales Invoice or Official Receipt
             $table->string('receipt_number')->nullable();
             $table->string('vendor_name')->nullable();
             $table->string('vendor_address')->nullable();
