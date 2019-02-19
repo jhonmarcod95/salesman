@@ -25,11 +25,11 @@ class ReceiptExpense extends Model
     }
 
     public function receiptType() {
-        return $this->belongsTo(ReceiptType::class,'receipt_type');
+        return $this->belongsTo(ReceiptType::class);
     }
 
     public function receiptTransaction() {
-        return $this->belongsTo(ReceiptTransaction::class,'receipt_transaction');
+        return $this->belongsTo(ReceiptTransaction::class);
     }
 
 }
