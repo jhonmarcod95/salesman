@@ -2,20 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\APIExpenseResult as expenseResult;
-use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Http\Resources\ExpensesEntriesResult as ExpensesEntriesResult;
+use App\Http\Resources\TinNumbersResource as TinNumbersResource;
+use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Http\Resources\PaymentsResource as PaymentsResource;
-use App\Expense;
+use App\Http\Resources\APIExpenseResult as expenseResult;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use App\Rules\TinNumber;
+use App\ReceiptExpense;
+use App\RequestSchedule;
 use App\ExpensesEntry;
 use App\ExpensesType;
-use App\Schedule;
 use App\Attendance;
-use App\Payment;
-use App\RequestSchedule;
 use Carbon\Carbon;
+use App\Schedule;
+use App\Expense;
+use App\Payment;
 use DB;
 
 
@@ -412,6 +415,121 @@ class AppAPIController extends Controller
                         ->get();
 
         return PaymentsResource::collection($payments);
+
+    }
+
+    //Receipt Expenses API
+
+    public function receiptExpense(ReceiptExpense $receiptExpense) {
+
+        return $receiptExpense;
+
+    }
+
+    // Query receipt expenses
+    public function checkTinNumber($tin_number) {
+        $tin = ReceiptExpense::select('tin_number','vendor_name','vendor_address')
+                            ->where('tin_number', $tin_number)
+                            ->first();
+        return $tin;
+    }
+
+    // Receipt Expenses API
+    public function storeReceiptExpense(Request $request) {
+
+        $this->validate($request, [
+            'expense_id' => 'required',
+            'receipt_transaction_id' => 'required', // VAT or NON-VAT
+            'receipt_type_id' => 'required', // Sales Invoice or Official Receipt
+            'receipt_number' => 'required|unique:receipt_expenses', // OR# or SI#
+            'date_receipt' => 'required' // date of receipt
+        ]);
+
+        if($request->input('receipt_transaction_id') == 1) {
+            $this->validate($request, [
+                'vendor_name' => 'required',
+                'vendor_address' => 'required',
+                'tin_number' => [new TinNumber, 'required'],
+            ]);
+        }
+
+        $existingTinNumber = $this->checkTinNumber($request->input('tin_number'));
+
+        $receiptExpense = new ReceiptExpense;
+        $receiptExpense->user_id = Auth::user()->id;
+        $receiptExpense->expense()->associate($request->input('expense_id'));
+
+        $receiptExpense->receipt_transaction_id = $request->input('receipt_transaction_id');
+        $receiptExpense->receipt_type_id = $request->input('receipt_type_id');
+        $receiptExpense->receipt_number = $request->input('receipt_number');
+        $receiptExpense->date_receipt = $request->input('date_receipt');
+
+       if($existingTinNumber) {
+            $receiptExpense->tin_number = $existingTinNumber->tin_number;
+            $receiptExpense->vendor_name = $existingTinNumber->vendor_name;
+            $receiptExpense->vendor_address = $existingTinNumber->vendor_address;
+       } else {
+           if($request->input('receipt_transaction_id') == 1) {
+                $receiptExpense->tin_number = $request->input('tin_number');
+                $receiptExpense->vendor_name = $request->input('vendor_name');
+                $receiptExpense->vendor_address = $request->input('vendor_address');
+           }
+       }
+
+        $receiptExpense->save();
+
+        return $receiptExpense;
+
+    }
+
+    public function updateReceiptExpense(Request $request, ReceiptExpense $receiptExpense)
+    {
+        $this->validate($request, [
+            'expense_id' => 'required',
+            'receipt_transaction_id' => 'required', // VAT or NON-VAT
+            'receipt_type_id' => 'required', // Sales Invoice or Official Receipt
+            'receipt_number' => 'required|unique:receipt_expenses,receipt_number,'.$receiptExpense->id, // OR# or SI#
+            'date_receipt' => 'required' // date of receipt
+        ]);
+
+        if($request->input('receipt_transaction_id') == 1) {
+            $this->validate($request, [
+                'vendor_name' => 'required',
+                'vendor_address' => 'required',
+                'tin_number' => [new TinNumber, 'required'],
+            ]);
+        }
+
+        $existingTinNumber = $this->checkTinNumber($request->input('tin_number'));
+
+        $receiptExpense->receipt_transaction_id = $request->input('receipt_transaction_id');
+        $receiptExpense->receipt_type_id = $request->input('receipt_type_id');
+        $receiptExpense->receipt_number = $request->input('receipt_number');
+        $receiptExpense->date_receipt = $request->input('date_receipt');
+
+       if($existingTinNumber) {
+            $receiptExpense->tin_number = $existingTinNumber->tin_number;
+            $receiptExpense->vendor_name = $existingTinNumber->vendor_name;
+            $receiptExpense->vendor_address = $existingTinNumber->vendor_address;
+       } else {
+           if($request->input('receipt_transaction_id') == 1) {
+                $receiptExpense->tin_number = $request->input('tin_number');
+                $receiptExpense->vendor_name = $request->input('vendor_name');
+                $receiptExpense->vendor_address = $request->input('vendor_address');
+           }
+       }
+
+        $receiptExpense->save();
+
+        return $receiptExpense;
+
+    }
+
+    public function getTinNumbers() {
+
+        $tinNumbers = ReceiptExpense::orderBy('id','DESC')->get()->unique('tin_number');
+
+        return TinNumbersResource::collection($tinNumbers);
 
     }
 

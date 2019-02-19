@@ -59,6 +59,12 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('requests/{requestSchedule}','RequestsAPIController@update');
     Route::delete('requests/{requestSchedule}','RequestsAPIController@destroy');
 
+    // Receipt Expenses
+    Route::get('receipt/expenses/{receiptExpense}','AppAPIController@receiptExpense');
+    Route::post('receipt/expenses','AppAPIController@storeReceiptExpense');
+    Route::post('receipt/expenses/{receiptExpense}','AppAPIController@updateReceiptExpense');
+    Route::get('receipt/tin-numbers','AppAPIController@getTinNumbers');
+
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');
     // Route::get('users','API\UserApiController@index');
