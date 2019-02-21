@@ -74885,7 +74885,7 @@ exports = module.exports = __webpack_require__(3)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -75094,24 +75094,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -75154,48 +75136,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this.errors = error.response.data.errors;
             });
         },
-        fetchExpenseByTsr: function fetchExpenseByTsr(id) {
-            var _this2 = this;
-
-            this.errors = [];
-            axios.get('/expense-submitted/' + id).then(function (response) {}).catch(function (error) {
-                _this2.errors = error.response.data.errors;
+        getExpenseSubmitted: function getExpenseSubmitted(e) {
+            var ids = e.map(function (el) {
+                return el.id;
             });
-
-            // this.errors = [];
-            // let ids = [];
-            // expenses.forEach(element => {
-            //     ids.push(element.id);
-            // });
-
-            // axios.get(`/expense-report-bydate-peruser/${ids}`)
-            // .then(response => { 
-            //     this.expenseByTsr = response.data;
-            //     this.tsrName = name;
-            //     var array = this.expenseByTsr.filter(item => item.payments == null);
-            //     this.submit = array.length > 0 ? true : false;
-            //     $('#viewModal').modal('show');
-            // })
-            // .catch(error => {
-            //     this.errors = error.response.data.errors;
-            // })
+            axios.post('/expense-submitted', {
+                ids: ids
+            }).then(function (response) {
+                window.location.href = window.location.origin + response.data;
+            }).catch(function (error) {
+                error.response.data.errors;
+            });
         },
-
-        // payExpenses(expenseId,userId){
-        //    axios.post('/payments', {
-        //        expenseId: expenseId,
-        //        userId: userId,
-        //    })
-        //    .then(response => {
-        //        $('#viewModal').modal('hide');
-        //        alert('Expense Successfully paid')
-        //    })
-        //    .catch(error => { 
-        //        this.errors= error.response.data.errors;
-        //    })
-        // },
+        expensesSubmittedPage: function expensesSubmittedPage(ids) {},
         fetchExpenses: function fetchExpenses() {
-            var _this3 = this;
+            var _this2 = this;
 
             var dates = this.week.split('-');
             var date1 = dates[0];
@@ -75210,10 +75165,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 endDate: this.endDate,
                 company: this.company
             }).then(function (response) {
-                _this3.expenses = response.data;
-                _this3.errors = [];
+                _this2.expenses = response.data;
+                _this2.errors = [];
             }).catch(function (error) {
-                _this3.errors = error.response.data.errors;
+                _this2.errors = error.response.data.errors;
             });
         },
         getyear: function getyear() {
@@ -75258,11 +75213,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     computed: {
         filteredExpenses: function filteredExpenses() {
-            var _this4 = this;
+            var _this3 = this;
 
             var self = this;
             return Object.values(self.expenses[0]).filter(function (expense) {
-                return expense[0].user.name.toLowerCase().includes(_this4.keywords.toLowerCase());
+                return expense[0].user.name.toLowerCase().includes(_this3.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -75282,10 +75237,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             return queues_array;
         },
-
-        // imageLink(){
-        //     return window.location.origin+'/storage/';
-        // },
         years: function years() {
             var year = new Date().getFullYear();
             return Array.from({ length: year - 2010 }, function (value, index) {
@@ -75829,10 +75780,11 @@ var render = function() {
                                       "a",
                                       {
                                         staticClass: "dropdown-item",
-                                        attrs: {
-                                          href:
-                                            _vm.expenseSubmittedLink +
-                                            expense[0].id
+                                        attrs: { href: "javascript:void(0)" },
+                                        on: {
+                                          click: function($event) {
+                                            _vm.getExpenseSubmitted(expense)
+                                          }
                                         }
                                       },
                                       [_vm._v("View")]

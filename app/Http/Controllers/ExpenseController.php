@@ -225,19 +225,34 @@ class ExpenseController extends Controller
     }
     
     /**
+     * Get Expense Submitted 
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getExpenseSubmitted(Request $request){
+        session(['expense_submitted_id' => $request->ids]);
+
+        $expense = Expense::whereIn('expenses_entry_id', $request->ids)->get();
+        return '/expense-submitted-page';
+    
+    }
+    /**
      * Show Expense Submitted page
      *
      * @return \Illuminate\Http\Response
      */
-    public function showExpenseSubmitted($id){
-        $expenseEntry = ExpensesEntry::findOrfail($id);
+
+    public function showExpenseSubmitted(){
         $date = session('dateEntry');
-        // $date = 1;
-        if($expenseEntry){
-            return view("expense.index-submitted", compact('id', 'date'));
-        }
+        $ids = session('expense_submitted_id');
+        return view("expense.index-submitted", compact('ids', 'date'));
     }
 
+    /**
+     * Simulate submitted expenses
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function simulateExpenseSubmitted($id){
         $expenseEntry = ExpensesEntry::findOrfail($id);
 

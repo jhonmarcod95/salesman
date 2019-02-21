@@ -50,20 +50,6 @@
                                         <span class="text-danger" v-if="errors.week">{{ errors.week[0] }}</span>
                                     </div>
                                 </div>
-                                <!-- <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label for="start_date" class="form-control-label">Start Date</label> 
-                                        <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
-                                        <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label for="end_date" class="form-control-label">End Date</label> 
-                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
-                                        <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
-                                    </div>
-                                </div> -->
                                 <div class="col-md-2">
                                     <button class="btn btn-sm btn-primary" @click="fetchExpenses"> Filter</button>
                                 </div>
@@ -88,17 +74,13 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <!-- <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense[0].user.name, expense.created_at)">View</a> -->
-                                                    <a class="dropdown-item" :href="expenseSubmittedLink+expense[0].id">View</a>
+                                                    <a class="dropdown-item" href="javascript:void(0)" @click="getExpenseSubmitted(expense)">View</a>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>{{ expense[0].user.name }}</td>
                                         <td>{{ countExpenseSubmitted(expense) }}</td>
-                                         <td>PHP {{ countTotalExpenses(expense) }}</td>
-                                        <!-- <td>{{ expense.expenses_model_count }}</td> -->
-                                        <!-- <td>{{ moment(expense.created_at).format('LLL') }}</td>
-                                        <td>PHP {{ expense.totalExpenses.toFixed(2) }}</td> -->
+                                        <td>PHP {{ countTotalExpenses(expense) }}</td>
                                     </tr>
                                 </tbody>
                                 <tbody v-else>
@@ -220,48 +202,21 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        fetchExpenseByTsr(id){
-
-            this.errors = [];
-            axios.get(`/expense-submitted/${id}`)
-            .then(response => { 
-
+        getExpenseSubmitted(e){
+            var ids = e.map(function (el) { return el.id; });
+            axios.post('/expense-submitted',{
+                ids: ids
+            })
+            .then(response => {
+                window.location.href = window.location.origin+response.data;
             })
             .catch(error => {
-                this.errors = error.response.data.errors;
+                error.response.data.errors
             })
-
-            // this.errors = [];
-            // let ids = [];
-            // expenses.forEach(element => {
-            //     ids.push(element.id);
-            // });
-         
-            // axios.get(`/expense-report-bydate-peruser/${ids}`)
-            // .then(response => { 
-            //     this.expenseByTsr = response.data;
-            //     this.tsrName = name;
-            //     var array = this.expenseByTsr.filter(item => item.payments == null);
-            //     this.submit = array.length > 0 ? true : false;
-            //     $('#viewModal').modal('show');
-            // })
-            // .catch(error => {
-            //     this.errors = error.response.data.errors;
-            // })
         },
-        // payExpenses(expenseId,userId){
-        //    axios.post('/payments', {
-        //        expenseId: expenseId,
-        //        userId: userId,
-        //    })
-        //    .then(response => {
-        //        $('#viewModal').modal('hide');
-        //        alert('Expense Successfully paid')
-        //    })
-        //    .catch(error => { 
-        //        this.errors= error.response.data.errors;
-        //    })
-        // },
+        expensesSubmittedPage(ids){
+
+        },
         fetchExpenses(){
             var dates = this.week.split('-');
             var date1 = dates[0];
@@ -351,9 +306,6 @@ export default {
 
             return queues_array;
         },
-        // imageLink(){
-        //     return window.location.origin+'/storage/';
-        // },
         years () {
             const year = new Date().getFullYear()
             return Array.from({length: year - 2010}, (value, index) => 2011 + index)
