@@ -189,7 +189,13 @@ class CustomerController extends Controller
         $customer = Customer::withTrashed()->whereNotIn('classification', [1,2])->orderBy('id','asc')->get();
         $customer_code = $customer->last()->customer_code;
 
-        return ++$customer_code;
+        //generate until to become unique
+        generate:
+        if(Customer::where('customer_code', $customer_code)->exists()){
+            $customer_code = $customer_code + 1;
+            goto generate;
+        }
+        return $customer_code;
     }
 
     /**
