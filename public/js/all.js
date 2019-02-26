@@ -82653,6 +82653,38 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.fetchProvince();
         this.fetchClassification();
     },
+    mounted: function mounted() {
+        var vm = this;
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('street');
+        var searchBox = new google.maps.places.Autocomplete(input, {
+            componentRestrictions: { country: 'ph' }
+        });
+
+        searchBox.addListener('place_changed', function () {
+            var place = searchBox.getPlace();
+
+            if (place.length == 0) {
+                return;
+            }
+
+            if (!place.geometry) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                console.log("No details available for input: '" + place.name + "'");
+                return;
+            }
+            vm.customer.street = document.getElementById("street").value;
+            //Bind town or city of address to input
+            place.address_components.filter(function (address) {
+                address.types.filter(function (types) {
+                    if (types == 'locality') {
+                        vm.customer.town_city = address.long_name;
+                    }
+                });
+            });
+        });
+    },
 
     methods: {
         addCustomer: function addCustomer(customer) {
@@ -82942,7 +82974,11 @@ var render = function() {
                             }
                           ],
                           staticClass: "form-control form-control-alternative",
-                          attrs: { id: "street", type: "text" },
+                          attrs: {
+                            id: "street",
+                            type: "text",
+                            placeholder: "Enter a Location"
+                          },
                           domProps: { value: _vm.customer.street },
                           on: {
                             input: function($event) {
@@ -83514,6 +83550,38 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.fetchProvince();
         this.fetchCustomer();
         this.fetchClassification();
+    },
+    mounted: function mounted() {
+        var vm = this;
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('street');
+        var searchBox = new google.maps.places.Autocomplete(input, {
+            componentRestrictions: { country: 'ph' }
+        });
+
+        searchBox.addListener('place_changed', function () {
+            var place = searchBox.getPlace();
+
+            if (place.length == 0) {
+                return;
+            }
+
+            if (!place.geometry) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                console.log("No details available for input: '" + place.name + "'");
+                return;
+            }
+            vm.customers.street = document.getElementById("street").value;
+            //Bind town or city of address to input
+            place.address_components.filter(function (address) {
+                address.types.filter(function (types) {
+                    if (types == 'locality') {
+                        vm.customers.town_city = address.long_name;
+                    }
+                });
+            });
+        });
     },
 
     methods: {
