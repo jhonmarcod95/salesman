@@ -29,7 +29,7 @@ class TinNumber implements Rule
         $formatted_tin = trim(str_replace('_','', $value));
 
         // check if the character is still 11 after trim function, then return true
-        if(strlen($formatted_tin) == 11) {
+        if(strlen($formatted_tin) == 15) {
             return true;
         } else {
             // return false by default when didn't pass the validation
@@ -45,6 +45,6 @@ class TinNumber implements Rule
      */
     public function message()
     {
-        return ':attribute format is incomplete';
+        return 'Invalid TIN format';
     }
 }
