@@ -103,8 +103,8 @@ class ExpenseController extends Controller
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate',
         ]);
-        
-        session(['dateEntry' => $request->startDate. ' to ' . $request->endDate]);
+
+        session(['dateEntry' => date("m/d/Y", strtotime($request->startDate)) . ' to ' . date("m/d/Y", strtotime($request->endDate))]);
 
         $company = $request->company;
         if($company){

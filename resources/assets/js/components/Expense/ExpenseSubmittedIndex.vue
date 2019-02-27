@@ -179,7 +179,7 @@
                                     <td>{{ simulatedExpense.item }}</td>
                                     <td>{{ simulatedExpense.item_text }}</td>
                                     <td>{{ simulatedExpense.gl_account }}</td>
-                                    <td>{{ simulatedExpense.description }}</td>
+                                    <td>{{ simulatedExpense.description.toUpperCase() }}</td>
                                     <td>{{ simulatedExpense.assignment }}</td>
                                     <td>{{ simulatedExpense.input_tax_code }}</td>
                                     <td>{{ simulatedExpense.internal_order }}</td>
