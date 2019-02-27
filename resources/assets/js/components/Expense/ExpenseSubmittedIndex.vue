@@ -194,8 +194,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="text-danger text-center mt-3 mt-3" v-if="responses.length && responses[0].return_message_type == 'E'">
+                    <div class="text-danger text-center mt-3 mb-3" v-if="responses.length && sap_errors > 0 ">
                         <span>Unable to post due to errors</span>
+                    </div>
+                     <div class="text-primary text-center mt-3 mb-3" v-if="responses.length && sap_errors == 0 ">
+                        <span>Ready for posting</span>
                     </div>
                     <div class="table-responsive" v-if="responses.length">
                         <table class="table align-items-center table-flush">
@@ -219,7 +222,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-round btn-fill disabled">POST</button>
+                    <button id="post_btn" type="button" class="btn btn-primary btn-round btn-fill">POST</button>
                     <button type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,'CHECK')">Check</button>
                 </div>
                 </div>
@@ -249,6 +252,7 @@ export default {
             posting_date: moment().format('YYYY-MM-DD'),
             baseline_date: moment().format('YYYY-MM-DD'),
             responses: [],
+            sap_errors: 0,
             errors: [],
             currentPage: 0,
             itemsPerPage: 10,
@@ -351,7 +355,7 @@ export default {
 
                 var expenses = { 
                     item: item,
-                    item_text: checkedExpense.expenses_type.name+ ' '+checkedExpense.created_at,
+                    item_text: checkedExpense.expenses_type.name.toUpperCase() + ' '+ moment(checkedExpense.created_at).format('L'),
                     gl_account: filteredGl[0].gl_account,
                     description: filteredGl[0].gl_description,
                     assignment: '',
@@ -426,6 +430,7 @@ export default {
             axios.get(`/expense-simulate/${this.expenseEntryId}`)
             .then(response => {
                 this.simulate = response.data;
+                document.getElementById("post_btn").disabled = true; 
                 $('#simulateModal').modal('show');
             })
             .catch(error => { 
@@ -433,40 +438,52 @@ export default {
             })
         },
         checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,posting_type){
-           axios.post('/payments', {
-            expenseEntryId: this.expenseEntryId,
-            posting_type: posting_type,
-            app_server: this.simulate[0].sap_server.app_server, // sap_server.app_server
-            system_id: this.simulate[0].sap_server.system_id, // sap_server.system_id
-            instance_number: this.simulate[0].sap_server.system_number, // sap_server.system_number
-            sap_name: this.simulate[0].sap_server.name, // sap_server.name
-            client: this.simulate[0].sap_server.client,  // sap_server.client
-            sap_user_id: this.simulate[0].sap_user.sap_id, //sap_user.id need to check first the server of tsr
-            sap_password: this.simulate[0].sap_user.sap_password, // sap_user.password need to check first the server of tsr
-            header_text: header_text,
-            company_code: expenseByTsr[0].user.companies[0].code,
-            document_date: moment(document_date).format('L'),
-            posting_date: moment(posting_date).format('L'),
-            // document_date: '01-29-2019',
-            // posting_date: '01-29-2019',
-            document_type: document_type,
-            reference_number: 'sample1',
-            // baseline_date: '01-29-2019',
-            baseline_date: moment(baseline_date).format('L'),
-            vendor_code: expenseByTsr[0].user.vendor.vendor_code,
-            payment_terms: payment_terms,
-            // gl_account_i7: '0010180003',
-            // gl_account_i3: '0010180001',
-            gl_account_i7: this.gl_account_i7[0].gl_account,
-            gl_account_i3: this.gl_account_i3[0].gl_account,
-            simulatedExpenses: simulatedExpenses
-        })
-        .then(response => {
-            this.responses = response.data;
-        })
-        .catch(error => { 
-            this.errors= error.response.data.errors;
-        })
+            let vm = this;
+            vm.sap_errors = 0;
+            document.getElementById("post_btn").disabled = true; 
+            this.responses = [];
+            axios.post('/payments', {
+                expenseEntryId: this.expenseEntryId,
+                posting_type: posting_type,
+                app_server: this.simulate[0].sap_server.app_server, // sap_server.app_server
+                system_id: this.simulate[0].sap_server.system_id, // sap_server.system_id
+                instance_number: this.simulate[0].sap_server.system_number, // sap_server.system_number
+                sap_name: this.simulate[0].sap_server.name, // sap_server.name
+                client: this.simulate[0].sap_server.client,  // sap_server.client
+                sap_user_id: this.simulate[0].sap_user.sap_id, //sap_user.id need to check first the server of tsr
+                sap_password: this.simulate[0].sap_user.sap_password, // sap_user.password need to check first the server of tsr
+                header_text: header_text,
+                company_code: expenseByTsr[0].user.companies[0].code,
+                document_date: moment(document_date).format('L'),
+                posting_date: moment(posting_date).format('L'),
+                // document_date: '01-29-2019',
+                // posting_date: '01-29-2019',
+                document_type: document_type,
+                reference_number: 'sample1',
+                // baseline_date: '01-29-2019',
+                baseline_date: moment(baseline_date).format('L'),
+                vendor_code: expenseByTsr[0].user.vendor.vendor_code,
+                payment_terms: payment_terms,
+                // gl_account_i7: '0010180003',
+                // gl_account_i3: '0010180001',
+                gl_account_i7: this.gl_account_i7[0].gl_account,
+                gl_account_i3: this.gl_account_i3[0].gl_account,
+                simulatedExpenses: simulatedExpenses
+            })
+            .then(response => {
+                this.responses = response.data;
+                this.responses.filter(function(response){
+                    if(response.return_message_type == 'E'){
+                       vm.sap_errors++
+                    }
+                });
+                if(vm.sap_errors == 0){
+                    document.getElementById("post_btn").disabled = false; 
+                }
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
 
 
             

@@ -79173,6 +79173,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -79194,6 +79197,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             posting_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()().format('YYYY-MM-DD'),
             baseline_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()().format('YYYY-MM-DD'),
             responses: [],
+            sap_errors: 0,
             errors: [],
             currentPage: 0,
             itemsPerPage: 10
@@ -79304,7 +79308,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                 var expenses = {
                     item: item,
-                    item_text: checkedExpense.expenses_type.name + ' ' + checkedExpense.created_at,
+                    item_text: checkedExpense.expenses_type.name.toUpperCase() + ' ' + __WEBPACK_IMPORTED_MODULE_0_moment___default()(checkedExpense.created_at).format('L'),
                     gl_account: filteredGl[0].gl_account,
                     description: filteredGl[0].gl_description,
                     assignment: '',
@@ -79378,6 +79382,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
             axios.get('/expense-simulate/' + this.expenseEntryId).then(function (response) {
                 _this2.simulate = response.data;
+                document.getElementById("post_btn").disabled = true;
                 $('#simulateModal').modal('show');
             }).catch(function (error) {
                 _this2.errors = error.response.data.errors;
@@ -79386,6 +79391,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         checkExpenses: function checkExpenses(expenseByTsr, simulatedExpenses, document_type, document_date, payment_terms, posting_date, header_text, baseline_date, posting_type) {
             var _this3 = this;
 
+            var vm = this;
+            vm.sap_errors = 0;
+            document.getElementById("post_btn").disabled = true;
+            this.responses = [];
             axios.post('/payments', {
                 expenseEntryId: this.expenseEntryId,
                 posting_type: posting_type,
@@ -79415,6 +79424,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 simulatedExpenses: simulatedExpenses
             }).then(function (response) {
                 _this3.responses = response.data;
+                _this3.responses.filter(function (response) {
+                    if (response.return_message_type == 'E') {
+                        vm.sap_errors++;
+                    }
+                });
+                if (vm.sap_errors == 0) {
+                    document.getElementById("post_btn").disabled = false;
+                }
             }).catch(function (error) {
                 _this3.errors = error.response.data.errors;
             });
@@ -80264,12 +80281,19 @@ var render = function() {
                       )
                     ]),
                     _vm._v(" "),
-                    _vm.responses.length &&
-                    _vm.responses[0].return_message_type == "E"
+                    _vm.responses.length && _vm.sap_errors > 0
                       ? _c(
                           "div",
-                          { staticClass: "text-danger text-center mt-3 mt-3" },
+                          { staticClass: "text-danger text-center mt-3 mb-3" },
                           [_c("span", [_vm._v("Unable to post due to errors")])]
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.responses.length && _vm.sap_errors == 0
+                      ? _c(
+                          "div",
+                          { staticClass: "text-primary text-center mt-3 mb-3" },
+                          [_c("span", [_vm._v("Ready for posting")])]
                         )
                       : _vm._e(),
                     _vm._v(" "),
@@ -80325,8 +80349,8 @@ var render = function() {
                 _c(
                   "button",
                   {
-                    staticClass: "btn btn-primary btn-round btn-fill disabled",
-                    attrs: { type: "button" }
+                    staticClass: "btn btn-primary btn-round btn-fill",
+                    attrs: { id: "post_btn", type: "button" }
                   },
                   [_vm._v("POST")]
                 ),
