@@ -123,7 +123,7 @@ class ScheduleController extends Controller
                     'customer_codes' => [new GeocodeCustomerRule(), 'required'],
                 ]);
 
-                $customer_codes = $request->customer_codes;
+                $customer_codes = $request->has('id') ? array($request->customer_codes) :  $request->customer_codes;
 
                 foreach ($customer_codes as $customer_code){
                     $customer = Customer::where('customer_code', $customer_code)->first();
@@ -179,6 +179,10 @@ class ScheduleController extends Controller
             }
         }
         DB::commit();
+
+        if($request->has('id')){
+            RequestSchedule::where('id', $request->id)->update(array('isApproved' => 1));
+        }
 
         return response()->json($data);
     }
