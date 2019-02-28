@@ -45,7 +45,8 @@ class ScheduleController extends Controller
             );
 
 
-        $customers = Customer::select(DB::raw("CONCAT(name, ' - ', street, ' - ',town_city) AS name"), 'customer_code')
+        $customers = Customer::select(DB::raw("CONCAT(name, ' - ', street) AS name"), 'customer_code')
+            ->where('company_id', $company_id)
             ->pluck(
                 'name',
                 'customer_code'
