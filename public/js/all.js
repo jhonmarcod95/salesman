@@ -81960,6 +81960,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -82199,6 +82201,8 @@ var render = function() {
                         _vm._v(" "),
                         _c("td", [_vm._v(_vm._s(customer.province))]),
                         _vm._v(" "),
+                        _c("td", [_vm._v(_vm._s(customer.google_address))]),
+                        _vm._v(" "),
                         _c("td", [
                           _vm._v(_vm._s(customer.customer_classification))
                         ]),
@@ -82350,6 +82354,8 @@ var staticRenderFns = [
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Town or City")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Province")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Google Map Address")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Classification")]),
         _vm._v(" "),
@@ -82624,6 +82630,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -82634,6 +82647,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 customer_code: '',
                 name: '',
                 street: '',
+                google_address: '',
                 town_city: '',
                 region: '',
                 province: '',
@@ -82656,7 +82670,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     mounted: function mounted() {
         var vm = this;
         // Create the search box and link it to the UI element.
-        var input = document.getElementById('street');
+        var input = document.getElementById('google_address');
         var searchBox = new google.maps.places.Autocomplete(input, {
             componentRestrictions: { country: 'ph' }
         });
@@ -82674,15 +82688,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 console.log("No details available for input: '" + place.name + "'");
                 return;
             }
-            vm.customer.street = document.getElementById("street").value;
+            vm.customer.google_address = document.getElementById("google_address").value;
             //Bind town or city of address to input
-            place.address_components.filter(function (address) {
-                address.types.filter(function (types) {
-                    if (types == 'locality') {
-                        vm.customer.town_city = address.long_name;
-                    }
-                });
-            });
+            // place.address_components.filter(function(address){
+            //     address.types.filter(function(types) {
+            //         if(types == 'locality'){
+            //             vm.customer.town_city = address.long_name;
+            //         }
+            //     });
+            // });
         });
     },
 
@@ -82695,6 +82709,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 customer_code: customer.customer_code,
                 name: customer.name,
                 street: customer.street,
+                google_address: customer.google_address,
                 town_city: customer.town_city,
                 region: customer.region,
                 province: customer.province,
@@ -82704,7 +82719,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 remarks: customer.remarks
             }).then(function (response) {
                 if (confirm('Customer Successful Added')) {
-                    window.location.href = response.data.redirect;
+                    // window.location.href = response.data.redirect;
                 }
             }).catch(function (error) {
                 _this.errors = error.response.data.errors;
@@ -82974,11 +82989,7 @@ var render = function() {
                             }
                           ],
                           staticClass: "form-control form-control-alternative",
-                          attrs: {
-                            id: "street",
-                            type: "text",
-                            placeholder: "Enter a Location"
-                          },
+                          attrs: { id: "street", type: "text" },
                           domProps: { value: _vm.customer.street },
                           on: {
                             input: function($event) {
@@ -83104,6 +83115,55 @@ var render = function() {
                         _vm.errors.province
                           ? _c("span", { staticClass: "text-danger small" }, [
                               _vm._v(_vm._s(_vm.errors.province[0]))
+                            ])
+                          : _vm._e()
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "form-control-label",
+                            attrs: { for: "google_address" }
+                          },
+                          [_vm._v("Google Map Address")]
+                        ),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.customer.google_address,
+                              expression: "customer.google_address"
+                            }
+                          ],
+                          staticClass: "form-control form-control-alternative",
+                          attrs: {
+                            id: "google_address",
+                            type: "text",
+                            placeholder: "Enter a Location"
+                          },
+                          domProps: { value: _vm.customer.google_address },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.customer,
+                                "google_address",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        }),
+                        _vm._v(" "),
+                        _vm.errors.google_address
+                          ? _c("span", { staticClass: "text-danger small" }, [
+                              _vm._v(_vm._s(_vm.errors.google_address[0]))
                             ])
                           : _vm._e()
                       ])
@@ -83532,6 +83592,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['customerId'],
@@ -83554,7 +83621,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     mounted: function mounted() {
         var vm = this;
         // Create the search box and link it to the UI element.
-        var input = document.getElementById('street');
+        var input = document.getElementById('google_address');
         var searchBox = new google.maps.places.Autocomplete(input, {
             componentRestrictions: { country: 'ph' }
         });
@@ -83572,15 +83639,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 console.log("No details available for input: '" + place.name + "'");
                 return;
             }
-            vm.customers.street = document.getElementById("street").value;
-            //Bind town or city of address to input
-            place.address_components.filter(function (address) {
-                address.types.filter(function (types) {
-                    if (types == 'locality') {
-                        vm.customers.town_city = address.long_name;
-                    }
-                });
-            });
+            vm.customers.google_address = document.getElementById("google_address").value;
         });
     },
 
@@ -83597,6 +83656,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 town_city: customers.town_city,
                 region: customers.region,
                 province: customers.province_id,
+                google_address: customers.google_address,
                 telephone_1: customers.telephone_1,
                 telephone_2: customers.telephone_2,
                 fax_number: customers.fax_number,
@@ -84005,6 +84065,55 @@ var render = function() {
                         _vm.errors.province
                           ? _c("span", { staticClass: "text-danger small" }, [
                               _vm._v(_vm._s(_vm.errors.province[0]))
+                            ])
+                          : _vm._e()
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "form-control-label",
+                            attrs: { for: "google_address" }
+                          },
+                          [_vm._v("Google Map Address")]
+                        ),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.customers.google_address,
+                              expression: "customers.google_address"
+                            }
+                          ],
+                          staticClass: "form-control form-control-alternative",
+                          attrs: {
+                            id: "google_address",
+                            type: "text",
+                            placeholder: "Enter a Location"
+                          },
+                          domProps: { value: _vm.customers.google_address },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.customers,
+                                "google_address",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        }),
+                        _vm._v(" "),
+                        _vm.errors.google_address
+                          ? _c("span", { staticClass: "text-danger small" }, [
+                              _vm._v(_vm._s(_vm.errors.google_address[0]))
                             ])
                           : _vm._e()
                       ])

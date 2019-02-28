@@ -54,7 +54,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="street">Street</label>
-                                                <input id="street" class="form-control form-control-alternative" type="text" v-model="customer.street" placeholder="Enter a Location">
+                                                <input id="street" class="form-control form-control-alternative" type="text" v-model="customer.street">
                                                 <span class="text-danger small" v-if="errors.street">{{ errors.street[0] }}</span>
                                             </div>
                                         </div>
@@ -83,6 +83,13 @@
                                                     <option v-for="(province, p) in provinces" v-bind:key="p" :value="province.id">{{ province.name}}</option>
                                                 </select>
                                                 <span class="text-danger small" v-if="errors.province">{{ errors.province[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="google_address">Google Map Address</label>
+                                                <input id="google_address" class="form-control form-control-alternative" type="text" v-model="customer.google_address" placeholder="Enter a Location">
+                                                <span class="text-danger small" v-if="errors.google_address">{{ errors.google_address[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -144,6 +151,7 @@
                     customer_code: '',
                     name: '',
                     street: '',
+                    google_address: '',
                     town_city: '',
                     region: '',
                     province: '',
@@ -166,7 +174,7 @@
         mounted() {
             let vm  = this;
             // Create the search box and link it to the UI element.
-            var input = document.getElementById('street');
+            var input = document.getElementById('google_address');
             var searchBox = new google.maps.places.Autocomplete(input, {
                  componentRestrictions: {country: 'ph'}
             });
@@ -184,15 +192,15 @@
                     console.log("No details available for input: '" + place.name + "'");
                     return;
                 }
-                vm.customer.street = document.getElementById("street").value;
+                vm.customer.google_address = document.getElementById("google_address").value;
                 //Bind town or city of address to input
-                place.address_components.filter(function(address){
-                    address.types.filter(function(types) {
-                        if(types == 'locality'){
-                            vm.customer.town_city = address.long_name;
-                        }
-                    });
-                });
+                // place.address_components.filter(function(address){
+                //     address.types.filter(function(types) {
+                //         if(types == 'locality'){
+                //             vm.customer.town_city = address.long_name;
+                //         }
+                //     });
+                // });
 
             });
         },
@@ -203,6 +211,7 @@
                     customer_code : customer.customer_code,
                     name: customer.name,
                     street: customer.street,
+                    google_address: customer.google_address,
                     town_city: customer.town_city,
                     region: customer.region,
                     province: customer.province,
@@ -213,7 +222,7 @@
                 })
                 .then(response => { 
                     if(confirm('Customer Successful Added')){
-                        window.location.href = response.data.redirect;
+                        // window.location.href = response.data.redirect;
                     }
                 })
                 .catch(error => {
