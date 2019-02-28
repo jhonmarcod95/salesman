@@ -74079,10 +74079,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 id: request.id,
                 user_id: request.user_id,
                 type: request.type,
-                date: request.date,
+                start_date: request.date,
+                end_date: request.date,
+                radius: '2',
                 start_time: request.start_time,
                 end_time: request.end_time,
-                customer_codes: request.code,
+                customer_codes: [request.code],
                 name: request.name,
                 address: request.address
             }).then(function (response) {
