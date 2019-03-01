@@ -82626,8 +82626,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['companyId'],
     data: function data() {
         return {
             customer: {
@@ -82644,6 +82646,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 fax_number: '',
                 remarks: ''
             },
+            show: false,
+            pilili_code: '',
             provinces: [],
             regions: [],
             classifications: [],
@@ -82710,15 +82714,45 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         checkCustomerCode: function checkCustomerCode() {
             var _this5 = this;
 
-            if (this.customer.classification != 1 && this.customer.classification != 2) {
-                axios.get('/check-customer-code').then(function (response) {
+            if (this.customer.classification != 1 && this.customer.classification != 2 && this.customer.classification != 8) {
+                axios.post('/check-customer-code', {
+                    classification: this.customer.classification,
+                    company_id: this.companyId
+
+                }).then(function (response) {
                     _this5.customer.customer_code = '';
                     _this5.customer.customer_code = response.data;
+                    _this5.show = false;
                     document.getElementById("customer_code").disabled = true;
                 }).catch(function (error) {
                     _this5.errors = error.response.data.errors;
                 });
+            } else if (this.customer.classification == 8 && this.companyId != 5) {
+                axios.post('/check-customer-code', {
+                    classification: this.customer.classification,
+                    company_id: this.companyId
+                }).then(function (response) {
+                    _this5.customer.customer_code = '';
+                    _this5.customer.customer_code = response.data;
+                    _this5.show = false;
+                    document.getElementById("customer_code").disabled = true;
+                }).catch(function (error) {
+                    _this5.errors = error.response.data.errors;
+                });
+            } else if (this.customer.classification == 8 && this.companyId == 5) {
+                axios.post('/check-customer-code', {
+                    classification: this.customer.classification,
+                    company_id: this.companyId
+                }).then(function (response) {
+                    _this5.customer.customer_code = '';
+                    _this5.show = true;
+                    _this5.pilili_code = response.data;
+                    document.getElementById("customer_code").disabled = false;
+                }).catch(function (error) {
+                    _this5.errors = error.response.data.errors;
+                });
             } else {
+                this.show = false;
                 this.customer.customer_code = '';
                 document.getElementById("customer_code").disabled = false;
             }
@@ -82753,6 +82787,15 @@ var render = function() {
                   _c("div", { staticClass: "row" }, [
                     _c("div", { staticClass: "col-lg-6" }, [
                       _c("div", { staticClass: "form-group" }, [
+                        _vm.show
+                          ? _c("span", [
+                              _vm._v(
+                                "Last customer code: " + _vm._s(_vm.pilili_code)
+                              ),
+                              _c("br")
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
                         _c(
                           "label",
                           {
@@ -83498,6 +83541,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['customerId'],
@@ -83508,7 +83552,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             classifications: [],
             regions: [],
             errors: [],
-            default_code: ''
+            default_code: '',
+            default_classification: '',
+            show: false,
+            pilili_code: ''
         };
     },
     created: function created() {
@@ -83547,6 +83594,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.get('/customers/show/' + this.customerId).then(function (response) {
                 _this2.customers = response.data;
                 _this2.default_code = _this2.customers.customer_code;
+                _this2.default_classification = _this2.customers.classification;
                 if (_this2.customers.classification != 1 && _this2.customers.classification != 2) {
                     document.getElementById("customer_code").disabled = true;
                 } else {
@@ -83584,12 +83632,55 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         },
         checkCustomerCode: function checkCustomerCode() {
-            if (this.customers.classification != 1 && this.customers.classification != 2) {
-                this.customers.customer_code = this.default_code;
-                document.getElementById("customer_code").disabled = true;
+            var _this6 = this;
+
+            if (this.customers.company_id == 5) {
+                //Pilili company_code generation
+                if (this.default_classification == 8 && this.customers.classification != 8 && this.customers.classification != 1 && this.customers.classification != 2) {
+                    axios.post('/check-customer-code', {
+                        classification: this.customers.classification,
+                        company_id: this.customers.company_id
+                    }).then(function (response) {
+                        _this6.customers.customer_code = '';
+                        _this6.customers.customer_code = response.data;
+                        _this6.show = false;
+                        document.getElementById("customer_code").disabled = true;
+                    }).catch(function (error) {
+                        _this6.errors = error.response.data.errors;
+                    });
+                } else if (this.default_classification != 8 && this.customers.classification == 8) {
+                    axios.post('/check-customer-code', {
+                        classification: this.customers.classification,
+                        company_id: this.customers.company_id
+                    }).then(function (response) {
+                        _this6.customers.customer_code = '';
+                        _this6.show = true;
+                        _this6.pilili_code = response.data;
+                        document.getElementById("customer_code").disabled = false;
+                    }).catch(function (error) {
+                        _this6.errors = error.response.data.errors;
+                    });
+                } else if (this.default_classification != 8 && this.customers.classification != 1 && this.customers.classification != 2) {
+                    this.show = false;
+                    this.customers.customer_code = this.default_code;
+                    document.getElementById("customer_code").disabled = true;
+                } else if (this.default_classification == 8 && this.customers.classification == 8) {
+                    this.show = false;
+                    this.customers.customer_code = this.default_code;
+                    document.getElementById("customer_code").disabled = true;
+                } else {
+                    this.show = false;
+                    this.customers.customer_code = '';
+                    document.getElementById("customer_code").disabled = false;
+                }
             } else {
-                this.customers.customer_code = '';
-                document.getElementById("customer_code").disabled = false;
+                if (this.customers.classification != 1 && this.customers.classification != 2) {
+                    this.customers.customer_code = this.default_code;
+                    document.getElementById("customer_code").disabled = true;
+                } else {
+                    this.customers.customer_code = '';
+                    document.getElementById("customer_code").disabled = false;
+                }
             }
         }
     }
@@ -83622,6 +83713,15 @@ var render = function() {
                   _c("div", { staticClass: "row" }, [
                     _c("div", { staticClass: "col-lg-6" }, [
                       _c("div", { staticClass: "form-group" }, [
+                        _vm.show
+                          ? _c("span", [
+                              _vm._v(
+                                "Last customer code: " + _vm._s(_vm.pilili_code)
+                              ),
+                              _c("br")
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
                         _c(
                           "label",
                           {

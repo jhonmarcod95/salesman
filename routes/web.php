@@ -116,7 +116,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // update customer
     Route::patch('/customers/{customer}', 'CustomerController@update');
     // check customer code of prospect
-    Route::get('/check-customer-code', 'CustomerController@checkCustomerCode');
+    Route::post('/check-customer-code', 'CustomerController@checkCustomerCode');
     // Delete Customer
     Route::delete('/customers/{customer}', 'CustomerController@destroy');
     // Get customers address geocode
