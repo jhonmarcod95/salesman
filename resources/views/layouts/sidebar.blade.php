@@ -88,24 +88,24 @@
                             <i class="ni ni-calendar-grid-58 text-orange"></i> Schedules
                         </a>
                     </li>
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a class="nav-link" href="{{ url('/announcements') }}">
                             <i class="ni ni-notification-70 text-purple"></i> Announcements
                         </a>
-                    </li>
+                    </li> --}}
                     {{-- <li class="nav-item">
                         <a class="nav-link" href="{{ url('/users') }}">
                             <i class="ni ni-single-02 text-yellow"></i> Users
                         </a>
                     </li> --}}
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a class="nav-link" href="{{ url('/messages') }}">
                             <i class="ni ni-email-83 text-green"></i> Messages
                         </a>
                     @if($notification > 0)
                         <span style="display:inline-block; background: red; position: relative; top: -47px; left: 137px; border-radius: 10px; color: #fff; min-width: 20px; text-align: center;">{{ $notification }}</span>
                     @endif
-                    </li>
+                    </li> --}}
 
                     <li>
                         <a data-toggle="collapse" href="#Report" class="collapsed" aria-expanded="false">
@@ -129,7 +129,7 @@
                             </ul>
                         </div>
                     </li>
-
+                    @if(!Auth::user()->hasRole('manager'))
                     <li>
                         <a data-toggle="collapse" href="#MasterData" class="collapsed" aria-expanded="false">
                             <div class="nav-link">
@@ -162,7 +162,8 @@
                             </ul>
                         </div>
                     </li>
-                    @if(Auth::user()->level() > 5)
+                    @endif
+                    @if(Auth::user()->level() > 5 || Auth::user()->level() == 3)
                     <li>
                         <a data-toggle="collapse" href="#Request" class="collapsed" aria-expanded="false">
                             <div class="nav-link">
