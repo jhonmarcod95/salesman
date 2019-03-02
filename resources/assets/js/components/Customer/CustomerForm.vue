@@ -226,7 +226,7 @@
                 })
                 .then(response => { 
                     if(confirm('Customer Successful Added')){
-                        // window.location.href = response.data.redirect;
+                        window.location.href = response.data.redirect;
                     }
                 })
                 .catch(error => {

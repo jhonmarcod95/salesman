@@ -74079,10 +74079,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 id: request.id,
                 user_id: request.user_id,
                 type: request.type,
-                date: request.date,
+                start_date: request.date,
+                end_date: request.date,
+                radius: '2',
                 start_time: request.start_time,
                 end_time: request.end_time,
-                customer_codes: request.code,
+                customer_codes: [request.code],
                 name: request.name,
                 address: request.address
             }).then(function (response) {
@@ -81960,6 +81962,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -82174,11 +82178,7 @@ var render = function() {
                                     staticClass: "dropdown-item",
                                     on: {
                                       click: function($event) {
-                                        _vm.getGeocode(
-                                          customer.street +
-                                            " " +
-                                            customer.town_city
-                                        )
+                                        _vm.getGeocode(customer.google_address)
                                       }
                                     }
                                   },
@@ -82198,6 +82198,8 @@ var render = function() {
                         _c("td", [_vm._v(_vm._s(customer.town_city))]),
                         _vm._v(" "),
                         _c("td", [_vm._v(_vm._s(customer.province))]),
+                        _vm._v(" "),
+                        _c("td", [_vm._v(_vm._s(customer.google_address))]),
                         _vm._v(" "),
                         _c("td", [
                           _vm._v(_vm._s(customer.customer_classification))
@@ -82350,6 +82352,8 @@ var staticRenderFns = [
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Town or City")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Province")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Google Map Address")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Classification")]),
         _vm._v(" "),
@@ -82624,8 +82628,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['companyId'],
     data: function data() {
         return {
             customer: {
@@ -82634,6 +82647,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 customer_code: '',
                 name: '',
                 street: '',
+                google_address: '',
                 town_city: '',
                 region: '',
                 province: '',
@@ -82642,6 +82656,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 fax_number: '',
                 remarks: ''
             },
+            show: false,
+            pilili_code: '',
             provinces: [],
             regions: [],
             classifications: [],
@@ -82653,6 +82669,38 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.fetchProvince();
         this.fetchClassification();
     },
+    mounted: function mounted() {
+        var vm = this;
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('google_address');
+        var searchBox = new google.maps.places.Autocomplete(input, {
+            componentRestrictions: { country: 'ph' }
+        });
+
+        searchBox.addListener('place_changed', function () {
+            var place = searchBox.getPlace();
+
+            if (place.length == 0) {
+                return;
+            }
+
+            if (!place.geometry) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                console.log("No details available for input: '" + place.name + "'");
+                return;
+            }
+            vm.customer.google_address = document.getElementById("google_address").value;
+            //Bind town or city of address to input
+            // place.address_components.filter(function(address){
+            //     address.types.filter(function(types) {
+            //         if(types == 'locality'){
+            //             vm.customer.town_city = address.long_name;
+            //         }
+            //     });
+            // });
+        });
+    },
 
     methods: {
         addCustomer: function addCustomer(customer) {
@@ -82663,6 +82711,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 customer_code: customer.customer_code,
                 name: customer.name,
                 street: customer.street,
+                google_address: customer.google_address,
                 town_city: customer.town_city,
                 region: customer.region,
                 province: customer.province,
@@ -82708,15 +82757,45 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         checkCustomerCode: function checkCustomerCode() {
             var _this5 = this;
 
-            if (this.customer.classification != 1 && this.customer.classification != 2) {
-                axios.get('/check-customer-code').then(function (response) {
+            if (this.customer.classification != 1 && this.customer.classification != 2 && this.customer.classification != 8) {
+                axios.post('/check-customer-code', {
+                    classification: this.customer.classification,
+                    company_id: this.companyId
+
+                }).then(function (response) {
                     _this5.customer.customer_code = '';
                     _this5.customer.customer_code = response.data;
+                    _this5.show = false;
                     document.getElementById("customer_code").disabled = true;
                 }).catch(function (error) {
                     _this5.errors = error.response.data.errors;
                 });
+            } else if (this.customer.classification == 8 && this.companyId != 5) {
+                axios.post('/check-customer-code', {
+                    classification: this.customer.classification,
+                    company_id: this.companyId
+                }).then(function (response) {
+                    _this5.customer.customer_code = '';
+                    _this5.customer.customer_code = response.data;
+                    _this5.show = false;
+                    document.getElementById("customer_code").disabled = true;
+                }).catch(function (error) {
+                    _this5.errors = error.response.data.errors;
+                });
+            } else if (this.customer.classification == 8 && this.companyId == 5) {
+                axios.post('/check-customer-code', {
+                    classification: this.customer.classification,
+                    company_id: this.companyId
+                }).then(function (response) {
+                    _this5.customer.customer_code = '';
+                    _this5.show = true;
+                    _this5.pilili_code = response.data;
+                    document.getElementById("customer_code").disabled = false;
+                }).catch(function (error) {
+                    _this5.errors = error.response.data.errors;
+                });
             } else {
+                this.show = false;
                 this.customer.customer_code = '';
                 document.getElementById("customer_code").disabled = false;
             }
@@ -82751,6 +82830,15 @@ var render = function() {
                   _c("div", { staticClass: "row" }, [
                     _c("div", { staticClass: "col-lg-6" }, [
                       _c("div", { staticClass: "form-group" }, [
+                        _vm.show
+                          ? _c("span", [
+                              _vm._v(
+                                "Last customer code: " + _vm._s(_vm.pilili_code)
+                              ),
+                              _c("br")
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
                         _c(
                           "label",
                           {
@@ -83068,6 +83156,55 @@ var render = function() {
                         _vm.errors.province
                           ? _c("span", { staticClass: "text-danger small" }, [
                               _vm._v(_vm._s(_vm.errors.province[0]))
+                            ])
+                          : _vm._e()
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "form-control-label",
+                            attrs: { for: "google_address" }
+                          },
+                          [_vm._v("Google Map Address")]
+                        ),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.customer.google_address,
+                              expression: "customer.google_address"
+                            }
+                          ],
+                          staticClass: "form-control form-control-alternative",
+                          attrs: {
+                            id: "google_address",
+                            type: "text",
+                            placeholder: "Enter a Location"
+                          },
+                          domProps: { value: _vm.customer.google_address },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.customer,
+                                "google_address",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        }),
+                        _vm._v(" "),
+                        _vm.errors.google_address
+                          ? _c("span", { staticClass: "text-danger small" }, [
+                              _vm._v(_vm._s(_vm.errors.google_address[0]))
                             ])
                           : _vm._e()
                       ])
@@ -83496,6 +83633,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['customerId'],
@@ -83506,7 +83651,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             classifications: [],
             regions: [],
             errors: [],
-            default_code: ''
+            default_code: '',
+            default_classification: '',
+            show: false,
+            pilili_code: ''
         };
     },
     created: function created() {
@@ -83514,6 +83662,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.fetchProvince();
         this.fetchCustomer();
         this.fetchClassification();
+    },
+    mounted: function mounted() {
+        var vm = this;
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('google_address');
+        var searchBox = new google.maps.places.Autocomplete(input, {
+            componentRestrictions: { country: 'ph' }
+        });
+
+        searchBox.addListener('place_changed', function () {
+            var place = searchBox.getPlace();
+
+            if (place.length == 0) {
+                return;
+            }
+
+            if (!place.geometry) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                console.log("No details available for input: '" + place.name + "'");
+                return;
+            }
+            vm.customers.google_address = document.getElementById("google_address").value;
+        });
     },
 
     methods: {
@@ -83529,6 +83701,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 town_city: customers.town_city,
                 region: customers.region,
                 province: customers.province_id,
+                google_address: customers.google_address,
                 telephone_1: customers.telephone_1,
                 telephone_2: customers.telephone_2,
                 fax_number: customers.fax_number,
@@ -83545,6 +83718,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.get('/customers/show/' + this.customerId).then(function (response) {
                 _this2.customers = response.data;
                 _this2.default_code = _this2.customers.customer_code;
+                _this2.default_classification = _this2.customers.classification;
                 if (_this2.customers.classification != 1 && _this2.customers.classification != 2) {
                     document.getElementById("customer_code").disabled = true;
                 } else {
@@ -83582,12 +83756,55 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         },
         checkCustomerCode: function checkCustomerCode() {
-            if (this.customers.classification != 1 && this.customers.classification != 2) {
-                this.customers.customer_code = this.default_code;
-                document.getElementById("customer_code").disabled = true;
+            var _this6 = this;
+
+            if (this.customers.company_id == 5) {
+                //Pilili company_code generation
+                if (this.default_classification == 8 && this.customers.classification != 8 && this.customers.classification != 1 && this.customers.classification != 2) {
+                    axios.post('/check-customer-code', {
+                        classification: this.customers.classification,
+                        company_id: this.customers.company_id
+                    }).then(function (response) {
+                        _this6.customers.customer_code = '';
+                        _this6.customers.customer_code = response.data;
+                        _this6.show = false;
+                        document.getElementById("customer_code").disabled = true;
+                    }).catch(function (error) {
+                        _this6.errors = error.response.data.errors;
+                    });
+                } else if (this.default_classification != 8 && this.customers.classification == 8) {
+                    axios.post('/check-customer-code', {
+                        classification: this.customers.classification,
+                        company_id: this.customers.company_id
+                    }).then(function (response) {
+                        _this6.customers.customer_code = '';
+                        _this6.show = true;
+                        _this6.pilili_code = response.data;
+                        document.getElementById("customer_code").disabled = false;
+                    }).catch(function (error) {
+                        _this6.errors = error.response.data.errors;
+                    });
+                } else if (this.default_classification != 8 && this.customers.classification != 1 && this.customers.classification != 2) {
+                    this.show = false;
+                    this.customers.customer_code = this.default_code;
+                    document.getElementById("customer_code").disabled = true;
+                } else if (this.default_classification == 8 && this.customers.classification == 8) {
+                    this.show = false;
+                    this.customers.customer_code = this.default_code;
+                    document.getElementById("customer_code").disabled = true;
+                } else {
+                    this.show = false;
+                    this.customers.customer_code = '';
+                    document.getElementById("customer_code").disabled = false;
+                }
             } else {
-                this.customers.customer_code = '';
-                document.getElementById("customer_code").disabled = false;
+                if (this.customers.classification != 1 && this.customers.classification != 2) {
+                    this.customers.customer_code = this.default_code;
+                    document.getElementById("customer_code").disabled = true;
+                } else {
+                    this.customers.customer_code = '';
+                    document.getElementById("customer_code").disabled = false;
+                }
             }
         }
     }
@@ -83620,6 +83837,15 @@ var render = function() {
                   _c("div", { staticClass: "row" }, [
                     _c("div", { staticClass: "col-lg-6" }, [
                       _c("div", { staticClass: "form-group" }, [
+                        _vm.show
+                          ? _c("span", [
+                              _vm._v(
+                                "Last customer code: " + _vm._s(_vm.pilili_code)
+                              ),
+                              _c("br")
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
                         _c(
                           "label",
                           {
@@ -83937,6 +84163,55 @@ var render = function() {
                         _vm.errors.province
                           ? _c("span", { staticClass: "text-danger small" }, [
                               _vm._v(_vm._s(_vm.errors.province[0]))
+                            ])
+                          : _vm._e()
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "form-control-label",
+                            attrs: { for: "google_address" }
+                          },
+                          [_vm._v("Google Map Address")]
+                        ),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.customers.google_address,
+                              expression: "customers.google_address"
+                            }
+                          ],
+                          staticClass: "form-control form-control-alternative",
+                          attrs: {
+                            id: "google_address",
+                            type: "text",
+                            placeholder: "Enter a Location"
+                          },
+                          domProps: { value: _vm.customers.google_address },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.customers,
+                                "google_address",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        }),
+                        _vm._v(" "),
+                        _vm.errors.google_address
+                          ? _c("span", { staticClass: "text-danger small" }, [
+                              _vm._v(_vm._s(_vm.errors.google_address[0]))
                             ])
                           : _vm._e()
                       ])

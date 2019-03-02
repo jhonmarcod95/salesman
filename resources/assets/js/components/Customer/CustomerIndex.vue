@@ -53,7 +53,7 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+customer.id">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getCustomerId(customer.id)">Delete</a>
-                                                    <a class="dropdown-item" @click="getGeocode(customer.street+' '+customer.town_city)">View address</a>
+                                                    <a class="dropdown-item" @click="getGeocode(customer.google_address)">View address</a>
                                                 </div>
                                             </div>
                                         </td>
