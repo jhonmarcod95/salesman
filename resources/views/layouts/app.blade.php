@@ -3,7 +3,7 @@
 <head>
     @include('layouts.head')
 </head>
-<body>
+<body onload="initMap()">
 
 <div id="app">
 
