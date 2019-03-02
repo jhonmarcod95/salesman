@@ -136,7 +136,7 @@ class ScheduleController extends Controller
                     $schedule->type = $schedule_type;
                     $schedule->code = $customer_code;
                     $schedule->name = $customer->name;
-                    $schedule->address = $customer->town_city;
+                    $schedule->address = $customer->street;
                     $schedule->date = $date;
                     $schedule->start_time = $request->start_time;
                     $schedule->end_time = $request->end_time;
