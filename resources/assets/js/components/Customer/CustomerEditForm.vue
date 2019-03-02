@@ -20,6 +20,7 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
+                                                <span v-if="show">Last customer code: {{ pilili_code }}<br></span>
                                                 <label class="form-control-label" for="customer_code">Customer Code</label>
                                                 <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customers.customer_code">
                                                 <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
@@ -145,6 +146,9 @@
                 regions:[],
                 errors: [],
                 default_code: '',
+                default_classification: '',
+                show: false,
+                pilili_code: '',
             }
         },
         created(){
@@ -181,6 +185,7 @@
                 .then(response => {
                     this.customers = response.data;
                     this.default_code = this.customers.customer_code;
+                    this.default_classification = this.customers.classification;
                     if(this.customers.classification != 1 && this.customers.classification != 2){
                         document.getElementById("customer_code").disabled = true;
                     }else{
@@ -219,13 +224,59 @@
                 })
             },
             checkCustomerCode(){
-                if(this.customers.classification != 1 && this.customers.classification != 2){
-                    this.customers.customer_code = this.default_code;
-                    document.getElementById("customer_code").disabled = true;
-                }
-                else{
-                    this.customers.customer_code = '';
-                    document.getElementById("customer_code").disabled = false;
+                if(this.customers.company_id == 5){ //Pilili company_code generation
+                    if(this.default_classification == 8 && this.customers.classification != 8  && this.customers.classification != 1 && this.customers.classification != 2){
+                        axios.post('/check-customer-code',{
+                            classification: this.customers.classification,
+                            company_id: this.customers.company_id
+                        })
+                        .then(response => {
+                            this.customers.customer_code = '';
+                            this.customers.customer_code = response.data;
+                            this.show = false;
+                            document.getElementById("customer_code").disabled = true;
+                        })
+                        .catch(error => {
+                            this.errors = error.response.data.errors;
+                        })
+                    }else if(this.default_classification != 8 && this.customers.classification == 8){
+                        axios.post('/check-customer-code',{
+                            classification: this.customers.classification,
+                            company_id: this.customers.company_id
+                        })
+                        .then(response => {
+                            this.customers.customer_code = '';
+                            this.show = true;
+                            this.pilili_code = response.data
+                            document.getElementById("customer_code").disabled = false;
+                        })
+                        .catch(error => {
+                            this.errors = error.response.data.errors;
+                        })
+                    }else if(this.default_classification != 8 && this.customers.classification != 1 && this.customers.classification != 2){
+                        this.show = false;
+                        this.customers.customer_code = this.default_code;
+                        document.getElementById("customer_code").disabled = true;
+                    }else if(this.default_classification == 8 && this.customers.classification == 8){
+                        this.show = false;
+                        this.customers.customer_code = this.default_code;
+                        document.getElementById("customer_code").disabled = true;
+                    }
+                    else{
+                        this.show = false;
+                        this.customers.customer_code = '';
+                        document.getElementById("customer_code").disabled = false;
+                    }
+
+                }else{
+                    if(this.customers.classification != 1 && this.customers.classification != 2){
+                        this.customers.customer_code = this.default_code;
+                        document.getElementById("customer_code").disabled = true;
+                    }else{
+                        this.customers.customer_code = '';
+                        document.getElementById("customer_code").disabled = false;
+                    }
+
                 }
             }
         },

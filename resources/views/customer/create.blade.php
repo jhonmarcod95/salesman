@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-    <customer-form></customer-form>
+    <customer-form :company-id={{ Auth::user()->companies->pluck('id')[0] }}></customer-form>
 @endsection

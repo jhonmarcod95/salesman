@@ -20,6 +20,7 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
+                                                <span v-if="show">Last customer code: {{ pilili_code }}<br></span>
                                                 <label class="form-control-label" for="customer_code">Customer Code</label>
                                                 <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code">
                                                 <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
@@ -136,6 +137,7 @@
 
 <script>
     export default {
+        props:['companyId'],
         data(){
             return{
                 customer:{
@@ -150,8 +152,10 @@
                     telephone_1: '',
                     telephone_2: '',
                     fax_number: '',
-                    remarks: ''
+                    remarks: '',
                 },
+                show: false,
+                pilili_code: '',
                 provinces: [],
                 regions:[],
                 classifications:[],
@@ -215,18 +219,52 @@
                 })
             },
             checkCustomerCode(){
-                if(this.customer.classification != 1 && this.customer.classification != 2){
-                    axios.get('/check-customer-code')
+
+                if(this.customer.classification != 1 && this.customer.classification != 2 && this.customer.classification != 8){
+                    axios.post('/check-customer-code',{
+                        classification: this.customer.classification,
+                        company_id: this.companyId
+                        
+                    })
                     .then(response => {
                         this.customer.customer_code = '';
                         this.customer.customer_code = response.data;
+                        this.show = false;
                         document.getElementById("customer_code").disabled = true;
                     })
                     .catch(error => {
                         this.errors = error.response.data.errors;
                     })
-                }
-                else{
+                }else if(this.customer.classification == 8 && this.companyId != 5){
+                    axios.post('/check-customer-code',{
+                        classification: this.customer.classification,
+                        company_id: this.companyId
+                    })
+                    .then(response => {
+                        this.customer.customer_code = '';
+                        this.customer.customer_code = response.data;
+                        this.show = false;
+                        document.getElementById("customer_code").disabled = true;
+                    })
+                    .catch(error => {
+                        this.errors = error.response.data.errors;
+                    })
+                }else if(this.customer.classification == 8 && this.companyId == 5){
+                    axios.post('/check-customer-code',{
+                        classification: this.customer.classification,
+                        company_id: this.companyId
+                    })
+                    .then(response => {
+                        this.customer.customer_code = '';
+                        this.show = true;
+                        this.pilili_code = response.data
+                        document.getElementById("customer_code").disabled = false;
+                    })
+                    .catch(error => {
+                        this.errors = error.response.data.errors;
+                    })
+                }else{
+                    this.show = false;
                     this.customer.customer_code = '';
                     document.getElementById("customer_code").disabled = false;
                 }
