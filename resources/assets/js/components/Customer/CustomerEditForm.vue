@@ -87,6 +87,13 @@
                                                 <span class="text-danger small" v-if="errors.province">{{ errors.province[0] }}</span>
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="google_address">Google Map Address</label>
+                                                <input id="google_address" class="form-control form-control-alternative" type="text" v-model="customers.google_address" placeholder="Enter a Location">
+                                                <span class="text-danger small" v-if="errors.google_address">{{ errors.google_address[0] }}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
@@ -157,6 +164,31 @@
             this.fetchCustomer();
             this.fetchClassification();
         },
+        mounted() {
+            let vm  = this;
+            // Create the search box and link it to the UI element.
+            var input = document.getElementById('google_address');
+            var searchBox = new google.maps.places.Autocomplete(input, {
+                 componentRestrictions: {country: 'ph'}
+            });
+    
+            searchBox.addListener('place_changed', function() {
+                var place = searchBox.getPlace();
+
+                if (place.length == 0) {
+                    return;
+                }
+
+                if (!place.geometry) {
+                    // User entered the name of a Place that was not suggested and
+                    // pressed the Enter key, or the Place Details request failed.
+                    console.log("No details available for input: '" + place.name + "'");
+                    return;
+                }
+                vm.customers.google_address = document.getElementById("google_address").value;
+
+            });
+        },
         methods:{
             updateCustomer(customers){  
                 axios.patch(`/customers/${customers.id}`,{
@@ -168,6 +200,7 @@
                     town_city: customers.town_city,
                     region: customers.region,
                     province: customers.province_id,
+                    google_address: customers.google_address,
                     telephone_1: customers.telephone_1,
                     telephone_2: customers.telephone_2,
                     fax_number: customers.fax_number,
