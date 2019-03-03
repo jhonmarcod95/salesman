@@ -441,15 +441,15 @@ class AppAPIController extends Controller
             'expense_id' => 'required',
             'receipt_transaction_id' => 'required', // VAT or NON-VAT
             'receipt_type_id' => 'required', // Sales Invoice or Official Receipt
-            'receipt_number' => 'required|unique:receipt_expenses', // OR# or SI#
             'date_receipt' => 'required' // date of receipt
-        ]);
+            ]);
 
-        if($request->input('receipt_transaction_id') == 1) {
-            $this->validate($request, [
-                'vendor_name' => 'required',
-                'vendor_address' => 'required',
-                'tin_number' => [new TinNumber, 'required'],
+            if($request->input('receipt_transaction_id') == 1) {
+                $this->validate($request, [
+                    'vendor_name' => 'required',
+                    'vendor_address' => 'required',
+                    'tin_number' => [new TinNumber, 'required'],
+                    'receipt_number' => 'required|unique:receipt_expenses', // OR# or SI#
             ]);
         }
 
