@@ -33,6 +33,7 @@
                                     <th scope="col">Street</th>
                                     <th scope="col">Town or City</th>
                                     <th scope="col">Province</th>
+                                    <th scope="col">Google Map Address</th>
                                     <th scope="col">Classification</th>
                                     <th scope="col">Telephone 1</th>
                                     <th scope="col">Telephone 2</th>
@@ -52,7 +53,7 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+customer.id">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getCustomerId(customer.id)">Delete</a>
-                                                    <a class="dropdown-item" @click="getGeocode(customer.street+' '+customer.town_city)">View address</a>
+                                                    <a class="dropdown-item" @click="getGeocode(customer.google_address)">View address</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -61,6 +62,7 @@
                                         <td>{{ customer.street }}</td>
                                         <td>{{ customer.town_city }}</td>
                                         <td>{{ customer.province }}</td>
+                                        <td>{{ customer.google_address }}</td>
                                         <td>{{ customer.customer_classification }}</td>
                                         <td>{{ customer.telephone_1 }}</td>
                                         <td>{{ customer.telephone_2 }}</td>

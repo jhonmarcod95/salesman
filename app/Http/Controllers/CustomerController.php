@@ -39,6 +39,9 @@ class CustomerController extends Controller
 
     public function indexData(){
         return  Customer::orderBy('customers.id', 'desc')
+            ->when(Auth::user()->level() < 8, function($q){
+                $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+            })
             ->leftJoin('provinces', 'provinces.id', '=', 'customers.province_id')
             ->leftJoin('customer_classifications', 'customer_classifications.id', '=', 'customers.classification')
             ->get([
@@ -51,6 +54,7 @@ class CustomerController extends Controller
                 'customers.street',
                 'customers.town_city',
                 'customers.province_id',
+                'customers.google_address',
                 'customers.telephone_1',
                 'customers.telephone_2',
                 'customers.fax_number',
@@ -94,17 +98,25 @@ class CustomerController extends Controller
             'name' => 'required',
             'classification' => 'required',
             'street' => 'required',
+            'google_address' => 'required',
             'town_city' => 'required',
             'province' => 'required',
         ]);
+
+        $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
+        
         $customers = new Customer;
 
+        $customers->company_id = Auth::user()->companies->pluck('id')[0];
         $customers->classification = $request->classification;
         $customers->customer_code = $request->customer_code;
         $customers->name = $request->name;
         $customers->street = $request->street;
         $customers->town_city = $request->town_city;
         $customers->province_id = $request->province;
+        $customers->google_address = $request->google_address;
+        $customers->lat = $geocode['lat'];
+        $customers->lng = $geocode['lng'];
         $customers->telephone_1 = $request->telephone_1;
         $customers->telephone_2 = $request->telephone_2;
         $customers->fax_number = $request->fax_number;
@@ -161,14 +173,21 @@ class CustomerController extends Controller
             'street' => 'required',
             'town_city' => 'required',
             'province' => 'required',
+            'google_address' => 'required',
         ]);
+        
+        $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
 
+        $customer->company_id = Auth::user()->companies->pluck('id')[0];
         $customer->classification = $request->classification;
         $customer->customer_code = $request->customer_code;
         $customer->name = $request->name;
         $customer->street = $request->street;
         $customer->town_city = $request->town_city;
         $customer->province_id = $request->province;
+        $customer->google_address = $request->google_address;
+        $customer->lat = $geocode['lat'];
+        $customer->lng = $geocode['lng'];
         $customer->telephone_1 = $request->telephone_1;
         $customer->telephone_2 = $request->telephone_2;
         $customer->fax_number = $request->fax_number;
@@ -185,17 +204,29 @@ class CustomerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function checkCustomerCode(){
-        $customer = Customer::withTrashed()->whereNotIn('classification', [1,2])->orderBy('id','asc')->get();
-        $customer_code = $customer->last()->customer_code;
+    public function checkCustomerCode(Request $request){
+        $request->validate([
+            'classification' => 'required',
+            'company_id' => 'required'
+        ]);
 
-        //generate until to become unique
-        generate:
-        if(Customer::where('customer_code', $customer_code)->exists()){
-            $customer_code = $customer_code + 1;
-            goto generate;
+        if($request->classification == 8 && $request->company_id == 5){
+            $customer = Customer::withTrashed()->where('classification',8)->where('company_id', 5)->orderBy('id','asc')->get();
+            $customer_code = $customer->last()->customer_code;
+            return $customer_code;
+
+        }else{
+            $customer = Customer::withTrashed()->whereNotIn('classification', [1,2,8])->orderBy('id','asc')->get();
+            $customer_code = $customer->last()->customer_code;
+
+            //generate until to become unique
+            generate:
+            if(Customer::where('customer_code', $customer_code)->exists()){
+                $customer_code = $customer_code + 1;
+                goto generate;
+            }
+            return $customer_code;
         }
-        return $customer_code;
     }
 
     /**

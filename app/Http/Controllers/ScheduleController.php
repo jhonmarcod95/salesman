@@ -45,7 +45,8 @@ class ScheduleController extends Controller
             );
 
 
-        $customers = Customer::select(DB::raw("CONCAT(name, ' - ', street, ' - ',town_city) AS name"), 'customer_code')
+        $customers = Customer::select(DB::raw("CONCAT(name, ' - ', street) AS name"), 'customer_code')
+            ->where('company_id', $company_id)
             ->pluck(
                 'name',
                 'customer_code'
@@ -135,7 +136,7 @@ class ScheduleController extends Controller
                     $schedule->type = $schedule_type;
                     $schedule->code = $customer_code;
                     $schedule->name = $customer->name;
-                    $schedule->address = $customer->town_city;
+                    $schedule->address = $customer->street;
                     $schedule->date = $date;
                     $schedule->start_time = $request->start_time;
                     $schedule->end_time = $request->end_time;
@@ -179,6 +180,10 @@ class ScheduleController extends Controller
             }
         }
         DB::commit();
+
+        if($request->has('id')){
+            RequestSchedule::where('id', $request->id)->update(array('isApproved' => 1));
+        }
 
         return response()->json($data);
     }

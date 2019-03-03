@@ -20,6 +20,7 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
+                                                <span v-if="show">Last customer code: {{ pilili_code }}<br></span>
                                                 <label class="form-control-label" for="customer_code">Customer Code</label>
                                                 <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customers.customer_code">
                                                 <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
@@ -86,6 +87,13 @@
                                                 <span class="text-danger small" v-if="errors.province">{{ errors.province[0] }}</span>
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="google_address">Google Map Address</label>
+                                                <input id="google_address" class="form-control form-control-alternative" type="text" v-model="customers.google_address" placeholder="Enter a Location">
+                                                <span class="text-danger small" v-if="errors.google_address">{{ errors.google_address[0] }}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
@@ -145,6 +153,9 @@
                 regions:[],
                 errors: [],
                 default_code: '',
+                default_classification: '',
+                show: false,
+                pilili_code: '',
             }
         },
         created(){
@@ -152,6 +163,31 @@
             this.fetchProvince();
             this.fetchCustomer();
             this.fetchClassification();
+        },
+        mounted() {
+            let vm  = this;
+            // Create the search box and link it to the UI element.
+            var input = document.getElementById('google_address');
+            var searchBox = new google.maps.places.Autocomplete(input, {
+                 componentRestrictions: {country: 'ph'}
+            });
+    
+            searchBox.addListener('place_changed', function() {
+                var place = searchBox.getPlace();
+
+                if (place.length == 0) {
+                    return;
+                }
+
+                if (!place.geometry) {
+                    // User entered the name of a Place that was not suggested and
+                    // pressed the Enter key, or the Place Details request failed.
+                    console.log("No details available for input: '" + place.name + "'");
+                    return;
+                }
+                vm.customers.google_address = document.getElementById("google_address").value;
+
+            });
         },
         methods:{
             updateCustomer(customers){  
@@ -164,6 +200,7 @@
                     town_city: customers.town_city,
                     region: customers.region,
                     province: customers.province_id,
+                    google_address: customers.google_address,
                     telephone_1: customers.telephone_1,
                     telephone_2: customers.telephone_2,
                     fax_number: customers.fax_number,
@@ -181,6 +218,7 @@
                 .then(response => {
                     this.customers = response.data;
                     this.default_code = this.customers.customer_code;
+                    this.default_classification = this.customers.classification;
                     if(this.customers.classification != 1 && this.customers.classification != 2){
                         document.getElementById("customer_code").disabled = true;
                     }else{
@@ -219,13 +257,59 @@
                 })
             },
             checkCustomerCode(){
-                if(this.customers.classification != 1 && this.customers.classification != 2){
-                    this.customers.customer_code = this.default_code;
-                    document.getElementById("customer_code").disabled = true;
-                }
-                else{
-                    this.customers.customer_code = '';
-                    document.getElementById("customer_code").disabled = false;
+                if(this.customers.company_id == 5){ //Pilili company_code generation
+                    if(this.default_classification == 8 && this.customers.classification != 8  && this.customers.classification != 1 && this.customers.classification != 2){
+                        axios.post('/check-customer-code',{
+                            classification: this.customers.classification,
+                            company_id: this.customers.company_id
+                        })
+                        .then(response => {
+                            this.customers.customer_code = '';
+                            this.customers.customer_code = response.data;
+                            this.show = false;
+                            document.getElementById("customer_code").disabled = true;
+                        })
+                        .catch(error => {
+                            this.errors = error.response.data.errors;
+                        })
+                    }else if(this.default_classification != 8 && this.customers.classification == 8){
+                        axios.post('/check-customer-code',{
+                            classification: this.customers.classification,
+                            company_id: this.customers.company_id
+                        })
+                        .then(response => {
+                            this.customers.customer_code = '';
+                            this.show = true;
+                            this.pilili_code = response.data
+                            document.getElementById("customer_code").disabled = false;
+                        })
+                        .catch(error => {
+                            this.errors = error.response.data.errors;
+                        })
+                    }else if(this.default_classification != 8 && this.customers.classification != 1 && this.customers.classification != 2){
+                        this.show = false;
+                        this.customers.customer_code = this.default_code;
+                        document.getElementById("customer_code").disabled = true;
+                    }else if(this.default_classification == 8 && this.customers.classification == 8){
+                        this.show = false;
+                        this.customers.customer_code = this.default_code;
+                        document.getElementById("customer_code").disabled = true;
+                    }
+                    else{
+                        this.show = false;
+                        this.customers.customer_code = '';
+                        document.getElementById("customer_code").disabled = false;
+                    }
+
+                }else{
+                    if(this.customers.classification != 1 && this.customers.classification != 2){
+                        this.customers.customer_code = this.default_code;
+                        document.getElementById("customer_code").disabled = true;
+                    }else{
+                        this.customers.customer_code = '';
+                        document.getElementById("customer_code").disabled = false;
+                    }
+
                 }
             }
         },
