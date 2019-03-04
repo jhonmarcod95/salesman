@@ -527,7 +527,10 @@ class AppAPIController extends Controller
 
     public function getTinNumbers() {
 
-        $tinNumbers = ReceiptExpense::orderBy('id','DESC')->get()->unique('tin_number');
+        $tinNumbers = ReceiptExpense::where('receipt_transaction_id',1)
+                            ->orderBy('id','DESC')
+                            ->get()
+                            ->unique('tin_number');
 
         return TinNumbersResource::collection($tinNumbers);
 
