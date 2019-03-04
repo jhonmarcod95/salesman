@@ -292,150 +292,167 @@ export default {
                 return expenses_id.includes(item.id);
             });
 
-            var sum = 0;
-
-            this.checkedExpenses.filter(function(checkedExpense) { //Get the sum of all checked expenes
-                sum = sum + checkedExpense.amount;
-            });
-
-            var filteredBusinessArea = this.checkedExpenses[0].user.companies[0].business_area.filter(function(businessArea){ // loop business area to get correct business area
-                return businessArea.location_id == vm.checkedExpenses[0].user.location[0].id;
-            });
-            
-            this.lineOneExpenses = { //Generate the line 1 paramater to post
-                item: 1,
-                item_text: 'REIMBURSEMENT; ' + this.dateEntry,
-                gl_account: this.expenseByTsr[0].user.vendor.vendor_code,
-                description: this.expenseByTsr[0].user.name,
-                assignment: '',
-                input_tax_code: '',
-                internal_order: '',
-                amount: sum * -1,
-                charge_type: '',
-                business_area: filteredBusinessArea[0].business_area,
-                or_number: '',
-                supplier_name: '',
-                supplier_address: '',
-                supplier_tin_number: ''
-            };
-
-            this.simulatedExpenses.push(this.lineOneExpenses);
-
-            var item = 1;
-            var tax_amountI3 = 0;
-            var tax_amountI7 = 0;
-            var tax_amount = 0;
-            this.checkedExpenses.filter(function(checkedExpense) {  //Generate the line 2 to n paramater to post
-                var filteredGl = checkedExpense.expenses_type.expense_charge_type.charge_type.expense_gl.filter(function(gl_account){ // loop expense gl to get correct gl account and description
-                                    return gl_account.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name && gl_account.company_code == checkedExpense.user.companies[0].code;
-                                });
-                var filteredInternalOrders =  checkedExpense.user.internal_orders.filter(function(internal_order){ // loop internal order to get correct internal order
-                                    return internal_order.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name;
-                                });
-                item = item + 1;
-                var amount = "";
-                var tax_code = "";
-                var bol_tax_amount = false;
-                if(checkedExpense.user.companies[0].code == "1100" || checkedExpense.user.companies[0].code == "CSCI"){
-                    amount = checkedExpense.amount;
-                    tax_code = "IX";
-                    bol_tax_amount = false;
-                }else if(checkedExpense.user.companies[0].code == "PFMC" && filteredBusinessArea[0].business_area.substring(0,2) == "FD"){
-                    amount = checkedExpense.amount;
-                    tax_code = "IX";
-                }else{
-                    var round_off = checkedExpense.amount / 1.12; //(Round off to two digit)
-                    amount = round_off.toFixed(2);
-                    // amount = checkedExpense.amount;
-                    tax_code = checkedExpense.receipt_expenses.receipt_type.tax_code;
-                    var round_off_tax_amount = checkedExpense.amount - (checkedExpense.amount / 1.12);
-                    tax_amount = round_off_tax_amount.toFixed(2);
-                    bol_tax_amount = true;
+            var createdDate = '';
+            var ableToPost = 0;
+            if(this.checkedExpenses.length == 1){
+                ableToPost = 0;
+            }
+            var validate = this.checkedExpenses.filter(function(checkedExpense) { //Validation for posting of expense(Posting must be in the same month and year)
+                if(createdDate){
+                    moment(createdDate).isSame(checkedExpense.created_at, 'month','year') == false ? ableToPost = ableToPost + 1 : '';
                 }
-
-                var expenses = { 
-                    item: item,
-                    item_text: checkedExpense.expenses_type.name.toUpperCase() + ' '+ moment(checkedExpense.created_at).format('L'),
-                    gl_account: filteredGl[0].gl_account,
-                    description: filteredGl[0].gl_description,
-                    assignment: '',
-                    // input_tax_code : checkedExpense.receipt_expenses.receipt_type.tax_code,
-                    input_tax_code : tax_code,
-                    internal_order: filteredInternalOrders[0].internal_order,
-                    // amount: checkedExpense.amount,
-                    amount: amount,
-                    charge_type: checkedExpense.expenses_type.expense_charge_type.charge_type.name,
-                    business_area: filteredBusinessArea[0].business_area,
-                    or_number: checkedExpense.receipt_expenses.receipt_number,
-                    supplier_name: checkedExpense.receipt_expenses.vendor_name,
-                    supplier_address: checkedExpense.receipt_expenses.vendor_address,
-                    supplier_tin_number: checkedExpense.receipt_expenses.tin_number,
-
-                }
-                if(bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I3'){
-                    // expenses.tax_amountI3 = tax_amount;
-                    tax_amountI3 = parseFloat(tax_amountI3) + parseFloat(tax_amount);
-                }else if (bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I7'){
-                    // expenses.tax_amountI7 = tax_amount;
-                    tax_amountI7 = parseFloat(tax_amountI7) + parseFloat(tax_amount);
-                }else {}
-                item + 1;
-                vm.simulatedExpenses.push(expenses);
+                createdDate = checkedExpense.created_at;
             });
-            this.gl_account_i7 = Object.values(this.checkedExpenses[0].user.companies[0].gl_taxcode).filter(function (tax_code){
-                return tax_code.tax_code == 'I7';
-            });
-                    
-            if(tax_amountI7){
-                var expenses = {
-                    item: item + 1,
-                    item_text: '',
-                    gl_account: this.gl_account_i7[0].gl_account,
-                    description: this.gl_account_i7[0].gl_description,
+
+            if(ableToPost > 0){
+                alert('Please select expenses with the same month and year');
+                return false;
+            }else{
+                 var sum = 0;
+
+                this.checkedExpenses.filter(function(checkedExpense) { //Get the sum of all checked expenes
+                    sum = sum + checkedExpense.amount;
+                });
+
+                var filteredBusinessArea = this.checkedExpenses[0].user.companies[0].business_area.filter(function(businessArea){ // loop business area to get correct business area
+                    return businessArea.location_id == vm.checkedExpenses[0].user.location[0].id;
+                });
+                
+                this.lineOneExpenses = { //Generate the line 1 paramater to post
+                    item: 1,
+                    item_text: 'REIMBURSEMENT; ' + this.dateEntry,
+                    gl_account: this.expenseByTsr[0].user.vendor.vendor_code,
+                    description: this.expenseByTsr[0].user.name,
                     assignment: '',
-                    input_tax_code : 'I7',
+                    input_tax_code: '',
                     internal_order: '',
-                    amount: tax_amountI7,
+                    amount: sum * -1,
                     charge_type: '',
                     business_area: filteredBusinessArea[0].business_area,
                     or_number: '',
                     supplier_name: '',
                     supplier_address: '',
-                    supplier_tin_number: '',
+                    supplier_tin_number: ''
+                };
+
+                this.simulatedExpenses.push(this.lineOneExpenses);
+
+                var item = 1;
+                var tax_amountI3 = 0;
+                var tax_amountI7 = 0;
+                var tax_amount = 0;
+                this.checkedExpenses.filter(function(checkedExpense) {  //Generate the line 2 to n paramater to post
+                    var filteredGl = checkedExpense.expenses_type.expense_charge_type.charge_type.expense_gl.filter(function(gl_account){ // loop expense gl to get correct gl account and description
+                                        return gl_account.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name && gl_account.company_code == checkedExpense.user.companies[0].code;
+                                    });
+                    var filteredInternalOrders =  checkedExpense.user.internal_orders.filter(function(internal_order){ // loop internal order to get correct internal order
+                                        return internal_order.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name;
+                                    });
+                    item = item + 1;
+                    var amount = "";
+                    var tax_code = "";
+                    var bol_tax_amount = false;
+                    if(checkedExpense.user.companies[0].code == "1100" || checkedExpense.user.companies[0].code == "CSCI"){
+                        amount = checkedExpense.amount;
+                        tax_code = "IX";
+                        bol_tax_amount = false;
+                    }else if(checkedExpense.user.companies[0].code == "PFMC" && filteredBusinessArea[0].business_area.substring(0,2) == "FD"){
+                        amount = checkedExpense.amount;
+                        tax_code = "IX";
+                    }else{
+                        var round_off = checkedExpense.amount / 1.12; //(Round off to two digit)
+                        amount = round_off.toFixed(2);
+                        // amount = checkedExpense.amount;
+                        tax_code = checkedExpense.receipt_expenses.receipt_type.tax_code;
+                        var round_off_tax_amount = checkedExpense.amount - (checkedExpense.amount / 1.12);
+                        tax_amount = round_off_tax_amount.toFixed(2);
+                        bol_tax_amount = true;
+                    }
+
+                    var expenses = { 
+                        item: item,
+                        item_text: checkedExpense.expenses_type.name.toUpperCase() + ' '+ moment(checkedExpense.created_at).format('L'),
+                        gl_account: filteredGl[0].gl_account,
+                        description: filteredGl[0].gl_description,
+                        assignment: '',
+                        // input_tax_code : checkedExpense.receipt_expenses.receipt_type.tax_code,
+                        input_tax_code : tax_code,
+                        internal_order: filteredInternalOrders[0].internal_order,
+                        // amount: checkedExpense.amount,
+                        amount: amount,
+                        charge_type: checkedExpense.expenses_type.expense_charge_type.charge_type.name,
+                        business_area: filteredBusinessArea[0].business_area,
+                        or_number: checkedExpense.receipt_expenses.receipt_number,
+                        supplier_name: checkedExpense.receipt_expenses.vendor_name,
+                        supplier_address: checkedExpense.receipt_expenses.vendor_address,
+                        supplier_tin_number: checkedExpense.receipt_expenses.tin_number,
+
+                    }
+                    if(bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I3'){
+                        // expenses.tax_amountI3 = tax_amount;
+                        tax_amountI3 = parseFloat(tax_amountI3) + parseFloat(tax_amount);
+                    }else if (bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I7'){
+                        // expenses.tax_amountI7 = tax_amount;
+                        tax_amountI7 = parseFloat(tax_amountI7) + parseFloat(tax_amount);
+                    }else {}
+                    item + 1;
+                    vm.simulatedExpenses.push(expenses);
+                });
+                this.gl_account_i7 = Object.values(this.checkedExpenses[0].user.companies[0].gl_taxcode).filter(function (tax_code){
+                    return tax_code.tax_code == 'I7';
+                });
+                        
+                if(tax_amountI7){
+                    var expenses = {
+                        item: item + 1,
+                        item_text: '',
+                        gl_account: this.gl_account_i7[0].gl_account,
+                        description: this.gl_account_i7[0].gl_description,
+                        assignment: '',
+                        input_tax_code : 'I7',
+                        internal_order: '',
+                        amount: tax_amountI7,
+                        charge_type: '',
+                        business_area: filteredBusinessArea[0].business_area,
+                        or_number: '',
+                        supplier_name: '',
+                        supplier_address: '',
+                        supplier_tin_number: '',
+                    }
+                    vm.simulatedExpenses.push(expenses);
                 }
-                vm.simulatedExpenses.push(expenses);
-            }
-            this.gl_account_i3 = Object.values(this.checkedExpenses[0].user.companies[0].gl_taxcode).filter(function (tax_code){
-                return tax_code.tax_code == 'I3';
-            });
-            if(tax_amountI3){
-                var expenses = { 
-                    item: item + 1,
-                    item_text: '',
-                    gl_account: this.gl_account_i3[0].gl_account,
-                    description: this.gl_account_i3[0].gl_description,
-                    assignment: '',
-                    input_tax_code : 'I7',
-                    internal_order: '',
-                    amount: tax_amountI3,
-                    charge_type: '',
-                    business_area: filteredBusinessArea[0].business_area,
-                    or_number: '',
-                    supplier_name: '',
-                    supplier_address: '',
-                    supplier_tin_number: '',
+                this.gl_account_i3 = Object.values(this.checkedExpenses[0].user.companies[0].gl_taxcode).filter(function (tax_code){
+                    return tax_code.tax_code == 'I3';
+                });
+                if(tax_amountI3){
+                    var expenses = { 
+                        item: item + 1,
+                        item_text: '',
+                        gl_account: this.gl_account_i3[0].gl_account,
+                        description: this.gl_account_i3[0].gl_description,
+                        assignment: '',
+                        input_tax_code : 'I7',
+                        internal_order: '',
+                        amount: tax_amountI3,
+                        charge_type: '',
+                        business_area: filteredBusinessArea[0].business_area,
+                        or_number: '',
+                        supplier_name: '',
+                        supplier_address: '',
+                        supplier_tin_number: '',
+                    }
+                    vm.simulatedExpenses.push(expenses);
                 }
-                vm.simulatedExpenses.push(expenses);
-            }
-            axios.get(`/expense-simulate/${this.expenseEntryId}`)
-            .then(response => {
-                this.simulate = response.data;
-                document.getElementById("post_btn").disabled = true; 
-                $('#simulateModal').modal('show');
-            })
-            .catch(error => { 
-                this.errors = error.response.data.errors;
-            })
+                    axios.get(`/expense-simulate/${this.expenseEntryId}`)
+                    .then(response => {
+                        this.simulate = response.data;
+                        document.getElementById("post_btn").disabled = true; 
+                        $('#simulateModal').modal('show');
+                    })
+                    .catch(error => { 
+                        this.errors = error.response.data.errors;
+                    })
+                }
         },
         checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,posting_type){
             let vm = this;
