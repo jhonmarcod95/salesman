@@ -63,7 +63,6 @@
 @section('script')
     <script>
 
-
         /*-------------------------- reset modal and its contents ----------------------------*/
         function resetModal() {
             document.getElementById("formAddSchedule").reset();

@@ -38,3 +38,32 @@
         display: none;
     }
 </style>
+
+
+{{-- Map Autocomplete --}}
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyCVhXP3qqWTbQnr-VtTdl0anZZJT3cP9Q0"></script>
+<script>
+    function initMap(){
+        let mapAutocomplete = new google.maps.places.Autocomplete((document.getElementById('add-address')),
+            {
+                componentRestrictions: {country: 'ph'}
+            });
+            google.maps.event.addListener(mapAutocomplete, 'place_changed', function() {
+        });
+        mapAutocomplete = new google.maps.places.Autocomplete((document.getElementById('address')),
+            {
+                componentRestrictions: {country: 'ph'}
+            });
+        google.maps.event.addListener(mapAutocomplete, 'place_changed', function() {
+        });
+    }
+</script>
+{{-- Use to show maps autocomplete in bootstrap modal --}}
+<style>
+    .modal{
+        z-index: 20;
+    }
+    .modal-backdrop{
+        z-index: 10;
+    }​
+</style>
