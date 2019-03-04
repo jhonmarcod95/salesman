@@ -18,6 +18,7 @@ Route::get('/manualInsert/{tsrId}', 'TsrController@manuallyInsertUser');
 
 Auth::routes();
 
+Route::get('/script', 'CustomerController@script');
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('logout', function(){

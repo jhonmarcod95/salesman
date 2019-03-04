@@ -86,6 +86,27 @@ class CustomerController extends Controller
         return view('customer.create', compact('notification'));
     }
 
+
+    /**
+     * Script to store existing customer geocode
+     *  Will Delete this
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function script(){
+
+        $customers = Customer::whereNull('google_address')->get();
+
+        foreach($customers as $customer){
+            $geocode = Geocoder::getCoordinatesForAddress($customer['street']. ' '.$customer['town_city']);
+
+            $customer->google_address = $customer['street']. ' '.$customer['town_city'];
+            $customer->lat = $geocode['lat'];
+            $customer->lng = $geocode['lng'];
+            $customer->save();  
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      *
