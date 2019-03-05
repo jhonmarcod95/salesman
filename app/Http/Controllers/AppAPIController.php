@@ -10,6 +10,7 @@ use App\Http\Resources\APIExpenseResult as expenseResult;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Rules\TinNumber;
+use App\Rules\AmountLimit;
 use App\ReceiptExpense;
 use App\RequestSchedule;
 use App\ExpensesEntry;
@@ -53,7 +54,7 @@ class AppAPIController extends Controller
     {
         $this->validate($request, [
             'types' => 'required',
-            'amount' => 'required'
+            'amount' => [new AmountLimit($request->input('types'), 0), 'required'],
         ]);
 
         $expense = new Expense();
@@ -88,7 +89,7 @@ class AppAPIController extends Controller
     {
         $this->validate($request, [
             'types' => 'required',
-            'amount' => 'required'
+            'amount' => [new AmountLimit($request->input('types'), $expense->id), 'required'],
         ]);
 
         $expense->amount = $request->input('amount');
