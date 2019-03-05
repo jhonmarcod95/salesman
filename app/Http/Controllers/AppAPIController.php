@@ -441,17 +441,21 @@ class AppAPIController extends Controller
         $this->validate($request, [
             'expense_id' => 'required',
             'receipt_transaction_id' => 'required', // VAT or NON-VAT
-            'receipt_type_id' => 'required', // Sales Invoice or Official Receipt
             'date_receipt' => 'required' // date of receipt
-            ]);
+        ],[
+            'receipt_transaction_id.required' => 'Please verify if VAT or NON-VAT',
+        ]);
 
-            if($request->input('receipt_transaction_id') == 1) {
+        if($request->input('receipt_transaction_id') == 1) {
                 $this->validate($request, [
+                    'receipt_type_id' => 'required', // Sales Invoice or Official Receipt
                     'vendor_name' => 'required',
                     'vendor_address' => 'required',
                     'tin_number' => [new TinNumber, 'required'],
                     'receipt_number' => 'required|unique:receipt_expenses', // OR# or SI#
-            ]);
+                ],[
+                    'receipt_type_id.required' => 'Please verify Receipt type'
+                ]);
         }
 
         $existingTinNumber = $this->checkTinNumber($request->input('tin_number'));
@@ -461,7 +465,7 @@ class AppAPIController extends Controller
         $receiptExpense->expense()->associate($request->input('expense_id'));
 
         $receiptExpense->receipt_transaction_id = $request->input('receipt_transaction_id');
-        $receiptExpense->receipt_type_id = $request->input('receipt_type_id');
+        $receiptExpense->receipt_type_id = $request->input('receipt_type_id') ?: 0;
         $receiptExpense->receipt_number = $request->input('receipt_number');
         $receiptExpense->date_receipt = $request->input('date_receipt');
 
