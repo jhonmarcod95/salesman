@@ -115,7 +115,7 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col">TSR</th>
-                                    <th scope="col">Customer</th>
+                                    <th scope="col">Itinerary</th>
                                     <th scope="col">IN</th>
                                 </tr>
                                 </thead>

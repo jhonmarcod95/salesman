@@ -90418,7 +90418,7 @@ var staticRenderFns = [
       _c("tr", [
         _c("th", { attrs: { scope: "col" } }, [_vm._v("TSR")]),
         _vm._v(" "),
-        _c("th", { attrs: { scope: "col" } }, [_vm._v("Customer")]),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Itinerary")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("IN")])
       ])

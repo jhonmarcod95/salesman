@@ -337,7 +337,7 @@ class ScheduleController extends Controller
         $request_status = $request->request_status;
 
         return RequestSchedule::with('user')
-            ->when(Auth::user()->level() == 6 || Auth::user()->level() == 7 , function($q){
+            ->when(Auth::user()->level() == 3 || Auth::user()->level() == 4 , function($q){
                 $q->whereHas('user', function ($q){
                     $q->whereHas('companies', function($q){
                         $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
