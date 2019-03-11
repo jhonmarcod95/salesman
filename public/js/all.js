@@ -79176,6 +79176,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -79183,11 +79186,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             errorsExpense: false,
+            post_successful: false,
             simulatedExpenses: [],
             lineOneExpenses: {},
             checkedExpenses: [],
             expenseByTsr: [],
             simulate: [],
+            expenses_id: [],
             gl_account_i7: [],
             gl_account_i3: [],
             payment_terms: 'NCOD',
@@ -79198,6 +79203,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             baseline_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()().format('YYYY-MM-DD'),
             responses: [],
             sap_errors: 0,
+            return_message_description: '',
             errors: [],
             currentPage: 0,
             itemsPerPage: 10
@@ -79225,19 +79231,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         simulateExpenses: function simulateExpenses(userId) {
             var _this2 = this;
 
+            document.getElementById("check_btn").disabled = false;
+            this.responses = [];
             var vm = this;
             this.simulatedExpenses = [];
-            var expenses_id = [];
+            vm.expenses_id = [];
             var checked = document.querySelectorAll("input[type=checkbox]:checked");
             if (!checked.length) {
                 this.errorsExpense = true;
                 return false;
             }this.errorsExpense = false;
             checked.forEach(function (element) {
-                expenses_id.push(parseInt(element.value));
+                vm.expenses_id.push(parseInt(element.value));
             });
             this.checkedExpenses = this.expenseByTsr.filter(function (item) {
-                return expenses_id.includes(item.id);
+                return vm.expenses_id.includes(item.id);
             });
 
             var createdDate = '';
@@ -79268,7 +79276,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     // loop business area to get correct business area
                     return businessArea.location_id == vm.checkedExpenses[0].user.location[0].id;
                 });
-
+                var line_one_amount = sum * -1;
                 this.lineOneExpenses = { //Generate the line 1 paramater to post
                     item: 1,
                     item_text: 'REIMBURSEMENT; ' + this.dateEntry,
@@ -79277,7 +79285,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     assignment: '',
                     input_tax_code: '',
                     internal_order: '',
-                    amount: sum * -1,
+                    amount: line_one_amount.toFixed(2),
                     charge_type: '',
                     business_area: filteredBusinessArea[0].business_area,
                     or_number: '',
@@ -79292,7 +79300,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 var tax_amountI3 = 0;
                 var tax_amountI7 = 0;
                 var tax_amount = 0;
-                this.checkedExpenses.filter(function (checkedExpense) {
+                vm.checkedExpenses.filter(function (checkedExpense) {
                     //Generate the line 2 to n paramater to post
                     var filteredGl = checkedExpense.expenses_type.expense_charge_type.charge_type.expense_gl.filter(function (gl_account) {
                         // loop expense gl to get correct gl account and description
@@ -79322,6 +79330,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         tax_amount = round_off_tax_amount.toFixed(2);
                         bol_tax_amount = true;
                     }
+                    var internal_order = '';
+                    if (filteredInternalOrders.length != 0) {
+                        internal_order = filteredInternalOrders[0].internal_order;
+                    } else {
+                        internal_order = "";
+                    }
 
                     var expenses = {
                         item: item,
@@ -79331,7 +79345,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         assignment: '',
                         // input_tax_code : checkedExpense.receipt_expenses.receipt_type.tax_code,
                         input_tax_code: tax_code,
-                        internal_order: filteredInternalOrders[0].internal_order,
+                        internal_order: internal_order,
                         // amount: checkedExpense.amount,
                         amount: amount,
                         charge_type: checkedExpense.expenses_type.expense_charge_type.charge_type.name,
@@ -79344,10 +79358,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     };
                     if (bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I3') {
                         // expenses.tax_amountI3 = tax_amount;
-                        tax_amountI3 = parseFloat(tax_amountI3) + parseFloat(tax_amount);
+                        var tax_amountI3_computation = parseFloat(tax_amountI3) + parseFloat(tax_amount);
+                        tax_amountI3 = tax_amountI3_computation.toFixed(2);
                     } else if (bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I7') {
                         // expenses.tax_amountI7 = tax_amount;
-                        tax_amountI7 = parseFloat(tax_amountI7) + parseFloat(tax_amount);
+                        var tax_amountI7_computation = parseFloat(tax_amountI7) + parseFloat(tax_amount);
+                        tax_amountI7 = tax_amountI7_computation.toFixed(2);
                     } else {}
                     item + 1;
                     vm.simulatedExpenses.push(expenses);
@@ -79357,8 +79373,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 });
 
                 if (tax_amountI7) {
+                    item = item + 1;
                     var expenses = {
-                        item: item + 1,
+                        item: item,
                         item_text: '',
                         gl_account: this.gl_account_i7[0].gl_account,
                         description: this.gl_account_i7[0].gl_description,
@@ -79379,13 +79396,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     return tax_code.tax_code == 'I3';
                 });
                 if (tax_amountI3) {
+                    item = item + 1;
                     var expenses = {
-                        item: item + 1,
+                        item: item,
                         item_text: '',
                         gl_account: this.gl_account_i3[0].gl_account,
                         description: this.gl_account_i3[0].gl_description,
                         assignment: '',
-                        input_tax_code: 'I7',
+                        input_tax_code: 'I3',
                         internal_order: '',
                         amount: tax_amountI3,
                         charge_type: '',
@@ -79412,8 +79430,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var vm = this;
             vm.sap_errors = 0;
             document.getElementById("post_btn").disabled = true;
+            document.getElementById("check_btn").disabled = true;
             this.responses = [];
             axios.post('/payments', {
+                expenseId: vm.expenses_id,
+                userId: this.expenseByTsr[0].user.id,
                 expenseEntryId: this.expenseEntryId,
                 posting_type: posting_type,
                 app_server: this.simulate[0].sap_server.app_server, // sap_server.app_server
@@ -79427,16 +79448,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 company_code: expenseByTsr[0].user.companies[0].code,
                 document_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()(document_date).format('L'),
                 posting_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()(posting_date).format('L'),
-                // document_date: '01-29-2019',
-                // posting_date: '01-29-2019',
                 document_type: document_type,
                 reference_number: 'sample1',
-                // baseline_date: '01-29-2019',
                 baseline_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()(baseline_date).format('L'),
                 vendor_code: expenseByTsr[0].user.vendor.vendor_code,
                 payment_terms: payment_terms,
-                // gl_account_i7: '0010180003',
-                // gl_account_i3: '0010180001',
                 gl_account_i7: this.gl_account_i7[0].gl_account,
                 gl_account_i3: this.gl_account_i3[0].gl_account,
                 simulatedExpenses: simulatedExpenses
@@ -79447,24 +79463,25 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         vm.sap_errors++;
                     }
                 });
-                if (vm.sap_errors == 0) {
-                    document.getElementById("post_btn").disabled = false;
+                if (posting_type == 'CHECK' && _this3.responses.length) {
+                    if (vm.sap_errors == 0) {
+                        vm.return_message_description = '';
+                        _this3.post_successful = false;
+                        document.getElementById("post_btn").disabled = false;
+                        document.getElementById("check_btn").disabled = false;
+                    }
+                } else {
+                    if (vm.sap_errors == 0) {
+                        _this3.post_successful = true;
+                        vm.return_message_description = _this3.responses[0].return_message_description;
+                        console.log(vm.return_message_description);
+                        document.getElementById("check_btn").disabled = true;
+                        document.getElementById("post_btn").disabled = true;
+                    }
                 }
             }).catch(function (error) {
                 _this3.errors = error.response.data.errors;
             });
-
-            //    axios.post('/payments', {
-            //        expenseId: expenseId,
-            //        userId: userId,
-            //    })
-            //    .then(response => {
-            //        $('#viewModal').modal('hide');
-            //        alert('Expense Successfully paid')
-            //    })
-            //    .catch(error => { 
-            //        this.errors= error.response.data.errors;
-            //    })
         }
     },
     computed: {
@@ -79528,7 +79545,7 @@ var render = function() {
                         "tbody",
                         _vm._l(_vm.expenseByTsr, function(expenseBy, e) {
                           return _c("tr", { key: e }, [
-                            !expenseBy.payments
+                            !expenseBy.payments && expenseBy.receipt_expenses
                               ? _c("td", [
                                   _c("input", {
                                     attrs: {
@@ -79539,7 +79556,13 @@ var render = function() {
                                     domProps: { value: expenseBy.id }
                                   })
                                 ])
-                              : _c("td", [_vm._v("Paid")]),
+                              : !expenseBy.receipt_expenses
+                                ? _c("td", { staticClass: "text-danger" }, [
+                                    _vm._v("Receipt unverified")
+                                  ])
+                                : _c("td", { staticClass: "text-primary" }, [
+                                    _vm._v("Paid")
+                                  ]),
                             _vm._v(" "),
                             _c("td", [
                               _c(
@@ -80303,7 +80326,9 @@ var render = function() {
                       )
                     ]),
                     _vm._v(" "),
-                    _vm.responses.length && _vm.sap_errors > 0
+                    _vm.responses.length &&
+                    _vm.sap_errors > 0 &&
+                    !_vm.post_successful
                       ? _c(
                           "div",
                           { staticClass: "text-danger text-center mt-3 mb-3" },
@@ -80311,11 +80336,23 @@ var render = function() {
                         )
                       : _vm._e(),
                     _vm._v(" "),
-                    _vm.responses.length && _vm.sap_errors == 0
+                    _vm.responses.length &&
+                    _vm.sap_errors == 0 &&
+                    !_vm.post_successful
                       ? _c(
                           "div",
                           { staticClass: "text-primary text-center mt-3 mb-3" },
                           [_c("span", [_vm._v("Ready for posting")])]
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.responses.length &&
+                    _vm.sap_errors == 0 &&
+                    _vm.post_successful
+                      ? _c(
+                          "div",
+                          { staticClass: "text-success text-center mt-3 mb-3" },
+                          [_c("span", [_vm._v("Successfully posted")])]
                         )
                       : _vm._e(),
                     _vm._v(" "),
@@ -80372,7 +80409,22 @@ var render = function() {
                   "button",
                   {
                     staticClass: "btn btn-primary btn-round btn-fill",
-                    attrs: { id: "post_btn", type: "button" }
+                    attrs: { id: "post_btn", type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.checkExpenses(
+                          _vm.expenseByTsr,
+                          _vm.simulatedExpenses,
+                          _vm.document_type,
+                          _vm.document_date,
+                          _vm.payment_terms,
+                          _vm.posting_date,
+                          _vm.header_text,
+                          _vm.baseline_date,
+                          "POST"
+                        )
+                      }
+                    }
                   },
                   [_vm._v("POST")]
                 ),
@@ -80381,7 +80433,7 @@ var render = function() {
                   "button",
                   {
                     staticClass: "btn btn-primary btn-round btn-fill",
-                    attrs: { type: "button" },
+                    attrs: { id: "check_btn", type: "button" },
                     on: {
                       click: function($event) {
                         _vm.checkExpenses(

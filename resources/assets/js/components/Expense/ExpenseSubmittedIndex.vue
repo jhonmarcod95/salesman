@@ -29,9 +29,9 @@
                                 </thead>
                                 <tbody v-if="expenseByTsr.length">
                                     <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">  
-                                        <!-- <td v-if='!expenseBy.payments'> <input type="checkbox" checkedname="expenses_id" :value="expenseBy.id" v-model="expenses_id"></td> -->
-                                        <td v-if='!expenseBy.payments'> <input type="checkbox" name="expenses_id" :value="expenseBy.id" checked="checked"></td>
-                                        <td v-else>Paid</td>
+                                        <td v-if='!expenseBy.payments && expenseBy.receipt_expenses'> <input type="checkbox" name="expenses_id" :value="expenseBy.id" checked="checked"></td>
+                                        <td v-else-if="!expenseBy.receipt_expenses" class="text-danger">Receipt unverified</td>
+                                        <td v-else class="text-primary">Paid</td>
                                         <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                         <td>{{ expenseBy.expenses_type.name }}</td>
                                         <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
@@ -194,11 +194,14 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="text-danger text-center mt-3 mb-3" v-if="responses.length && sap_errors > 0 ">
+                    <div class="text-danger text-center mt-3 mb-3" v-if="responses.length && sap_errors > 0 && !post_successful">
                         <span>Unable to post due to errors</span>
                     </div>
-                     <div class="text-primary text-center mt-3 mb-3" v-if="responses.length && sap_errors == 0 ">
+                     <div class="text-primary text-center mt-3 mb-3" v-if="responses.length && sap_errors == 0 && !post_successful">
                         <span>Ready for posting</span>
+                    </div>
+                    <div class="text-success text-center mt-3 mb-3" v-if="responses.length && sap_errors == 0 && post_successful">
+                        <span>Successfully posted</span>
                     </div>
                     <div class="table-responsive" v-if="responses.length">
                         <table class="table align-items-center table-flush">
@@ -222,8 +225,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="post_btn" type="button" class="btn btn-primary btn-round btn-fill">POST</button>
-                    <button type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,'CHECK')">Check</button>
+                    <button id="post_btn" type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,'POST')">POST</button>
+                    <button id="check_btn" type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,'CHECK')">Check</button>
                 </div>
                 </div>
             </div>
@@ -238,11 +241,13 @@ export default {
     data(){
         return {
             errorsExpense: false,
+            post_successful: false,
             simulatedExpenses: [],
             lineOneExpenses: {},
             checkedExpenses: [],
             expenseByTsr: [],
             simulate: [],
+            expenses_id: [],
             gl_account_i7: [],
             gl_account_i3: [],
             payment_terms: 'NCOD',
@@ -253,6 +258,7 @@ export default {
             baseline_date: moment().format('YYYY-MM-DD'),
             responses: [],
             sap_errors: 0,
+            return_message_description: '',
             errors: [],
             currentPage: 0,
             itemsPerPage: 10,
@@ -277,19 +283,21 @@ export default {
             });
         },
         simulateExpenses(userId){
+            document.getElementById("check_btn").disabled = false;
+            this.responses = [];
             let vm = this;
-            this.simulatedExpenses = [];         
-            var expenses_id = [];
+            this.simulatedExpenses = [];
+            vm.expenses_id = [];
             var checked = document.querySelectorAll("input[type=checkbox]:checked");
             if(!checked.length){
                 this.errorsExpense = true;
                 return false;
             } this.errorsExpense = false;
             checked.forEach(function(element) {
-               expenses_id.push(parseInt(element.value));
+               vm.expenses_id.push(parseInt(element.value));
             });
             this.checkedExpenses = this.expenseByTsr.filter(function(item) {
-                return expenses_id.includes(item.id);
+                return vm.expenses_id.includes(item.id);
             });
 
             var createdDate = '';
@@ -317,7 +325,7 @@ export default {
                 var filteredBusinessArea = this.checkedExpenses[0].user.companies[0].business_area.filter(function(businessArea){ // loop business area to get correct business area
                     return businessArea.location_id == vm.checkedExpenses[0].user.location[0].id;
                 });
-                
+                var line_one_amount = sum * -1;
                 this.lineOneExpenses = { //Generate the line 1 paramater to post
                     item: 1,
                     item_text: 'REIMBURSEMENT; ' + this.dateEntry,
@@ -326,7 +334,7 @@ export default {
                     assignment: '',
                     input_tax_code: '',
                     internal_order: '',
-                    amount: sum * -1,
+                    amount: line_one_amount.toFixed(2),
                     charge_type: '',
                     business_area: filteredBusinessArea[0].business_area,
                     or_number: '',
@@ -341,13 +349,13 @@ export default {
                 var tax_amountI3 = 0;
                 var tax_amountI7 = 0;
                 var tax_amount = 0;
-                this.checkedExpenses.filter(function(checkedExpense) {  //Generate the line 2 to n paramater to post
+                vm.checkedExpenses.filter(function(checkedExpense) {  //Generate the line 2 to n paramater to post
                     var filteredGl = checkedExpense.expenses_type.expense_charge_type.charge_type.expense_gl.filter(function(gl_account){ // loop expense gl to get correct gl account and description
                                         return gl_account.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name && gl_account.company_code == checkedExpense.user.companies[0].code;
                                     });
                     var filteredInternalOrders =  checkedExpense.user.internal_orders.filter(function(internal_order){ // loop internal order to get correct internal order
                                         return internal_order.charge_type == checkedExpense.expenses_type.expense_charge_type.charge_type.name;
-                                    });
+                                    });            
                     item = item + 1;
                     var amount = "";
                     var tax_code = "";
@@ -368,6 +376,12 @@ export default {
                         tax_amount = round_off_tax_amount.toFixed(2);
                         bol_tax_amount = true;
                     }
+                    var internal_order = '';
+                    if(filteredInternalOrders.length != 0) {  
+                        internal_order = filteredInternalOrders[0].internal_order;
+                    }else{
+                        internal_order = "";
+                    }
 
                     var expenses = { 
                         item: item,
@@ -377,7 +391,7 @@ export default {
                         assignment: '',
                         // input_tax_code : checkedExpense.receipt_expenses.receipt_type.tax_code,
                         input_tax_code : tax_code,
-                        internal_order: filteredInternalOrders[0].internal_order,
+                        internal_order: internal_order,
                         // amount: checkedExpense.amount,
                         amount: amount,
                         charge_type: checkedExpense.expenses_type.expense_charge_type.charge_type.name,
@@ -390,10 +404,12 @@ export default {
                     }
                     if(bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I3'){
                         // expenses.tax_amountI3 = tax_amount;
-                        tax_amountI3 = parseFloat(tax_amountI3) + parseFloat(tax_amount);
+                        var tax_amountI3_computation = parseFloat(tax_amountI3) + parseFloat(tax_amount);  
+                        tax_amountI3 = tax_amountI3_computation.toFixed(2);
                     }else if (bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I7'){
                         // expenses.tax_amountI7 = tax_amount;
-                        tax_amountI7 = parseFloat(tax_amountI7) + parseFloat(tax_amount);
+                        var tax_amountI7_computation = parseFloat(tax_amountI7) + parseFloat(tax_amount);
+                        tax_amountI7 = tax_amountI7_computation.toFixed(2);
                     }else {}
                     item + 1;
                     vm.simulatedExpenses.push(expenses);
@@ -403,8 +419,9 @@ export default {
                 });
                         
                 if(tax_amountI7){
+                    item = item + 1;
                     var expenses = {
-                        item: item + 1,
+                        item: item,
                         item_text: '',
                         gl_account: this.gl_account_i7[0].gl_account,
                         description: this.gl_account_i7[0].gl_description,
@@ -425,13 +442,14 @@ export default {
                     return tax_code.tax_code == 'I3';
                 });
                 if(tax_amountI3){
+                    item = item + 1;
                     var expenses = { 
-                        item: item + 1,
+                        item: item,
                         item_text: '',
                         gl_account: this.gl_account_i3[0].gl_account,
                         description: this.gl_account_i3[0].gl_description,
                         assignment: '',
-                        input_tax_code : 'I7',
+                        input_tax_code : 'I3',
                         internal_order: '',
                         amount: tax_amountI3,
                         charge_type: '',
@@ -457,9 +475,12 @@ export default {
         checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,posting_type){
             let vm = this;
             vm.sap_errors = 0;
-            document.getElementById("post_btn").disabled = true; 
+            document.getElementById("post_btn").disabled = true;
+            document.getElementById("check_btn").disabled = true; 
             this.responses = [];
             axios.post('/payments', {
+                expenseId: vm.expenses_id,
+                userId: this.expenseByTsr[0].user.id,
                 expenseEntryId: this.expenseEntryId,
                 posting_type: posting_type,
                 app_server: this.simulate[0].sap_server.app_server, // sap_server.app_server
@@ -473,16 +494,11 @@ export default {
                 company_code: expenseByTsr[0].user.companies[0].code,
                 document_date: moment(document_date).format('L'),
                 posting_date: moment(posting_date).format('L'),
-                // document_date: '01-29-2019',
-                // posting_date: '01-29-2019',
                 document_type: document_type,
                 reference_number: 'sample1',
-                // baseline_date: '01-29-2019',
                 baseline_date: moment(baseline_date).format('L'),
                 vendor_code: expenseByTsr[0].user.vendor.vendor_code,
                 payment_terms: payment_terms,
-                // gl_account_i7: '0010180003',
-                // gl_account_i3: '0010180001',
                 gl_account_i7: this.gl_account_i7[0].gl_account,
                 gl_account_i3: this.gl_account_i3[0].gl_account,
                 simulatedExpenses: simulatedExpenses
@@ -491,30 +507,29 @@ export default {
                 this.responses = response.data;
                 this.responses.filter(function(response){
                     if(response.return_message_type == 'E'){
-                       vm.sap_errors++
+                        vm.sap_errors++
                     }
                 });
-                if(vm.sap_errors == 0){
-                    document.getElementById("post_btn").disabled = false; 
+                if(posting_type == 'CHECK' && this.responses.length){
+                    if(vm.sap_errors == 0){
+                        vm.return_message_description = '';
+                        this.post_successful = false;
+                        document.getElementById("post_btn").disabled = false;
+                        document.getElementById("check_btn").disabled = false;
+                    }
+                }else{
+                    if(vm.sap_errors == 0){
+                        this.post_successful = true;
+                        vm.return_message_description = this.responses[0].return_message_description;
+                        console.log(vm.return_message_description);
+                        document.getElementById("check_btn").disabled = true; 
+                        document.getElementById("post_btn").disabled = true; 
+                    }
                 }
             })
             .catch(error => { 
                 this.errors = error.response.data.errors;
             })
-
-
-            
-        //    axios.post('/payments', {
-        //        expenseId: expenseId,
-        //        userId: userId,
-        //    })
-        //    .then(response => {
-        //        $('#viewModal').modal('hide');
-        //        alert('Expense Successfully paid')
-        //    })
-        //    .catch(error => { 
-        //        this.errors= error.response.data.errors;
-        //    })
         }
     },
     computed:{
