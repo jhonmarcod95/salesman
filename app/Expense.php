@@ -36,4 +36,9 @@ class Expense extends Model
     public function receiptExpenses() {
         return $this->hasOne(ReceiptExpense::class);
     }
+
+    public function expenseRepresentations()
+    {
+        return $this->hasMany(ExpenseRepresentation::class);
+    }
 }
