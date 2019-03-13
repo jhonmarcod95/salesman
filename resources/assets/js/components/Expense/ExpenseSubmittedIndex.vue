@@ -31,7 +31,7 @@
                                     <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">  
                                         <td v-if='!expenseBy.payments && expenseBy.receipt_expenses'> <input type="checkbox" name="expenses_id" :value="expenseBy.id" checked="checked"></td>
                                         <td v-else-if="!expenseBy.receipt_expenses" class="text-danger">Receipt unverified</td>
-                                        <td v-else class="text-primary">Paid</td>
+                                        <td v-else class="text-primary">{{ expenseBy.payments.document_code}}</td>
                                         <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                         <td>{{ expenseBy.expenses_type.name }}</td>
                                         <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
@@ -88,7 +88,7 @@
                             <div class="col-lg-3">
                                 <div class="form-group">
                                     <label class="form-control-label" for="document-date">Document Date</label>
-                                    <input type="date" id="document-date" class="form-control" v-model="document_date">
+                                    <input type="date" id="document-date" class="form-control" v-model="document_date" disabled>
                                     <span class="text-danger" v-if="errors.document_date">{{ errors.document_date }}</span>
                                 </div>
                             </div>
@@ -111,7 +111,7 @@
                             <div class="col-lg-3">
                                 <div class="form-group">
                                     <label class="form-control-label" for="payment-terms">Payment Terms</label>
-                                    <input type="text" id="payment-terms" class="form-control form-control-alternative" v-model="payment_terms">
+                                    <input type="text" id="payment-terms" class="form-control form-control-alternative" v-model="payment_terms" disabled>
                                     <span class="text-danger" v-if="errors.payment_terms">{{ errors.payment_terms }}</span>
                                 </div>
                             </div>
@@ -127,7 +127,7 @@
                             <div class="col-lg-3">
                                 <div class="form-group">
                                     <label class="form-control-label" for="reference-number">Reference Number</label>
-                                    <input type="text" id="reference-number" class="form-control form-control-alternative">
+                                    <input type="text" id="reference-number" class="form-control form-control-alternative" v-model="this.simulate[0].reference_number" disabled v-if="simulate.length">
                                     <span class="text-danger" v-if="errors.reference_number">{{ errors.reference_number }}</span>
                                 </div>
                             </div>
@@ -141,14 +141,14 @@
                             <div class="col-lg-3">
                                 <div class="form-group">
                                     <label class="form-control-label" for="header-text">Header Text</label>
-                                    <input type="text" id="header-text" class="form-control form-control-alternative" v-model="header_text">
+                                    <input type="text" id="header-text" class="form-control form-control-alternative" v-model="header_text" disabled>
                                     <span class="text-danger" v-if="errors.header_text">{{ errors.header_text }}</span>
                                 </div>
                             </div>
                             <div class="col-lg-3">
                                 <div class="form-group">
                                     <label class="form-control-label" for="posting-date">Baseline Date</label>
-                                    <input type="date" id="baseline-date" class="form-control form-control-alternative" v-model="baseline_date">
+                                    <input type="date" id="baseline-date" class="form-control form-control-alternative" v-model="baseline_date" disabled>
                                     <span class="text-danger" v-if="errors.baseline_date">{{ errors.baseline_date }}</span>
                                 </div>
                             </div>
@@ -225,8 +225,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="post_btn" type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,'POST')">POST</button>
-                    <button id="check_btn" type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,'CHECK')">Check</button>
+                    <button id="post_btn" type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,expenseByTsr[0].user.companies[0].name,expenseByTsr[0].user.name,'POST')">POST</button>
+                    <button id="check_btn" type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,expenseByTsr[0].user.companies[0].name,expenseByTsr[0].user.name,'CHECK')">Check</button>
                 </div>
                 </div>
             </div>
@@ -258,7 +258,6 @@ export default {
             baseline_date: moment().format('YYYY-MM-DD'),
             responses: [],
             sap_errors: 0,
-            return_message_description: '',
             errors: [],
             currentPage: 0,
             itemsPerPage: 10,
@@ -472,13 +471,15 @@ export default {
                     })
                 }
         },
-        checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,posting_type){
+        checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,company_name,vendor_name,posting_type){
             let vm = this;
             vm.sap_errors = 0;
             document.getElementById("post_btn").disabled = true;
             document.getElementById("check_btn").disabled = true; 
             this.responses = [];
             axios.post('/payments', {
+                company_name: company_name,
+                vendor_name: vendor_name,
                 expenseId: vm.expenses_id,
                 userId: this.expenseByTsr[0].user.id,
                 expenseEntryId: this.expenseEntryId,
@@ -495,7 +496,7 @@ export default {
                 document_date: moment(document_date).format('L'),
                 posting_date: moment(posting_date).format('L'),
                 document_type: document_type,
-                reference_number: 'sample1',
+                reference_number: this.simulate[0].reference_number,
                 baseline_date: moment(baseline_date).format('L'),
                 vendor_code: expenseByTsr[0].user.vendor.vendor_code,
                 payment_terms: payment_terms,
@@ -512,7 +513,6 @@ export default {
                 });
                 if(posting_type == 'CHECK' && this.responses.length){
                     if(vm.sap_errors == 0){
-                        vm.return_message_description = '';
                         this.post_successful = false;
                         document.getElementById("post_btn").disabled = false;
                         document.getElementById("check_btn").disabled = false;
@@ -520,10 +520,9 @@ export default {
                 }else{
                     if(vm.sap_errors == 0){
                         this.post_successful = true;
-                        vm.return_message_description = this.responses[0].return_message_description;
-                        console.log(vm.return_message_description);
                         document.getElementById("check_btn").disabled = true; 
-                        document.getElementById("post_btn").disabled = true; 
+                        document.getElementById("post_btn").disabled = true;
+                        this.fetchExpenseByTsr(); 
                     }
                 }
             })

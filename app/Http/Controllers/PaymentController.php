@@ -7,9 +7,11 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use App\{
     Message,
-    Payment
+    Payment,
+    PaymentHeader,
+    PaymentDetail
 };
-
+use DateTime;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -137,6 +139,7 @@ class PaymentController extends Controller
         if($acc_tax_amountI7){
             $array['tax_amountI7'] = $acc_tax_amountI7;
         }
+
         $params = http_build_query($array) . "\n";
         $decode_params = urldecode($params);
         $trimmed_params = preg_replace('/[\[{\(].*[\]}\)]/U' , '', $decode_params);
@@ -185,15 +188,55 @@ class PaymentController extends Controller
                     $ids[] = [
                         'expense_id' => $expense,
                         'user_id' => $request->userId,
+                        'document_code' => json_decode($response, true)[0]['return_message_description'],
                         'created_at' => date('Y-m-d H:i:s'),
                         'updated_at' => date('Y-m-d H:i:s')
                     ];
                 }
+                $document_date = new DateTime($request->document_date);
+                $posting_date = new DateTime($request->posting_date);
+                $baseline_date = new DateTime($request->baseline_date);
                 if(Payment::insert($ids)){
+                    $array_header = [
+                        'company_code' => $request->company_code,
+                        'company_name' => $request->company_name,
+                        'reference_number' => $request->reference_number,
+                        'ap_user' => $request->sap_user_id,
+                        'vendor_code' => $request->vendor_code,
+                        'vendor_name' =>  $request->vendor_name,
+                        'document_type' => $request->document_type,
+                        'payment_terms' => $request->payment_terms,
+                        'header_text' => $request->header_text,
+                        'document_date' => $document_date->format('Y-m-d'),
+                        'posting_date' => $posting_date->format('Y-m-d'),
+                        'baseline_date' => $baseline_date->format('Y-m-d'),
+                    ];
+                    if($payment_header = PaymentHeader::create($array_header)){
+                        foreach($request->simulatedExpenses as $expense){
+                            $array_details = [
+                                'item' => $expense['item'],
+                                'item_text' => $expense['item_text'],
+                                'gl_account' => $expense['gl_account'],
+                                'description' => $expense['description'],
+                                'assignment' => $expense['assignment'],
+                                'input_tax_code' => $expense['input_tax_code'],
+                                'internal_order' => $expense['internal_order'],
+                                'amount' => $expense['amount'],
+                                'charge_type' => $expense['charge_type'],
+                                'business_area' => $expense['business_area'],
+                                'or_number' => $expense['or_number'],
+                                'supplier_name' => $expense['supplier_name'],
+                                'supplier_address' => $expense['supplier_address'],
+                                'supplier_tin_number' => $expense['supplier_tin_number'],
+                            ];
+                            $payment_header->paymentDetail()->create($array_details);
+                        }
+
+                        return $response;
+                    }
                     return $response;
                 }
             }
-
             return $response;
         }
     }

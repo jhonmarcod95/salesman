@@ -79203,7 +79203,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             baseline_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()().format('YYYY-MM-DD'),
             responses: [],
             sap_errors: 0,
-            return_message_description: '',
             errors: [],
             currentPage: 0,
             itemsPerPage: 10
@@ -79424,7 +79423,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 });
             }
         },
-        checkExpenses: function checkExpenses(expenseByTsr, simulatedExpenses, document_type, document_date, payment_terms, posting_date, header_text, baseline_date, posting_type) {
+        checkExpenses: function checkExpenses(expenseByTsr, simulatedExpenses, document_type, document_date, payment_terms, posting_date, header_text, baseline_date, company_name, vendor_name, posting_type) {
             var _this3 = this;
 
             var vm = this;
@@ -79433,6 +79432,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             document.getElementById("check_btn").disabled = true;
             this.responses = [];
             axios.post('/payments', {
+                company_name: company_name,
+                vendor_name: vendor_name,
                 expenseId: vm.expenses_id,
                 userId: this.expenseByTsr[0].user.id,
                 expenseEntryId: this.expenseEntryId,
@@ -79449,7 +79450,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 document_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()(document_date).format('L'),
                 posting_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()(posting_date).format('L'),
                 document_type: document_type,
-                reference_number: 'sample1',
+                reference_number: this.simulate[0].reference_number,
                 baseline_date: __WEBPACK_IMPORTED_MODULE_0_moment___default()(baseline_date).format('L'),
                 vendor_code: expenseByTsr[0].user.vendor.vendor_code,
                 payment_terms: payment_terms,
@@ -79465,7 +79466,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 });
                 if (posting_type == 'CHECK' && _this3.responses.length) {
                     if (vm.sap_errors == 0) {
-                        vm.return_message_description = '';
                         _this3.post_successful = false;
                         document.getElementById("post_btn").disabled = false;
                         document.getElementById("check_btn").disabled = false;
@@ -79473,10 +79473,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 } else {
                     if (vm.sap_errors == 0) {
                         _this3.post_successful = true;
-                        vm.return_message_description = _this3.responses[0].return_message_description;
-                        console.log(vm.return_message_description);
                         document.getElementById("check_btn").disabled = true;
                         document.getElementById("post_btn").disabled = true;
+                        _this3.fetchExpenseByTsr();
                     }
                 }
             }).catch(function (error) {
@@ -79561,7 +79560,9 @@ var render = function() {
                                     _vm._v("Receipt unverified")
                                   ])
                                 : _c("td", { staticClass: "text-primary" }, [
-                                    _vm._v("Paid")
+                                    _vm._v(
+                                      _vm._s(expenseBy.payments.document_code)
+                                    )
                                   ]),
                             _vm._v(" "),
                             _c("td", [
@@ -79859,7 +79860,11 @@ var render = function() {
                                 }
                               ],
                               staticClass: "form-control",
-                              attrs: { type: "date", id: "document-date" },
+                              attrs: {
+                                type: "date",
+                                id: "document-date",
+                                disabled: ""
+                              },
                               domProps: { value: _vm.document_date },
                               on: {
                                 input: function($event) {
@@ -80011,7 +80016,11 @@ var render = function() {
                               ],
                               staticClass:
                                 "form-control form-control-alternative",
-                              attrs: { type: "text", id: "payment-terms" },
+                              attrs: {
+                                type: "text",
+                                id: "payment-terms",
+                                disabled: ""
+                              },
                               domProps: { value: _vm.payment_terms },
                               on: {
                                 input: function($event) {
@@ -80086,11 +80095,41 @@ var render = function() {
                               [_vm._v("Reference Number")]
                             ),
                             _vm._v(" "),
-                            _c("input", {
-                              staticClass:
-                                "form-control form-control-alternative",
-                              attrs: { type: "text", id: "reference-number" }
-                            }),
+                            _vm.simulate.length
+                              ? _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: this.simulate[0].reference_number,
+                                      expression:
+                                        "this.simulate[0].reference_number"
+                                    }
+                                  ],
+                                  staticClass:
+                                    "form-control form-control-alternative",
+                                  attrs: {
+                                    type: "text",
+                                    id: "reference-number",
+                                    disabled: ""
+                                  },
+                                  domProps: {
+                                    value: this.simulate[0].reference_number
+                                  },
+                                  on: {
+                                    input: function($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        this.simulate[0],
+                                        "reference_number",
+                                        $event.target.value
+                                      )
+                                    }
+                                  }
+                                })
+                              : _vm._e(),
                             _vm._v(" "),
                             _vm.errors.reference_number
                               ? _c("span", { staticClass: "text-danger" }, [
@@ -80174,7 +80213,11 @@ var render = function() {
                               ],
                               staticClass:
                                 "form-control form-control-alternative",
-                              attrs: { type: "text", id: "header-text" },
+                              attrs: {
+                                type: "text",
+                                id: "header-text",
+                                disabled: ""
+                              },
                               domProps: { value: _vm.header_text },
                               on: {
                                 input: function($event) {
@@ -80216,7 +80259,11 @@ var render = function() {
                               ],
                               staticClass:
                                 "form-control form-control-alternative",
-                              attrs: { type: "date", id: "baseline-date" },
+                              attrs: {
+                                type: "date",
+                                id: "baseline-date",
+                                disabled: ""
+                              },
                               domProps: { value: _vm.baseline_date },
                               on: {
                                 input: function($event) {
@@ -80421,6 +80468,8 @@ var render = function() {
                           _vm.posting_date,
                           _vm.header_text,
                           _vm.baseline_date,
+                          _vm.expenseByTsr[0].user.companies[0].name,
+                          _vm.expenseByTsr[0].user.name,
                           "POST"
                         )
                       }
@@ -80445,6 +80494,8 @@ var render = function() {
                           _vm.posting_date,
                           _vm.header_text,
                           _vm.baseline_date,
+                          _vm.expenseByTsr[0].user.companies[0].name,
+                          _vm.expenseByTsr[0].user.name,
                           "CHECK"
                         )
                       }

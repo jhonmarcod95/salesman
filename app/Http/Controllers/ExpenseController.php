@@ -11,6 +11,7 @@ use App\{
     User,
     SapUser,
     SapServer,
+    PaymentHeader
 };
 use Illuminate\Http\Request;
 
@@ -261,10 +262,16 @@ class ExpenseController extends Controller
             $tsr_company_code = $tsr->companies->pluck('code');
             $sap_user = SapUser::where('user_id', Auth::user()->id)->where('sap_server', $tsr_company_code)->first();
             $sap_server = SapServer::where('sap_server', $tsr_company_code)->first();
-            
+            $header_query = PaymentHeader::where('ap_user', $sap_user->sap_id)->get()->last();
+            $reference_number = '000000000';
+            if($header_query){
+                $reference_number = substr($header_query->reference_number, -9);
+            }
+
             $data = [
                 'sap_user' => $sap_user,
-                'sap_server' => $sap_server
+                'sap_server' => $sap_server,
+                'reference_number' => Auth::user()->id . $reference_number + 1
             ];
 
             return array ($data);
