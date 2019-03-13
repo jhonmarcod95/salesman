@@ -55,7 +55,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Address</h5>
-                                {!! Form::textarea('address', null, ['class' => 'form-control', 'rows' => '2', 'maxlength' => '150']) !!}
+                                {!! Form::text('address', null, ['id' => 'add-address', 'class' => 'form-control', 'rows' => '2', 'maxlength' => '150']) !!}
                             </div>
                         </div>
                     </div>
@@ -180,7 +180,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Address</h5>
-                                {!! Form::textarea('address', null, ['id' => 'address', 'class' => 'form-control', 'rows' => '2', 'maxlength' => '150']) !!}
+                                {!! Form::text('address', null, ['id' => 'address', 'class' => 'form-control', 'rows' => '2', 'maxlength' => '150']) !!}
                             </div>
                         </div>
                     </div>

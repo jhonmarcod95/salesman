@@ -63,7 +63,6 @@
 @section('script')
     <script>
 
-
         /*-------------------------- reset modal and its contents ----------------------------*/
         function resetModal() {
             document.getElementById("formAddSchedule").reset();
@@ -345,6 +344,16 @@
                     }
 
                     resetModal();
+
+                    //disable delete button if current day is selected
+                    if(calEvent.start.format() == moment().format('YYYY-MM-DD')){
+                        $('#btn_delete').prop('disabled', true);
+                    }
+                    else{
+                        $('#btn_delete').prop('disabled', false);
+                    }
+
+
                     selectedSchedule = calEvent;
                     selectedDate = calEvent.start.format();
 

@@ -129,8 +129,6 @@ class ScheduleController extends Controller
                 foreach ($customer_codes as $customer_code){
                     $customer = Customer::where('customer_code', $customer_code)->first();
 
-                    $geocode = Geocoder::getCoordinatesForAddress($customer->street . ' ' . $customer->town_city);
-
                     $schedule = new Schedule();
                     $schedule->user_id = $request->user_id;
                     $schedule->type = $schedule_type;
@@ -142,9 +140,9 @@ class ScheduleController extends Controller
                     $schedule->end_time = $request->end_time;
                     $schedule->status = '2';
                     $schedule->remarks = $request->remarks;
-                    $schedule->lat = $geocode['lat'];
-                    $schedule->lng = $geocode['lng'];
-                    $schedule->km_distance = $this->getRadius($geocode['lat'], $geocode['lng'], $request->radius);
+                    $schedule->lat = $customer->lat;
+                    $schedule->lng = $customer->lng;
+                    $schedule->km_distance = $request->radius;
                     $schedule->save();
 
                     $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -208,8 +206,6 @@ class ScheduleController extends Controller
 
             $customer = Customer::where('customer_code', $request->customer_code)->first();
 
-            $geocode = Geocoder::getCoordinatesForAddress($customer->street . ' ' . $customer->town_city);
-
             $schedule = Schedule::find($id);
             $schedule->type = $schedule_type;
             $schedule->code = $customer->customer_code;
@@ -219,8 +215,8 @@ class ScheduleController extends Controller
             $schedule->end_time = $request->end_time;
             $schedule->status = '2';
             $schedule->remarks = $request->remarks;
-            $schedule->lat = $geocode['lat'];
-            $schedule->lng = $geocode['lng'];
+            $schedule->lat = $customer->lat;
+            $schedule->lng = $customer->lng;
             $schedule->km_distance = $request->radius;
             $schedule->save();
         }
@@ -341,7 +337,7 @@ class ScheduleController extends Controller
         $request_status = $request->request_status;
 
         return RequestSchedule::with('user')
-            ->when(Auth::user()->level() == 6 || Auth::user()->level() == 7 , function($q){
+            ->when(Auth::user()->level() == 3 || Auth::user()->level() == 4 , function($q){
                 $q->whereHas('user', function ($q){
                     $q->whereHas('companies', function($q){
                         $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
@@ -387,23 +383,6 @@ class ScheduleController extends Controller
             $result[] = $value->format('Y-m-d');
         }
 
-        return $result;
-    }
-
-    function getRadius($p_lat, $p_lng, $p_radius){
-        $radius = 25;
-        $lat = 14.579842;
-        $lng = 121.037349;
-
-        $km_distance = $this->haversineGreatCircleDistance($p_lat, $p_lng,$lat, $lng);
-
-        //within metro manila
-        if ($km_distance <= $radius){
-            $result = 0.5;
-        }
-        else{
-            $result = $p_radius;
-        }
         return $result;
     }
 

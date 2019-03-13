@@ -53,4 +53,5 @@ function formatDate(date) {
     return [year, month, day].join('-');
 }
 </script>
+
 @yield('script')
