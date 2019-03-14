@@ -6,6 +6,8 @@ use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Expense;
+use App\ExpenseRate;
+use App\ExpensesType;
 
 class AmountLimit implements Rule
 {
@@ -69,16 +71,10 @@ class AmountLimit implements Rule
      */
     public function passes($attribute, $value)
     {
-        switch ($this->expenses_type_id) {
-            case '1': //food
-                return $value <= 175 && $this->getTotalFoodExpenses($value) <= 175;
-                break;
-            case '3': // lodging
-                return $value <= 800 && $this->getTotalFoodExpenses($value) <= 800;
-                break;
-            default:
-                return true;
-        }
+
+        return $value <= ExpensesType::find($this->expenses_type_id)->amount_rate && $this->getTotalFoodExpenses($value)
+                        <= ExpenseRate::rateAmount($this->expenses_type_id);
+
     }
 
     /**
