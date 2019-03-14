@@ -74,6 +74,6 @@ class ExpensesTest extends TestCase
 
         echo json_encode($default_rate, JSON_PRETTY_PRINT);
 
-        $this->assertGreaterThan(8000, $default_rate);
+        $this->assertGreaterThan(5000, $default_rate);
     }
 }
