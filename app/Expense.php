@@ -41,4 +41,9 @@ class Expense extends Model
     {
         return $this->hasMany(ExpenseRepresentation::class);
     }
+
+    public function expenseRate()
+    {
+        return $this->hasOne(ExpenseRate::class);
+    }
 }

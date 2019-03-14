@@ -8,9 +8,15 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Expense;
+use App\ExpenseRate;
+use App\ExpensesType;
 
 class ExpensesTest extends TestCase
 {
+
+    // To run test
+    // vendor\bin\phpunit --filter [methodName]
+
     /**
      * A basic test example.
      *
@@ -52,5 +58,22 @@ class ExpensesTest extends TestCase
         echo json_encode($get_expenses->count(), JSON_PRETTY_PRINT);
         $this->assertGreaterThan(0, $get_expenses->count());
 
+    }
+
+    public function testExpenseRate()
+    {
+        $expenses_type_id = 4; // lodging expense
+        $user_id = 35; // current user id
+
+        $query = ExpenseRate::where('user_id', $user_id)
+                            ->where('expenses_type_id', $expenses_type_id);
+
+        $default_rate = $query->exists() ?
+                        $query->pluck('amount')->first() :
+                        ExpensesType::find($expenses_type_id)->amount_rate;
+
+        echo json_encode($default_rate, JSON_PRETTY_PRINT);
+
+        $this->assertGreaterThan(8000, $default_rate);
     }
 }
