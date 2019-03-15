@@ -109,7 +109,7 @@ class ExpenseController extends Controller
 
         $company = $request->company;
         if($company){
-            $expense = ExpensesEntry::with('user')
+            $expense = ExpensesEntry::with('user' ,'expensesModel.payments')
             ->whereHas('user' , function($q) use($company){
                 $q->whereHas('companies', function ($q) use($company){
                     $q->where('company_id', $company);
@@ -122,7 +122,7 @@ class ExpenseController extends Controller
             ->get();
           
         }else{
-            $expense = ExpensesEntry::with('user')
+            $expense = ExpensesEntry::with('user', 'expensesModel.payments')
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
             ->has('expensesModel')

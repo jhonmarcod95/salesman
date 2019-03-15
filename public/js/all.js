@@ -74885,7 +74885,7 @@ exports = module.exports = __webpack_require__(3)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -74931,6 +74931,15 @@ module.exports = function listToStyles (parentId, list) {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_moment__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_moment___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_moment__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -75148,7 +75157,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 error.response.data.errors;
             });
         },
-        expensesSubmittedPage: function expensesSubmittedPage(ids) {},
         fetchExpenses: function fetchExpenses() {
             var _this2 = this;
 
@@ -75197,6 +75205,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 totalExpenses = totalExpenses + element.totalExpenses;
             });
             return totalExpenses.toFixed(2);
+        },
+        showLegend: function showLegend(legend) {
+            var paid = 0;
+            var unpaid = 0;
+            legend.filter(function (item) {
+                item.expenses_model.filter(function (i) {
+                    i.payments ? paid = paid + 1 : unpaid = unpaid + 1;
+                });
+            });
+            if (paid && !unpaid) {
+                return '<i class="fab fa-font-awesome-flag text-success pl-4" style="font-size: 20px;"></i>';
+            } else if (paid && unpaid) {
+                return '<i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>';
+            } else {
+                return '<i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>';
+            }
         },
         setPage: function setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -75794,6 +75818,12 @@ var render = function() {
                               ])
                             ]),
                             _vm._v(" "),
+                            _c("td", {
+                              domProps: {
+                                innerHTML: _vm._s(_vm.showLegend(expense))
+                              }
+                            }),
+                            _vm._v(" "),
                             _c("td", [_vm._v(_vm._s(expense[0].user.name))]),
                             _vm._v(" "),
                             _c("td", [
@@ -75813,8 +75843,31 @@ var render = function() {
               )
             ]),
             _vm._v(" "),
-            _vm.expenses.length
+            this.expenses.length
               ? _c("div", { staticClass: "card-footer py-4" }, [
+                  _c("span", [_vm._v("LEGEND:")]),
+                  _vm._v(" "),
+                  _c("i", {
+                    staticClass: "fab fa-font-awesome-flag text-success pl-4",
+                    staticStyle: { "font-size": "20px" }
+                  }),
+                  _vm._v(" "),
+                  _c("span", [_vm._v(" - Fully Posted")]),
+                  _vm._v(" "),
+                  _c("i", {
+                    staticClass: "fab fa-font-awesome-flag text-yellow pl-4",
+                    staticStyle: { "font-size": "20px" }
+                  }),
+                  _vm._v(" "),
+                  _c("span", [_vm._v(" - Partially Posted")]),
+                  _vm._v(" "),
+                  _c("i", {
+                    staticClass: "fab fa-font-awesome-flag text-danger pl-4",
+                    staticStyle: { "font-size": "20px" }
+                  }),
+                  _vm._v(" "),
+                  _c("span", [_vm._v(" - Unprocessed")]),
+                  _vm._v(" "),
                   _c("nav", { attrs: { "aria-label": "..." } }, [
                     _c(
                       "ul",
@@ -76077,6 +76130,8 @@ var staticRenderFns = [
     return _c("thead", { staticClass: "thead-light" }, [
       _c("tr", [
         _c("th", { attrs: { scope: "col" } }),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Legend")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("TSR")]),
         _vm._v(" "),

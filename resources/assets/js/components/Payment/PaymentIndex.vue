@@ -60,6 +60,7 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col"></th>
+                                    <th scope="col">Legend</th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Expense Submitted</th>
                                     <th scope="col">Total Expenses</th>
@@ -78,6 +79,7 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <td v-html="showLegend(expense)"></td>
                                         <td>{{ expense[0].user.name }}</td>
                                         <td>{{ countExpenseSubmitted(expense) }}</td>
                                         <td>PHP {{ countTotalExpenses(expense) }}</td>
@@ -90,7 +92,14 @@
                                 </tbody>
                             </table>
                         </div>
-                       <div class="card-footer py-4" v-if="expenses.length">
+                       <div class="card-footer py-4" v-if="this.expenses.length">
+                            <span>LEGEND:</span>
+                            <i class="fab fa-font-awesome-flag text-success pl-4" style="font-size: 20px;"></i>
+                            <span> - Fully Posted</span>
+                            <i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>
+                            <span> - Partially Posted</span>
+                            <i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>
+                            <span> - Unprocessed</span>
                             <nav aria-label="...">
                                 <ul class="pagination justify-content-end mb-0">
                                     <li class="page-item">
@@ -214,9 +223,6 @@ export default {
                 error.response.data.errors
             })
         },
-        expensesSubmittedPage(ids){
-
-        },
         fetchExpenses(){
             var dates = this.week.split('-');
             var date1 = dates[0];
@@ -265,6 +271,22 @@ export default {
               totalExpenses = totalExpenses + element.totalExpenses;
             });
             return totalExpenses.toFixed(2);
+        },
+        showLegend(legend){
+            var paid = 0;
+            var unpaid = 0;
+            legend.filter(item => {
+                item.expenses_model.filter(i => {
+                   i.payments ? paid = paid + 1 : unpaid = unpaid + 1
+                })
+            });
+            if(paid && !unpaid){
+                return '<i class="fab fa-font-awesome-flag text-success pl-4" style="font-size: 20px;"></i>';
+            }else if(paid && unpaid){
+                return '<i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>';
+            }else{
+                return '<i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>';
+            }
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
