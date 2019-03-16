@@ -209,6 +209,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
 // Request Routes
 Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver']], function () {
+
+    // Change Schedule
+    Route::post('/schedules/store', 'ScheduleController@store');
+    Route::patch('/schedules/update/{id}', 'ScheduleController@update');
+
     // Request schedules
     Route::get('/change-schedule', 'ScheduleController@changeScheduleIndex');
     // Fetch all companies
