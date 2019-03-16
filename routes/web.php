@@ -37,7 +37,7 @@ Route::group(['middleware' => 'auth'], function(){
 });
 
 // Admin Routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|approver']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
@@ -209,10 +209,6 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
 // Request Routes
 Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver']], function () {
-
-    // Change Schedule
-    Route::post('/schedules/store', 'ScheduleController@store');
-    Route::patch('/schedules/update/{id}', 'ScheduleController@update');
 
     // Request schedules
     Route::get('/change-schedule', 'ScheduleController@changeScheduleIndex');
