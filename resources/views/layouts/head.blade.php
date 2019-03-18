@@ -41,7 +41,7 @@
 
 
 {{-- Map Autocomplete --}}
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyCVhXP3qqWTbQnr-VtTdl0anZZJT3cP9Q0"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyDpNG0tEGmWoe0TgT6WizG_tUnwuXz2HPg"></script>
 <script>
     function initMap(){
         let mapAutocomplete = new google.maps.places.Autocomplete((document.getElementById('add-address')),
