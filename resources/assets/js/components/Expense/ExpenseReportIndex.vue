@@ -121,6 +121,7 @@
                             <tr>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
+                                <th scope="col">Date</th>
                                 <th scope="col">Amount</th>
                             </tr>
                             </thead>
@@ -128,6 +129,7 @@
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
                                     <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                     <td>{{ expenseBy.expenses_type.name }}</td>
+                                    <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
                                 </tr>
                             </tbody>
