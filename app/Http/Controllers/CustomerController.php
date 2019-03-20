@@ -221,10 +221,13 @@ class CustomerController extends Controller
 
             //generate until to become unique
             generate:
-            if(Customer::where('customer_code', $customer_code)->exists()){
+            if(Customer::withTrashed()->where('customer_code', $customer_code)->exists()){
                 $customer_code = $customer_code + 1;
                 goto generate;
             }
+
+            //pad zeros at left
+            $customer_code = str_pad($customer_code, 10, "0");
             return $customer_code;
         }
     }
