@@ -79376,13 +79376,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         amount = checkedExpense.amount;
                         tax_code = "IX";
                     } else {
-                        var round_off = checkedExpense.amount / 1.12; //(Round off to two digit)
-                        amount = round_off.toFixed(2);
-                        // amount = checkedExpense.amount;
                         tax_code = checkedExpense.receipt_expenses.receipt_type.tax_code;
-                        var round_off_tax_amount = checkedExpense.amount - checkedExpense.amount / 1.12;
-                        tax_amount = round_off_tax_amount.toFixed(2);
-                        bol_tax_amount = true;
+                        if (tax_code == "IX") {
+                            var round_off = checkedExpense.amount;
+                            amount = round_off.toFixed(2);
+                            var round_off_tax_amount = checkedExpense.amount;
+                            tax_amount = round_off_tax_amount.toFixed(2);
+                        } else {
+                            var round_off = checkedExpense.amount / 1.12; //(Round off to two digit)
+                            amount = round_off.toFixed(2);
+                            // amount = checkedExpense.amount;
+                            var round_off_tax_amount = checkedExpense.amount - checkedExpense.amount / 1.12;
+                            tax_amount = round_off_tax_amount.toFixed(2);
+                            bol_tax_amount = true;
+                        }
                     }
                     var internal_order = '';
                     if (filteredInternalOrders.length != 0) {
