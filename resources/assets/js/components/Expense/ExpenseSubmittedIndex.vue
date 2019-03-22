@@ -1,6 +1,7 @@
 
 <template>
-          <div>
+    <div>
+        <loader v-if="loading"></loader>
         <div class="header bg-green pb-6 pt-5 pt-md-6"></div>
         <div class="container-fluid mt--7">
             <!-- Table -->
@@ -51,7 +52,7 @@
         </div>
 
         <!-- View Simulate Modal -->
-        <div class="modal fade" id="simulateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="simulateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
             <span class="closed" data-dismiss="modal">&times;</span>
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document" style="max-width: 1300px">
                 <div class="modal-content">
@@ -236,7 +237,10 @@
 
 <script>
 import moment from 'moment';
+import loader from '../Loader'
+
 export default {
+    components: { loader },
     props: ['expenseEntryId', 'dateEntry'],
     data(){
         return {
@@ -261,6 +265,7 @@ export default {
             errors: [],
             currentPage: 0,
             itemsPerPage: 10,
+            loading: true
         }
     },
     created(){
@@ -272,13 +277,16 @@ export default {
             event.target.src = window.location.origin+'/img/brand/no-image.png';
         },
         fetchExpenseByTsr(){
+            this.loading = true;
             this.errors = [];
             axios.get(`/expense-report-bydate-peruser/${this.expenseEntryId}`)
             .then(response => { 
                 this.expenseByTsr = response.data;
+                this.loading = false;
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
+                this.loading = false;
             });
         },
         simulateExpenses(userId){
@@ -480,6 +488,7 @@ export default {
                 }
         },
         checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,company_name,vendor_name,posting_type){
+            this.loading = true;
             let vm = this;
             vm.sap_errors = 0;
             document.getElementById("post_btn").disabled = true;
@@ -533,9 +542,11 @@ export default {
                         this.fetchExpenseByTsr(); 
                     }
                 }
+                this.loading = false;
             })
             .catch(error => { 
                 this.errors = error.response.data.errors;
+                this.loading = false;
             })
         }
     },

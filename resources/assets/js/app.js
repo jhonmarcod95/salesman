@@ -60,6 +60,8 @@ Vue.component('attendance-report-index', require('./components/AttendanceReport/
 // Dashboard
 Vue.component('dashboard-index', require('./components/Dashboard/DashboardIndex.vue'));
 
+// Loader
+Vue.component('loader', require('./components/Loader.vue'));
 
 const app = new Vue({
     el: '#app',

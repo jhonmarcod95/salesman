@@ -1,5 +1,6 @@
 <template>
       <div>
+        <loader v-if="loading"></loader>
         <div class="header bg-green pb-6 pt-5 pt-md-6"></div>
         <div class="container-fluid mt--7">
             <!-- Table -->
@@ -172,7 +173,10 @@
 </template>
 <script>
 import moment from 'moment';
+import loader from '../Loader'
+
 export default {
+    components: { loader },
     data(){
         return{
             expenses: [],
@@ -192,6 +196,7 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            loading: false
         }
     },
     created(){
@@ -224,6 +229,7 @@ export default {
             })
         },
         fetchExpenses(){
+            this.loading = true;
             var dates = this.week.split('-');
             var date1 = dates[0];
             var date2= dates[1];
@@ -239,10 +245,12 @@ export default {
             })
             .then(response => {
                 this.expenses = response.data;
-                this.errors = []; 
+                this.errors = [];
+                this.loading = false;
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
+                this.loading = false;
             })
         },
         getyear(){
