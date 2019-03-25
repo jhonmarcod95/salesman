@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class ReceiptExpense extends Model
 {
     protected $fillable = [
-        'receipt_transaction_id',
-        'receipt_type_id',
+        'receipt_transaction',
+        'receipt_type',
         'receipt_number',
         'vendor_name',
         'vendor_address',
@@ -25,11 +25,11 @@ class ReceiptExpense extends Model
     }
 
     public function receiptType() {
-        return $this->belongsTo(ReceiptType::class);
+        return $this->belongsTo(ReceiptType::class,'receipt_type_id');
     }
 
     public function receiptTransaction() {
-        return $this->belongsTo(ReceiptTransaction::class);
+        return $this->belongsTo(ReceiptTransaction::class,'receipt_transaction');
     }
 
 }
