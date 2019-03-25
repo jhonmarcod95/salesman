@@ -37,7 +37,7 @@ Route::group(['middleware' => 'auth'], function(){
 });
 
 // Admin Routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|approver']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
@@ -116,7 +116,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // update customer
     Route::patch('/customers/{customer}', 'CustomerController@update');
     // check customer code of prospect
-    Route::post('/check-customer-code', 'CustomerController@checkCustomerCode');
+    Route::get('/check-customer-code', 'CustomerController@checkCustomerCode');
     // Delete Customer
     Route::delete('/customers/{customer}', 'CustomerController@destroy');
     // Get customers address geocode
@@ -177,18 +177,18 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     
 });
 
+Route::get('/ginahambal', 'PaymentController@store');
 // AP Routes
 Route::group(['middleware' => ['auth', 'role:ap']], function(){
+
     // Payments
     Route::get('/payments', 'PaymentController@index');
     // Store payment expense
     Route::post('/payments', 'PaymentController@store');
     // Fetch expense report by company
     Route::post('/expense-by-company', 'ExpenseController@generateByCompany');
-    // Get expenses submitted
-    Route::post('/expense-submitted', 'ExpenseController@getExpenseSubmitted');
-    // Show expenses submitted page
-    Route::get('/expense-submitted-page', 'ExpenseController@showExpenseSubmitted')->name('expense_submitted_list');
+    // Show expenses submitted
+    Route::get('/expense-submitted/{id}', 'ExpenseController@showExpenseSubmitted');
     // Simulate expenses submitted
     Route::get('/expense-simulate/{id}', 'ExpenseController@simulateExpenseSubmitted');
 
@@ -216,8 +216,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 });
 
 // Request Routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver']], function () {
 
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp']], function () {
     // Request schedules
     Route::get('/change-schedule', 'ScheduleController@changeScheduleIndex');
     // Fetch all companies

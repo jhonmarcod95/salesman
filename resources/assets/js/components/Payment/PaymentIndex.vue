@@ -1,5 +1,6 @@
 <template>
       <div>
+        <loader v-if="loading"></loader>
         <div class="header bg-green pb-6 pt-5 pt-md-6"></div>
         <div class="container-fluid mt--7">
             <!-- Table -->
@@ -33,16 +34,21 @@
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label for="start_date" class="form-control-label">Start Date</label> 
-                                        <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
-                                        <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
+                                        <label for="year" class="form-control-label">Year</label> 
+                                        <select class="form-control" v-model="year" @change="getyear">
+                                            <option v-for="(year, y) in years" v-bind:key="y">{{ year }}</option>
+                                        </select> 
+                                        <span class="text-danger" v-if="errors.year  ">{{ errors.year[0] }}</span>
+
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label for="end_date" class="form-control-label">End Date</label> 
-                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
-                                        <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
+                                        <label for="year" class="form-control-label">Date</label> 
+                                        <select class="form-control" v-model="week">
+                                            <option v-for="(week, w) in weeks" v-bind:key="w">{{ week }} </option>
+                                        </select> 
+                                        <span class="text-danger" v-if="errors.week">{{ errors.week[0] }}</span>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -55,9 +61,9 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col"></th>
+                                    <th scope="col">Legend</th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Expense Submitted</th>
-                                    <th scope="col">Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
                                 </thead>
@@ -70,14 +76,14 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</a>
+                                                    <a class="dropdown-item" href="javascript:void(0)" @click="getExpenseSubmitted(expense)">View</a>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ expense.user.name }}</td>
-                                        <td>{{ expense.expenses_model_count }}</td>
-                                        <td>{{ moment(expense.created_at).format('LLL') }}</td>
-                                        <td>PHP {{ expense.totalExpenses.toFixed(2) }}</td>
+                                        <td v-html="showLegend(expense)"></td>
+                                        <td>{{ expense[0].user.name }}</td>
+                                        <td>{{ countExpenseSubmitted(expense) }}</td>
+                                        <td>PHP {{ countTotalExpenses(expense) }}</td>
                                     </tr>
                                 </tbody>
                                 <tbody v-else>
@@ -87,7 +93,14 @@
                                 </tbody>
                             </table>
                         </div>
-                       <div class="card-footer py-4" v-if="expenses.length">
+                       <div class="card-footer py-4" v-if="this.expenses.length">
+                            <span>LEGEND:</span>
+                            <i class="fab fa-font-awesome-flag text-success pl-4" style="font-size: 20px;"></i>
+                            <span> - Fully Posted</span>
+                            <i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>
+                            <span> - Partially Posted</span>
+                            <i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>
+                            <span> - Unprocessed</span>
                             <nav aria-label="...">
                                 <ul class="pagination justify-content-end mb-0">
                                     <li class="page-item">
@@ -121,7 +134,7 @@
                 <div class="modal-body text-center">
                     <div class="row">
                         <div class="col"><h3>TSR: {{ this.tsrName }}</h3></div>
-                        <div class="col"><h3>Date: {{ moment(this.date).format('ll') }} </h3></div>
+                        <!-- <div class="col"><h3>Date: {{ moment(this.date).format('ll') }} </h3></div> -->
                     </div>
                     <div class="table-responsive">
                         <table class="table align-items-center table-flush">
@@ -130,6 +143,7 @@
                                 <th scope="col"></th>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
+                                <th scope="col">Date</th>
                                 <th scope="col">Amount</th>
                             </tr>
                             </thead>
@@ -138,7 +152,8 @@
                                     <td v-if='!expenseBy.payments'> <input type="checkbox" name="vehicle" :value="expenseBy.id" v-model="expenses_id"></td>
                                     <td v-else>Paid</td>
                                     <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
-                                    <td>{{ moment(expenseBy.created_at).format('ll') }} </td>
+                                    <td>{{ expenseBy.expenses_type.name }}</td>
+                                    <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
                                 </tr>
                             </tbody>
@@ -149,22 +164,27 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-round btn-fill" v-if="submit" @click="payExpenses(expenses_id,expenseByTsr[0].user_id)">Submit</button>
+                    <button type="button" class="btn btn-primary btn-round btn-fill" v-if="submit" @click="payExpenses(expenses_id,expenseByTsr[0].user_id)">Simulate</button>
                 </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
-
 <script>
 import moment from 'moment';
+import loader from '../Loader'
+
 export default {
+    components: { loader },
     data(){
         return{
             expenses: [],
             expenses_id: [],
             expenseByTsr: [],
+            weeks: [],
+            year: '',
+            week: '',
             startDate: '',
             endDate: '',
             tsrName: '',
@@ -176,6 +196,7 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            loading: false
         }
     },
     created(){
@@ -195,35 +216,28 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        fetchExpenseByTsr(id,name,created){
-            this.errors = [];
-            axios.get(`/expense-report/${id}`)
-            .then(response => { 
-                this.expenseByTsr = response.data;
-                this.tsrName = name;
-                this.date = created;
-                var array = this.expenseByTsr.filter(item => item.payments == null);
-                this.submit = array.length > 0 ? true : false;
-                $('#viewModal').modal('show');
+        getExpenseSubmitted(e){
+            var ids = e.map(function (el) { return el.id; });
+            axios.post('/expense-submitted',{
+                ids: ids
+            })
+            .then(response => {
+                window.location.href = window.location.origin+response.data;
             })
             .catch(error => {
-                this.errors = error.response.data.errors;
+                error.response.data.errors
             })
         },
-        payExpenses(expenseId,userId){
-           axios.post('/payments', {
-               expenseId: expenseId,
-               userId: userId,
-           })
-           .then(response => {
-               $('#viewModal').modal('hide');
-               alert('Expense Successfully paid')
-           })
-           .catch(error => { 
-               this.errors= error.response.data.errors;
-           })
-        },
         fetchExpenses(){
+            this.loading = true;
+            var dates = this.week.split('-');
+            var date1 = dates[0];
+            var date2= dates[1];
+            
+            var moment1 = moment(date1);
+            var moment2 = moment(date2);
+            this.startDate = moment1.format('YYYY-MM-DD');
+            this.endDate = moment2.format('YYYY-MM-DD');
             axios.post('/expense-by-company', {
                 startDate: this.startDate,
                 endDate: this.endDate,
@@ -231,11 +245,56 @@ export default {
             })
             .then(response => {
                 this.expenses = response.data;
-                this.errors = []; 
+                this.errors = [];
+                this.loading = false;
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
+                this.loading = false;
             })
+        },
+        getyear(){
+            var start = moment(this.year).day('Monday');
+            var end   = moment();
+            var day   = 1;
+
+            var result = [];
+            var current = start.clone();
+            result.push(moment(start).format('ll') +' - ' + moment(start.add(6, 'days')).format('ll'));
+            while (current.day(7 + day).isBefore(end)) {
+                result.push(moment(current.clone()).format('ll') +' - ' + moment(current.clone().add(6, 'days')).format('ll'));
+            }
+            this.weeks = result;
+        },
+        countExpenseSubmitted(expenses){
+            var totalSubmitted = 0;
+            expenses.forEach(element => {
+              totalSubmitted = totalSubmitted + element.expenses_model_count;
+            });
+            return totalSubmitted;
+        },
+         countTotalExpenses(expenses){
+            var totalExpenses = 0;
+            expenses.forEach(element => {
+              totalExpenses = totalExpenses + element.totalExpenses;
+            });
+            return totalExpenses.toFixed(2);
+        },
+        showLegend(legend){
+            var paid = 0;
+            var unpaid = 0;
+            legend.filter(item => {
+                item.expenses_model.filter(i => {
+                   i.payments ? paid = paid + 1 : unpaid = unpaid + 1
+                })
+            });
+            if(paid && !unpaid){
+                return '<i class="fab fa-font-awesome-flag text-success pl-4" style="font-size: 20px;"></i>';
+            }else if(paid && unpaid){
+                return '<i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>';
+            }else{
+                return '<i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>';
+            }
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -256,16 +315,16 @@ export default {
     computed:{
         filteredExpenses(){
             let self = this;
-            return self.expenses.filter(expense => {
-                return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+            return Object.values(self.expenses[0]).filter(expense => {
+                return expense[0].user.name.toLowerCase().includes(this.keywords.toLowerCase())
             });
         },
         totalPages() {
-            return Math.ceil(this.filteredExpenses.length / this.itemsPerPage)
+            return Math.ceil(Object.values(this.filteredExpenses).length / this.itemsPerPage)
         },
         filteredQueues() {
             var index = this.currentPage * this.itemsPerPage;
-            var queues_array = this.filteredExpenses.slice(index, index + this.itemsPerPage);
+            var queues_array = Object.values(this.filteredExpenses).slice(index, index + this.itemsPerPage);
 
             if(this.currentPage >= this.totalPages) {
                 this.currentPage = this.totalPages - 1
@@ -277,8 +336,12 @@ export default {
 
             return queues_array;
         },
-        imageLink(){
-            return window.location.origin+'/storage/';
+        years () {
+            const year = new Date().getFullYear()
+            return Array.from({length: year - 2010}, (value, index) => 2011 + index)
+        },
+        expenseSubmittedLink(){
+            return window.location.origin+'/expense-submitted/';
         }
     },
 }

@@ -7,12 +7,17 @@ use App\{
     Message,
     Expense,
     ExpensesEntry,
-    ExpensesType
+    ExpensesType,
+    User,
+    SapUser,
+    SapServer,
+    PaymentHeader
 };
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      *
@@ -95,15 +100,16 @@ class ExpenseController extends Controller
      */
     
     public function generateByCompany(Request $request){
-
         $request->validate([
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate',
         ]);
-        
+
+        session(['dateEntry' => date("m/d/Y", strtotime($request->startDate)) . ' to ' . date("m/d/Y", strtotime($request->endDate))]);
+
         $company = $request->company;
         if($company){
-            $expense = ExpensesEntry::with('user')
+            $expense = ExpensesEntry::with('user' ,'expensesModel.payments')
             ->whereHas('user' , function($q) use($company){
                 $q->whereHas('companies', function ($q) use($company){
                     $q->where('company_id', $company);
@@ -112,19 +118,34 @@ class ExpenseController extends Controller
             ->whereDate('created_at' ,'<=', $request->endDate)
             ->has('expensesModel')
             ->withCount('expensesModel')
-            ->orderBy('id', 'desc')->get();
+            ->orderBy('id', 'desc')
+            ->get();
+          
         }else{
-            $expense = ExpensesEntry::with('user')
+            $expense = ExpensesEntry::with('user', 'expensesModel.payments')
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
             ->has('expensesModel')
             ->withCount('expensesModel')
-            ->orderBy('id', 'desc')->get();
+            ->orderBy('id', 'desc')
+            ->get();
+
         }
 
-        return $expense;
+        return array($expense->groupBy('user_id'));
     }
 
+    /**
+     * Get all Expenses of user per week
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function generateBydatePerUser(Request $request, $ids){
+        $explode_id = array_map('intval', explode(',', $ids));
+        return Expense::with('user','user.companies','user.companies.businessArea','user.companies.glTaxcode','user.location','user.vendor','user.internalOrders','expensesType','expensesType.expenseChargeType.chargeType.expenseGl', 'payments','receiptExpenses','receiptExpenses.receiptType')->whereHas('expensesEntry', function($q) use ($explode_id){
+            $q->whereIn('id', $explode_id);
+        })->get();
+    }
     /**
      * Show Expense page
      *
@@ -153,16 +174,6 @@ class ExpenseController extends Controller
      */
     public function indexExpenseData(){
         return ExpensesType::orderBy('id', 'desc')->get();
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -195,17 +206,6 @@ class ExpenseController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -224,15 +224,57 @@ class ExpenseController extends Controller
 
         return $expensesType;
     }
-
+    
     /**
-     * Remove the specified resource from storage.
+     * Get Expense Submitted 
      *
-     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        //
+    public function getExpenseSubmitted(Request $request){
+        session(['expense_submitted_id' => $request->ids]);
+
+        $expense = Expense::whereIn('expenses_entry_id', $request->ids)->get();
+        return '/expense-submitted-page';
+    
+    }
+    /**
+     * Show Expense Submitted page
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function showExpenseSubmitted(){
+        $date = session('dateEntry');
+        $ids = session('expense_submitted_id');
+        return view("expense.index-submitted", compact('ids', 'date'));
+    }
+
+    /**
+     * Simulate submitted expenses
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function simulateExpenseSubmitted($id){
+        $expenseEntry = ExpensesEntry::findOrfail($id);
+
+        if($expenseEntry){
+            $tsr = User::findOrFail($expenseEntry->user_id);
+            $tsr_company_code = $tsr->companies->pluck('code');
+            $sap_user = SapUser::where('user_id', Auth::user()->id)->where('sap_server', $tsr_company_code)->first();
+            $sap_server = SapServer::where('sap_server', $tsr_company_code)->first();
+            $header_query = PaymentHeader::where('ap_user', $sap_user->sap_id)->get()->last();
+            $reference_number = '000000000';
+            if($header_query){
+                $reference_number = substr($header_query->reference_number, -9);
+            }
+
+            $data = [
+                'sap_user' => $sap_user,
+                'sap_server' => $sap_server,
+                'reference_number' => Auth::user()->id . $reference_number + 1
+            ];
+
+            return array ($data);
+        }
     }
 }

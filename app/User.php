@@ -83,9 +83,21 @@ class User extends Authenticatable implements Auditable
         return $this->hasMany(Payment::class);
     }
 
+    public function vendor(){
+        return $this->hasOne(SalesmanVendor::class);
+    }
+    
     public function receiptExpenses()
     {
         return $this->hasMany(ReceiptExpense::class);
     }
 
+    public function internalOrders()
+    {
+        return $this->hasMany(SalesmanInternalOrder::class);
+    }
+
+    public function location(){
+        return $this->belongsToMany(Location::class);
+    }
 }

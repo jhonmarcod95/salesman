@@ -30,6 +30,7 @@ Vue.component('company-index', require('./components/Company/CompanyIndex.vue'))
 // Expenses
 Vue.component('expense-index', require('./components/Expense/ExpenseIndex.vue'));
 Vue.component('expense-report-index', require('./components/Expense/ExpenseReportIndex.vue'));
+Vue.component('expense-submitted-index', require('./components/Expense/ExpenseSubmittedIndex.vue'));
 
 // Announcement
 Vue.component('announcement-index', require('./components/Announcement/AnnouncementIndex.vue'));
@@ -59,6 +60,8 @@ Vue.component('attendance-report-index', require('./components/AttendanceReport/
 // Dashboard
 Vue.component('dashboard-index', require('./components/Dashboard/DashboardIndex.vue'));
 
+// Loader
+Vue.component('loader', require('./components/Loader.vue'));
 
 const app = new Vue({
     el: '#app',
