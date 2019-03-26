@@ -17,6 +17,9 @@ window.Vue = require('vue');
 
 // Vue.component('example-component', require('./components/ExampleComponent.vue'));
 
+// SapUser
+Vue.component('sap-user-index', require('./components/SapUser/SapUserIndex.vue'));
+
 // Schedule
 Vue.component('request-schedule-index', require('./components/Schedule/RequestScheduleIndex.vue'));
 
