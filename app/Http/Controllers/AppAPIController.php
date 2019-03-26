@@ -8,6 +8,7 @@ use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Http\Resources\PaymentsResource as PaymentsResource;
 use App\Http\Resources\APIExpenseResult as expenseResult;
 use Illuminate\Support\Facades\Auth;
+use Ixudra\Curl\Facades\Curl;
 use Illuminate\Http\Request;
 use App\Rules\TinNumber;
 use App\Rules\AmountLimit;
@@ -42,6 +43,16 @@ class AppAPIController extends Controller
     public function getExpensesType() {
         $expensesType = ExpensesType::all();
         return $expensesType;
+    }
+
+
+    public function checkBudget()
+    {
+        $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
+        ->withContentType('application/x-www-form-urlencoded')
+        ->withData(array( 'budget_line' => 'P600601S0064', 'posting_date' => '3/19/2019', 'company_server'=> 'PFMC' ))
+        ->post();
+        return $response;
     }
 
     /**
