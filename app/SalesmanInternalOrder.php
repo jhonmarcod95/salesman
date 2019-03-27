@@ -6,5 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class SalesmanInternalOrder extends Model
 {
-    //
+    protected $fillable = [
+        'user_id',
+        'charge_type',
+        'internal_order',
+        'sap_server'
+    ];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }
