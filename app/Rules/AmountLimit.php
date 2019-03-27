@@ -17,17 +17,20 @@ class AmountLimit implements Rule
      * @return void
      */
 
-    private $expenses_type_id;
-    private $expense_id;
+    private $expenses_type_id; // determine the expense type [store & update]
+    private $expense_id; // determine the expense_id for [update] function only
+    private $io_balance; // get the budget balance from SAP
+    // private $remaining_balance; // pass the $value argument to new remaining balance
 
-    public function __construct($expenses_type_id, $expense_id)
+    public function __construct($expenses_type_id, $expense_id, $io_balance)
     {
         $this->expenses_type_id = $expenses_type_id;
         $this->expense_id = $expense_id;
+        $this->io_balance = $io_balance;
     }
 
     /**
-     * Query Expense based from expenses_type or if has expense_id
+     * Query Expense based from expenses_type or if has expense_id within the day
      *
      * @param [type] $expense_id
      * @return void
@@ -35,7 +38,7 @@ class AmountLimit implements Rule
     public function queryExpense($expense_id) {
 
         $get_expenses = Expense::where('user_id', Auth::user()->id)
-                            ->whereNotIn('id', [$expense_id])
+                            ->whereNotIn('id', [$expense_id]) // will take effect on update function
                             ->where('expenses_type_id', $this->expenses_type_id)
                             ->where('created_at', '>=', Carbon::today())
                             ->get();
@@ -50,7 +53,7 @@ class AmountLimit implements Rule
      * @param [type] $new_value
      * @return void
      */
-    public function getTotalFoodExpenses($new_value) {
+    public function getTodaysExpense($new_value) {
 
         $response = $this->queryExpense($this->expense_id)->reduce(function ($total, $item) {
             return $total + $item->amount;
@@ -72,8 +75,34 @@ class AmountLimit implements Rule
     public function passes($attribute, $value)
     {
 
-        return $value <= ExpensesType::find($this->expenses_type_id)->amount_rate && $this->getTotalFoodExpenses($value)
-                        <= ExpenseRate::rateAmount($this->expenses_type_id);
+        // default or maximum amount per expense type
+        // daily limit
+        $defaultExpenseRate = ExpensesType::find($this->expenses_type_id)->amount_rate;
+
+        // determine if has maintained custom expense rate
+        // daily limit
+        $maintainedExpenseRate = ExpenseRate::rateAmount($this->expenses_type_id);
+
+        // set default budget total
+        $budgetBalanceCurrent = 0;
+        if($this->io_balance) {
+            $budgetBalanceCurrent = (double) $this->io_balance - $this->getTodaysExpense($value);
+        }
+
+        // If user has SAP budget line assigned
+        if($maintainedExpenseRate->exists()) {
+
+            return $this->io_balance ? $budgetBalanceCurrent > 0 &&
+                   $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first() :
+                   $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first();
+
+        } else {
+
+            return $this->io_balance ? $budgetBalanceCurrent > 0 &&
+                   $this->getTodaysExpense($value) <= $defaultExpenseRate :
+                   $this->getTodaysExpense($value) <= $defaultExpenseRate;
+
+        }
 
     }
 
@@ -84,6 +113,10 @@ class AmountLimit implements Rule
      */
     public function message()
     {
-        return 'Budget exceeded';
+        if($this->io_balance) {
+            return 'Budget Line Found (exceeded)';
+        } else {
+            return 'Budget exceeded';
+        }
     }
 }

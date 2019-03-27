@@ -27,9 +27,7 @@ class ExpenseRate extends Model
         $check = $query->where('user_id', Auth::user()->id)
                     ->where('expenses_type_id', $expenses_type_id);
 
-        $default_rate = ExpensesType::find($expenses_type_id)->amount_rate;
-
-        return $check->exists() ? $check->pluck('amount')->first() : $default_rate;
+        return $check;
     }
 
 }

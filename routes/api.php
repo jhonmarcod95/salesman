@@ -66,7 +66,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('receipt/tin-numbers','AppAPIController@getTinNumbers');
 
     //Budget Checking API
-    Route::get('sap/budget_check','AppAPIController@checkBudget');
+    Route::get('check_internal_order/{expense_type}','AppAPIController@checkInternalOrder');
+    Route::get('charge_type/{expense_type}','AppAPIController@checkChargeType');
+    Route::get('sap/budget_check/{expense_type}','AppAPIController@checkBudget');
 
     // Expense Representation API
     Route::post('receipt/representation','API\ExpenseRepresentationController@store');

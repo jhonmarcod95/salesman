@@ -29,16 +29,23 @@ class ExpensesTest extends TestCase
 
     public function testAmountLimit()
     {
+
+        $expense_type_id = 1; // test value for expense_type_id
+
         $get_food_expenses = Expense::where('user_id', 35) // My User Id
-                    ->where('expenses_type_id', 1)
+                    ->where('expenses_type_id', $expense_type_id)
                     ->where('created_at', '>=', Carbon::today())
                     ->get();
 
+        // get total daily expense
         $response = $get_food_expenses->reduce(function ($total, $item) {
             return $total + $item->amount;
         });
 
-         echo json_encode($response, JSON_PRETTY_PRINT);
+        $new_response = $response + $new_value;
+
+        //  echo json_encode($response, JSON_PRETTY_PRINT);
+        $this->assertNotNull($response);
         $this->assertLessThan(175, $response);
 
     }

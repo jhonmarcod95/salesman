@@ -8,8 +8,10 @@ use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Http\Resources\PaymentsResource as PaymentsResource;
 use App\Http\Resources\APIExpenseResult as expenseResult;
 use Illuminate\Support\Facades\Auth;
+use App\SalesmanInternalOrder;
 use Ixudra\Curl\Facades\Curl;
 use Illuminate\Http\Request;
+use App\ExpenseChargeType;
 use App\Rules\TinNumber;
 use App\Rules\AmountLimit;
 use App\ReceiptExpense;
@@ -45,14 +47,60 @@ class AppAPIController extends Controller
         return $expensesType;
     }
 
-
-    public function checkBudget()
+    /**
+     * Check budget balance from SAP by given expense type and user id
+     *
+     * @param [Integer] $expense_type
+     * @return void
+     */
+    public function checkBudget($expense_type)
     {
-        $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
-        ->withContentType('application/x-www-form-urlencoded')
-        ->withData(array( 'budget_line' => 'P600601S0064', 'posting_date' => '3/19/2019', 'company_server'=> 'PFMC' ))
-        ->post();
-        return $response;
+        if($this->checkInternalOrder($expense_type)) {
+
+            $internalOrder = $this->checkInternalOrder($expense_type);
+
+            $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
+            ->withContentType('application/x-www-form-urlencoded')
+            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+            ->post();
+
+            $toJson = json_decode($response, true);
+
+            return $toJson[0]['balance_amount'];
+
+        }
+        return null;
+    }
+
+    /**
+     * Check the internal order record table from given expense type
+     *
+     * @param [Integer] $expense_type
+     * @return void
+     */
+    public function checkInternalOrder($expense_type)
+    {
+        // can be return as null
+        // get the internal_order & server
+        return SalesmanInternalOrder::where('user_id', Auth::user()->id)
+                                    ->where('charge_type', $this->checkChargeType($expense_type))
+                                    ->first();
+    }
+
+    /**
+     * Check the charge type name from the table w/ given expense type
+     *
+     * @param [Integer] $expense_type
+     * @return void
+     */
+    public function checkChargeType($expense_type)
+    {
+        $expenseChargeType = ExpenseChargeType::where('expense_type_id', $expense_type);
+        if($expenseChargeType->exists()) {
+            return $expenseChargeType->first()->chargeType->name;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -65,7 +113,7 @@ class AppAPIController extends Controller
     {
         $this->validate($request, [
             'types' => 'required',
-            'amount' => [new AmountLimit($request->input('types'), 0), 'required'],
+            'amount' => [new AmountLimit($request->input('types'), 0, $this->checkBudget($request->input('types'))), 'required'],
         ]);
 
         $expense = new Expense();
@@ -100,7 +148,7 @@ class AppAPIController extends Controller
     {
         $this->validate($request, [
             'types' => 'required',
-            'amount' => [new AmountLimit($request->input('types'), $expense->id), 'required'],
+            'amount' => [new AmountLimit($request->input('types'), $expense->id, $this->checkBudget($request->input('types'))), 'required'],
         ]);
 
         $expense->amount = $request->input('amount');
