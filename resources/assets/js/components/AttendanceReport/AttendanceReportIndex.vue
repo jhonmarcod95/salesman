@@ -47,6 +47,13 @@
                                 </div>
                                 <div class="col-md-2">
                                     <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
+                                    <download-excel
+                                        :data   = "schedules"
+                                        :fields = "json_fields"
+                                        class   = "btn btn-sm btn-default"
+                                        name    = "Salesforce Attendance report.xls">
+                                            Export to excel
+                                    </download-excel>
                                 </div>
                             </div>
                         </div>
@@ -149,15 +156,16 @@
                 </div>
             </div>
         </div>
-
-
-
+        
     </div>
 </template>
 
 <script>
 import moment from 'moment';
+import JsonExcel from 'vue-json-excel'
+
 export default {
+    components: { 'downloadExcel': JsonExcel },
     props: ['userRole'],
     data(){
         return{
@@ -177,6 +185,77 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            json_fields: {
+                'TYPE': {
+                    callback: (value) => {
+                        if(value.type == 1){
+                            return 'Customer';
+                        }else if(value.type == 2){
+                           return 'Mapping';
+                        }else{
+                            return 'Event';
+                        }
+                    }
+                },
+                'NAME': 'name',
+                'ADDRESS': 'address',
+                'DATE': 'date',
+                'START TIME': 'start_time',
+                'END TIME': 'end_time',
+                'STATUS': {
+                    callback: (value) => {
+                        if(value.status == 1){
+                            return 'Visited';
+                        }else if(value.status == 2){
+                           return 'Pending';
+                        }else{
+                            return 'Absent';
+                        }
+                    }
+                },
+                'REMARKS': 'remarks',
+                'SALES PERSONNEL': {
+                    callback: (value) => {
+                        return value.user.name;
+                    }
+                },
+                'IN': {
+                    callback: (value) => {
+                        if(value.attendances){
+                            return moment(value.attendances.sign_in).format('lll');
+                        }else{
+                            return '';
+                        }
+                    }
+                },
+                'OUT':{
+                      callback: (value) => {
+                        if(value.attendances){
+                            if(value.attendances.sign_out){
+                                return moment(value.attendances.sign_out).format('lll');
+                            }else{
+                                return '';
+                            }
+                        }else{
+                            return '';
+                        }
+                    }
+                },
+                'RENDERED':{
+                     callback: (value) => {
+                        if(value.attendances){
+                            if(value.attendances.sign_in && value.attendances.sign_out){
+                                // return moment(value.attendances.sign_out).format('lll');
+                                return this.rendered(value.attendances.sign_out, value.attendances.sign_in)
+                            }else{
+                                return '';
+                            }
+                        }else{
+                            return '';
+                        }
+                    }
+                }
+            }
         }
     },
     created(){
