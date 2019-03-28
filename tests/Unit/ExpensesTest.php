@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Expense;
 use App\ExpenseRate;
 use App\ExpensesType;
+use App\SalesmanInternalOrder;
 
 class ExpensesTest extends TestCase
 {
@@ -82,5 +83,10 @@ class ExpensesTest extends TestCase
         echo json_encode($default_rate, JSON_PRETTY_PRINT);
 
         $this->assertGreaterThan(5000, $default_rate);
+    }
+
+    public function testCheckUserBalance()
+    {
+
     }
 }

@@ -11,4 +11,8 @@ class SalesmanInternalOrder extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function chargeType()
+    {
+        return $this->belongsTo(ChargeType::class,'charge_type','name');
+    }
 }

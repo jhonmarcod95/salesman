@@ -103,6 +103,40 @@ class AppAPIController extends Controller
         }
     }
 
+    public function checkUserBalance()
+    {
+        $internalOrders = SalesmanInternalOrder::where('user_id', Auth::user()->id)->get();
+
+        $expenseBalances = array();
+
+        foreach($internalOrders as $internalOrder) {
+
+            // SAP API
+            $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
+            ->withContentType('application/x-www-form-urlencoded')
+            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+            ->post();
+
+            $toJson = json_decode($response, true);
+
+            // Expense Charge Type
+            $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
+
+            $data = array(
+                'id' => $internalOrder->id,
+                'charge_type' => $internalOrder->charge_type,
+                'expense_type' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->name : null,
+                'sap_server' => $internalOrder->sap_server,
+                'balance' => (double) $toJson[0]['balance_amount']
+            );
+            array_push($expenseBalances,$data);
+
+        }
+
+        return $expenseBalances;
+
+    }
+
     /**
      * Store a newly created resource in storage.
      *
