@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Expense;
 use App\ExpenseRate;
 use App\ExpensesType;
+use App\ExpenseChargeType;
 use App\SalesmanInternalOrder;
 
 class ExpensesTest extends TestCase
@@ -87,6 +88,33 @@ class ExpensesTest extends TestCase
 
     public function testCheckUserBalance()
     {
+        // given values
+        $user = 35; // Auth::user()->id
+
+        $internalOrders = SalesmanInternalOrder::where('user_id', $user);
+
+        //assert if has value & count result
+        $this->assertGreaterThan(0, $internalOrders->count());
+    }
+
+    public function testChargeTypes()
+    {
+        $expense_type = 1;
+        $expenseChargeType = ExpenseChargeType::where('expense_type_id', $expense_type);
+
+        $this->assertTrue($expenseChargeType->exists());
+    }
+
+    public function testCheckInternalOrder()
+    {
+        $chargeType = 'A1'; // given charge type
+        $user_id = 35; // current authenticated user
+
+        $io = SalesmanInternalOrder::
+                where('user_id', $user_id)
+                ->where('charge_type', $chargeType);
+
+        $this->assertTrue($io->exists());
 
     }
 }

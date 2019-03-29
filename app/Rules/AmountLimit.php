@@ -85,23 +85,27 @@ class AmountLimit implements Rule
 
         // set default budget total
         $budgetBalanceCurrent = 0;
-        if($this->io_balance) {
+        // if io_balance is found
+        if($this->io_balance || $this->io_balance ==  'N/A') {
             $budgetBalanceCurrent = (double) $this->io_balance - $this->getTodaysExpense($value);
-        }
 
-        // If user has SAP budget line assigned
-        if($maintainedExpenseRate->exists()) {
+            // If user has SAP budget line assigned
+            if($maintainedExpenseRate->exists()) {
 
-            return $this->io_balance ? $budgetBalanceCurrent > 0 &&
-                   $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first() :
-                   $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first();
+                return $this->io_balance ? $budgetBalanceCurrent > 0 &&
+                    $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first() :
+                    $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first();
 
+            } else {
+
+                return $this->io_balance ? $budgetBalanceCurrent > 0 &&
+                    $this->getTodaysExpense($value) <= $defaultExpenseRate :
+                    $this->getTodaysExpense($value) <= $defaultExpenseRate;
+
+            }
         } else {
-
-            return $this->io_balance ? $budgetBalanceCurrent > 0 &&
-                   $this->getTodaysExpense($value) <= $defaultExpenseRate :
-                   $this->getTodaysExpense($value) <= $defaultExpenseRate;
-
+            // User can't proceed / no budget line found
+            return false;
         }
 
     }
@@ -113,10 +117,10 @@ class AmountLimit implements Rule
      */
     public function message()
     {
-        if($this->io_balance) {
-            return 'Budget Line Found (exceeded)';
+        if($this->io_balance || $this->io_balance ==  'N/A') {
+            return 'Budget Exceeded';
         } else {
-            return 'Budget exceeded';
+            return 'No Budget Line Found';
         }
     }
 }

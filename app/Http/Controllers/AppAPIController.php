@@ -55,21 +55,26 @@ class AppAPIController extends Controller
      */
     public function checkBudget($expense_type)
     {
-        if($this->checkInternalOrder($expense_type)) {
+        if($this->checkInternalOrder($expense_type) != 'N/A') {
+            if($this->checkInternalOrder($expense_type)) {
 
-            $internalOrder = $this->checkInternalOrder($expense_type);
+                $internalOrder = $this->checkInternalOrder($expense_type);
 
-            $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
-            ->withContentType('application/x-www-form-urlencoded')
-            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
-            ->post();
+                $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
+                ->withContentType('application/x-www-form-urlencoded')
+                ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+                ->post();
 
-            $toJson = json_decode($response, true);
+                $toJson = json_decode($response, true);
 
-            return $toJson[0]['balance_amount'];
+                return $toJson[0]['balance_amount'];
 
+            }
+            // if null, expense will not proceed
+            return null;
         }
-        return null;
+        // If N/A expense will proceed
+        return 'N/A';
     }
 
     /**
@@ -80,11 +85,19 @@ class AppAPIController extends Controller
      */
     public function checkInternalOrder($expense_type)
     {
-        // can be return as null
-        // get the internal_order & server
-        return SalesmanInternalOrder::where('user_id', Auth::user()->id)
-                                    ->where('charge_type', $this->checkChargeType($expense_type))
-                                    ->first();
+        $isUserIo = SalesmanInternalOrder::where('user_id', Auth::user()->id);
+        // // check if USER is found in SalesmanInternal Order
+        if($isUserIo->exists()) {
+            // when user found; check if expense type is exsisting
+            $isUserHasChargeType = SalesmanInternalOrder::where('user_id', Auth::user()->id)->where('charge_type', $this->checkChargeType($expense_type))->first();
+            if($isUserHasChargeType) {
+                return $isUserHasChargeType;
+            }
+                return $isUserHasChargeType;
+        }
+        // users that excluded from SAP API
+        return 'N/A';
+
     }
 
     /**
@@ -103,6 +116,11 @@ class AppAPIController extends Controller
         }
     }
 
+    /**
+     * Check all user's remaining balance in SAP api within the month
+     *
+     * @return void
+     */
     public function checkUserBalance()
     {
         $internalOrders = SalesmanInternalOrder::where('user_id', Auth::user()->id)->get();
@@ -125,6 +143,7 @@ class AppAPIController extends Controller
             $data = array(
                 'id' => $internalOrder->id,
                 'charge_type' => $internalOrder->charge_type,
+                'internal_order' => $internalOrder->internal_order,
                 'expense_type' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->name : null,
                 'sap_server' => $internalOrder->sap_server,
                 'balance' => (double) $toJson[0]['balance_amount']
