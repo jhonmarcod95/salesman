@@ -173,7 +173,7 @@ class ExpenseController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexExpenseData(){
-        return ExpensesType::orderBy('id', 'desc')->get();
+        return ExpensesType::with('expenseChargeType.chargeType')->orderBy('id', 'desc')->get();
     }
 
     /**

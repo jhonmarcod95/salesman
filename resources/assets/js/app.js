@@ -66,6 +66,9 @@ Vue.component('dashboard-index', require('./components/Dashboard/DashboardIndex.
 // Loader
 Vue.component('loader', require('./components/Loader.vue'));
 
+// Internal Order
+Vue.component('internal-order-index', require('./components/InternalOrder/InternalOrderIndex.vue'));
+
 const app = new Vue({
     el: '#app',
 });

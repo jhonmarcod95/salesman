@@ -225,6 +225,16 @@
                     {{--</a>--}}
                 {{--</li>--}}
             {{--</ul>--}}
+
+
+
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/internal-order') }}">
+                        <i class="ni ni-money-coins text-indigo"></i> Internal Order
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
