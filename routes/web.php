@@ -192,6 +192,19 @@ Route::group(['middleware' => ['auth', 'role:ap']], function(){
     // Simulate expenses submitted
     Route::get('/expense-simulate/{id}', 'ExpenseController@simulateExpenseSubmitted');
 
+    // Show SAP user page
+    Route::get('/sap/account', 'SapUserController@index')->name('sap_user');
+    // Show SAP user page
+    Route::get('/sap/accounts', 'SapUserController@indexData');
+    // Store new sap account
+    Route::post('/sap/account', 'SapUserController@store');
+    // Update sap account
+    Route::patch('/sap/account/{sapUser}', 'SapUserController@update');
+    // Delete sap account
+    Route::delete('/sap/account/{sapUser}', 'SapUserController@destroy');
+    // Fetch all sap servers
+    Route::get('/sap/server', 'SapServerController@index');
+
 });
 
 // Hr routes

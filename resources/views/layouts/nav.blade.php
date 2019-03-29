@@ -24,6 +24,10 @@
                         <i class="ni ni-single-02"></i>
                         <span>Change Password</span>
                     </a>
+                    <a href="{{ route('sap_user') }}" class="dropdown-item">
+                        <i class="ni ni-single-02"></i>
+                        <span>SAP User</span>
+                    </a>
 
 
                     <div class="dropdown-divider"></div>
