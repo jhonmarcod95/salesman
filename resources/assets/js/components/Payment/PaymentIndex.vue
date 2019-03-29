@@ -106,7 +106,7 @@
                                     <li class="page-item">
                                         <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
                                     </li>
-                                    <li class="page-item">
+                                    <li class="page-item">npm run
                                         Page {{ currentPage + 1 }} of {{ totalPages }}
                                     </li>
                                     <li class="page-item">
