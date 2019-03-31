@@ -8,7 +8,10 @@ use App\Http\Resources\SchedulesResource as SchedulesResource;
 use App\Http\Resources\PaymentsResource as PaymentsResource;
 use App\Http\Resources\APIExpenseResult as expenseResult;
 use Illuminate\Support\Facades\Auth;
+use App\SalesmanInternalOrder;
+use Ixudra\Curl\Facades\Curl;
 use Illuminate\Http\Request;
+use App\ExpenseChargeType;
 use App\Rules\TinNumber;
 use App\Rules\AmountLimit;
 use App\ReceiptExpense;
@@ -45,6 +48,115 @@ class AppAPIController extends Controller
     }
 
     /**
+     * Check budget balance from SAP by given expense type and user id
+     *
+     * @param [Integer] $expense_type
+     * @return void
+     */
+    public function checkBudget($expense_type)
+    {
+        if($this->checkInternalOrder($expense_type) != 'N/A') {
+            if($this->checkInternalOrder($expense_type)) {
+
+                $internalOrder = $this->checkInternalOrder($expense_type);
+
+                $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
+                ->withContentType('application/x-www-form-urlencoded')
+                ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+                ->post();
+
+                $toJson = json_decode($response, true);
+
+                return $toJson[0]['balance_amount'];
+
+            }
+            // if null, expense will not proceed
+            return null;
+        }
+        // If N/A expense will proceed
+        return 'N/A';
+    }
+
+    /**
+     * Check the internal order record table from given expense type
+     *
+     * @param [Integer] $expense_type
+     * @return void
+     */
+    public function checkInternalOrder($expense_type)
+    {
+        $isUserIo = SalesmanInternalOrder::where('user_id', Auth::user()->id);
+        // // check if USER is found in SalesmanInternal Order
+        if($isUserIo->exists()) {
+            // when user found; check if expense type is exsisting
+            $isUserHasChargeType = SalesmanInternalOrder::where('user_id', Auth::user()->id)->where('charge_type', $this->checkChargeType($expense_type))->first();
+            if($isUserHasChargeType) {
+                return $isUserHasChargeType;
+            }
+                return $isUserHasChargeType;
+        }
+        // users that excluded from SAP API
+        return 'N/A';
+
+    }
+
+    /**
+     * Check the charge type name from the table w/ given expense type
+     *
+     * @param [Integer] $expense_type
+     * @return void
+     */
+    public function checkChargeType($expense_type)
+    {
+        $expenseChargeType = ExpenseChargeType::where('expense_type_id', $expense_type);
+        if($expenseChargeType->exists()) {
+            return $expenseChargeType->first()->chargeType->name;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Check all user's remaining balance in SAP api within the month
+     *
+     * @return void
+     */
+    public function checkUserBalance()
+    {
+        $internalOrders = SalesmanInternalOrder::where('user_id', Auth::user()->id)->get();
+
+        $expenseBalances = array();
+
+        foreach($internalOrders as $internalOrder) {
+
+            // SAP API
+            $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
+            ->withContentType('application/x-www-form-urlencoded')
+            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+            ->post();
+
+            $toJson = json_decode($response, true);
+
+            // Expense Charge Type
+            $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
+
+            $data = array(
+                'id' => $internalOrder->id,
+                'charge_type' => $internalOrder->charge_type,
+                'internal_order' => $internalOrder->internal_order,
+                'expense_type' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->name : null,
+                'sap_server' => $internalOrder->sap_server,
+                'balance' => (double) $toJson[0]['balance_amount']
+            );
+            array_push($expenseBalances,$data);
+
+        }
+
+        return $expenseBalances;
+
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -54,7 +166,7 @@ class AppAPIController extends Controller
     {
         $this->validate($request, [
             'types' => 'required',
-            'amount' => [new AmountLimit($request->input('types'), 0), 'required'],
+            'amount' => [new AmountLimit($request->input('types'), 0, $this->checkBudget($request->input('types'))), 'required'],
         ]);
 
         $expense = new Expense();
@@ -89,7 +201,7 @@ class AppAPIController extends Controller
     {
         $this->validate($request, [
             'types' => 'required',
-            'amount' => [new AmountLimit($request->input('types'), $expense->id), 'required'],
+            'amount' => [new AmountLimit($request->input('types'), $expense->id, $this->checkBudget($request->input('types'))), 'required'],
         ]);
 
         $expense->amount = $request->input('amount');

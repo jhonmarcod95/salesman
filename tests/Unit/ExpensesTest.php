@@ -10,6 +10,8 @@ use Carbon\Carbon;
 use App\Expense;
 use App\ExpenseRate;
 use App\ExpensesType;
+use App\ExpenseChargeType;
+use App\SalesmanInternalOrder;
 
 class ExpensesTest extends TestCase
 {
@@ -29,16 +31,23 @@ class ExpensesTest extends TestCase
 
     public function testAmountLimit()
     {
+
+        $expense_type_id = 1; // test value for expense_type_id
+
         $get_food_expenses = Expense::where('user_id', 35) // My User Id
-                    ->where('expenses_type_id', 1)
+                    ->where('expenses_type_id', $expense_type_id)
                     ->where('created_at', '>=', Carbon::today())
                     ->get();
 
+        // get total daily expense
         $response = $get_food_expenses->reduce(function ($total, $item) {
             return $total + $item->amount;
         });
 
-         echo json_encode($response, JSON_PRETTY_PRINT);
+        $new_response = $response + $new_value;
+
+        //  echo json_encode($response, JSON_PRETTY_PRINT);
+        $this->assertNotNull($response);
         $this->assertLessThan(175, $response);
 
     }
@@ -75,5 +84,37 @@ class ExpensesTest extends TestCase
         echo json_encode($default_rate, JSON_PRETTY_PRINT);
 
         $this->assertGreaterThan(5000, $default_rate);
+    }
+
+    public function testCheckUserBalance()
+    {
+        // given values
+        $user = 35; // Auth::user()->id
+
+        $internalOrders = SalesmanInternalOrder::where('user_id', $user);
+
+        //assert if has value & count result
+        $this->assertGreaterThan(0, $internalOrders->count());
+    }
+
+    public function testChargeTypes()
+    {
+        $expense_type = 1;
+        $expenseChargeType = ExpenseChargeType::where('expense_type_id', $expense_type);
+
+        $this->assertTrue($expenseChargeType->exists());
+    }
+
+    public function testCheckInternalOrder()
+    {
+        $chargeType = 'A1'; // given charge type
+        $user_id = 35; // current authenticated user
+
+        $io = SalesmanInternalOrder::
+                where('user_id', $user_id)
+                ->where('charge_type', $chargeType);
+
+        $this->assertTrue($io->exists());
+
     }
 }
