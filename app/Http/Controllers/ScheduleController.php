@@ -61,7 +61,6 @@ class ScheduleController extends Controller
         $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
 
         return view('schedule.index', compact(
-            'schedules',
             'tsrs',
             'scheduleTypes',
             'customers',
