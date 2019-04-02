@@ -185,7 +185,7 @@
                                     <td>{{ simulatedExpense.input_tax_code }}</td>
                                     <td>{{ simulatedExpense.internal_order }}</td>
                                     <td>{{ simulatedExpense.amount }}</td>
-                                    <td>{{ simulatedExpense.charge_type }}</td>
+                                    <td>{{ simulatedExpense.charge_type.name }}</td>
                                     <td>{{ simulatedExpense.business_area }}</td>
                                     <td>{{ simulatedExpense.or_number }}</td>
                                     <td>{{ simulatedExpense.supplier_name }}</td>

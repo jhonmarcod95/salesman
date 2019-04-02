@@ -9,7 +9,10 @@ use App\ExpensesType;
 class ExpenseRate extends Model
 {
     protected $fillable = [
-        'amount'
+        'amount',
+        'expenses_type_id',
+        'user_id',
+        'created_by'
     ];
 
     public function user()

@@ -202,8 +202,6 @@ Route::group(['middleware' => ['auth', 'role:ap']], function(){
     Route::patch('/sap/account/{sapUser}', 'SapUserController@update');
     // Delete sap account
     Route::delete('/sap/account/{sapUser}', 'SapUserController@destroy');
-    // Fetch all sap servers
-    Route::get('/sap/server', 'SapServerController@index');
 
 });
 
@@ -244,3 +242,6 @@ Route::post('/internal-order', 'SalesmanInternalOrderController@store');
 Route::patch('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@update');
 Route::delete('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@destroy');
 Route::get('/internal-orders', 'SalesmanInternalOrderController@indexData')->name('internal-order');
+
+// Fetch all sap servers
+Route::get('/sap/server', 'SapServerController@index');

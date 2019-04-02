@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Rules\ChargeTypeRule;
 use App\{
-    SalesmanInternalOrder
+    SalesmanInternalOrder,
+    ExpenseRate,
+    ChargeType
 };
-
+use Auth;
 class SalesmanInternalOrderController extends Controller
 {
     /**
@@ -28,7 +31,7 @@ class SalesmanInternalOrderController extends Controller
      */
     public function indexData()
     {
-        return SalesmanInternalOrder::with('user')->orderBy('id', 'desc')->get();
+        return SalesmanInternalOrder::with('user','user.expenseRate','chargeType.expenseChargeType.expenseType')->orderBy('id', 'desc')->get();
     }
 
     /**
@@ -41,14 +44,24 @@ class SalesmanInternalOrderController extends Controller
     {
         $request->validate([
             'user_id' => 'required',
-            'charge_type' => 'required', 
+            'charge_type' => ['required', new ChargeTypeRule($request->user_id)], 
             'internal_order' => 'required',
-            'sap_server' => 'required'
+            'sap_server' => 'required',
+            'amount' => 'required|integer'
         ]);
-        
+
         if($internal_order = SalesmanInternalOrder::create($request->all())){
-            
-            return SalesmanInternalOrder::with('user')->where('id', $internal_order->id)->first();
+
+            $chargeType = ChargeType::with('expenseChargeType.expenseType')->where('name', $request->charge_type)->first();
+
+            $array = [
+                'created_by' => Auth::user()->id,
+                'user_id' => $request->user_id,
+                'expenses_type_id' => $chargeType->expenseChargeType->expenseType->id,
+                'amount' => $request->amount,
+            ];
+            ExpenseRate::create($array);
+            return SalesmanInternalOrder::with('user','user.expenseRate', 'chargeType.expenseChargeType.expenseType')->where('id', $internal_order->id)->first();
         }
     }
 
@@ -61,9 +74,29 @@ class SalesmanInternalOrderController extends Controller
      */
     public function update(Request $request, SalesmanInternalOrder $salesmanInternalOrder)
     {
+        $request->validate([
+            'user_id' => 'required',
+            'charge_type' => ['required', new ChargeTypeRule($request->user_id, $salesmanInternalOrder->id, 'Edit')], 
+            'internal_order' => 'required',
+            'sap_server' => 'required',
+            'amount' => 'required|integer',
+            'default_expense_type' => 'required'
+        ]);
+
         if($salesmanInternalOrder->update($request->all())){
 
-            return SalesmanInternalOrder::with('user')->where('id', $salesmanInternalOrder->id)->first();
+            $chargeType = ChargeType::with('expenseChargeType.expenseType')->where('name', $request->charge_type)->first();
+            $expenseRate = ExpenseRate::where('user_id',$request->user_id)->where('expenses_type_id', $request->default_expense_type)->first();
+
+            $array = [
+                'created_by' => Auth::user()->id,
+                'user_id' => $request->user_id,
+                'expenses_type_id' => $chargeType->expenseChargeType->expenseType->id,
+                'amount' => $request->amount,
+            ];
+            $expenseRate->update($array);
+
+            return SalesmanInternalOrder::with('user','user.expenseRate','chargeType.expenseChargeType.expenseType')->where('id', $salesmanInternalOrder->id)->first();
         }
     }
 

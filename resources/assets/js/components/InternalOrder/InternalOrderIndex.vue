@@ -30,7 +30,9 @@
                                     <th scope="col"></th>
                                     <th scope="col">ID</th>
                                     <th scope="col">User</th>
+                                    <th scope="col">Expense Type</th>
                                     <th scope="col">Charge Type</th>
+                                    <th scope="col">Amount</th>
                                     <th scope="col">Internal Order</th>
                                     <th scope="col">SAP Server</th>
                                 </tr>
@@ -51,7 +53,9 @@
                                         </td>
                                         <td>{{ internalOrder.id }}</td>
                                         <td>{{ internalOrder.user.name }}</td>
-                                        <td>{{ internalOrder.charge_type }}</td>
+                                        <td>{{ internalOrder.charge_type.expense_charge_type.expense_type.name }}</td>
+                                        <td>{{ internalOrder.charge_type.name }}</td>
+                                        <td>{{ getExpenseRate(internalOrder) }}</td>
                                         <td>{{ internalOrder.internal_order }}</td>
                                         <td>{{ internalOrder.sap_server }}</td>
                                     </tr>
@@ -123,8 +127,19 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="form-control-label" for="sap_server">SAP Server</label>
-                                    <input type="text" id="sap_server" class="form-control form-control-alternative" v-model="internal_order.sap_server">
+                                    <select class="form-control" v-model="internal_order.sap_server">
+                                        <option v-for="(server, s) in servers" v-bind:key="s" :value="server.sap_server">{{ server.sap_server }}</option>  
+                                    </select>
                                     <span class="text-danger small" v-if="errors.sap_server">{{ errors.sap_server[0] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="amount">Amount</label>
+                                    <input type="text" id="amount" class="form-control form-control-alternative" v-model="internal_order.amount">
+                                    <span class="text-danger small" v-if="errors.amount">{{ errors.amount[0] }}</span>
                                 </div>
                             </div>
                         </div>
@@ -151,7 +166,7 @@
                             <div class="col-lg-12">
                                 <div class="form-group">
                                     <label class="form-control-label" for="classification">User</label>
-                                    <select class="form-control" v-model="internal_order_copied.user_id">
+                                    <select class="form-control" v-model="internal_order_copied.user_id" disabled>
                                         <option v-for="(tsr, t) in tsrs" v-bind:key="t" :value="tsr.user.id">{{ tsr.first_name + ' ' + tsr.last_name}}</option>  
                                     </select>
                                     <span class="text-danger small" v-if="errors.user_id">{{ errors.user_id[0] }}</span>
@@ -161,8 +176,8 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label class="form-control-label" for="classification">Expense Type</label>
-                                    <select class="form-control" v-model="internal_order_copied.charge_type">
+                                    <label class="form-control-label" for="classification">Expense Type</label>  
+                                    <select class="form-control" v-model="internal_order_copied_charge_type">
                                         <option v-for="(expense_type, e) in expense_types" v-bind:key="e" :value="expense_type.expense_charge_type.charge_type.name">{{ expense_type.name }}</option>  
                                     </select>
                                     <span class="text-danger small" v-if="errors.charge_type">{{ errors.charge_type[0] }}</span>
@@ -182,15 +197,26 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="form-control-label" for="sap_server">SAP Server</label>
-                                    <input type="text" id="sap_server" class="form-control form-control-alternative" v-model="internal_order_copied.sap_server">
+                                    <select class="form-control" v-model="internal_order_copied.sap_server">
+                                        <option v-for="(server, s) in servers" v-bind:key="s" :value="server.sap_server">{{ server.sap_server }}</option>  
+                                    </select>
                                     <span class="text-danger small" v-if="errors.sap_server">{{ errors.sap_server[0] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="amount">Amount</label>
+                                    <input type="text" id="amount" class="form-control form-control-alternative" v-model="default_amount">
+                                    <span class="text-danger small" v-if="errors.amount">{{ errors.amount[0] }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
-                        <button class="btn btn-primary" @click="updateInternalOrder(internal_order_copied)">Save</button>
+                        <button class="btn btn-primary" @click="updateInternalOrder(internal_order_copied,internal_order_copied_charge_type,default_amount)">Save</button>
                     </div>
                 </div>
             </div>
@@ -224,7 +250,7 @@
     </div>
 </template>
 
-<script>
+<script>;
 export default {
     data(){
         return{
@@ -238,16 +264,35 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            internal_order_copied_charge_type: '',
+            default_expense_type:'',
+            default_amount: '',
+            servers: [],
+            expense_id: ''
         }
     },
     created(){
         this.fetchInternalOrders();
         this.fetchTsrs();
         this.fetchExpensesTypes();
+        this.fetchServer();
     },
     methods:{
+        getExpenseRate(internalOrder){
+            var amount = '';
+            internalOrder.user.expense_rate.findIndex(element => {
+                if(element.expenses_type_id == internalOrder.charge_type.expense_charge_type.expense_type.id){
+                    amount = element.amount;
+                }
+            })
+            return amount;
+        },
         copyObject(internalOrder){
-            this.internal_order_copied = Object.assign({}, internalOrder)
+            this.errors = [];
+            this.internal_order_copied = Object.assign({}, internalOrder);
+            this.internal_order_copied_charge_type = this.internal_order_copied.charge_type.name;
+            this.default_expense_type = internalOrder.charge_type.expense_charge_type.expense_type.id;
+            this.default_amount = this.getExpenseRate(internalOrder);
         },
         getInternalOrderId(id){
             this.internal_order_id = id;
@@ -279,12 +324,23 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
+        fetchServer(){
+            axios.get('/sap/server')
+            .then(response => { 
+                this.servers = response.data;
+            })
+            .catch(error => { 
+                this.errors = response.data.errors;
+            });
+        },
         addInternalOrder(internal_order){
+            this.errors = [];
             axios.post('/internal-order',{
                 'user_id': internal_order.tsr,
                 'charge_type': internal_order.expense_type, 
                 'internal_order': internal_order.internal_order,
-                'sap_server': internal_order.sap_server
+                'sap_server': internal_order.sap_server,
+                'amount': internal_order.amount
             })
             .then(response => {
                 $('#addModal').modal('hide');
@@ -295,14 +351,17 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        updateInternalOrder(internal_order_copied){
+        updateInternalOrder(internal_order_copied,internal_order_copied_charge_type,default_amount){
+            this.errors = [];
             var index = this.internal_orders.findIndex(item => item.id == internal_order_copied.id);
 
             axios.post(`/internal-order/${internal_order_copied.id}`,{
                 'user_id': internal_order_copied.user_id,
-                'charge_type': internal_order_copied.charge_type, 
+                'charge_type': internal_order_copied_charge_type, 
                 'internal_order': internal_order_copied.internal_order,
                 'sap_server': internal_order_copied.sap_server,
+                'amount' : default_amount,
+                'default_expense_type': this.default_expense_type,
                 '_method': 'PATCH'
             })
             .then(response => {
