@@ -54,7 +54,7 @@ class ExpenseController extends Controller
         
         if(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap')){
             
-            $expense = ExpensesEntry::with('user')
+            $expense = ExpensesEntry::with('user','expensesModel.payments')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
@@ -66,7 +66,7 @@ class ExpenseController extends Controller
             ->withCount('expensesModel')
             ->orderBy('id', 'desc')->get();
         }else{
-            $expense = ExpensesEntry::with('user')
+            $expense = ExpensesEntry::with('user','expensesModel.payments')
                 ->whereDate('created_at', '>=',  $request->startDate)
                 ->whereDate('created_at' ,'<=', $request->endDate)
                 ->has('expensesModel')

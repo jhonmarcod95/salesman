@@ -273,10 +273,12 @@ export default {
             });
             return totalSubmitted;
         },
-         countTotalExpenses(expenses){
+        countTotalExpenses(expenses){
             var totalExpenses = 0;
             expenses.forEach(element => {
-              totalExpenses = totalExpenses + element.totalExpenses;
+                element.expenses_model.forEach(e => {
+                    totalExpenses = totalExpenses + e.amount;  
+                })
             });
             return totalExpenses.toFixed(2);
         },

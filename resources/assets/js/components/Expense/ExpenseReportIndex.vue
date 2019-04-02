@@ -69,7 +69,7 @@
                                         <td>{{ expense.user.name }}</td>
                                         <td>{{ expense.expenses_model_count  }}</td>
                                         <td>{{ moment(expense.created_at).format('ll') }}</td>
-                                        <td>PHP {{ expense.totalExpenses.toFixed(2) }}</td>
+                                        <td>PHP {{ countTotalExpenses(expense) }}</td>
                                     </tr>
                                 </tbody>
                                 <tbody v-else>
@@ -170,6 +170,13 @@ export default {
         moment,
         noImage(event){
             event.target.src = window.location.origin+'/img/brand/no-image.png';
+        },
+        countTotalExpenses(expense){
+            var totalExpenses = 0;
+            expense.expenses_model.forEach(element => {
+                totalExpenses = totalExpenses + element.amount;
+            });
+            return totalExpenses.toFixed(2);
         },
         fetchExpenses(){
             axios.post('/expense-report-bydate', {
