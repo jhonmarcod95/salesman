@@ -103,7 +103,7 @@ class PaymentController extends Controller
             'system_id' =>  $request->system_id,
             'instance_number' => $request->instance_number,
             'sap_user_id' => $request->sap_user_id,
-            'sap_password' => $request->sap_password,
+            'sap_password' => urlencode($request->sap_password),
             'sap_name' => $request->sap_name,
             'client' => $request->client,
             'header_text' => $request->header_text,

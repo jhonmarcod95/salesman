@@ -226,8 +226,7 @@
                 {{--</li>--}}
             {{--</ul>--}}
 
-
-
+            @if(!Auth::user()->hasRole('ap'))
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/internal-order') }}">
@@ -235,6 +234,7 @@
                     </a>
                 </li>
             </ul>
+            @endif
         </div>
     </div>
 </nav>
