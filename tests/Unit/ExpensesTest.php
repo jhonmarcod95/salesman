@@ -117,4 +117,12 @@ class ExpensesTest extends TestCase
         $this->assertTrue($io->exists());
 
     }
+
+    public function testFindExpense()
+    {
+        $expense_id = 100;
+        $expense = Expense::whereId($expense_id)->whereNotIn('expenses_type_id',[1,3]); // Food, Lodging
+        $this->assertFalse($expense->exists());
+    }
+
 }
