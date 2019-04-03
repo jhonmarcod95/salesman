@@ -564,10 +564,17 @@ class AppAPIController extends Controller
                     'vendor_name' => 'required',
                     'vendor_address' => 'required',
                     'tin_number' => [new TinNumber, 'required'],
-                    'receipt_number' => 'required|unique:receipt_expenses', // OR# or SI#
+                    // 'receipt_number' => 'required|unique:receipt_expenses', // OR# or SI#
                 ],[
                     'receipt_type_id.required' => 'Please verify Receipt type'
                 ]);
+        }
+
+        $findExpense = Expense::whereId($request->input('expense_id'))->whereNotIn('expenses_type_id',[1,3]);
+        if($findExpense->exists()) {
+            $this->validate($request,[
+                'receipt_number' => 'required|unique:receipt_expenses',
+            ]);
         }
 
         $existingTinNumber = $this->checkTinNumber($request->input('tin_number'));
@@ -601,11 +608,19 @@ class AppAPIController extends Controller
 
     public function updateReceiptExpense(Request $request, ReceiptExpense $receiptExpense)
     {
+
+        $findExpense = Expense::whereId($request->input('expense_id'))->whereNotIn('expenses_type_id',[1,3]);
+        if($findExpense->exists()) {
+            $this->validate($request,[
+                'receipt_number' => 'required|unique:receipt_expenses,receipt_number,'.$receiptExpense->id, // OR# or SI#
+            ]);
+        }
+
         $this->validate($request, [
             'expense_id' => 'required',
             'receipt_transaction_id' => 'required', // VAT or NON-VAT
             'receipt_type_id' => 'required', // Sales Invoice or Official Receipt
-            'receipt_number' => 'required|unique:receipt_expenses,receipt_number,'.$receiptExpense->id, // OR# or SI#
+            // 'receipt_number' => 'required|unique:receipt_expenses,receipt_number,'.$receiptExpense->id, // OR# or SI#
             'date_receipt' => 'required' // date of receipt
         ]);
 
