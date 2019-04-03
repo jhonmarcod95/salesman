@@ -72,7 +72,7 @@
                                 <tbody v-if="requests.length">
                                     <tr v-for="(requests, r) in filteredQueues" v-bind:key="r">
                                         <td class="text-right">
-                                            <div class="dropdown" v-if="requests.isApproved == 0">
+                                            <div class="dropdown" v-if="requests.isApproved == 0 && moment(requests.date).isSameOrAfter(moment(), 'day')">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fas fa-ellipsis-v"></i>
@@ -185,6 +185,7 @@
 </template>
 
 <script>
+import moment from 'moment';
 export default {
     data(){
         return{
@@ -203,6 +204,7 @@ export default {
         // this.fetchRequests();
     },
     methods:{
+        moment,
         fetchRequests(){
             this.errors = [];
             axios.post('/change-schedule-bydate', {
