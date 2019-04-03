@@ -75134,6 +75134,8 @@ module.exports = Component.exports
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_moment__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_moment___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_moment__);
 //
 //
 //
@@ -75320,6 +75322,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -75340,6 +75343,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
 
     methods: {
+        moment: __WEBPACK_IMPORTED_MODULE_0_moment___default.a,
         fetchRequests: function fetchRequests() {
             var _this = this;
 
@@ -75671,7 +75675,10 @@ var render = function() {
                         _vm._l(_vm.filteredQueues, function(requests, r) {
                           return _c("tr", { key: r }, [
                             _c("td", { staticClass: "text-right" }, [
-                              requests.isApproved == 0
+                              requests.isApproved == 0 &&
+                              _vm
+                                .moment(requests.date)
+                                .isSameOrAfter(_vm.moment(), "day")
                                 ? _c("div", { staticClass: "dropdown" }, [
                                     _vm._m(2, true),
                                     _vm._v(" "),
