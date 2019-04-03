@@ -64,6 +64,23 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="role">Location</label>
+                                                <select class="form-control" v-model="tsr.location">
+                                                    <option v-for="(location,l) in locations" v-bind:key="l" :value="location.id"> {{ location.name }}</option>
+                                                </select>
+                                                <span class="text-danger" v-if="errors.location  ">{{ errors.location[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="input-last-name">Vendor Code</label>
+                                                <input type="text" id="vendor-code" class="form-control form-control-alternative" v-model="tsr.vendor_code">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <hr class="my-4" />
                                 <!-- Address -->
@@ -158,6 +175,8 @@ export default {
                 suffix: '',
                 email: '',
                 address: '',
+                location: '',
+                vendor_code: '',
                 contact_number: '',
                 date_of_birth: '',
                 date_hired: '',
@@ -167,11 +186,13 @@ export default {
                 company: '',
             },
             companies: [],
+            locations: [],
             errors: []
         }
     },
     created(){
         this.fetchCompanies();
+        this.fetchLocations();
     },
     methods:{
         fetchCompanies(){
@@ -183,7 +204,16 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        addTsr(tsr){
+        fetchLocations(){
+            axios.get('/locations')
+            .then(response => { 
+                this.locations = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
+    addTsr(tsr){
             axios.post('/tsr', {
                 last_name: tsr.last_name,
                 first_name: tsr.first_name,
@@ -198,12 +228,13 @@ export default {
                 contact_person: tsr.contact_person,
                 personal_email: tsr.personal_email,
                 plate_number: tsr.plate_number,
-                company: tsr.company
+                company: tsr.company,
+                location: tsr.location,
+                vendor_code: tsr.vendor_code,
 
             })
             .then(response => {
                 window.location.href = response.data.redirect;
-                
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
