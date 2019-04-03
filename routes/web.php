@@ -97,8 +97,6 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/tsr/show/{id}', 'TsrController@show');
     // update customer
     Route::patch('/tsr/{technicalSalesRepresentative}', 'TsrController@update');
-    // show details of specific tsr
-    Route::get('/tsr/show/{id}', 'TsrController@show');
 
     //Customer
     // show customer page
@@ -226,6 +224,9 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::patch('/company/{company}', 'CompanyController@update');
     // Delete company
     Route::delete('/company/{id}', 'CompanyController@destroy');
+
+    // Locations
+    Route::get('/locations', 'LocationController@index');
 });
 
 // Request Routes

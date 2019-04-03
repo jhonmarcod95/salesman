@@ -95530,6 +95530,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -95542,6 +95559,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 suffix: '',
                 email: '',
                 address: '',
+                location: '',
+                vendor_code: '',
                 contact_number: '',
                 date_of_birth: '',
                 date_hired: '',
@@ -95551,11 +95570,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 company: ''
             },
             companies: [],
+            locations: [],
             errors: []
         };
     },
     created: function created() {
         this.fetchCompanies();
+        this.fetchLocations();
     },
 
     methods: {
@@ -95568,8 +95589,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this.errors = error.response.data.errors;
             });
         },
-        addTsr: function addTsr(tsr) {
+        fetchLocations: function fetchLocations() {
             var _this2 = this;
+
+            axios.get('/locations').then(function (response) {
+                _this2.locations = response.data;
+            }).catch(function (error) {
+                _this2.errors = error.response.data.errors;
+            });
+        },
+        addTsr: function addTsr(tsr) {
+            var _this3 = this;
 
             axios.post('/tsr', {
                 last_name: tsr.last_name,
@@ -95585,12 +95615,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 contact_person: tsr.contact_person,
                 personal_email: tsr.personal_email,
                 plate_number: tsr.plate_number,
-                company: tsr.company
+                company: tsr.company,
+                location: tsr.location,
+                vendor_code: tsr.vendor_code
 
             }).then(function (response) {
                 window.location.href = response.data.redirect;
             }).catch(function (error) {
-                _this2.errors = error.response.data.errors;
+                _this3.errors = error.response.data.errors;
             });
         }
     }
@@ -95885,6 +95917,107 @@ var render = function() {
                               _vm._v(_vm._s(_vm.errors.company[0]))
                             ])
                           : _vm._e()
+                      ])
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "row" }, [
+                    _c("div", { staticClass: "col-lg-6" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "form-control-label",
+                            attrs: { for: "role" }
+                          },
+                          [_vm._v("Location")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.tsr.location,
+                                expression: "tsr.location"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.tsr,
+                                  "location",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          _vm._l(_vm.locations, function(location, l) {
+                            return _c(
+                              "option",
+                              { key: l, domProps: { value: location.id } },
+                              [_vm._v(" " + _vm._s(location.name))]
+                            )
+                          })
+                        ),
+                        _vm._v(" "),
+                        _vm.errors.location
+                          ? _c("span", { staticClass: "text-danger" }, [
+                              _vm._v(_vm._s(_vm.errors.location[0]))
+                            ])
+                          : _vm._e()
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-lg-6" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "form-control-label",
+                            attrs: { for: "input-last-name" }
+                          },
+                          [_vm._v("Vendor Code")]
+                        ),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.tsr.vendor_code,
+                              expression: "tsr.vendor_code"
+                            }
+                          ],
+                          staticClass: "form-control form-control-alternative",
+                          attrs: { type: "text", id: "vendor-code" },
+                          domProps: { value: _vm.tsr.vendor_code },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.tsr,
+                                "vendor_code",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
                       ])
                     ])
                   ])
@@ -96482,6 +96615,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['tsrId'],
@@ -96489,12 +96639,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         return {
             tsr: [],
             companies: [],
+            locations: [],
             errors: []
         };
     },
     created: function created() {
         this.fetchTsr();
         this.fetchCompanies();
+        this.fetchLocations();
     },
 
     methods: {
@@ -96507,17 +96659,26 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this.errors = error.response.data.errors;
             });
         },
-        fetchTsr: function fetchTsr() {
+        fetchLocations: function fetchLocations() {
             var _this2 = this;
 
-            axios.get('/tsr/show/' + this.tsrId).then(function (response) {
-                _this2.tsr = response.data;
+            axios.get('/locations').then(function (response) {
+                _this2.locations = response.data;
             }).catch(function (error) {
                 _this2.errors = error.response.data.errors;
             });
         },
-        updateTsr: function updateTsr(tsr) {
+        fetchTsr: function fetchTsr() {
             var _this3 = this;
+
+            axios.get('/tsr/show/' + this.tsrId).then(function (response) {
+                _this3.tsr = response.data;
+            }).catch(function (error) {
+                _this3.errors = error.response.data.errors;
+            });
+        },
+        updateTsr: function updateTsr(tsr) {
+            var _this4 = this;
 
             axios.patch('/tsr/' + tsr.id, {
                 last_name: tsr.last_name,
@@ -96533,11 +96694,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 contact_person: tsr.contact_person,
                 personal_email: tsr.personal_email,
                 plate_number: tsr.plate_number,
-                company: tsr.company_id
+                company: tsr.company_id,
+                location: tsr.user.location[0].id,
+                vendor_code: tsr.user.vendor.vendor_code
+
             }).then(function (response) {
                 window.location.href = response.data.redirect;
             }).catch(function (error) {
-                _this3.errors = error.response.data.errors;
+                _this4.errors = error.response.data.errors;
             });
         }
     }
@@ -96820,6 +96984,107 @@ var render = function() {
                               _vm._v(_vm._s(_vm.errors.company[0]))
                             ])
                           : _vm._e()
+                      ])
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "row" }, [
+                    _c("div", { staticClass: "col-lg-6" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "form-control-label",
+                            attrs: { for: "role" }
+                          },
+                          [_vm._v("Location")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.tsr.user.location[0].id,
+                                expression: "tsr.user.location[0].id"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.tsr.user.location[0],
+                                  "id",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          _vm._l(_vm.locations, function(location, l) {
+                            return _c(
+                              "option",
+                              { key: l, domProps: { value: location.id } },
+                              [_vm._v(" " + _vm._s(location.name))]
+                            )
+                          })
+                        ),
+                        _vm._v(" "),
+                        _vm.errors.location
+                          ? _c("span", { staticClass: "text-danger" }, [
+                              _vm._v(_vm._s(_vm.errors.location[0]))
+                            ])
+                          : _vm._e()
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-lg-6" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "form-control-label",
+                            attrs: { for: "input-last-name" }
+                          },
+                          [_vm._v("Vendor Code")]
+                        ),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.tsr.user.vendor.vendor_code,
+                              expression: "tsr.user.vendor.vendor_code"
+                            }
+                          ],
+                          staticClass: "form-control form-control-alternative",
+                          attrs: { type: "text", id: "vendor-code" },
+                          domProps: { value: _vm.tsr.user.vendor.vendor_code },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.tsr.user.vendor,
+                                "vendor_code",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
                       ])
                     ])
                   ])

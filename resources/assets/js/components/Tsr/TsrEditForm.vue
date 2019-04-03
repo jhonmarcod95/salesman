@@ -14,7 +14,7 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <form>
+                            <form> 
                                 <h6 class="heading-small text-muted mb-4">Personal information</h6>
                                 <div class="pl-lg-4">
                                     <div class="row">
@@ -59,6 +59,23 @@
                                                     <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
                                                 </select>
                                                 <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="role">Location</label>
+                                                <select class="form-control" v-model="tsr.user.location[0].id">
+                                                    <option v-for="(location,l) in locations" v-bind:key="l" :value="location.id"> {{ location.name }}</option>
+                                                </select>
+                                                <span class="text-danger" v-if="errors.location  ">{{ errors.location[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="input-last-name">Vendor Code</label>
+                                                <input type="text" id="vendor-code" class="form-control form-control-alternative" v-model="tsr.user.vendor.vendor_code">
                                             </div>
                                         </div>
                                     </div>
@@ -146,18 +163,29 @@ export default {
         return{
             tsr: [],
             companies: [],
+            locations: [],
             errors: []
         }
     },
     created(){
         this.fetchTsr();
         this.fetchCompanies();
+        this.fetchLocations();
     },
     methods: {
         fetchCompanies(){
             axios.get('/companies-all')
             .then(response => { 
                 this.companies = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
+        fetchLocations(){
+            axios.get('/locations')
+            .then(response => { 
+                this.locations = response.data;
             })
             .catch(error => { 
                 this.errors = error.response.data.errors;
@@ -188,6 +216,9 @@ export default {
                 personal_email: tsr.personal_email,
                 plate_number: tsr.plate_number,
                 company: tsr.company_id,
+                location: tsr.user.location[0].id,
+                vendor_code: tsr.user.vendor.vendor_code,
+
             })
             .then(response => {
                 window.location.href = response.data.redirect;

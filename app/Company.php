@@ -17,4 +17,8 @@ class Company extends Model
     public function glTaxcode(){
         return $this->hasMany(GlTaxcode::class, 'company_code', 'code');
     }
+
+    public function sapServers() {
+        return $this->belongsToMany(SapServer::class);
+    }
 }

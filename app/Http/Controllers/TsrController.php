@@ -7,7 +7,8 @@ use App\TechnicalSalesRepresentative;
 use App\{
     User,
     Role,
-    Message
+    Message,
+    SalesmanVendor
 };
 use Illuminate\Http\Request;
 
@@ -83,7 +84,9 @@ class TsrController extends Controller
             'address' => 'required',
             'contact_number' => 'required',
             'date_of_birth' => 'required',
-            'company' => 'required'
+            'company' => 'required',
+            'location' => 'required',
+            'vendor_code' => 'required'
         ]);
 
 
@@ -120,6 +123,15 @@ class TsrController extends Controller
                 $user->syncRoles($tsrRole);
                 // Assigning of companies
                 $user->companies()->sync( (array) $request->company);
+                // Assigning of locations
+                $user->location()->sync( (array) $request->location);
+                // Insert to salesman vendor table
+                $array = [
+                    'user_id' => $user->id,
+                    'vendor_code' => $request->vendor_code,
+                    'sap_server' =>  $user->company->sapServers[0]->sap_server
+                ];
+                SalesmanVendor::create($array);
                 // Insert user_id in tsr table
                 $tsr->update(['user_id'=> $user->id]);
                 return ['redirect' => route('tsr_list')];
@@ -154,7 +166,7 @@ class TsrController extends Controller
      */
     public function show($id)
     {
-        return TechnicalSalesRepresentative::findOrFail($id);
+        return TechnicalSalesRepresentative::with('user.location', 'user.vendor')->where('id',$id)->first();
     }
 
     /**
@@ -172,7 +184,9 @@ class TsrController extends Controller
             'address' => 'required',
             'contact_number' => 'required',
             'date_of_birth' => 'required',
-            'company' => 'required'
+            'company' => 'required',
+            'location' => 'required',
+            'vendor_code' => 'required'
         ]);
 
         $technicalSalesRepresentative->last_name = $request->last_name;
@@ -193,13 +207,26 @@ class TsrController extends Controller
 
         if($technicalSalesRepresentative->save()){
 
-            $user = User::find($technicalSalesRepresentative->user_id);
+            $user = User::findOrFail($technicalSalesRepresentative->user_id);
             $user->name = $technicalSalesRepresentative->first_name. ' ' .$technicalSalesRepresentative->last_name;
             $user->email = $technicalSalesRepresentative->email;
             $user->company_id = $request->company;
-            $user->save();
-
-            return ['redirect' => route('tsr_list')];
+            if($user->save()){
+                // Assigning of companies
+                $user->companies()->sync( (array) $request->company);
+                // Assigning of locations
+                $user->location()->sync( (array) $request->location);
+                // Update to salesman vendor table
+                $array = [
+                    'user_id' => $user->id,
+                    'vendor_code' => $request->vendor_code,
+                    'sap_server' =>  $user->company->sapServers[0]->sap_server
+                ];
+                $salemanVendor = SalesmanVendor::where('user_id', $user->id)->first();
+                $salemanVendor->update($array);
+                
+                return ['redirect' => route('tsr_list')];
+            }
         }
     }
 
