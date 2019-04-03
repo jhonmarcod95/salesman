@@ -88691,7 +88691,9 @@ var render = function() {
                                   ]),
                                   _vm._v(" "),
                                   _c("td", [
-                                    _vm._v(_vm._s(simulatedExpense.charge_type))
+                                    _vm._v(
+                                      _vm._s(simulatedExpense.charge_type.name)
+                                    )
                                   ]),
                                   _vm._v(" "),
                                   _c("td", [
@@ -102635,7 +102637,33 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+;
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
         return {
@@ -102648,18 +102676,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             errors: [],
             keywords: '',
             currentPage: 0,
-            itemsPerPage: 10
+            itemsPerPage: 10,
+            internal_order_copied_charge_type: '',
+            default_expense_type: '',
+            default_amount: '',
+            servers: [],
+            expense_id: ''
         };
     },
     created: function created() {
         this.fetchInternalOrders();
         this.fetchTsrs();
         this.fetchExpensesTypes();
+        this.fetchServer();
     },
 
     methods: {
+        getExpenseRate: function getExpenseRate(internalOrder) {
+            var amount = '';
+            internalOrder.user.expense_rate.findIndex(function (element) {
+                if (element.expenses_type_id == internalOrder.charge_type.expense_charge_type.expense_type.id) {
+                    amount = element.amount;
+                }
+            });
+            return amount;
+        },
         copyObject: function copyObject(internalOrder) {
+            this.errors = [];
             this.internal_order_copied = Object.assign({}, internalOrder);
+            this.internal_order_copied_charge_type = this.internal_order_copied.charge_type.name;
+            this.default_expense_type = internalOrder.charge_type.expense_charge_type.expense_type.id;
+            this.default_amount = this.getExpenseRate(internalOrder);
         },
         getInternalOrderId: function getInternalOrderId(id) {
             this.internal_order_id = id;
@@ -102691,55 +102738,69 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this3.errors = error.response.data.errors;
             });
         },
-        addInternalOrder: function addInternalOrder(internal_order) {
+        fetchServer: function fetchServer() {
             var _this4 = this;
 
+            axios.get('/sap/server').then(function (response) {
+                _this4.servers = response.data;
+            }).catch(function (error) {
+                _this4.errors = response.data.errors;
+            });
+        },
+        addInternalOrder: function addInternalOrder(internal_order) {
+            var _this5 = this;
+
+            this.errors = [];
             axios.post('/internal-order', {
                 'user_id': internal_order.tsr,
                 'charge_type': internal_order.expense_type,
                 'internal_order': internal_order.internal_order,
-                'sap_server': internal_order.sap_server
+                'sap_server': internal_order.sap_server,
+                'amount': internal_order.amount
             }).then(function (response) {
                 $('#addModal').modal('hide');
                 alert('Internal Order successfully added');
-                _this4.internal_orders.unshift(response.data);
+                _this5.internal_orders.unshift(response.data);
             }).catch(function (error) {
-                _this4.errors = error.response.data.errors;
+                _this5.errors = error.response.data.errors;
             });
         },
-        updateInternalOrder: function updateInternalOrder(internal_order_copied) {
-            var _this5 = this;
+        updateInternalOrder: function updateInternalOrder(internal_order_copied, internal_order_copied_charge_type, default_amount) {
+            var _this6 = this;
 
+            this.errors = [];
             var index = this.internal_orders.findIndex(function (item) {
                 return item.id == internal_order_copied.id;
             });
 
             axios.post('/internal-order/' + internal_order_copied.id, {
                 'user_id': internal_order_copied.user_id,
-                'charge_type': internal_order_copied.charge_type,
+                'charge_type': internal_order_copied_charge_type,
                 'internal_order': internal_order_copied.internal_order,
                 'sap_server': internal_order_copied.sap_server,
+                'amount': default_amount,
+                'default_expense_type': this.default_expense_type,
                 '_method': 'PATCH'
             }).then(function (response) {
                 $('#editModal').modal('hide');
                 alert('Internal Order successfully updated');
-                _this5.internal_orders.splice(index, 1, response.data);
+                _this6.internal_orders.splice(index, 1, response.data);
             }).catch(function (error) {
-                _this5.errors = error.response.data.errors;
+                _this6.errors = error.response.data.errors;
             });
         },
         deleteInternalOrder: function deleteInternalOrder() {
-            var _this6 = this;
+            var _this7 = this;
 
             var index = this.internal_orders.findIndex(function (item) {
-                return item.id == _this6.internal_order_id;
+                return item.id == _this7.internal_order_id;
             });
             axios.delete('/internal-order/' + this.internal_order_id).then(function (response) {
                 $('#deleteModal').modal('hide');
                 alert('Internal Order successfully deleted');
-                _this6.internal_orders.splice(index, 1);
+                _this7.internal_orders.splice(index, 1);
             }).catch(function (error) {
-                _this6.errors = error.response.data.errors;
+                _this7.errors = error.response.data.errors;
             });
         },
         setPage: function setPage(pageNumber) {
@@ -102757,11 +102818,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     computed: {
         filteredInternalOrders: function filteredInternalOrders() {
-            var _this7 = this;
+            var _this8 = this;
 
             var self = this;
             return self.internal_orders.filter(function (internal_order) {
-                return internal_order.user.name.toLowerCase().includes(_this7.keywords.toLowerCase());
+                return internal_order.user.name.toLowerCase().includes(_this8.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -102892,7 +102953,22 @@ var render = function() {
                         _vm._v(" "),
                         _c("td", [_vm._v(_vm._s(internalOrder.user.name))]),
                         _vm._v(" "),
-                        _c("td", [_vm._v(_vm._s(internalOrder.charge_type))]),
+                        _c("td", [
+                          _vm._v(
+                            _vm._s(
+                              internalOrder.charge_type.expense_charge_type
+                                .expense_type.name
+                            )
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("td", [
+                          _vm._v(_vm._s(internalOrder.charge_type.name))
+                        ]),
+                        _vm._v(" "),
+                        _c("td", [
+                          _vm._v(_vm._s(_vm.getExpenseRate(internalOrder)))
+                        ]),
                         _vm._v(" "),
                         _c("td", [
                           _vm._v(_vm._s(internalOrder.internal_order))
@@ -103180,18 +103256,80 @@ var render = function() {
                         [_vm._v("SAP Server")]
                       ),
                       _vm._v(" "),
+                      _c(
+                        "select",
+                        {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.internal_order.sap_server,
+                              expression: "internal_order.sap_server"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          on: {
+                            change: function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.$set(
+                                _vm.internal_order,
+                                "sap_server",
+                                $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              )
+                            }
+                          }
+                        },
+                        _vm._l(_vm.servers, function(server, s) {
+                          return _c(
+                            "option",
+                            { key: s, domProps: { value: server.sap_server } },
+                            [_vm._v(_vm._s(server.sap_server))]
+                          )
+                        })
+                      ),
+                      _vm._v(" "),
+                      _vm.errors.sap_server
+                        ? _c("span", { staticClass: "text-danger small" }, [
+                            _vm._v(_vm._s(_vm.errors.sap_server[0]))
+                          ])
+                        : _vm._e()
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-md-12" }, [
+                    _c("div", { staticClass: "form-group" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "form-control-label",
+                          attrs: { for: "amount" }
+                        },
+                        [_vm._v("Amount")]
+                      ),
+                      _vm._v(" "),
                       _c("input", {
                         directives: [
                           {
                             name: "model",
                             rawName: "v-model",
-                            value: _vm.internal_order.sap_server,
-                            expression: "internal_order.sap_server"
+                            value: _vm.internal_order.amount,
+                            expression: "internal_order.amount"
                           }
                         ],
                         staticClass: "form-control form-control-alternative",
-                        attrs: { type: "text", id: "sap_server" },
-                        domProps: { value: _vm.internal_order.sap_server },
+                        attrs: { type: "text", id: "amount" },
+                        domProps: { value: _vm.internal_order.amount },
                         on: {
                           input: function($event) {
                             if ($event.target.composing) {
@@ -103199,16 +103337,16 @@ var render = function() {
                             }
                             _vm.$set(
                               _vm.internal_order,
-                              "sap_server",
+                              "amount",
                               $event.target.value
                             )
                           }
                         }
                       }),
                       _vm._v(" "),
-                      _vm.errors.sap_server
+                      _vm.errors.amount
                         ? _c("span", { staticClass: "text-danger small" }, [
-                            _vm._v(_vm._s(_vm.errors.sap_server[0]))
+                            _vm._v(_vm._s(_vm.errors.amount[0]))
                           ])
                         : _vm._e()
                     ])
@@ -103293,6 +103431,7 @@ var render = function() {
                             }
                           ],
                           staticClass: "form-control",
+                          attrs: { disabled: "" },
                           on: {
                             change: function($event) {
                               var $$selectedVal = Array.prototype.filter
@@ -103354,8 +103493,8 @@ var render = function() {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.internal_order_copied.charge_type,
-                              expression: "internal_order_copied.charge_type"
+                              value: _vm.internal_order_copied_charge_type,
+                              expression: "internal_order_copied_charge_type"
                             }
                           ],
                           staticClass: "form-control",
@@ -103369,13 +103508,10 @@ var render = function() {
                                   var val = "_value" in o ? o._value : o.value
                                   return val
                                 })
-                              _vm.$set(
-                                _vm.internal_order_copied,
-                                "charge_type",
-                                $event.target.multiple
-                                  ? $$selectedVal
-                                  : $$selectedVal[0]
-                              )
+                              _vm.internal_order_copied_charge_type = $event
+                                .target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
                             }
                           }
                         },
@@ -103465,37 +103601,93 @@ var render = function() {
                         [_vm._v("SAP Server")]
                       ),
                       _vm._v(" "),
+                      _c(
+                        "select",
+                        {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.internal_order_copied.sap_server,
+                              expression: "internal_order_copied.sap_server"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          on: {
+                            change: function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.$set(
+                                _vm.internal_order_copied,
+                                "sap_server",
+                                $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              )
+                            }
+                          }
+                        },
+                        _vm._l(_vm.servers, function(server, s) {
+                          return _c(
+                            "option",
+                            { key: s, domProps: { value: server.sap_server } },
+                            [_vm._v(_vm._s(server.sap_server))]
+                          )
+                        })
+                      ),
+                      _vm._v(" "),
+                      _vm.errors.sap_server
+                        ? _c("span", { staticClass: "text-danger small" }, [
+                            _vm._v(_vm._s(_vm.errors.sap_server[0]))
+                          ])
+                        : _vm._e()
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-md-12" }, [
+                    _c("div", { staticClass: "form-group" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "form-control-label",
+                          attrs: { for: "amount" }
+                        },
+                        [_vm._v("Amount")]
+                      ),
+                      _vm._v(" "),
                       _c("input", {
                         directives: [
                           {
                             name: "model",
                             rawName: "v-model",
-                            value: _vm.internal_order_copied.sap_server,
-                            expression: "internal_order_copied.sap_server"
+                            value: _vm.default_amount,
+                            expression: "default_amount"
                           }
                         ],
                         staticClass: "form-control form-control-alternative",
-                        attrs: { type: "text", id: "sap_server" },
-                        domProps: {
-                          value: _vm.internal_order_copied.sap_server
-                        },
+                        attrs: { type: "text", id: "amount" },
+                        domProps: { value: _vm.default_amount },
                         on: {
                           input: function($event) {
                             if ($event.target.composing) {
                               return
                             }
-                            _vm.$set(
-                              _vm.internal_order_copied,
-                              "sap_server",
-                              $event.target.value
-                            )
+                            _vm.default_amount = $event.target.value
                           }
                         }
                       }),
                       _vm._v(" "),
-                      _vm.errors.sap_server
+                      _vm.errors.amount
                         ? _c("span", { staticClass: "text-danger small" }, [
-                            _vm._v(_vm._s(_vm.errors.sap_server[0]))
+                            _vm._v(_vm._s(_vm.errors.amount[0]))
                           ])
                         : _vm._e()
                     ])
@@ -103519,7 +103711,11 @@ var render = function() {
                     staticClass: "btn btn-primary",
                     on: {
                       click: function($event) {
-                        _vm.updateInternalOrder(_vm.internal_order_copied)
+                        _vm.updateInternalOrder(
+                          _vm.internal_order_copied,
+                          _vm.internal_order_copied_charge_type,
+                          _vm.default_amount
+                        )
                       }
                     }
                   },
@@ -103623,7 +103819,11 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("User")]),
         _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Expense Type")]),
+        _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Charge Type")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Amount")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Internal Order")]),
         _vm._v(" "),

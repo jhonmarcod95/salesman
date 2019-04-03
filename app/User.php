@@ -100,4 +100,8 @@ class User extends Authenticatable implements Auditable
     public function location(){
         return $this->belongsToMany(Location::class);
     }
+
+    public function expenseRate(){
+        return $this->hasMany(ExpenseRate::class);
+    }
 }
