@@ -31,7 +31,11 @@ class SalesmanInternalOrderController extends Controller
      */
     public function indexData()
     {
-        return SalesmanInternalOrder::with('user','user.expenseRate','chargeType.expenseChargeType.expenseType')->orderBy('id', 'desc')->get();
+        return SalesmanInternalOrder::with('user', 'user.expenseRate', 'chargeType.expenseChargeType.expenseType')
+            ->whereHas('user', function ($q){
+                $q->where('company_id', Auth::user()->companies->pluck('id'));
+            })
+            ->orderBy('id', 'desc')->get();
     }
 
     /**

@@ -282,7 +282,6 @@ class ScheduleController extends Controller
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                 });
             })->where('date', Carbon\Carbon::now()->toDateString())->get();
-    
         }
 
         return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
