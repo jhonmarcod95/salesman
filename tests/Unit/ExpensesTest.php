@@ -12,6 +12,7 @@ use App\ExpenseRate;
 use App\ExpensesType;
 use App\ExpenseChargeType;
 use App\SalesmanInternalOrder;
+use Ixudra\Curl\Facades\Curl;
 
 class ExpensesTest extends TestCase
 {
@@ -89,9 +90,38 @@ class ExpensesTest extends TestCase
     public function testCheckUserBalance()
     {
         // given values
-        $user = 35; // Auth::user()->id
+        $user = 40; // Auth::user()->id // ale paez
 
-        $internalOrders = SalesmanInternalOrder::where('user_id', $user);
+        $internalOrders = SalesmanInternalOrder::orderBy('id', 'DESC')->where('user_id', $user);
+
+        $expenseBalances = array();
+
+         foreach($internalOrders->get() as $internalOrder) {
+
+            // SAP API
+            $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
+            ->withContentType('application/x-www-form-urlencoded')
+            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+            ->post();
+
+            $toJson = json_decode($response, true);
+
+            // Expense Charge Type
+            $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
+
+            $data = array(
+                'id' => $internalOrder->id,
+                'charge_type' => $internalOrder->charge_type,
+                'internal_order' => $internalOrder->internal_order,
+                'expense_type' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->name : null,
+                'sap_server' => $internalOrder->sap_server,
+                'balance' => (double) $toJson[0]['balance_amount']
+            );
+            array_push($expenseBalances,$data);
+
+        }
+
+        //  echo json_encode($expenseBalances, JSON_PRETTY_PRINT);
 
         //assert if has value & count result
         $this->assertGreaterThan(0, $internalOrders->count());

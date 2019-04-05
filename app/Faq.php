@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Faq extends Model
 {
-    protected $model = [
+    protected $fillable = [
+        'user_id',
         'question',
         'answer'
     ];
