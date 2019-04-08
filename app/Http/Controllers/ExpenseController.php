@@ -259,9 +259,8 @@ class ExpenseController extends Controller
 
         if($expenseEntry){
             $tsr = User::findOrFail($expenseEntry->user_id);
-            $tsr_company_code = $tsr->companies->pluck('code');
-            $sap_user = SapUser::where('user_id', Auth::user()->id)->where('sap_server', $tsr_company_code)->first();
-            $sap_server = SapServer::where('sap_server', $tsr_company_code)->first();
+            $sap_server = $tsr->companies[0]->sapServers[0];
+            $sap_user = SapUser::where('user_id', Auth::user()->id)->where('sap_server', $sap_server->sap_server)->first();
             $header_query = PaymentHeader::where('ap_user', $sap_user->sap_id)->get()->last();
             $reference_number = '000000000';
             if($header_query){
