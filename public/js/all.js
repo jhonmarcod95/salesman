@@ -84095,10 +84095,10 @@ var render = function() {
                       staticStyle: { "font-size": "20px" }
                     }),
                     _vm._v(" "),
-                    _c("span", [_vm._v(" - Fully Posted")]),
+                    _c("span", [_vm._v(" - Partially Posted")]),
                     _vm._v(" "),
                     _c("i", {
-                      staticClass: "fab fa-font-awesome-flag text-yellow pl-4",
+                      staticClass: "fab fa-font-awesome-flag text-danger pl-4",
                       staticStyle: { "font-size": "20px" }
                     }),
                     _vm._v(" "),
@@ -84127,7 +84127,7 @@ var render = function() {
                           _vm._v(" "),
                           _c("li", { staticClass: "page-item" }, [
                             _vm._v(
-                              "npm run\n                                    Page " +
+                              "\n                                    Page " +
                                 _vm._s(_vm.currentPage + 1) +
                                 " of " +
                                 _vm._s(_vm.totalPages) +
