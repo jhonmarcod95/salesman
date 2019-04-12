@@ -14,6 +14,7 @@ class ReceiptExpense extends Model
         'vendor_address',
         'tin_number',
         'date_receipt',
+        'tin_number_extend',
     ];
 
     public function user() {

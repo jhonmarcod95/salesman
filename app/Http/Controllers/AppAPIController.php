@@ -587,6 +587,7 @@ class AppAPIController extends Controller
         $receiptExpense->receipt_type_id = $request->input('receipt_type_id') ?: 0;
         $receiptExpense->receipt_number = $request->input('receipt_number');
         $receiptExpense->date_receipt = $request->input('date_receipt');
+        $receiptExpense->tin_number_extend = $request->input('tin_number_extend');
 
        if($existingTinNumber) {
             $receiptExpense->tin_number = $existingTinNumber->tin_number;
@@ -638,6 +639,7 @@ class AppAPIController extends Controller
         $receiptExpense->receipt_type_id = $request->input('receipt_type_id');
         $receiptExpense->receipt_number = $request->input('receipt_number');
         $receiptExpense->date_receipt = $request->input('date_receipt');
+        $receiptExpense->tin_number_extend = $request->input('tin_number_extend');
 
        if($existingTinNumber) {
             $receiptExpense->tin_number = $existingTinNumber->tin_number;
