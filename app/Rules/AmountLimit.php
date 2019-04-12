@@ -93,11 +93,11 @@ class AmountLimit implements Rule
 
             // If user has SAP budget line assigned
             if($maintainedExpenseRate->exists()) {
-                return $this->io_balance != 'N/A' ? $budgetBalanceCurrent > 0 &&
+                return $this->io_balance != 'N/A' ? $budgetBalanceCurrent >= 0 &&
                     $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first() :
                     $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first();
             } else {
-                return $this->io_balance != 'N/A' ? $budgetBalanceCurrent > 0 &&
+                return $this->io_balance != 'N/A' ? $budgetBalanceCurrent >= 0 &&
                     $this->getTodaysExpense($value) <= $defaultExpenseRate :
                     $this->getTodaysExpense($value) <= $defaultExpenseRate;
             }
