@@ -15,7 +15,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <h5>Technical Sales Representative</h5>
+                            <h5>Sales Personnel</h5>
                             {!! Form::select('user_id', $tsrs, null, ['class' => 'addScheduleModalSel2']) !!}
                         </div>
                     </div>
@@ -34,7 +34,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <h5>Customer</h5>
-                                {!! Form::select('customer_codes[]', $customers, null, ['class' => 'addScheduleModalSel2', 'multiple', 'required']) !!}
+                                <select id="sel-customer-codes" style="width: 100%" name="customer_codes[]" multiple required></select>
                             </div>
                         </div>
                     </div>
@@ -139,7 +139,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <h5>Technical Sales Representative</h5>
+                            <h5>Sales Personnel</h5>
                             {!! Form::text('tsr_name', null, ['id' => 'tsr_name', 'class' => 'form-control', 'disabled']) !!}
                             {!! Form::hidden('user_id', null, ['id' => 'user_id']) !!}
                         </div>

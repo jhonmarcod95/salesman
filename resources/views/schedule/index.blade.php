@@ -21,22 +21,8 @@
                             </div>
 
                             <div class="col-md-7">
-                                <label>Technical Sales Representative</label>
+                                <label>Sales Personnel</label>
                                 {!! Form::select('tsrs[]', $tsrs, null, ['class' => 'sel2', 'multiple']) !!}
-                            </div>
-
-                        </div>
-
-                        <div class="row">
-
-                            <div class="col-md-3">
-                            </div>
-
-                            <div class="col-md-7">
-                                <div class="form-group">
-                                    <label>Customer</label>
-                                    {!! Form::select('customer_codes[]', $customers, null, ['class' => 'sel2', 'multiple', 'required']) !!}
-                                </div>
                             </div>
 
                             <div class="col-md-2">
@@ -62,6 +48,27 @@
 
 @section('script')
     <script>
+
+        /*------------------------- fetch customers to select elem -------------------------*/
+        function retrieveCustomers(selectId, classification) {
+            $.ajax({
+                type:'GET',
+                url: 'schedule-customer/' + classification,
+                dataType: 'json',
+                success: function(data){
+                    var customers = $(selectId);
+                    customers.empty();
+                    $(selectId).empty();
+
+                    for(let customer of data){
+                        customers.append('<option value=' + customer.customer_code + '>' + customer.name + '</option>');
+                    }
+                    customers.change();
+                    customers.select2();
+                }
+            });
+        }
+        /*------------------------------------------------------------------------------------*/
 
         /*-------------------------- reset modal and its contents ----------------------------*/
         function resetModal() {
@@ -255,8 +262,9 @@
         }
         /*-----------------------------------------------------------------------------------*/
 
+        /*-------------------- sched type event in add & update modal -----------------------*/
         function setModalElementVisibility(type){
-            if(type == 1){
+            if(type == 1 || type == 5){ //customer and office
                 $("#add_customer_schedule").show();
                 $("#add_mapping_event_schedule").hide();
 
@@ -276,14 +284,21 @@
             $('#calendar').fullCalendar('gotoDate', date);
         }
 
-        //sched type event in add & update modal
         $('#sel_add_sched_type, #sel_update_sched_type').on('select2:select', function (e) {
             var type = e.params.data.id;
 
             /* revise this code, radius must be defined in schedule type table */
-            if(type == '1'){
+            if(type == '1'){ // customer
                 $("#radius-add").val('5');
                 $("#radius-update").val('5');
+
+                retrieveCustomers('#sel-customer-codes', null);
+            }
+            else if(type == '5'){ // office
+                $("#radius-add").val('1');
+                $("#radius-update").val('1');
+
+                retrieveCustomers('#sel-customer-codes', 6);
             }
             else{
                 $("#radius-add").val('10');
@@ -292,7 +307,7 @@
 
             setModalElementVisibility(type);
         });
-
+        /*-----------------------------------------------------------------------------------*/
 
         /****************************************************
          * ************* CALENDAR EVENTS ***************
@@ -406,10 +421,6 @@
 
             // retrieveSchedules(currentDate);
         });
-
-
-
-
 
     </script>
 

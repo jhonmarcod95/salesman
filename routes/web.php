@@ -42,6 +42,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
 
+    Route::get('/schedule-customer/{classification}', 'ScheduleController@scheduleCustomerData');
+
     Route::post('/schedules/store', 'ScheduleController@store');
     Route::patch('/schedules/update/{id}', 'ScheduleController@update');
     Route::patch('/schedules/change/{id}', 'ScheduleController@change');
