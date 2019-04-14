@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TransportationResource;
 use App\RouteTransportation;
 use App\Transportation;
+use Illuminate\Support\Facades\Auth;
 
 class RouteTransportationsController extends Controller
 {
@@ -35,7 +36,16 @@ class RouteTransportationsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request, [
+            'from' => 'required',
+            'to' => 'required',
+            'fare' => 'required',
+        ]);
+
+        $routeTransportation = Auth::user()->routeTransportations()->create($request->all());
+
+        return $routeTransportation;
+
     }
 
     /**

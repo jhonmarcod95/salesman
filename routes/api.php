@@ -17,6 +17,10 @@ use Illuminate\Http\Request;
 Route::post('register', 'AuthController@register');
 Route::post('login', 'AuthController@login');
 
+
+Route::post('transportations','API\RouteTransportationsController@store');
+
+
 // Route API setup for Mobile Client
 Route::group(['middleware' => 'auth:api'], function() {
 
@@ -74,6 +78,10 @@ Route::group(['middleware' => 'auth:api'], function() {
     // Expense Representation API
     Route::post('receipt/representation','API\ExpenseRepresentationController@store');
 
+
+
+    // Transportation API
+    Route::get('transportations','API\RouteTransportationsController@transportations');
 
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');

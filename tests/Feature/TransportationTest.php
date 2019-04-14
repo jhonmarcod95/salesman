@@ -11,8 +11,12 @@ class TransportationTest extends TestCase
    /**
     * @test
     */
-    public function transportations()
+    public function can_return_collection_of_transportation()
     {
-
+        $response = $this->json('GET','api/transportations');
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            [ 'id','mode' ]
+        ]);
     }
 }
