@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Expense extends Model 
+class Expense extends Model
 {
     protected $fillable = [
         'amount',
@@ -16,7 +16,7 @@ class Expense extends Model
     //     'created_at',
     //     'updated_at'
     // ];
- 
+
     public function user() {
         return $this->belongsTo(User::class);
     }
@@ -35,5 +35,9 @@ class Expense extends Model
 
     public function receiptExpenses() {
         return $this->hasOne(ReceiptExpense::class);
+    }
+
+    public function routeTransportation() {
+        return $this->hasOne(RouteTransportation::class);
     }
 }

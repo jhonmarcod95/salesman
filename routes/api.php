@@ -81,6 +81,14 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('faqs','API\FaqsControllerAPI@store');
     Route::get('faqs/{faq}','API\FaqsControllerAPI@show');
 
+    // Transportation API
+    Route::get('transportations','API\RouteTransportationsController@transportations');
+
+    //Route Transportation
+    Route::post('routeTransportations','API\RouteTransportationsController@store');
+    Route::post('routeTransportations/{routeTransportation}','API\RouteTransportationsController@update');
+
+
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');
     // Route::get('users','API\UserApiController@index');

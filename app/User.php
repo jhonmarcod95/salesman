@@ -86,7 +86,7 @@ class User extends Authenticatable implements Auditable
     public function vendor(){
         return $this->hasOne(SalesmanVendor::class);
     }
-    
+
     public function receiptExpenses()
     {
         return $this->hasMany(ReceiptExpense::class);
@@ -103,5 +103,10 @@ class User extends Authenticatable implements Auditable
 
     public function expenseRate(){
         return $this->hasMany(ExpenseRate::class);
+    }
+
+    public function routeTransportations()
+    {
+        return $this->hasMany(RouteTransportation::class);
     }
 }
