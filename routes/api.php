@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 Route::post('register', 'AuthController@register');
 Route::post('login', 'AuthController@login');
 
+
 // Route API setup for Mobile Client
 Route::group(['middleware' => 'auth:api'], function() {
 
@@ -74,6 +75,11 @@ Route::group(['middleware' => 'auth:api'], function() {
     // Expense Representation API
     Route::post('receipt/representation','API\ExpenseRepresentationController@store');
 
+    // FAQ API
+    // Route::resource('faqs','API\FaqsControllerAPI');
+    Route::get('faqs','API\FaqsControllerAPI@index');
+    Route::post('faqs','API\FaqsControllerAPI@store');
+    Route::get('faqs/{faq}','API\FaqsControllerAPI@show');
 
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');
