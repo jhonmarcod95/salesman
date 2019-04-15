@@ -96,17 +96,17 @@
                        <div class="card-footer py-4" v-if="this.expenses.length">
                             <span>LEGEND:</span>
                             <i class="fab fa-font-awesome-flag text-success pl-4" style="font-size: 20px;"></i>
-                            <span> - Fully Posted</span>
-                            <i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>
-                            <!--<span> - Partially Posted</span>-->
-                            <!--<i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>-->
+                            <!--<span> - Fully Posted</span>-->
+                            <!--<i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>-->
+                            <span> - Partially Posted</span>
+                            <i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>
                             <span> - Unprocessed</span>
                             <nav aria-label="...">
                                 <ul class="pagination justify-content-end mb-0">
                                     <li class="page-item">
                                         <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
                                     </li>
-                                    <li class="page-item">npm run
+                                    <li class="page-item">
                                         Page {{ currentPage + 1 }} of {{ totalPages }}
                                     </li>
                                     <li class="page-item">
