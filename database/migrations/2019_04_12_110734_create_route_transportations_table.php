@@ -16,11 +16,12 @@ class CreateRouteTransportationsTable extends Migration
         Schema::create('route_transportations', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
+            $table->integer('expense_id')->unsigned();
             $table->integer('transportation_id')->unsigned();
             $table->string('from');
             $table->string('to');
-            $table->double('fare');
-            $table->string('remakrs')->nullable();
+            // $table->double('fare');
+            $table->string('remarks')->nullable();
             $table->timestamps();
         });
     }

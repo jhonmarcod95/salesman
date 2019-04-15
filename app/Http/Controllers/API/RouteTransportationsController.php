@@ -37,12 +37,23 @@ class RouteTransportationsController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
+            'expense_id' => 'required',
+            'transportation_id' => 'required',
             'from' => 'required',
             'to' => 'required',
-            'fare' => 'required',
+            // 'fare' => 'required',
         ]);
 
-        $routeTransportation = Auth::user()->routeTransportations()->create($request->all());
+        // $routeTransportation =  = Auth::user()->routeTransportations()->create($request->all());
+        $routeTransportation = new RouteTransportation;
+        $routeTransportation->user_id = Auth::user()->id;
+        $routeTransportation->from = $request->input('from');
+        $routeTransportation->to = $request->input('to');
+        // $routeTransportation->fare = $request->input('fare');
+        $routeTransportation->remarks = $request->input('remarks');
+        $routeTransportation->expense()->associate($request->input('expense_id'));
+        $routeTransportation->transportation()->associate($request->input('transportation_id'));
+        $routeTransportation->save();
 
         return $routeTransportation;
 
@@ -66,9 +77,17 @@ class RouteTransportationsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, RouteTransportation $routeTransportation)
     {
-        //
+        $this->validate($request,[
+            'from' => 'required',
+            'to' => 'required',
+            // 'fare' => 'required'
+        ]);
+
+        $routeTransportation->update($request->all());
+
+        return $routeTransportation;
     }
 
     /**

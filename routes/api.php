@@ -18,9 +18,6 @@ Route::post('register', 'AuthController@register');
 Route::post('login', 'AuthController@login');
 
 
-Route::post('transportations','API\RouteTransportationsController@store');
-
-
 // Route API setup for Mobile Client
 Route::group(['middleware' => 'auth:api'], function() {
 
@@ -79,9 +76,13 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('receipt/representation','API\ExpenseRepresentationController@store');
 
 
-
     // Transportation API
     Route::get('transportations','API\RouteTransportationsController@transportations');
+
+    //Route Transportation
+    Route::post('routeTransportations','API\RouteTransportationsController@store');
+    Route::post('routeTransportations/{routeTransportation}','API\RouteTransportationsController@update');
+
 
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');

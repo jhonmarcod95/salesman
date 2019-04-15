@@ -9,7 +9,7 @@ class RouteTransportation extends Model
     protected $fillable = [
         'from',
         'to',
-        'fare',
+        // 'fare',
         'remarks'
     ];
 
@@ -21,5 +21,10 @@ class RouteTransportation extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function expense()
+    {
+        return $this->belongsTo(Expense::class);
     }
 }
