@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\CustomerClassification;
 use App\Rules\GeocodeCustomerRule;
 use App\Rules\GeocodeEventRule;
 use Auth;
@@ -43,7 +44,6 @@ class ScheduleController extends Controller
                 'name',
                 'company_user.user_id'
             );
-
 
         $customers = Customer::select(DB::raw("CONCAT(name, ' - ', street) AS name"), 'customer_code')
             ->where('company_id', $company_id)
@@ -116,11 +116,11 @@ class ScheduleController extends Controller
 
         DB::beginTransaction();
         foreach ($dates as $date){
-            #Customer Visit
-            if($schedule_type == '1'){
+            #Customer & Office Visit
+            if($schedule_type == '1' || $schedule_type == '5'){
 
                 $request->validate([
-                    'customer_codes' => [new GeocodeCustomerRule(), 'required'],
+                    'customer_codes' => 'required',
                 ]);
 
                 $customer_codes = $request->customer_codes;
@@ -198,7 +198,7 @@ class ScheduleController extends Controller
         $schedule_type = $request->type;
 
         #Customer Visit
-        if($schedule_type == '1'){
+        if($schedule_type == '1' || $schedule_type == '5'){
             $request->validate([
                 'customer_code' => [new GeocodeCustomerRule(), 'required'],
             ]);
@@ -399,5 +399,25 @@ class ScheduleController extends Controller
         $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
                 cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
         return $angle * $earthRadius;
+    }
+
+    function scheduleCustomerData($classification){
+
+        $company_id = Auth::user()->companies->first()->id; //filter by auth company
+
+        ################################
+        $customers = Customer::select(DB::raw("CONCAT(name, ' - ', street) AS name"), 'customer_code')
+            ->when($classification != 'null', function ($q) use($classification){
+                $q->where('classification', $classification);
+            })
+            ->where('company_id', $company_id)
+            ->get([
+                'name',
+                'customer_code'
+            ]);
+        ################################
+
+        return $customers;
+
     }
 }

@@ -20,7 +20,7 @@ class TsrController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(){
-        session(['header_text' => 'Technical Sales Representative']);
+        session(['header_text' => 'Salesman']);
 
         $message = Message::where('user_id', '!=', Auth::user()->id)->get();
         $notification = 0;  

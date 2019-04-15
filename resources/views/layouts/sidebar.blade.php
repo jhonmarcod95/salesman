@@ -141,7 +141,7 @@
                             <ul class="nav" style="list-style-type: none;">
                                 <li>
                                     <a class="nav-link" href="{{ url('/tsr') }}">
-                                        <i class="ni ni-circle-08 text-pink"></i> TSR
+                                        <i class="ni ni-circle-08 text-pink"></i> Salesman
                                     </a>
                                 </li>
                                 {{-- <li>
