@@ -29,21 +29,26 @@ use DB;
 class AppAPIController extends Controller
 {
     // Expenses App API
-
+    /**
+     * Get unverfied expenses within the current week
+     *
+     * @return json
+     */
     public function getExpenses()  {
         $expenses = Expense::where('user_id',Auth::user()->id)
+                        ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
                         ->where('expenses_entry_id', 0)
                         ->get();
         return expenseResult::collection($expenses);
     }
 
     /**
-     * Get expenses types API
+     * Get all active expense types
      *
      * @return json
      */
     public function getExpensesType() {
-        $expensesType = ExpensesType::all();
+        $expensesType = ExpensesType::whereStatus(1)->get();
         return $expensesType;
     }
 
