@@ -109,4 +109,9 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(RouteTransportation::class);
     }
+
+    public function expenseBypasses()
+    {
+        return $this->hasMany(ExpenseBypass::class);
+    }
 }

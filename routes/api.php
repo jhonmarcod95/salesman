@@ -88,6 +88,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('routeTransportations','API\RouteTransportationsController@store');
     Route::post('routeTransportations/{routeTransportation}','API\RouteTransportationsController@update');
 
+    //Expense Bypass API
+    Route::post('expense-bypass','ExpenseBypassesController@store');
+
 
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');

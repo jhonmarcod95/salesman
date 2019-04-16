@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Expense;
 use App\ExpenseRate;
 use App\ExpensesType;
+use App\ExpenseBypass;
 
 class AmountLimit implements Rule
 {
@@ -83,8 +84,16 @@ class AmountLimit implements Rule
         // daily limit
         $maintainedExpenseRate = ExpenseRate::rateAmount($this->expenses_type_id);
 
+        //Check if user has a expense exception to bypass budget exceeded
+        $expenseBypass = ExpenseBypass::bypass($this->expenses_type_id);
+
         // set default budget total
         $budgetBalanceCurrent = 0;
+
+        // Check if user has expense bypase
+        if($expenseBypass->exists()) {
+            return true;
+        }
 
         // do not proceed if io_balance is empty
         // if io_balance is found

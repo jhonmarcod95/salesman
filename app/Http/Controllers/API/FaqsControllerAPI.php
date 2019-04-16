@@ -30,6 +30,11 @@ class FaqsControllerAPI extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request,[
+            'question' => 'required',
+            'answer' => 'required'
+        ]);
+
         $faq = Faq::create([
             'user_id' => 1,
             'question' => $request->question,
