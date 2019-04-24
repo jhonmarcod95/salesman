@@ -275,5 +275,48 @@ class ExpenseController extends Controller
 
             return array ($data);
         }
+    } 
+    
+    /**
+     * Simulate submitted expenses
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function expensePostedIndex(){
+        
+        session(['header_text' => 'Posted Expenses']);
+
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
+
+        return view('payment-posted.index', compact('notification'));
+    }
+
+
+    /**
+     * Fetch all expense posted
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function expensePostedIndexData(Request $request){
+        $request->validate([
+            'company' => 'required',
+            'startDate' => 'required',
+            'endDate' => 'required'
+        ]);
+
+        return PaymentHeader::with('paymentDetail', 'payments')
+            ->where('company_name', $request->company)
+            ->whereDate('created_at', '>=',  $request->startDate)
+            ->whereDate('created_at' ,'<=', $request->endDate)
+            ->orderBy('id', 'desc')->get();
     }
 }

@@ -39,16 +39,6 @@ class PaymentController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -210,6 +200,7 @@ class PaymentController extends Controller
                         'document_date' => $document_date->format('Y-m-d'),
                         'posting_date' => $posting_date->format('Y-m-d'),
                         'baseline_date' => $baseline_date->format('Y-m-d'),
+                        'document_code' => json_decode($response, true)[0]['return_message_description'],
                     ];
                     if($payment_header = PaymentHeader::create($array_header)){
                         foreach($request->simulatedExpenses as $expense){

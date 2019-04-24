@@ -26,6 +26,9 @@ Vue.component('request-schedule-index', require('./components/Schedule/RequestSc
 // Payment
 Vue.component('payment-index', require('./components/Payment/PaymentIndex.vue'));
 
+// Payment Posted
+Vue.component('payment-posted-index', require('./components/PaymentPosted/PaymentPostedIndex.vue'));
+
 // Companeies
 Vue.component('company-index', require('./components/Company/CompanyIndex.vue'));
 

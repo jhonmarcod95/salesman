@@ -24,4 +24,8 @@ class PaymentHeader extends Model
     public function paymentDetail() {
         return $this->hasMany(PaymentDetail::class);
     }
+
+    public function payments(){
+        return $this->hasMany(Payment::class, 'document_code', 'document_code');
+    }
 }

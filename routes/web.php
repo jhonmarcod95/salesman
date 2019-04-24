@@ -192,6 +192,12 @@ Route::group(['middleware' => ['auth', 'role:ap']], function(){
     // Simulate expenses submitted
     Route::get('/expense-simulate/{id}', 'ExpenseController@simulateExpenseSubmitted');
 
+
+    // Expense Posted
+    Route::get('/expense-posted', 'ExpenseController@expensePostedIndex');
+    Route::post('/expense-posteds', 'ExpenseController@expensePostedIndexData');
+
+
     // Show SAP user page
     Route::get('/sap/account', 'SapUserController@index')->name('sap_user');
     // Show SAP user page

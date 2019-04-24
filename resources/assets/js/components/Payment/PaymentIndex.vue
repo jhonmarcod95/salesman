@@ -340,7 +340,7 @@ export default {
         },
         years () {
             const year = new Date().getFullYear()
-            return Array.from({length: year - 2010}, (value, index) => 2011 + index)
+            return Array.from({length: year - 2015}, (value, index) => 2016 + index)
         },
         expenseSubmittedLink(){
             return window.location.origin+'/expense-submitted/';
@@ -348,7 +348,3 @@ export default {
     },
 }
 </script>
-
-<style>
-
-</style>

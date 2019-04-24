@@ -179,6 +179,11 @@
                         <i class="ni ni-briefcase-24 text-yellow"></i> Payment
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/expense-posted') }}">
+                        <i class="ni ni-basket text-orange"></i> Posted Expenses
+                    </a>
+                </li>
                 @endif
             </ul>
             @endif
