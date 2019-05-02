@@ -56,7 +56,6 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col"></th>
-                                    <th scope="col">ID</th>
                                     <th scope="col">Document Code</th>
                                     <th scope="col">Company Code</th>
                                     <th scope="col">Company Name</th>
@@ -85,7 +84,6 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td> {{ paymentHeader.id }} </td>
                                         <td>{{ paymentHeader.document_code }}</td>
                                         <td>{{ paymentHeader.company_code }}</td>
                                         <td>{{ paymentHeader.company_name }}</td>
