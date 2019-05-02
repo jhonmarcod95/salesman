@@ -19,6 +19,7 @@ class PaymentHeader extends Model
         'document_date',
         'posting_date',
         'baseline_date',
+        'document_code',
     ];
 
     public function paymentDetail() {

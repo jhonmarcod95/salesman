@@ -24,7 +24,7 @@ class CreatePaymentDetailsTable extends Migration
             $table->string('internal_order')->nullable();
             $table->integer('amount');
             $table->string('charge_type')->nullable();
-            $table->string('business_area');
+            $table->string('business_area')->nullable();
             $table->string('or_number')->nullable();
             $table->string('supplier_name')->nullable();
             $table->string('supplier_address')->nullable();
