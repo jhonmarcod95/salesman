@@ -48,6 +48,13 @@
                                 </div>
                                 <div class="col-md-2">
                                     <button class="btn btn-sm btn-primary" @click="fetchPaymentHeaders"> Filter</button>
+                                    <download-excel
+                                        :data   = "paymentHeaders"
+                                        :fields = "json_fields"
+                                        class   = "btn btn-sm btn-default"
+                                        name    = "Posted Expense report.xls">
+                                            Export to excel
+                                    </download-excel>
                                 </div>
                             </div>
                         </div>
@@ -57,6 +64,7 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col">Document Code</th>
+                                    <th scope="col">Amount(PHP)</th>
                                     <th scope="col">Company Code</th>
                                     <th scope="col">Company Name</th>
                                     <th scope="col">Reference Number</th>
@@ -85,6 +93,7 @@
                                             </div>
                                         </td>
                                         <td>{{ paymentHeader.document_code }}</td>
+                                        <td>{{ paymentHeader.payment_detail[0].amount.toString().slice(1)+ '.00' }}</td>
                                         <td>{{ paymentHeader.company_code }}</td>
                                         <td>{{ paymentHeader.company_name }}</td>
                                         <td>{{ paymentHeader.reference_number }}</td>
@@ -281,10 +290,11 @@
 </template>
 <script>
 import moment from 'moment';
-import loader from '../Loader'
+import loader from '../Loader';
+import JsonExcel from 'vue-json-excel';
 
 export default {
-    components: { loader },
+    components: { loader, 'downloadExcel': JsonExcel },
     data(){
         return{
             paymentHeaders: [],
@@ -297,7 +307,27 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
-            loading: false
+            loading: false,
+            json_fields: {
+                'DOCUMENT CODE': 'document_code',
+                'AMOUNT(PHP)': {
+                    callback: (value) => {
+                        return value.payment_detail[0].amount.toString().slice(1) + '.00';
+                    },
+                },
+                'COMPANY CODE': 'company_code',
+                'COMPANY NAME': 'company_name',
+                'REFERENCE NUMBER': 'reference_number',
+                'AP USER': 'ap_user',
+                'VENDOR CODE': 'vendor_code',
+                'VENDOR NAME': 'vendor_name',
+                'DOCUMENT TYPE': 'document_type',
+                'PAYMENT TERMS': 'payment_terms',
+                'HEADER TEXT': 'header_text',
+                'DOCUMENT DATE': 'document_date',
+                'POSTING DATE': 'posting_date',
+                'BASELINE DATE': 'baseline_date',
+            }
         }
     },
     created(){
