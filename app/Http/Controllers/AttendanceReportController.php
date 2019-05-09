@@ -105,78 +105,12 @@ class AttendanceReportController extends Controller
         }else {  $new_schedule = $schedule; }
         return $new_schedule;
     }
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 
      /**
      * Get all area that is current visiting
      *
      * @return \Illuminate\Http\Response
      */
-
     public function visiting(){
         if(Auth::user()->level() < 8){
 
@@ -184,12 +118,17 @@ class AttendanceReportController extends Controller
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                 });
+            })->whereHas('schedule', function ($q){
+                $q->whereNotIn('type', [4,5]);
             })->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
             ->whereNull('sign_out')->orderBy('id','desc')->get();
     
         }
 
-        return Attendance::with('user', 'schedule')->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
+        return Attendance::with('user', 'schedule')
+        ->whereHas('schedule', function ($q){
+            $q->whereNotIn('type', [4,5]);
+        })->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
         ->whereNull('sign_out')->orderBy('id','desc')->get();
 
     }
@@ -206,13 +145,18 @@ class AttendanceReportController extends Controller
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                 });
-            })->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
+            }) ->whereHas('schedule', function ($q){
+                $q->whereNotIn('type', [4,5]);
+            })
+            ->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
             ->whereNotNull('sign_out')->orderBy('id','desc')->get();
     
         }
         
         return Attendance::with('user', 'schedule')->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
-                ->whereNotNull('sign_out')->orderBy('id','desc')->get();
+            ->whereHas('schedule', function ($q){
+                $q->whereNotIn('type', [4,5]);
+            })->whereNotNull('sign_out')->orderBy('id','desc')->get();
     }
 
 }

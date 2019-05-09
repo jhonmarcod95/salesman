@@ -102704,7 +102704,7 @@ exports = module.exports = __webpack_require__(3)(false);
 
 
 // module
-exports.push([module.i, "\n@media (min-width: 768px) {\n.modal-xl {\n        width: 90%;\n    max-width:1200px;\n}\n}\n", ""]);
+exports.push([module.i, "\n@media (min-width: 768px) {\n.modal-xl {\n        width: 90%;\n        max-width:1200px;\n}\n}\n", ""]);
 
 // exports
 
@@ -103089,6 +103089,74 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -103097,6 +103165,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
             visiting: [],
             completed: [],
             todays: [],
+            todaysAll: [],
+            todaysUnvisiteds: [],
             errors: [],
             recents: [],
             tsrUniques: [],
@@ -103109,6 +103179,12 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
             eventCount: '',
             eventCompletedCount: '',
             eventPercentage: '',
+            travelCount: '',
+            travelCompletedCount: '',
+            travelPercentage: '',
+            officeCount: '',
+            officeCompletedCount: '',
+            officePercentage: '',
             completedPercentage: 0,
             currentPage: 0,
             itemsPerPage: 10,
@@ -103119,10 +103195,31 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
         this.fetchCurrentVisiting();
         this.fetchCompletedTask();
         this.fetchTodaysSchedule();
+        this.fetchTodaysAllSchedule();
     },
 
     methods: {
         moment: __WEBPACK_IMPORTED_MODULE_0_moment___default.a,
+        scheduleType: function scheduleType(type) {
+            switch (type) {
+                case 1:
+                    return 'Customer';
+                    break;
+                case 2:
+                    return 'Mapping';
+                    break;
+                case 3:
+                    return 'Event';
+                    break;
+                case 4:
+                    return 'Travel';
+                    break;
+                case 5:
+                    return 'Office';
+                    break;
+                default:
+            }
+        },
         openCurrentVisiting: function openCurrentVisiting() {
             $('#currentVisitingModal').modal('show');
         },
@@ -103132,12 +103229,18 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
         openTodaysSchedule: function openTodaysSchedule() {
             $('#todaysScheduleModal').modal('show');
         },
+        openTodaysUnvisited: function openTodaysUnvisited() {
+            $('#todaysUnvisitedModal').modal('show');
+        },
         fetchCurrentVisiting: function fetchCurrentVisiting() {
             var _this = this;
 
             axios.get('/attendances-visiting').then(function (response) {
                 _this.visiting = response.data;
                 _this.recents = _this.visiting.slice(0, 5);
+                _this.visiting.filter(function (item) {
+                    return console.log(item.sign_in);
+                });
             }).catch(function (error) {
                 _this.errors = error.response.data.errors;
             });
@@ -103156,16 +103259,33 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
             axios.get('/schedules-todays').then(function (response) {
                 _this3.todays = response.data;
-                _this3.countCustomer();
-                _this3.countMapping();
-                _this3.countEvent();
-                _this3.tsrGetUnique();
+                _this3.getUnvisitedSchedule(_this3.todays);
             }).catch(function (error) {
                 _this3.errors = error.response.data.errors;
             });
         },
+        fetchTodaysAllSchedule: function fetchTodaysAllSchedule() {
+            var _this4 = this;
+
+            axios.get('/schedules-todays-all').then(function (response) {
+                _this4.todaysAll = response.data;
+                _this4.countCustomer();
+                _this4.countMapping();
+                _this4.countEvent();
+                _this4.countTravel();
+                _this4.countOffice();
+                _this4.tsrGetUnique();
+            }).catch(function (error) {
+                _this4.errors = error.response.data.errors;
+            });
+        },
+        getUnvisitedSchedule: function getUnvisitedSchedule(schedTodays) {
+            this.todaysUnvisiteds = this.todays.filter(function (item) {
+                return item.attendances === null;
+            });
+        },
         countCustomer: function countCustomer() {
-            this.customerCount = this.todays.filter(function (item) {
+            this.customerCount = this.todaysAll.filter(function (item) {
                 return item.type == 1;
             });
             if (this.customerCount.length) {
@@ -103181,7 +103301,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
             }
         },
         countMapping: function countMapping() {
-            this.mappingCount = this.todays.filter(function (item) {
+            this.mappingCount = this.todaysAll.filter(function (item) {
                 return item.type == 2;
             });
             if (this.mappingCount.length) {
@@ -103197,7 +103317,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
             }
         },
         countEvent: function countEvent() {
-            this.eventCount = this.todays.filter(function (item) {
+            this.eventCount = this.todaysAll.filter(function (item) {
                 return item.type == 3;
             });
             if (this.eventCount.length) {
@@ -103209,6 +103329,38 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
                         return item.attendances.sign_out !== null;
                     });
                     this.eventPercentage = Math.round(this.eventCompletedCount.length / this.eventCount.length * 100);
+                }
+            }
+        },
+        countTravel: function countTravel() {
+            this.travelCount = this.todaysAll.filter(function (item) {
+                return item.type == 4;
+            });
+            if (this.travelCount.length) {
+                var attendance = this.travelCount.filter(function (item) {
+                    return item.attendances !== null;
+                });
+                if (attendance.length) {
+                    this.travelCompletedCount = attendance.filter(function (item) {
+                        return item.attendances.sign_out !== null;
+                    });
+                    this.travelPercentage = Math.round(this.eventCompletedCount.length / this.travelCount.length * 100);
+                }
+            }
+        },
+        countOffice: function countOffice() {
+            this.officeCount = this.todaysAll.filter(function (item) {
+                return item.type == 5;
+            });
+            if (this.officeCount.length) {
+                var attendance = this.officeCount.filter(function (item) {
+                    return item.attendances !== null;
+                });
+                if (attendance.length) {
+                    this.officeCompletedCount = attendance.filter(function (item) {
+                        return item.attendances.sign_out !== null;
+                    });
+                    this.officePercentage = Math.round(this.eventCompletedCount.length / this.officeCount.length * 100);
                 }
             }
         },
@@ -103254,12 +103406,12 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
             return hours + 'h ' + minutes + ' min.';
         },
         tsrGetUnique: function tsrGetUnique() {
-            var _this4 = this;
+            var _this5 = this;
 
             axios.get('/schedules-user-today').then(function (response) {
-                _this4.tsrUniques = response.data[0];
+                _this5.tsrUniques = response.data[0];
             }).catch(function (error) {
-                _this4.errors = error.response.data.errors;
+                _this5.errors = error.response.data.errors;
             });
         },
         setPage: function setPage(pageNumber) {
@@ -103277,11 +103429,11 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
     },
     computed: {
         filteredTsrUniques: function filteredTsrUniques() {
-            var _this5 = this;
+            var _this6 = this;
 
             var self = this;
             return Object.values(self.tsrUniques).filter(function (tsrUnique) {
-                return tsrUnique[0].user.name.toLowerCase().includes(_this5.keywords.toLowerCase());
+                return tsrUnique[0].user.name.toLowerCase().includes(_this6.keywords.toLowerCase());
             });
         },
         totalPages: function totalPages() {
@@ -103428,7 +103580,42 @@ var render = function() {
               ]
             ),
             _vm._v(" "),
-            _vm._m(6)
+            _c(
+              "div",
+              {
+                staticClass: "col-xl-3 col-lg-6",
+                staticStyle: { cursor: "pointer" },
+                on: { click: _vm.openTodaysUnvisited }
+              },
+              [
+                _c("div", { staticClass: "card card-stats mb-4 mb-xl-0" }, [
+                  _c("div", { staticClass: "card-body" }, [
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col" }, [
+                        _c(
+                          "h5",
+                          {
+                            staticClass:
+                              "card-title text-uppercase text-muted mb-0"
+                          },
+                          [_vm._v("Unvisited")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "span",
+                          { staticClass: "h2 font-weight-bold mb-0" },
+                          [_vm._v(_vm._s(_vm.todaysUnvisiteds.length))]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _vm._m(6)
+                    ]),
+                    _vm._v(" "),
+                    _vm._m(7)
+                  ])
+                ])
+              ]
+            )
           ])
         ])
       ])
@@ -103438,14 +103625,14 @@ var render = function() {
       _c("div", { staticClass: "row mt-5" }, [
         _c("div", { staticClass: "col-xl-8 mb-5 mb-xl-0" }, [
           _c("div", { staticClass: "card shadow" }, [
-            _vm._m(7),
+            _vm._m(8),
             _vm._v(" "),
             _c("div", { staticClass: "table-responsive" }, [
               _c(
                 "table",
                 { staticClass: "table align-items-center table-flush" },
                 [
-                  _vm._m(8),
+                  _vm._m(9),
                   _vm._v(" "),
                   _c(
                     "tbody",
@@ -103453,7 +103640,18 @@ var render = function() {
                       return _c("tr", { key: r }, [
                         _c("td", [_vm._v(_vm._s(recent.user.name))]),
                         _vm._v(" "),
-                        _c("td", [_vm._v(_vm._s(recent.schedule.name))]),
+                        _c("td", [
+                          _vm._v(
+                            "\n                                        " +
+                              _vm._s(recent.schedule.name)
+                          ),
+                          _c("br"),
+                          _vm._v(
+                            "\n                                        Schedule Type: " +
+                              _vm._s(_vm.scheduleType(recent.schedule.type)) +
+                              "\n                                    "
+                          )
+                        ]),
                         _vm._v(" "),
                         _c("td", [
                           _vm._v(
@@ -103471,14 +103669,14 @@ var render = function() {
         _vm._v(" "),
         _c("div", { staticClass: "col-xl-4" }, [
           _c("div", { staticClass: "card shadow" }, [
-            _vm._m(9),
+            _vm._m(10),
             _vm._v(" "),
             _c("div", { staticClass: "table-responsive" }, [
               _c(
                 "table",
                 { staticClass: "table align-items-center table-flush" },
                 [
-                  _vm._m(10),
+                  _vm._m(11),
                   _vm._v(" "),
                   _c("tbody", [
                     _c("tr", [
@@ -103541,6 +103739,50 @@ var render = function() {
                             _vm._v(" " + _vm._s(_vm.eventPercentage) + "% ")
                           ])
                         : _c("td", [_vm._v(" 0% ")])
+                    ]),
+                    _vm._v(" "),
+                    _c("tr", [
+                      _c("th", { attrs: { scope: "row" } }, [
+                        _vm._v(" Travel ")
+                      ]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _vm._v(" " + _vm._s(_vm.travelCount.length) + " ")
+                      ]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _vm._v(
+                          " " + _vm._s(_vm.travelCompletedCount.length) + " "
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _vm.travelPercentage
+                        ? _c("td", [
+                            _vm._v(" " + _vm._s(_vm.travelPercentage) + "% ")
+                          ])
+                        : _c("td", [_vm._v(" 0% ")])
+                    ]),
+                    _vm._v(" "),
+                    _c("tr", [
+                      _c("th", { attrs: { scope: "row" } }, [
+                        _vm._v(" Office ")
+                      ]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _vm._v(" " + _vm._s(_vm.officeCount.length) + " ")
+                      ]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _vm._v(
+                          " " + _vm._s(_vm.officeCompletedCount.length) + " "
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _vm.officePercentage
+                        ? _c("td", [
+                            _vm._v(" " + _vm._s(_vm.officePercentage) + "% ")
+                          ])
+                        : _c("td", [_vm._v(" 0% ")])
                     ])
                   ])
                 ]
@@ -103553,7 +103795,7 @@ var render = function() {
       _c("div", { staticClass: "row mt-5" }, [
         _c("div", { staticClass: "col-xl-8 mb-5 mb-xl-0" }, [
           _c("div", { staticClass: "card shadow" }, [
-            _vm._m(11),
+            _vm._m(12),
             _vm._v(" "),
             _c("div", { staticClass: "col-xl-4 mb-3 float-right" }, [
               _c("input", {
@@ -103584,7 +103826,7 @@ var render = function() {
                 "table",
                 { staticClass: "table align-items-center table-flush" },
                 [
-                  _vm._m(12),
+                  _vm._m(13),
                   _vm._v(" "),
                   _c(
                     "tbody",
@@ -103691,7 +103933,7 @@ var render = function() {
           },
           [
             _c("div", { staticClass: "modal-content" }, [
-              _vm._m(13),
+              _vm._m(14),
               _vm._v(" "),
               _c("div", { staticClass: "modal-body" }, [
                 _c("div", { staticClass: "table-responsive" }, [
@@ -103699,7 +103941,7 @@ var render = function() {
                     "table",
                     { staticClass: "table align-items-center table-flush" },
                     [
-                      _vm._m(14),
+                      _vm._m(15),
                       _vm._v(" "),
                       _c(
                         "tbody",
@@ -103709,11 +103951,7 @@ var render = function() {
                               _c("td", [_vm._v(_vm._s(visit.user.name))]),
                               _vm._v(" "),
                               _c("td", [
-                                _vm._v(
-                                  " Customer: " +
-                                    _vm._s(visit.schedule.name) +
-                                    " "
-                                ),
+                                _vm._v(_vm._s(visit.schedule.name) + " "),
                                 _c("br")
                               ]),
                               _vm._v(" "),
@@ -103744,7 +103982,7 @@ var render = function() {
                 ])
               ]),
               _vm._v(" "),
-              _vm._m(15)
+              _vm._m(16)
             ])
           ]
         )
@@ -103772,7 +104010,7 @@ var render = function() {
           },
           [
             _c("div", { staticClass: "modal-content" }, [
-              _vm._m(16),
+              _vm._m(17),
               _vm._v(" "),
               _c("div", { staticClass: "modal-body" }, [
                 _c("div", { staticClass: "table-responsive" }, [
@@ -103780,7 +104018,7 @@ var render = function() {
                     "table",
                     { staticClass: "table align-items-center table-flush" },
                     [
-                      _vm._m(17),
+                      _vm._m(18),
                       _vm._v(" "),
                       _c(
                         "tbody",
@@ -103790,7 +104028,18 @@ var render = function() {
                               _c("td", [_vm._v(_vm._s(complete.user.name))]),
                               _vm._v(" "),
                               _c("td", [
-                                _vm._v(_vm._s(complete.schedule.name))
+                                _vm._v(
+                                  "\n                                        " +
+                                    _vm._s(complete.schedule.name)
+                                ),
+                                _c("br"),
+                                _vm._v(
+                                  "\n                                        Schedule Type: " +
+                                    _vm._s(
+                                      _vm.scheduleType(complete.schedule.type)
+                                    ) +
+                                    "\n                                    "
+                                )
                               ]),
                               _vm._v(" "),
                               _c("td", [
@@ -103848,7 +104097,7 @@ var render = function() {
                 ])
               ]),
               _vm._v(" "),
-              _vm._m(18)
+              _vm._m(19)
             ])
           ]
         )
@@ -103876,7 +104125,7 @@ var render = function() {
           },
           [
             _c("div", { staticClass: "modal-content" }, [
-              _vm._m(19),
+              _vm._m(20),
               _vm._v(" "),
               _c("div", { staticClass: "modal-body" }, [
                 _c("div", { staticClass: "table-responsive" }, [
@@ -103884,7 +104133,7 @@ var render = function() {
                     "table",
                     { staticClass: "table align-items-center table-flush" },
                     [
-                      _vm._m(20),
+                      _vm._m(21),
                       _vm._v(" "),
                       _c(
                         "tbody",
@@ -103950,7 +104199,128 @@ var render = function() {
                 ])
               ]),
               _vm._v(" "),
-              _vm._m(21)
+              _vm._m(22)
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          id: "todaysUnvisitedModal",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "exampleModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-dialog-centered modal-xl",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _vm._m(23),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c("div", { staticClass: "table-responsive" }, [
+                  _c(
+                    "table",
+                    { staticClass: "table align-items-center table-flush" },
+                    [
+                      _vm._m(24),
+                      _vm._v(" "),
+                      _c(
+                        "tbody",
+                        [
+                          _vm._l(_vm.todaysUnvisiteds, function(
+                            todaysUnvisited,
+                            t
+                          ) {
+                            return _c("tr", { key: t }, [
+                              _c("td", [
+                                _vm._v(_vm._s(todaysUnvisited.user.name))
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
+                                _vm._v(
+                                  "\n                                    Customer : " +
+                                    _vm._s(todaysUnvisited.name) +
+                                    " "
+                                ),
+                                _c("br"),
+                                _vm._v(
+                                  "\n                                    Address : " +
+                                    _vm._s(todaysUnvisited.address) +
+                                    " "
+                                ),
+                                _c("br"),
+                                _vm._v(
+                                  "\n                                    Schedule Type: " +
+                                    _vm._s(
+                                      _vm.scheduleType(todaysUnvisited.type)
+                                    ) +
+                                    "  \n                                "
+                                )
+                              ]),
+                              _vm._v(" "),
+                              _c("td", [
+                                _c("span", [
+                                  _vm._v(
+                                    " Start Time : " +
+                                      _vm._s(
+                                        _vm
+                                          .moment(
+                                            todaysUnvisited.start_time,
+                                            "HH:mm"
+                                          )
+                                          .format("hh:mm a")
+                                      )
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("br"),
+                                _vm._v(" "),
+                                _c("span", [
+                                  _vm._v(
+                                    " End Time : " +
+                                      _vm._s(
+                                        _vm
+                                          .moment(
+                                            todaysUnvisited.end_time,
+                                            "HH:mm"
+                                          )
+                                          .format("hh:mm a")
+                                      )
+                                  )
+                                ])
+                              ])
+                            ])
+                          }),
+                          _vm._v(" "),
+                          !_vm.todays.length
+                            ? _c("tr", [
+                                _c("td", [
+                                  _vm._v("No data available in the table")
+                                ])
+                              ])
+                            : _vm._e()
+                        ],
+                        2
+                      )
+                    ]
+                  )
+                ])
+              ]),
+              _vm._v(" "),
+              _vm._m(25)
             ])
           ]
         )
@@ -104038,40 +104408,24 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-xl-3 col-lg-6" }, [
-      _c("div", { staticClass: "card card-stats mb-4 mb-xl-0" }, [
-        _c("div", { staticClass: "card-body" }, [
-          _c("div", { staticClass: "row" }, [
-            _c("div", { staticClass: "col" }, [
-              _c(
-                "h5",
-                { staticClass: "card-title text-uppercase text-muted mb-0" },
-                [_vm._v("Request")]
-              ),
-              _vm._v(" "),
-              _c("span", { staticClass: "h2 font-weight-bold mb-0" }, [
-                _vm._v("0")
-              ])
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-auto" }, [
-              _c(
-                "div",
-                {
-                  staticClass:
-                    "icon icon-shape bg-info text-white rounded-circle shadow"
-                },
-                [_c("i", { staticClass: "fas fa-bell" })]
-              )
-            ])
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "mt-3 mb-0 text-muted text-sm" }, [
-            _c("span", { staticClass: "text-nowrap" }, [
-              _vm._v("Click for more details")
-            ])
-          ])
-        ])
+    return _c("div", { staticClass: "col-auto" }, [
+      _c(
+        "div",
+        {
+          staticClass:
+            "icon icon-shape bg-info text-white rounded-circle shadow"
+        },
+        [_c("i", { staticClass: "fas fa-bell" })]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("p", { staticClass: "mt-3 mb-0 text-muted text-sm" }, [
+      _c("span", { staticClass: "text-nowrap" }, [
+        _vm._v("Click for more details")
       ])
     ])
   },
@@ -104196,7 +104550,7 @@ var staticRenderFns = [
       _c("tr", [
         _c("th", { attrs: { scope: "col" } }, [_vm._v("TSR")]),
         _vm._v(" "),
-        _c("th", { attrs: { scope: "col" } }, [_vm._v("Customer")]),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Itenerary")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("In")])
       ])
@@ -104282,6 +104636,60 @@ var staticRenderFns = [
         "h5",
         { staticClass: "modal-title", attrs: { id: "exampleModalLabel" } },
         [_vm._v("Today's Schedule")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "close",
+          attrs: {
+            type: "button",
+            "data-dismiss": "modal",
+            "aria-label": "Close"
+          }
+        },
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", { staticClass: "thead-light" }, [
+      _c("tr", [
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("TSR")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Customer")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Start Time/ End Time")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-footer" }, [
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-secondary",
+          attrs: { type: "button", "data-dismiss": "modal" }
+        },
+        [_vm._v("Close")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-header" }, [
+      _c(
+        "h5",
+        { staticClass: "modal-title", attrs: { id: "exampleModalLabel" } },
+        [_vm._v("Today's Unvisited")]
       ),
       _vm._v(" "),
       _c(

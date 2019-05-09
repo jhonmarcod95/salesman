@@ -268,7 +268,7 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Get all todays schedule
+     * Get todays schedule (Customer, Event, Mapping)
      *
      * @return \Illuminate\Http\Response
      */
@@ -276,15 +276,33 @@ class ScheduleController extends Controller
     public function todays(){
 
         if(Auth::user()->level() < 8){
-
             return Schedule::with('user','attendances')->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                 });
-            })->where('date', Carbon\Carbon::now()->toDateString())->get();
+            })->whereNotIn('type', [4,5])->where('date', Carbon\Carbon::now()->toDateString())->get();
         }
 
-        return Schedule::with('user','attendances')->where('date', Carbon\Carbon::now()->toDateString())->get();
+        return Schedule::with('user','attendances')->whereNotIn('type', [4,5])->where('date', Carbon\Carbon::now()->toDateString())->get();
+    }
+
+    /**
+     * Get todays all schedule
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function todaysAll(){
+
+        if(Auth::user()->level() < 8){
+            return Schedule::with('user','attendances')->whereHas('user' , function($q){
+                $q->whereHas('companies', function ($q){
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                });
+            }) ->where('date', Carbon\Carbon::now()->toDateString())->get();
+        }
+
+        return Schedule::with('user','attendances')->whereNotIn('type', [4,5])->where('date', Carbon\Carbon::now()->toDateString())->get();
     }
 
     /**
