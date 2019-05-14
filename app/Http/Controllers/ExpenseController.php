@@ -232,6 +232,7 @@ class ExpenseController extends Controller
      */
     public function getExpenseSubmitted(Request $request){
         session(['expense_submitted_id' => $request->ids]);
+        session(['current_week' => $request->current_week]);
 
         $expense = Expense::whereIn('expenses_entry_id', $request->ids)->get();
         return '/expense-submitted-page';
@@ -246,7 +247,8 @@ class ExpenseController extends Controller
     public function showExpenseSubmitted(){
         $date = session('dateEntry');
         $ids = session('expense_submitted_id');
-        return view("expense.index-submitted", compact('ids', 'date'));
+        $currentWeek = session('current_week');
+        return view("expense.index-submitted", compact('ids', 'date','currentWeek'));
     }
 
     /**

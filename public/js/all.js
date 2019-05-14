@@ -76652,6 +76652,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             expenses_id: [],
             expenseByTsr: [],
             weeks: [],
+            current_week: '',
             year: '',
             week: '',
             startDate: '',
@@ -76691,7 +76692,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 return el.id;
             });
             axios.post('/expense-submitted', {
-                ids: ids
+                ids: ids,
+                current_week: this.current_week
             }).then(function (response) {
                 window.location.href = window.location.origin + response.data;
             }).catch(function (error) {
@@ -76735,6 +76737,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 result.push(__WEBPACK_IMPORTED_MODULE_0_moment___default()(current.clone()).format('ll') + ' - ' + __WEBPACK_IMPORTED_MODULE_0_moment___default()(current.clone().add(6, 'days')).format('ll'));
             }
             this.weeks = result;
+            this.current_week = this.weeks[this.weeks.length - 1];
         },
         countExpenseSubmitted: function countExpenseSubmitted(expenses) {
             var totalSubmitted = 0;
@@ -76809,8 +76812,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         years: function years() {
             var year = new Date().getFullYear();
-            return Array.from({ length: year - 2015 }, function (value, index) {
-                return 2016 + index;
+            return Array.from({ length: year - 2018 }, function (value, index) {
+                return 2019 + index;
             });
         },
         expenseSubmittedLink: function expenseSubmittedLink() {
@@ -90668,7 +90671,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     components: { loader: __WEBPACK_IMPORTED_MODULE_1__Loader___default.a },
-    props: ['expenseEntryId', 'dateEntry'],
+    props: ['expenseEntryId', 'dateEntry', 'currentWeek'],
     data: function data() {
         return {
             errorsExpense: false,
@@ -90995,6 +90998,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         imageLink: function imageLink() {
             return window.location.origin + '/storage/';
+        },
+        isDisabled: function isDisabled() {
+            var current = this.currentWeek.split('-')[0];
+            var selected = __WEBPACK_IMPORTED_MODULE_0_moment___default()(this.dateEntry.split('to')[0]).format('ll');
+            var c = __WEBPACK_IMPORTED_MODULE_0_moment___default()(current).format('YYYY MM DD');
+            var s = __WEBPACK_IMPORTED_MODULE_0_moment___default()(selected).format('YYYY MM DD');
+
+            if (__WEBPACK_IMPORTED_MODULE_0_moment___default()(c).isSame(s, 'day')) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 });
@@ -91142,7 +91157,7 @@ var render = function() {
                       {
                         staticClass:
                           "btn btn-primary btn-round btn-fill float-right mb-3 mr-3",
-                        attrs: { type: "button" },
+                        attrs: { type: "button", disabled: _vm.isDisabled },
                         on: {
                           click: function($event) {
                             _vm.simulateExpenses(_vm.expenseByTsr[0].user_id)

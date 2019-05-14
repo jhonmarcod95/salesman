@@ -183,6 +183,7 @@ export default {
             expenses_id: [],
             expenseByTsr: [],
             weeks: [],
+            current_week: '',
             year: '',
             week: '',
             startDate: '',
@@ -219,7 +220,8 @@ export default {
         getExpenseSubmitted(e){
             var ids = e.map(function (el) { return el.id; });
             axios.post('/expense-submitted',{
-                ids: ids
+                ids: ids,
+                current_week: this.current_week
             })
             .then(response => {
                 window.location.href = window.location.origin+response.data;
@@ -265,6 +267,7 @@ export default {
                 result.push(moment(current.clone()).format('ll') +' - ' + moment(current.clone().add(6, 'days')).format('ll'));
             }
             this.weeks = result;
+            this.current_week = this.weeks[this.weeks.length - 1];
         },
         countExpenseSubmitted(expenses){
             var totalSubmitted = 0;
@@ -340,7 +343,7 @@ export default {
         },
         years () {
             const year = new Date().getFullYear()
-            return Array.from({length: year - 2015}, (value, index) => 2016 + index)
+            return Array.from({length: year - 2018}, (value, index) => 2019 + index)
         },
         expenseSubmittedLink(){
             return window.location.origin+'/expense-submitted/';

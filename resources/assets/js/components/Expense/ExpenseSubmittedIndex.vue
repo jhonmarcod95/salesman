@@ -44,7 +44,7 @@
                             <div class="text-center mb-2">
                                 <span v-if="errorsExpense" class="text-danger">Please Select Expense</span>
                             </div>
-                            <button v-if="expenseByTsr.length" type="button" class="btn btn-primary btn-round btn-fill float-right mb-3 mr-3"  @click="simulateExpenses(expenseByTsr[0].user_id)">Simulate</button>
+                            <button v-if="expenseByTsr.length" type="button" class="btn btn-primary btn-round btn-fill float-right mb-3 mr-3"  :disabled="isDisabled" @click="simulateExpenses(expenseByTsr[0].user_id)">Simulate</button>
                         </div>
                     </div>
                 </div>
@@ -241,7 +241,7 @@ import loader from '../Loader'
 
 export default {
     components: { loader },
-    props: ['expenseEntryId', 'dateEntry'],
+    props: ['expenseEntryId', 'dateEntry', 'currentWeek'],
     data(){
         return {
             errorsExpense: false,
@@ -563,6 +563,18 @@ export default {
         imageLink(){
             return window.location.origin+'/storage/';
         },
+        isDisabled(){
+            var current = this.currentWeek.split('-')[0];
+            var selected = moment(this.dateEntry.split('to')[0]).format('ll');
+            var c = moment(current).format('YYYY MM DD');
+            var s = moment(selected).format('YYYY MM DD');
+
+            if(moment(c).isSame(s, 'day')){
+               return false;
+            }else{
+               return true;
+            }
+        }
     }
 }
 </script>
