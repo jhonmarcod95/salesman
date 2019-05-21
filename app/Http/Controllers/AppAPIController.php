@@ -35,11 +35,30 @@ class AppAPIController extends Controller
      * @return json
      */
     public function getExpenses()  {
-        $expenses = Expense::where('user_id',Auth::user()->id)
+
+
+        //   $expenses = Expense::where('user_id',Auth::user()->id)
+        //                 ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
+        //                 ->where('expenses_entry_id', 0)
+        //                 ->get();
+        //     return expenseResult::collection($expenses);
+
+        if(Auth::user()->id == 17) {
+            $expenses = Expense::where('user_id',Auth::user()->id)
+                        ->where('created_at', '<', Carbon::parse('2019-05-19'))
+                        ->where('attachment','attachments/default.jpg')
+                        // ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
+                        ->where('expenses_entry_id', 0)
+                        ->get();
+            return expenseResult::collection($expenses);
+        } else {
+            $expenses = Expense::where('user_id',Auth::user()->id)
                         ->whereBetween('created_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
                         ->where('expenses_entry_id', 0)
                         ->get();
-        return expenseResult::collection($expenses);
+            return expenseResult::collection($expenses);
+        }
+
     }
 
     /**
