@@ -571,8 +571,10 @@ export default {
 
             if(moment(c).isSame(s, 'day')){
                return false;
+            }else if(moment(c).diff(s, 'day') <= 7){
+               return false;
             }else{
-               return true;
+                return true
             }
         }
     }
