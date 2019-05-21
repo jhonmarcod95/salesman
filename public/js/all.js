@@ -90814,7 +90814,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         amount = checkedExpense.amount;
                         tax_code = "IX";
                     } else {
-                        tax_code = checkedExpense.receipt_expenses.receipt_type.tax_code;
+                        tax_code = checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.receipt_type.tax_code : "IX";
+
                         if (tax_code == "IX") {
                             var round_off = checkedExpense.amount;
                             amount = round_off.toFixed(2);
@@ -90849,10 +90850,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         amount: amount,
                         charge_type: checkedExpense.expenses_type.expense_charge_type.charge_type.name,
                         business_area: filteredBusinessArea[0].business_area,
-                        or_number: checkedExpense.receipt_expenses.receipt_number,
-                        supplier_name: checkedExpense.receipt_expenses.vendor_name,
-                        supplier_address: checkedExpense.receipt_expenses.vendor_address,
-                        supplier_tin_number: checkedExpense.receipt_expenses.tin_number
+                        or_number: checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.receipt_number : '',
+                        supplier_name: checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.vendor_name : '',
+                        supplier_address: checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.vendor_address : '',
+                        supplier_tin_number: checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.tin_number : ''
 
                     };
                     if (bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I3') {
@@ -91065,7 +91066,10 @@ var render = function() {
                           "tbody",
                           _vm._l(_vm.expenseByTsr, function(expenseBy, e) {
                             return _c("tr", { key: e }, [
-                              !expenseBy.payments && expenseBy.receipt_expenses
+                              (!expenseBy.payments &&
+                                expenseBy.receipt_expenses &&
+                                !expenseBy.route_transportation) ||
+                              expenseBy.route_transportation
                                 ? _c("td", [
                                     _c("input", {
                                       attrs: {
@@ -91076,7 +91080,8 @@ var render = function() {
                                       domProps: { value: expenseBy.id }
                                     })
                                   ])
-                                : !expenseBy.receipt_expenses
+                                : !expenseBy.receipt_expenses &&
+                                  !expenseBy.receipt_expenses
                                   ? _c("td", { staticClass: "text-danger" }, [
                                       _vm._v("Receipt unverified")
                                     ])
