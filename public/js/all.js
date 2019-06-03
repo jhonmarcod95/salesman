@@ -91069,7 +91069,9 @@ var render = function() {
                               (!expenseBy.payments &&
                                 expenseBy.receipt_expenses &&
                                 !expenseBy.route_transportation) ||
-                              expenseBy.route_transportation
+                              (expenseBy.route_transportation &&
+                                !expenseBy.payments &&
+                                !expenseBy.receipt_expenses)
                                 ? _c("td", [
                                     _c("input", {
                                       attrs: {
@@ -91080,8 +91082,9 @@ var render = function() {
                                       domProps: { value: expenseBy.id }
                                     })
                                   ])
-                                : !expenseBy.receipt_expenses &&
-                                  !expenseBy.receipt_expenses
+                                : !expenseBy.payments &&
+                                  !expenseBy.receipt_expenses &&
+                                  !expenseBy.route_transportation
                                   ? _c("td", { staticClass: "text-danger" }, [
                                       _vm._v("Receipt unverified")
                                     ])
