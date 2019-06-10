@@ -72,6 +72,10 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('charge_type/{expense_type}','AppAPIController@checkChargeType');
     Route::get('sap/budget_check/{expense_type}','AppAPIController@checkBudget');
 
+    // Check total spent in a month
+    Route::get('total-spent','AppAPIController@totalSpent');
+
+
     // Expense Representation API
     Route::post('receipt/representation','API\ExpenseRepresentationController@store');
 

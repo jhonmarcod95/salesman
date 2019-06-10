@@ -164,6 +164,25 @@ class AppAPIController extends Controller
     }
 
     /**
+     * get the total unpained spent per user in a month
+     *
+     * @return void
+     */
+    public function totalSpent()
+    {
+
+        $expense = Expense::whereUserId(Auth::user()->id)
+                        ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
+                        ->doesntHave('postedPayments')
+                        ->has('expensesEntry')
+                        ->get();
+
+        return $expense->sum('amount');
+
+    }
+
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request

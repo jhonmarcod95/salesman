@@ -40,4 +40,9 @@ class Expense extends Model
     public function routeTransportation() {
         return $this->hasOne(RouteTransportation::class);
     }
+
+    public function postedPayments()
+    {
+        return $this->hasMany(Payment::class);
+    }
 }
