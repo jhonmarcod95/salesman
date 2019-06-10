@@ -98,7 +98,7 @@
                             <i class="fab fa-font-awesome-flag text-success pl-4" style="font-size: 20px;"></i>
                             <!--<span> - Fully Posted</span>-->
                             <!--<i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>-->
-                            <span> - Partially Posted</span>
+                            <span> - Posted</span>
                             <i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>
                             <span> - Unprocessed</span>
                             <nav aria-label="...">

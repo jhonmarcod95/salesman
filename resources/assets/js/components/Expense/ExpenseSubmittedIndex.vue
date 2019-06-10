@@ -30,8 +30,8 @@
                                 </thead>
                                 <tbody v-if="expenseByTsr.length">
                                     <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">  
-                                        <td v-if='!expenseBy.payments && expenseBy.receipt_expenses'> <input type="checkbox" name="expenses_id" :value="expenseBy.id" checked="checked"></td>
-                                        <td v-else-if="!expenseBy.receipt_expenses" class="text-danger">Receipt unverified</td>
+                                        <td v-if='(!expenseBy.payments && expenseBy.receipt_expenses && !expenseBy.route_transportation) || (expenseBy.route_transportation && !expenseBy.payments && !expenseBy.receipt_expenses)'> <input type="checkbox" name="expenses_id" :value="expenseBy.id" checked="checked"></td>
+                                        <td v-else-if="!expenseBy.payments && !expenseBy.receipt_expenses && !expenseBy.route_transportation" class="text-danger">Receipt unverified</td>
                                         <td v-else class="text-primary">{{ expenseBy.payments.document_code}}</td>
                                         <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                         <td>{{ expenseBy.expenses_type.name }}</td>
@@ -375,7 +375,8 @@ export default {
                         amount = checkedExpense.amount;
                         tax_code = "IX";
                     }else{
-                        tax_code = checkedExpense.receipt_expenses.receipt_type.tax_code;
+                        tax_code = checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.receipt_type.tax_code : "IX";
+
                         if (tax_code == "IX"){
                             var round_off = checkedExpense.amount;
                             amount = round_off.toFixed(2);
@@ -411,10 +412,10 @@ export default {
                         amount: amount,
                         charge_type: checkedExpense.expenses_type.expense_charge_type.charge_type.name,
                         business_area: filteredBusinessArea[0].business_area,
-                        or_number: checkedExpense.receipt_expenses.receipt_number,
-                        supplier_name: checkedExpense.receipt_expenses.vendor_name,
-                        supplier_address: checkedExpense.receipt_expenses.vendor_address,
-                        supplier_tin_number: checkedExpense.receipt_expenses.tin_number,
+                        or_number:  checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.receipt_number : '',
+                        supplier_name: checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.vendor_name : '',
+                        supplier_address: checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.vendor_address : '',
+                        supplier_tin_number: checkedExpense.receipt_expenses ? checkedExpense.receipt_expenses.tin_number : '',
 
                     }
                     if(bol_tax_amount && checkedExpense.receipt_expenses.receipt_type.tax_code == 'I3'){
@@ -571,8 +572,10 @@ export default {
 
             if(moment(c).isSame(s, 'day')){
                return false;
+            }else if(moment(c).diff(s, 'day') <= 7){
+               return false;
             }else{
-               return true;
+                return true
             }
         }
     }
