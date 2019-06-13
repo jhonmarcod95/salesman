@@ -184,6 +184,11 @@
                         <i class="ni ni-basket text-orange"></i> Posted Expenses
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/users') }}">
+                        <i class="ni ni-user-run text-blue"></i> Users
+                    </a>
+                </li>
                 @endif
             </ul>
             @endif
