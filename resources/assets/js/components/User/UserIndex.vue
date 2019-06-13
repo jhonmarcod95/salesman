@@ -36,7 +36,7 @@
                                 <tbody>
                                     <tr v-for="(user, u) in filteredQueues" v-bind:key="u">
                                         <td class="text-right">
-                                            <div class="dropdown">
+                                            <div class="dropdown" v-if="role === 'It'">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fas fa-ellipsis-v"></i>
@@ -116,16 +116,27 @@ export default {
             errors:[],
             keywords: '',
             user_id: '',
+            role: '',
             currentPage: 0,
             itemsPerPage: 10,
         }
     },
     created(){
         this.fectUsers();
+        this.getAuthRole();
     },
     methods:{
         getUserId(id){
             return this.user_id = id;
+        },
+        getAuthRole(){
+            axios.get('/auth-role')
+                .then(response => {
+                    this.role = response.data;
+                })
+                .catch(error => {
+                    this.errors = error.response.data.errors;
+                })
         },
         fectUsers(){
             axios.get('/users-all')

@@ -256,3 +256,6 @@ Route::get('/internal-orders', 'SalesmanInternalOrderController@indexData')->nam
 
 // Fetch all sap servers
 Route::get('/sap/server', 'SapServerController@index');
+
+//Auth role
+Route::get('/auth-role', 'UserController@getRole');

@@ -206,4 +206,9 @@ class UserController extends Controller
         return $user;
     }
 
+    public function getRole(){
+        $role = Auth::user()->roles()->get();
+        return $role[0]->name;
+    }
+
 }
