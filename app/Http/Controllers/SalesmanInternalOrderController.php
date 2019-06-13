@@ -98,7 +98,7 @@ class SalesmanInternalOrderController extends Controller
                 'expenses_type_id' => $chargeType->expenseChargeType->expenseType->id,
                 'amount' => $request->amount,
             ];
-            $expenseRate->update($array);
+            $expenseRate ? $expenseRate->update($array) : ExpenseRate::create($array);
 
             return SalesmanInternalOrder::with('user','user.expenseRate','chargeType.expenseChargeType.expenseType')->where('id', $salesmanInternalOrder->id)->first();
         }
