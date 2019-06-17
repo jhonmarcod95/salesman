@@ -315,7 +315,7 @@ class ExpenseController extends Controller
             'endDate' => 'required'
         ]);
 
-        return PaymentHeader::with('paymentDetail', 'payments')
+        return PaymentHeader::with('paymentDetail', 'payments.expense')
             ->where('company_name', $request->company)
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)

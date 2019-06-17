@@ -245,6 +245,7 @@
                             <tr>
                                 <th scope="col">Item</th>
                                 <th scope="col">Item text</th>
+                                <th scope="col">Attachment</th>
                                 <th scope="col">GL account</th>
                                 <th scope="col">Description</th>
                                 <th scope="col">Assignment</th>
@@ -263,6 +264,8 @@
                                 <tr v-for="(paymentDetail, p) in copiedObject.payment_detail" v-bind:key="p">
                                     <td>{{ paymentDetail.item }}</td>
                                     <td>{{ paymentDetail.item_text }}</td>
+                                    <td v-if="paymentDetail.internal_order"><a :href="imageLink+copiedObject.payments[p - 1].expense.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+copiedObject.payments[p - 1].expense.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
+                                    <td v-else></td>
                                     <td>{{ paymentDetail.gl_account }}</td>
                                     <td>{{ paymentDetail.description.toUpperCase() }}</td>
                                     <td>{{ paymentDetail.assignment }}</td>
@@ -335,6 +338,9 @@ export default {
     },
     methods:{
         moment,
+        noImage(event){
+            event.target.src = window.location.origin+'/img/brand/no-image.png';
+        },
         copyObject(paymentHeader){
             this.copiedObject = Object.assign({}, paymentHeader)
         },
@@ -398,6 +404,9 @@ export default {
             }
 
             return queues_array;
+        },
+        imageLink(){
+            return window.location.origin+'/storage/';
         }
     },
 }

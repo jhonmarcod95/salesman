@@ -40,7 +40,7 @@ class HomeController extends Controller
             }
     
             return view('home',compact('notification'));
-        }elseif(Auth::user()->hasRole('ap')){
+        }elseif(Auth::user()->hasRole('ap') || Auth::user()->hasRole('tax')){
             session(['header_text' => 'Payment']);
 
             return view('payment.index');

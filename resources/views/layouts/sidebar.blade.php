@@ -76,7 +76,7 @@
                 </div>
             </form>
             <!-- Navigation -->
-            @if(!Auth::user()->hasRole('hr') && !Auth::user()->hasRole('ap') && !Auth::user()->hasRole('approver'))
+            @if(!Auth::user()->hasRole('hr') && !Auth::user()->hasRole('ap') && !Auth::user()->hasRole('approver') && !Auth::user()->hasRole('tax'))
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('/home') }}">
@@ -192,6 +192,15 @@
                 @endif
             </ul>
             @endif
+            @if(Auth::user()->hasRole('tax'))
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/expense-posted') }}">
+                        <i class="ni ni-basket text-orange"></i> Posted Expenses
+                    </a>
+                </li>
+            </ul>
+            @endif
             <ul class="navbar-nav">
                 @if(Auth::user()->level() > 5 || Auth::user()->level() == 3)
                     <li>
@@ -236,7 +245,7 @@
                 {{--</li>--}}
             {{--</ul>--}}
 
-            @if(!Auth::user()->hasRole('ap'))
+            @if(!Auth::user()->hasRole('ap') && !Auth::user()->hasRole('tax'))
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/internal-order') }}">

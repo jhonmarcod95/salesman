@@ -151,7 +151,7 @@
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
                                     <td v-if='!expenseBy.payments'> <input type="checkbox" name="vehicle" :value="expenseBy.id" v-model="expenses_id"></td>
                                     <td v-else>Paid</td>
-                                    <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
+                                    <td><a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                     <td>{{ expenseBy.expenses_type.name }}</td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>

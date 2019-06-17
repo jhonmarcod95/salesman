@@ -180,7 +180,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 });
 
 // AP Routes
-Route::group(['middleware' => ['auth', 'role:ap']], function(){
+Route::group(['middleware' => ['auth', 'role:ap|tax']], function(){
     // Payments
     Route::get('/payments', 'PaymentController@index');
     // Store payment expense
@@ -214,7 +214,7 @@ Route::group(['middleware' => ['auth', 'role:ap']], function(){
 });
 
 // Hr routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax']], function () {
     // Attendance Report
     Route::get('/attendance-report', 'AttendanceReportController@index')->name('report_list');
     // fetch all Attendance Report
