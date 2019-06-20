@@ -570,12 +570,11 @@ export default {
             var c = moment(current).format('YYYY MM DD');
             var s = moment(selected).format('YYYY MM DD');
 
+            return false; //temporary only
             if(moment(c).isSame(s, 'day')){
-               // return false;
-                return true;
+               return false;
             }else if(moment(c).diff(s, 'day') <= 7){
-               // return false;
-                return true;
+               return false;
             }else{
                 return true
             }
