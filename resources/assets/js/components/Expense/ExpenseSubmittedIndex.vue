@@ -571,9 +571,11 @@ export default {
             var s = moment(selected).format('YYYY MM DD');
 
             if(moment(c).isSame(s, 'day')){
-               return false;
+               // return false;
+                return true;
             }else if(moment(c).diff(s, 'day') <= 7){
-               return false;
+               // return false;
+                return true;
             }else{
                 return true
             }
