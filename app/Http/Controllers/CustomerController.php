@@ -110,7 +110,7 @@ class CustomerController extends Controller
         $customers->company_id = Auth::user()->companies->pluck('id')[0];
         $customers->classification = $request->classification;
         $customers->customer_code = $request->customer_code;
-        $customers->name = $request->name;
+        $customers->name = strtoupper($request->name);
         $customers->street = $request->street;
         $customers->town_city = $request->town_city;
         $customers->province_id = $request->province;
@@ -181,7 +181,7 @@ class CustomerController extends Controller
         $customer->company_id = Auth::user()->companies->pluck('id')[0];
         $customer->classification = $request->classification;
         $customer->customer_code = $request->customer_code;
-        $customer->name = $request->name;
+        $customer->name = strtoupper($request->name);
         $customer->street = $request->street;
         $customer->town_city = $request->town_city;
         $customer->province_id = $request->province;

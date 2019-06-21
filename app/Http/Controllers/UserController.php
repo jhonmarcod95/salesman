@@ -77,7 +77,7 @@ class UserController extends Controller
 
         $user = new User;
 
-        $user->name = $request->name;
+        $user->name = strtoupper($request->name);
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
 
@@ -137,7 +137,7 @@ class UserController extends Controller
             'company' => 'required'
         ]);
         
-        $user->name = $request->name;
+        $user->name = strtoupper($request->name);
         $user->email= $request->email;
 
         if($user->save()){

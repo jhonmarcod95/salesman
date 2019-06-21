@@ -92,10 +92,10 @@ class TsrController extends Controller
 
         $tsr = new TechnicalSalesRepresentative;
 
-        $tsr->last_name = $request->last_name;
-        $tsr->first_name = $request->first_name;
-        $tsr->middle_name = $request->middle_name;
-        $tsr->middle_initial = $request->middle_initial;
+        $tsr->last_name = strtoupper($request->last_name);
+        $tsr->first_name = strtoupper($request->first_name);
+        $tsr->middle_name = strtoupper($request->middle_name);
+        $tsr->middle_initial = strtoupper($request->middle_initial);
         $tsr->suffix = $request->suffix;
         $tsr->email = $request->email;
         $tsr->address = $request->address;
@@ -113,7 +113,7 @@ class TsrController extends Controller
             $user_password = strtolower($tsr->first_name.'.'.$tsr->last_name);
             // Save User
             $user = new User;
-            $user->name = $tsr->first_name. ' ' .$tsr->last_name;
+            $user->name = strtoupper($tsr->first_name). ' ' .strtoupper($tsr->last_name);
             $user->email = $tsr->email;
             $user->password = bcrypt(preg_replace('/\s+/', '', $user_password));
             $user->company_id = $request->company;
@@ -189,10 +189,10 @@ class TsrController extends Controller
             'vendor_code' => 'required'
         ]);
 
-        $technicalSalesRepresentative->last_name = $request->last_name;
-        $technicalSalesRepresentative->first_name = $request->first_name;
-        $technicalSalesRepresentative->middle_name = $request->middle_name;
-        $technicalSalesRepresentative->middle_initial = $request->middle_initial;
+        $technicalSalesRepresentative->last_name = strtoupper($request->last_name);
+        $technicalSalesRepresentative->first_name = strtoupper($request->first_name);
+        $technicalSalesRepresentative->middle_name = strtoupper($request->middle_name);
+        $technicalSalesRepresentative->middle_initial = strtoupper($request->middle_initial);
         $technicalSalesRepresentative->suffix = $request->suffix;
         $technicalSalesRepresentative->email = $request->email;
         $technicalSalesRepresentative->address = $request->address;
@@ -208,7 +208,7 @@ class TsrController extends Controller
         if($technicalSalesRepresentative->save()){
 
             $user = User::findOrFail($technicalSalesRepresentative->user_id);
-            $user->name = $technicalSalesRepresentative->first_name. ' ' .$technicalSalesRepresentative->last_name;
+            $user->name = strtoupper($technicalSalesRepresentative->last_name). ' ' .strtoupper($technicalSalesRepresentative->last_name);
             $user->email = $technicalSalesRepresentative->email;
             $user->company_id = $request->company;
             if($user->save()){
@@ -244,7 +244,7 @@ class TsrController extends Controller
         $user_password = strtolower($tsr->first_name.'.'.$tsr->last_name);
         // Save User
         $user = new User;
-        $user->name = $tsr->first_name. ' ' .$tsr->last_name;
+        $user->name = strtoupper($tsr->first_name). ' ' .strtoupper($tsr->last_name);
         $user->email = $tsr->email;
         $user->password = bcrypt(preg_replace('/\s+/', '', $user_password));
         if($user->save()){
