@@ -147,13 +147,17 @@ class AppAPIController extends Controller
             // Expense Charge Type
             $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
 
+            //Calculate Ramaining total amound
+            $totalBalance = $expenseChargeType->exists() ? abs((double) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id)) : (double) $toJson[0]['balance_amount'];
+
             $data = array(
                 'id' => $internalOrder->id,
                 'charge_type' => $internalOrder->charge_type,
                 'internal_order' => $internalOrder->internal_order,
                 'expense_type' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->name : null,
+                'expense_type_id' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->id : null,
                 'sap_server' => $internalOrder->sap_server,
-                'balance' => (double) $toJson[0]['balance_amount']
+                'balance' => $totalBalance
             );
             array_push($expenseBalances,$data);
 
@@ -163,6 +167,18 @@ class AppAPIController extends Controller
 
     }
 
+    public function getUnprocessSubmittedExpense($expenses_type_id)
+    {
+        $expense = Expense::whereUserId(Auth::user()->id)
+                        ->where('expenses_type_id',$expenses_type_id)
+                        ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
+                        ->doesntHave('postedPayments')
+                        ->has('expensesEntry')
+                        ->get();
+
+        return $expense->sum('amount');
+    }
+
     /**
      * get the total unpained spent per user in a month
      *
@@ -170,7 +186,6 @@ class AppAPIController extends Controller
      */
     public function totalSpent()
     {
-
         $expense = Expense::whereUserId(Auth::user()->id)
                         ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
                         ->doesntHave('postedPayments')
