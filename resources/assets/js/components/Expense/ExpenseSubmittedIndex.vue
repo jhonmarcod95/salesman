@@ -237,6 +237,7 @@
 
 <script>
 import moment from 'moment';
+import computation from '../../artisans';
 import loader from '../Loader'
 
 export default {
@@ -332,25 +333,6 @@ export default {
                 var filteredBusinessArea = this.checkedExpenses[0].user.companies[0].business_area.filter(function(businessArea){ // loop business area to get correct business area
                     return businessArea.location_id == vm.checkedExpenses[0].user.location[0].id;
                 });
-                var line_one_amount = sum * -1;
-                this.lineOneExpenses = { //Generate the line 1 paramater to post
-                    item: 1,
-                    item_text: 'REIMBURSEMENT; ' + this.dateEntry,
-                    gl_account: this.expenseByTsr[0].user.vendor.vendor_code,
-                    description: this.expenseByTsr[0].user.name,
-                    assignment: '',
-                    input_tax_code: '',
-                    internal_order: '',
-                    amount: line_one_amount.toFixed(2),
-                    charge_type: '',
-                    business_area: filteredBusinessArea[0].business_area,
-                    or_number: '',
-                    supplier_name: '',
-                    supplier_address: '',
-                    supplier_tin_number: ''
-                };
-
-                this.simulatedExpenses.push(this.lineOneExpenses);
 
                 var item = 1;
                 var tax_amountI3 = 0;
@@ -477,6 +459,28 @@ export default {
                     }
                     vm.simulatedExpenses.push(expenses);
                 }
+
+                /* line one to the first ***************************/
+                var line_one_amount = this.simulatedExpenses.Sum('amount') * -1;
+                this.lineOneExpenses = { //Generate the line 1 paramater to post
+                    item: 1,
+                    item_text: 'REIMBURSEMENT; ' + this.dateEntry,
+                    gl_account: this.expenseByTsr[0].user.vendor.vendor_code,
+                    description: this.expenseByTsr[0].user.name,
+                    assignment: '',
+                    input_tax_code: '',
+                    internal_order: '',
+                    amount: line_one_amount.toFixed(2),
+                    charge_type: '',
+                    business_area: filteredBusinessArea[0].business_area,
+                    or_number: '',
+                    supplier_name: '',
+                    supplier_address: '',
+                    supplier_tin_number: ''
+                };
+                this.simulatedExpenses.unshift(this.lineOneExpenses); //push at first index instead last
+                /* ****************************************************/
+
                     axios.get(`/expense-simulate/${this.expenseEntryId}`)
                     .then(response => {
                         this.simulate = response.data;
