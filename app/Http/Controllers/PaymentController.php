@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use DB;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use App\{
     Message,
     Payment,
     PaymentHeader,
-    PaymentDetail
+    PaymentDetail,
+    PaymentHeaderError,
+    PaymentDetailError
 };
 use DateTime;
 use Illuminate\Http\Request;
@@ -226,6 +229,39 @@ class PaymentController extends Controller
                         return $response;
                     }
                     return $response;
+                }
+            }
+
+            // Save errors to the database
+            if($sap_errors > 0){
+                DB::beginTransaction();
+                try {
+                    $data = [
+                        'user_id' => $request->userId,
+                        'ap_id' => Auth::user()->id,
+                        'cover_week' => $request->simulatedExpenses[0]['item_text'],
+
+                    ];
+                    if($paymentHeaderError = PaymentHeaderError::create($data)){
+                        $errors = json_decode($response);
+
+                        foreach( $errors as $err){
+                            if($err->return_message_type == 'E'){
+                                $array_details = [
+                                    'return_message_type' => $err->return_message_type,
+                                    'return_message_id' => $err->return_message_id,
+                                    'return_message_number' => $err->return_message_number,
+                                    'return_message_description' => $err->return_message_description,
+                                ];
+                                $paymentHeaderError->paymentHeaderDetailError()->create($array_details);
+                            }
+                        }
+
+                        DB::commit();
+                        return $response;
+                   }
+                } catch (Exception $e) {
+                    DB::rollBack();
                 }
             }
             return $response;
