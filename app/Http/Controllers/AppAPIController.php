@@ -333,7 +333,9 @@ class AppAPIController extends Controller
     {
         $currentSchedule = Schedule::where('user_id', Auth::user()->id)
                         ->orderBy('id','DESC')
+                        ->whereBetween('date', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
                         ->where('isCurrent', 1)
+                        ->where('status',2)
                         ->first();
 
         return $currentSchedule;
@@ -459,6 +461,16 @@ class AppAPIController extends Controller
         $schedule->save();
 
         return $attendance;
+    }
+
+    public function closeVisit(Request $request, Schedule $schedule)
+    {
+        // update schedule
+        $schedule->isCurrent =  0;
+        $schedule->status = 1;
+        $schedule->save();
+
+        return $schedule;
     }
 
     //User API
