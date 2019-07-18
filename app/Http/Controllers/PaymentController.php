@@ -125,7 +125,7 @@ class PaymentController extends Controller
             'acc_address' => $acc_address,
             'acc_tin_number' => $acc_tin_number
         ];
-    
+
         if($acc_tax_amountI3){
             $array['tax_amountI3'] = $acc_tax_amountI3;
         }

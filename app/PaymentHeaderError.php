@@ -9,7 +9,7 @@ class PaymentHeaderError extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['user_id', 'ap_id', 'cover_week'];
+    protected $fillable = ['user_id', 'ap_id', 'cover_week', 'posting_type'];
 
     // Relationship
     public function paymentHeaderDetailError() {
