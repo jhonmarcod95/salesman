@@ -53,7 +53,7 @@ class PaymentAutoPosting extends Command
         $companies = Company::orderBy('id', 'desc')->get();
         $lastWeekMonday = date("Y-m-d", strtotime("last week monday"));
         $lastWeekSunday = date("Y-m-d", strtotime("last sunday"));
-        $coveredWeek = $lastWeekMonday . ' to ' .$lastWeekSunday;
+        $coveredWeek = Carbon::parse($lastWeekMonday)->format('m/d/Y') . ' to ' .Carbon::parse($lastWeekSunday)->format('m/d/Y');
 
         foreach($companies as $company){
             $expenses = Expense::doesntHave('payments')->with('user', 'user.companies', 'user.location','user.vendor', 'user.internalOrders', 'user.companies.businessArea', 'user.companies.glTaxcode','expensesType','expensesType.expenseChargeType.chargeType.expenseGl', 'receiptExpenses','receiptExpenses.receiptType')
@@ -76,13 +76,22 @@ class PaymentAutoPosting extends Command
         foreach($expenses as  $expense){
             //Group entry by month
             $groupedArrayExpenses = [];
+            $baseline_date = '';
             foreach($expense as $key => $e){
                 $month = date('n', strtotime($e->created_at));
-
+                //Group entries by month
                 if (!isset($groupedArrayExpenses[$month])) {
                     $groupedArrayExpenses[$month][0] = $e;
                 }else{
                     $groupedArrayExpenses[$month][$key] = $e;
+                }
+                // Get baseline date
+                if (!$baseline_date) { // set date first to  $baseline_date
+                    $baseline_date = $e->created_at;
+                }else{
+                    if($baseline_date->greaterThan($e->created_at)){ // compare $baseline_date to current created_at to get most recent date
+                        $baseline_date = $e->created_at;
+                    }
                 }
             }
             
@@ -259,12 +268,13 @@ class PaymentAutoPosting extends Command
                 // Get SAP server
                 $sapCredential = $this->simulateExpenseSubmitted($groupedExpenses[0]->expenses_entry_id);
                 // Post Simulated Expeses to SAP                
-                $this->postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential);
+                $this->postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $groupedExpenses[0]->created_at->endOfMonth(),$baseline_date->format('m/d/Y'));
+
             }
         }
     }
 
-    public function postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential){
+    public function postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date){
         $posting_type = 'CHECK';
         $array = [
             'posting_type' => $posting_type,
@@ -278,11 +288,10 @@ class PaymentAutoPosting extends Command
             'header_text' => '"REIMBURSEMENT"',
             'company_code' => $user->companies[0]->code,
             'document_date' => Carbon::now()->format('m/d/Y'),
-            'posting_date' => Carbon::now()->format('m/d/Y'),
-            // 'posting_date' => $request->posting_date,
+            'posting_date' => $posting_date,
             'document_type' => 'KR',
             'reference_number' => $sapCredential[0]['reference_number'],
-            'baseline_date' => Carbon::now()->format('m/d/Y'), 
+            'baseline_date' => $baseline_date, 
             'vendor_code' => $user->vendor->vendor_code,
             'payment_terms' => 'NCOD',
             'gl_account_i7' => $gl_account_i7->gl_account,
@@ -365,8 +374,8 @@ class PaymentAutoPosting extends Command
                             'payment_terms' => 'NCOD',
                             'header_text' => "REIMBURSEMENT",
                             'document_date' => Carbon::now()->format('Y-m-d'),
-                            'posting_date' => Carbon::now()->format('Y-m-d'),
-                            'baseline_date' => Carbon::now()->format('Y-m-d'),
+                            'posting_date' => $posting_date,
+                            'baseline_date' => $baseline_date,
                             'document_code' => json_decode($response, true)[0]['return_message_description'],
                         ];
                         if($payment_header = PaymentHeader::create($array_header)){ //Save transaction header to payment header table
