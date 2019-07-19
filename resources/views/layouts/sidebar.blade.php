@@ -245,7 +245,7 @@
                 {{--</li>--}}
             {{--</ul>--}}
 
-            @if(!Auth::user()->hasRole('ap') && !Auth::user()->hasRole('tax'))
+            @if(Auth::user()->hasRole('it'))
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/internal-order') }}">
