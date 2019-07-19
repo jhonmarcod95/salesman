@@ -349,7 +349,7 @@ class PaymentAutoPosting extends Command
                 }
             }
 
-            if($sap_errors == 0){ //Check if has error in SAP posting 
+            if($sap_errors == 0 &&  $posting_type == 'POST'){ //Check if has error in SAP posting 
                 DB::beginTransaction();
                 try {
                     $ids = [];
