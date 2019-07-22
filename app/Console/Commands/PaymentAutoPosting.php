@@ -50,7 +50,7 @@ class PaymentAutoPosting extends Command
      */
     public function handle()
     {
-        $companies = Company::orderBy('id', 'desc')->get();
+        $companies = Company::where('hasSAP',1)->orderBy('id', 'desc')->get();
         $lastWeekMonday = date("Y-m-d", strtotime("last week monday"));
         $lastWeekSunday = date("Y-m-d", strtotime("last sunday"));
         $coveredWeek = Carbon::parse($lastWeekMonday)->format('m/d/Y') . ' to ' .Carbon::parse($lastWeekSunday)->format('m/d/Y');
@@ -66,7 +66,6 @@ class PaymentAutoPosting extends Command
             ->where('expenses_entry_id', '!=', 0)
             ->get()
             ->groupBy('user.id');
-
             $this->simulateExpense($expenses,$coveredWeek);
         }
     }
@@ -94,9 +93,14 @@ class PaymentAutoPosting extends Command
                     }
                 }
             }
-            
+            $posting_date = Carbon::now();
+            $loop_count = 1;
             //Simulate entry
             foreach($groupedArrayExpenses as $groupedExpenses){ // Loop month's. if there's an entry with different month
+               
+                if(count($groupedArrayExpenses) > 1){ // Set posting date for different month
+                    $posting_date = $loop_count == 1 ? $groupedExpenses[0]->created_at->endOfMonth() : Carbon::now();
+                }
                 
                 $acc_item_no = [];
                 $acc_item_text = [];
@@ -136,7 +140,7 @@ class PaymentAutoPosting extends Command
                 array_push($acc_input_tax_code, '~');
                 array_push($acc_internal_order, '~');
                 array_push($acc_charge_type, '~');
-                array_push($acc_business_area, $filteredBusinessArea->business_area);
+                array_push($acc_business_area, $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~');
                 array_push($acc_or_number, '~');
                 array_push($acc_supplier_name, '~');
                 array_push($acc_address, '~');
@@ -149,47 +153,25 @@ class PaymentAutoPosting extends Command
                     array_push($expense_ids,$expense->id);
                     $filteredGL = $expense->expensesType->expenseChargeType->chargeType->expenseGl->where('charge_type', $expense->expensesType->expenseChargeType->chargeType->name)
                     ->where('company_code', $expense->user->companies[0]->code)->first(); //Loop to get correct GL base on the charge type and user company code
-
                     $filteredInternalOrders = $expense->user->internalOrders->where('charge_type',$expense->expensesType->expenseChargeType->chargeType->name)->first(); //Loop to get correct IO base on the charge type of expense
-
+                    
                     // Hard coded  for special scenario for specific company
                     $amount = '';  
                     $tax_code = '';
                     $or_number = '';
                     $supplier_name = '';
                     $supplier_address = '';
-                    $supplier_tin_number = '';
                     $bol_tax_amount = false;
 
                     if($expense->user->companies[0]->code == '1100' || $expense->user->companies[0]->code == 'CSCI'){
                         $amount = $expense->amount;
                         $tax_code = 'IX';
-                        $or_number = '~';
-                        $supplier_name = '~';
-                        $supplier_address = '~';
-                        $supplier_tin_number = '~';
                         $bol_tax_amount = false;
                     }else if($expense->user->companies[0]->code == 'PFMC' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){
                         $amount = $expense->amount;
                         $tax_code = 'IX';
-                        $or_number = '~';
-                        $supplier_name = '~';
-                        $supplier_address = '~';
-                        $supplier_tin_number = '~';
                     }else{
-                        if($expense->receiptExpenses){
-                            $tax_code = $expense->receiptExpenses->receiptType->tax_code;
-                            $or_number = $expense->receiptExpenses->receipt_number;
-                            $supplier_name = $expense->receiptExpenses->vendor_name;
-                            $supplier_address = $expense->receiptExpenses->vendor_address;
-                            $supplier_tin_number = $expense->receiptExpenses->tin_number;
-                        }else{
-                            $tax_code = 'IX';
-                            $or_number = '~';
-                            $supplier_name = '~';
-                            $supplier_address = '~';
-                            $supplier_tin_number = '~';
-                        }
+                        $tax_code = $expense->receiptExpenses ? $expense->receiptExpenses->receiptType->tax_code : 'IX';
 
                         if($tax_code  == 'IX'){
                             $amount = number_format($expense->amount, 2, '.', "");
@@ -211,11 +193,11 @@ class PaymentAutoPosting extends Command
                     array_push($acc_internal_order, $internal_order);
                     array_push($acc_amount, $amount);
                     array_push($acc_charge_type, $expense->expensesType->expenseChargeType->chargeType->name);
-                    array_push($acc_business_area, $filteredBusinessArea->business_area);
-                    array_push($acc_or_number, $or_number);
-                    array_push($acc_supplier_name, $supplier_name ? $supplier_name : '~');
-                    array_push($acc_address, $supplier_address ? $supplier_address : '~');
-                    array_push($acc_tin_number, $supplier_tin_number ?  $supplier_tin_number : '~');
+                    array_push($acc_business_area, $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~');
+                    array_push($acc_or_number, $expense->receiptExpenses ? $expense->receiptExpenses->receipt_number : '~');
+                    array_push($acc_supplier_name, $expense->receiptExpenses ? $expense->receiptExpenses->vendor_name : '~');
+                    array_push($acc_address, $expense->receiptExpenses ? $expense->receiptExpenses->vendor_address : '~');
+                    array_push($acc_tin_number, $expense->receiptExpenses ? $expense->receiptExpenses->tin_number : '~');
                     // array_push($acc_tax_amountI3, '~');
                     // array_push($acc_tax_amountI7, '~');
 
@@ -241,7 +223,7 @@ class PaymentAutoPosting extends Command
                     array_push($acc_internal_order, '~');
                     array_push($acc_amount, $tax_amountI7);
                     array_push($acc_charge_type, '~');
-                    array_push($acc_business_area, $filteredBusinessArea->business_area);
+                    array_push($acc_business_area, $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~');
                     array_push($acc_or_number, '~');
                     array_push($acc_supplier_name, '~');
                     array_push($acc_address, '~');
@@ -259,7 +241,7 @@ class PaymentAutoPosting extends Command
                     array_push($acc_internal_order, '~');
                     array_push($acc_amount, $tax_amountI3);
                     array_push($acc_charge_type, '~');
-                    array_push($acc_business_area, $filteredBusinessArea->business_area);
+                    array_push($acc_business_area, $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~');
                     array_push($acc_or_number, '~');
                     array_push($acc_supplier_name, '~');
                     array_push($acc_address, '~');
@@ -268,14 +250,16 @@ class PaymentAutoPosting extends Command
                 // Get SAP server
                 $sapCredential = $this->simulateExpenseSubmitted($groupedExpenses[0]->expenses_entry_id);
                 // Post Simulated Expeses to SAP                
-                $this->postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $groupedExpenses[0]->created_at->endOfMonth(),$baseline_date);
+                $this->postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date);
+
+                $loop_count = $loop_count + 1;
 
             }
         }
     }
 
     public function postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date){
-        $posting_type = 'CHECK';
+        $posting_type = 'POST';
         $array = [
             'posting_type' => $posting_type,
             'app_server' => $sapCredential[0]['sap_server']->app_server,
@@ -285,7 +269,7 @@ class PaymentAutoPosting extends Command
             'sap_password' => urlencode($sapCredential[0]['sap_user']->sap_password),
             'sap_name' => $sapCredential[0]['sap_server']->name,
             'client' => $sapCredential[0]['sap_server']->client,
-            'header_text' => '"REIMBURSEMENT"',
+            'header_text' => 'REIMBURSEMENT',
             'company_code' => $user->companies[0]->code,
             'document_date' => Carbon::now()->format('m/d/Y'),
             'posting_date' => $posting_date->format('m/d/Y'),
