@@ -4,9 +4,18 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BrandResource;
+use App\Brand;
 
 class SurveyControllerApi extends Controller
 {
+
+    public function brands()
+    {
+        $brands = Brand::all();
+        return BrandResource::collection($brands);
+    }
+
     /**
      * Display a listing of the resource.
      *

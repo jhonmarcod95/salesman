@@ -101,4 +101,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     // Route::get('users','API\UserApiController@index');
     Route::post('users/update','API\UserApiController@update');
 
+    //Survey API
+    Route::get('brands','API\SurveyControllerApi@brands');
+
 });
