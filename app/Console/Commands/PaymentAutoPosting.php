@@ -149,7 +149,6 @@ class PaymentAutoPosting extends Command
                 // array_push($acc_tax_amountI7, '~');
 
                 foreach($groupedExpenses as $expense){ // Loop entry per month. This will generate line 2 to the nth line
-                    $acc_amount_first_index = $acc_amount_first_index + $expense->amount;
                     array_push($expense_ids,$expense->id);
                     $filteredGL = $expense->expensesType->expenseChargeType->chargeType->expenseGl->where('charge_type', $expense->expensesType->expenseChargeType->chargeType->name)
                     ->where('company_code', $expense->user->companies[0]->code)->first(); //Loop to get correct GL base on the charge type and user company code
@@ -182,6 +181,8 @@ class PaymentAutoPosting extends Command
                             $bol_tax_amount = true;
                         }
                     }
+                    $acc_amount_first_index = $acc_amount_first_index + $amount;
+
                     $internal_order = $filteredInternalOrders ? $filteredInternalOrders->internal_order : '~';
 
                     array_push($acc_item_no, $item = $item + 1);
@@ -194,10 +195,10 @@ class PaymentAutoPosting extends Command
                     array_push($acc_amount, $amount);
                     array_push($acc_charge_type, $expense->expensesType->expenseChargeType->chargeType->name);
                     array_push($acc_business_area, $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~');
-                    array_push($acc_or_number, $expense->receiptExpenses ? $expense->receiptExpenses->receipt_number : '~');
-                    array_push($acc_supplier_name, $expense->receiptExpenses ? $expense->receiptExpenses->vendor_name : '~');
-                    array_push($acc_address, $expense->receiptExpenses ? $expense->receiptExpenses->vendor_address : '~');
-                    array_push($acc_tin_number, $expense->receiptExpenses ? $expense->receiptExpenses->tin_number : '~');
+                    array_push($acc_or_number, $expense->receiptExpenses && $expense->receiptExpenses->receipt_number ? $expense->receiptExpenses->receipt_number : '~');
+                    array_push($acc_supplier_name, $expense->receiptExpenses && $expense->receiptExpenses->vendor_name ? $expense->receiptExpenses->vendor_name : '~');
+                    array_push($acc_address, $expense->receiptExpenses && $expense->receiptExpenses->vendor_address ? $expense->receiptExpenses->vendor_address : '~');
+                    array_push($acc_tin_number, $expense->receiptExpenses && $expense->receiptExpenses->tin_number ? $expense->receiptExpenses->tin_number : '~');
                     // array_push($acc_tax_amountI3, '~');
                     // array_push($acc_tax_amountI7, '~');
 
@@ -208,8 +209,6 @@ class PaymentAutoPosting extends Command
                     }else{}
                 }
 
-                array_unshift($acc_amount, number_format($acc_amount_first_index * -1, 2, '.', "")); //Place total amount to be reimburse in the first index of @acc_amount 
-            
                 // Generate last line of the entry for I7 or I3
                 $gl_account_i7 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I7')->first();
 
@@ -228,6 +227,7 @@ class PaymentAutoPosting extends Command
                     array_push($acc_supplier_name, '~');
                     array_push($acc_address, '~');
                     array_push($acc_tin_number, '~');
+                    $acc_amount_first_index = $acc_amount_first_index + $tax_amountI7;
                 }
 
                 $gl_account_i3 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I3')->first();
@@ -246,7 +246,11 @@ class PaymentAutoPosting extends Command
                     array_push($acc_supplier_name, '~');
                     array_push($acc_address, '~');
                     array_push($acc_tin_number, '~');
+                    $acc_amount_first_index = $acc_amount_first_index + $tax_amountI3;
                 }
+
+                //Place total amount to be reimburse in the first index of @acc_amount
+                array_unshift($acc_amount, number_format($acc_amount_first_index * -1, 2, '.', "")); 
                 // Get SAP server
                 $sapCredential = $this->simulateExpenseSubmitted($groupedExpenses[0]->expenses_entry_id);
                 // Post Simulated Expeses to SAP                
@@ -295,7 +299,7 @@ class PaymentAutoPosting extends Command
             'acc_address' => $acc_address,
             'acc_tin_number' => $acc_tin_number
         ];
-
+        
         $params = http_build_query($array) . "\n";
         $decode_params = urldecode($params);
         $trimmed_params = preg_replace('/[\[{\(].*[\]}\)]/U' , '', $decode_params);
