@@ -147,8 +147,13 @@ class AppAPIController extends Controller
             // Expense Charge Type
             $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
 
+            // Return value or zero when negative
+            $simulatedBalancedReturn = (double) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id);
+
+            $zeroOrResult = $simulatedBalancedReturn < 0 ? 0 : $simulatedBalancedReturn;
+
             //Calculate Ramaining total amound
-            $totalBalance = $expenseChargeType->exists() ? abs((double) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id)) : (double) $toJson[0]['balance_amount'];
+            $totalBalance = $expenseChargeType->exists() ? $zeroOrResult : (double) $toJson[0]['balance_amount'];
 
             $data = array(
                 'id' => $internalOrder->id,
