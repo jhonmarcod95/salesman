@@ -34,12 +34,12 @@ class ScheduleController extends Controller
     {
         session(['header_text' => 'Schedules']);
 
-        $company_id = Auth::user()->companies->first()->id; //used to filter with same company
+        $company_id = Auth::user()->companies->pluck(['id']); //used to filter with same company
 
         $tsrs = TechnicalSalesRepresentative::select(
             DB::raw("CONCAT(first_name,' ',last_name) AS name"), 'company_user.user_id')
             ->join('company_user', 'company_user.user_id', 'technical_sales_representatives.user_id')
-            ->where('company_user.company_id', $company_id)
+            ->whereIn('company_user.company_id', $company_id)
             ->pluck(
                 'name',
                 'company_user.user_id'

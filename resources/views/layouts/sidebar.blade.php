@@ -76,7 +76,8 @@
                 </div>
             </form>
             <!-- Navigation -->
-            @if(!Auth::user()->hasRole('hr') && !Auth::user()->hasRole('ap') && !Auth::user()->hasRole('approver') && !Auth::user()->hasRole('tax'))
+{{--            @if(!Auth::user()->hasRole('hr') && !Auth::user()->hasRole('ap') && !Auth::user()->hasRole('approver') && !Auth::user()->hasRole('tax'))--}}
+            @if(!Auth::user()->hasRole(['hr','ap','approver','tax', 'audit']))
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('/home') }}">
@@ -166,7 +167,7 @@
                 </ul>
             @else
             <ul class="navbar-nav">
-                @if(Auth::user()->hasRole('hr'))
+                @if(Auth::user()->hasRole(['hr','audit']))
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/attendance-report') }}">
                         <i class="ni ni-books text-gray"></i> Attendance Report
@@ -192,7 +193,7 @@
                 @endif
             </ul>
             @endif
-            @if(Auth::user()->hasRole('tax'))
+            @if(Auth::user()->hasRole(['tax','audit']))
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/expense-posted') }}">
@@ -202,6 +203,13 @@
             </ul>
             @endif
             <ul class="navbar-nav">
+                @if(Auth::user()->hasRole('audit'))
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url('/schedules') }}">
+                            <i class="ni ni-calendar-grid-58 text-orange"></i> Schedules
+                        </a>
+                    </li>
+                @endif
                 @if(Auth::user()->level() > 5 || Auth::user()->level() == 3)
                     <li>
                         <a data-toggle="collapse" href="#Request" class="collapsed" aria-expanded="false">

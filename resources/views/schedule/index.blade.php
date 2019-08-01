@@ -177,10 +177,7 @@
                 },
                 error: function(data){
                     var errors = $.parseJSON(data.responseText);
-                    $("#errorList").html('');
-                    $.each(errors.errors, function (key, val) {
-                        $("#errorList").append('<li>' + val + '</li>');
-                    });
+                    $("#errorList").html(showErrorAlert(data));
                     $('#btn_save').prop('disabled', false);
                     // console.log(errors);
                 }
@@ -221,12 +218,7 @@
                     // console.log(eventData);
                 },
                 error: function(data){
-                    var errors = $.parseJSON(data.responseText);
-
-                    $("#updateScheduleErrorList").html('');
-                    $.each(errors.errors, function (key, val) {
-                        $("#updateScheduleErrorList").append('<li>' + val + '</li>');
-                    });
+                    $("#updateScheduleErrorList").html(showErrorAlert(data));
                     $('#btn_save_change').prop('disabled', false);
                     // console.log(errors);
                 }

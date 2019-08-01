@@ -264,7 +264,7 @@
                                 <tr v-for="(paymentDetail, p) in copiedObject.payment_detail" v-bind:key="p">
                                     <td>{{ paymentDetail.item }}</td>
                                     <td>{{ paymentDetail.item_text }}</td>
-                                    <td v-if="paymentDetail.internal_order"><a :href="imageLink+copiedObject.payments[p - 1].expense.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+copiedObject.payments[p - 1].expense.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
+                                    <td v-if="paymentDetail.internal_order && paymentDetail.internal_order !== '~'"><a :href="imageLink+copiedObject.payments[p - 1].expense.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+copiedObject.payments[p - 1].expense.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                     <td v-else></td>
                                     <td>{{ paymentDetail.gl_account }}</td>
                                     <td>{{ paymentDetail.description.toUpperCase() }}</td>
