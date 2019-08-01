@@ -263,3 +263,6 @@ Route::get('/sap/server', 'SapServerController@index');
 
 //Auth role
 Route::get('/auth-role', 'UserController@getRole');
+
+Route::get('/visited-customer', 'CustomerController@customerVisitedIndex');
+Route::post('/visited-customer-all', 'CustomerController@customerVisitedIndexData');
