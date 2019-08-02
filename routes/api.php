@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('schedules/exists','AppAPIController@checkHasSchedule');
     Route::get('schedules/visited/{schedule}','AppAPIController@markedVisited');
     Route::get('schedules/current','AppAPIController@getCurrentSchedule');
+    Route::get('schedules/close/{schedule}','AppAPIController@closeVisit');
 
     //Attendance
     Route::post('attendances/signin','AppAPIController@signIn');

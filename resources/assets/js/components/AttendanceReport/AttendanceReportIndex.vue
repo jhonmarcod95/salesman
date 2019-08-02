@@ -82,8 +82,6 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a v-if="schedule.attendances && schedule.attendances.sign_in !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#singInphotoModal" @click="getSingInImage(schedule)">Sign In Photo</a>
                                                     <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule)">Sign out Photo</a>
-                                                    <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#editModal">Edit</a>
-                                                    <a class="dropdown-item" href="#deleteModal" data-toggle="modal" >Delete</a>
                                                 </div>
                                             </div>
                                         </td>

@@ -18,6 +18,7 @@ class CreatePaymentHeaderErrorsTable extends Migration
             $table->integer('user_id');
             $table->integer('ap_id');
             $table->string('cover_week');
+            $table->string('posting_type');
             $table->timestamps();
             $table->softDeletes();
         });

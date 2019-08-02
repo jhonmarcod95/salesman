@@ -52,6 +52,14 @@ function formatDate(date) {
 
     return [year, month, day].join('-');
 }
+function showErrorAlert(data) {
+    var errors = $.parseJSON(data.responseText);
+    var errList = '';
+    $.each(errors.errors, function (key, val) {
+        errList += '<li>' + val + '</li>';
+    });
+    return '<p>Error</b> ' + errors.message + '</p><ul class="small">' + errList + '</ul>';
+}
 </script>
 
 @yield('script')

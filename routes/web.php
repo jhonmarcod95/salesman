@@ -34,6 +34,13 @@ Route::group(['middleware' => 'auth'], function(){
 
     //Roles
     Route::get('/roles', 'RoleController@index');
+
+    // User
+    Route::post('/change-password', 'UserController@changePassword');
+    // Show change password page
+    Route::get('/user/change-password', 'UserController@changePasswordIndex')->name('change_password');
+    // Fetch all companies
+    Route::get('/companies-all', 'CompanyController@indexData');
 });
 
 // Admin Routes
@@ -140,12 +147,6 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // fetch all recipients
     Route::get('/recipients', 'MessageController@recipients');
 
-
-    // User
-    Route::post('/change-password', 'UserController@changePassword');
-    // Show change password page
-    Route::get('/user/change-password', 'UserController@changePasswordIndex')->name('change_password');
-
     //Schedules
     // Fetch todays schedule(Customer,event,mapping)
     Route::get('/schedules-todays', 'ScheduleController@todays');
@@ -180,7 +181,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 });
 
 // AP Routes
-Route::group(['middleware' => ['auth', 'role:ap|tax']], function(){
+Route::group(['middleware' => ['auth', 'role:ap|tax|audit']], function(){
     // Payments
     Route::get('/payments', 'PaymentController@index');
     // Store payment expense
@@ -214,7 +215,7 @@ Route::group(['middleware' => ['auth', 'role:ap|tax']], function(){
 });
 
 // Hr routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit']], function () {
     // Attendance Report
     Route::get('/attendance-report', 'AttendanceReportController@index')->name('report_list');
     // fetch all Attendance Report
@@ -224,8 +225,6 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     // Companies
     Route::get('/companies', 'CompanyController@index');
-    // Fetch all companies
-    Route::get('/companies-all', 'CompanyController@indexData');
     // Add company  
     Route::post('/company', 'CompanyController@store');
     // Update company
@@ -236,6 +235,17 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Locations
     Route::get('/locations', 'LocationController@index');
 });
+
+//Audit routes
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit']], function () {
+    //Schedules
+    Route::get('/schedules', 'ScheduleController@index');
+    Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
+
+    Route::get('/schedule-customer/{classification}', 'ScheduleController@scheduleCustomerData');
+});
+
+
 
 // Request Routes
 Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver']], function () {
@@ -248,11 +258,15 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver']], fu
     Route::post('/change-schedule-disapproved', 'ScheduleController@changeScheduleDisapproved');
 });
 
-Route::get('/internal-order', 'SalesmanInternalOrderController@index')->name('internal-order');
-Route::post('/internal-order', 'SalesmanInternalOrderController@store');
-Route::patch('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@update');
-Route::delete('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@destroy');
-Route::get('/internal-orders', 'SalesmanInternalOrderController@indexData')->name('internal-order');
+
+Route::group(['middleware' => ['auth', 'role:it']], function () {
+    Route::get('/internal-order', 'SalesmanInternalOrderController@index')->name('internal-order');
+    Route::post('/internal-order', 'SalesmanInternalOrderController@store');
+    Route::patch('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@update');
+    Route::delete('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@destroy');
+    Route::get('/internal-orders', 'SalesmanInternalOrderController@indexData')->name('internal-order');
+});
+
 
 // Fetch all sap servers
 Route::get('/sap/server', 'SapServerController@index');

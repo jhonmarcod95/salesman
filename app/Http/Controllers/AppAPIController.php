@@ -147,8 +147,13 @@ class AppAPIController extends Controller
             // Expense Charge Type
             $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
 
+            // Return value or zero when negative
+            $simulatedBalancedReturn = (double) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id);
+
+            $zeroOrResult = $simulatedBalancedReturn < 0 ? 0 : $simulatedBalancedReturn;
+
             //Calculate Ramaining total amound
-            $totalBalance = $expenseChargeType->exists() ? abs((double) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id)) : (double) $toJson[0]['balance_amount'];
+            $totalBalance = $expenseChargeType->exists() ? $zeroOrResult : (double) $toJson[0]['balance_amount'];
 
             $data = array(
                 'id' => $internalOrder->id,
@@ -333,7 +338,9 @@ class AppAPIController extends Controller
     {
         $currentSchedule = Schedule::where('user_id', Auth::user()->id)
                         ->orderBy('id','DESC')
+                        ->whereBetween('date', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
                         ->where('isCurrent', 1)
+                        ->where('status',2)
                         ->first();
 
         return $currentSchedule;
@@ -459,6 +466,16 @@ class AppAPIController extends Controller
         $schedule->save();
 
         return $attendance;
+    }
+
+    public function closeVisit(Request $request, Schedule $schedule)
+    {
+        // update schedule
+        $schedule->isCurrent =  0;
+        $schedule->status = 1;
+        $schedule->save();
+
+        return $schedule;
     }
 
     //User API

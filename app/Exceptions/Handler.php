@@ -4,6 +4,10 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use jeremykenedy\LaravelRoles\Exceptions\LevelDeniedException;
+use jeremykenedy\LaravelRoles\Exceptions\PermissionDeniedException;
+use jeremykenedy\LaravelRoles\Exceptions\RoleDeniedException;
+
 
 class Handler extends ExceptionHandler
 {
@@ -46,6 +50,24 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        $userLevelCheck = $exception instanceof RoleDeniedException ||
+            $exception instanceof RoleDeniedException ||
+            $exception instanceof PermissionDeniedException ||
+            $exception instanceof LevelDeniedException;
+
+        if ($userLevelCheck) {
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error'    =>  403,
+                    'message'   =>  'Unauthorized.'
+                ], 403);
+            }
+
+            abort(403);
+        }
+
+
         return parent::render($request, $exception);
     }
 }
