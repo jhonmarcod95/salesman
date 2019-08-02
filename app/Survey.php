@@ -8,8 +8,28 @@ class Survey extends Model
 {
     protected $fillable = [
         'remarks',
-        'customer_photo'
+        'customer_photo',
+        'ranks',
+        'brands'
     ];
+
+    protected $casts = [
+        'ranks' => 'array',
+        'brands' => 'array',
+    ];
+
+    /**
+     * Convet array to string conversion
+     */
+    public function setRanksAttribute($value)
+    {
+        $this->attributes['ranks'] = json_encode($value);
+    }
+
+    public function setBrandsAttribute($value)
+    {
+        $this->attributes['brands'] = json_encode($value);
+    }
 
     public function user()
     {
