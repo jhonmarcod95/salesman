@@ -191,6 +191,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/expense-unposted') }}">
+                        <i class="ni ni-chart-pie-35 text-danger"></i> Unposted Expenses
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{{ url('/users') }}">
                         <i class="ni ni-user-run text-blue"></i> Users
                     </a>

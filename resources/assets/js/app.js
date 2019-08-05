@@ -28,10 +28,11 @@ Vue.component('payment-index', require('./components/Payment/PaymentIndex.vue'))
 
 // Payment Posted
 Vue.component('payment-posted-index', require('./components/PaymentPosted/PaymentPostedIndex.vue'));
+// Payment Unposted
+Vue.component('payment-unposted-index', require('./components/PaymentUnposted/PaymentUnpostedIndex.vue'));
 
 // Companeies
 Vue.component('company-index', require('./components/Company/CompanyIndex.vue'));
-
 
 // Expenses
 Vue.component('expense-index', require('./components/Expense/ExpenseIndex.vue'));

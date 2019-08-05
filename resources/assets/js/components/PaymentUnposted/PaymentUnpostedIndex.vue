@@ -11,7 +11,7 @@
                         <div class="card-header border-0">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h3 class="mb-0">Payment</h3>
+                                    <h3 class="mb-0">Unposted Expenses</h3>
                                 </div>
                             </div>
                         </div>
@@ -61,7 +61,6 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col"></th>
-                                    <th scope="col">Legend</th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Expense Submitted</th>
                                     <th scope="col">Total Expenses</th>
@@ -76,14 +75,13 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" href="javascript:void(0)" @click="getExpenseSubmitted(expense)">View</a>
+                                                    <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#viewModal" @click="getExpenseSubmitted(expense.user.name,expense.user.expenses,expense.payment_header_detail_error)">View</a>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td v-html="showLegend(expense)"></td>
-                                        <td>{{ expense[0].user.name }}</td>
-                                        <td>{{ countExpenseSubmitted(expense) }}</td>
-                                        <td>PHP {{ countTotalExpenses(expense) }}</td>
+                                        <td>{{ expense.user.name }}</td>
+                                        <td>{{ expense.user.expenses.length }}</td>
+                                        <td>PHP {{ countTotalExpenses(expense.user.expenses) }}</td>
                                     </tr>
                                 </tbody>
                                 <tbody v-else>
@@ -94,13 +92,6 @@
                             </table>
                         </div>
                        <div class="card-footer py-4" v-if="this.expenses.length">
-                            <span>LEGEND:</span>
-                            <i class="fab fa-font-awesome-flag text-success pl-4" style="font-size: 20px;"></i>
-                            <!--<span> - Fully Posted</span>-->
-                            <!--<i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>-->
-                            <span> - Posted</span>
-                            <i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>
-                            <span> - Unprocessed</span>
                             <nav aria-label="...">
                                 <ul class="pagination justify-content-end mb-0">
                                     <li class="page-item">
@@ -119,6 +110,69 @@
                 </div>
             </div>
         </div>
+
+        <!-- View Expense Modal -->
+        <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <span class="closed" data-dismiss="modal">&times;</span>
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCompanyLabel">Expenses Submitted</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="row">
+                        <div class="col"><h3>TSR: {{ this.tsrName }}</h3></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-items-center table-flush">
+                            <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Attachment</th>
+                                <th scope="col">Type of Expense</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
+                                    <td><a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
+                                    <td>{{ expenseBy.expenses_type.name }}</td>
+                                    <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
+                                    <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-danger text-center mt-3 mb-3">
+                        <span>Unable to post due to errors</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-items-center table-flush">
+                            <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Type</th>
+                                <th scope="col">Id</th>
+                                <th scope="col">Number</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(errorDetail, e) in errorDetails" v-bind:key="e">
+                                    <td>{{ errorDetail.return_message_type }}</td>
+                                    <td>{{ errorDetail.return_message_id }}</td>
+                                    <td>{{ errorDetail.return_message_number }}</td>
+                                    <td>{{ errorDetail.return_message_description }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -131,6 +185,7 @@ export default {
         return{
             expenses: [],
             expenses_id: [],
+            expenseByTsr: [],
             weeks: [],
             current_week: '',
             year: '',
@@ -146,7 +201,8 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
-            loading: false
+            loading: false,
+            errorDetails: []
         }
     },
     created(){
@@ -166,18 +222,10 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        getExpenseSubmitted(e){
-            var ids = e.map(function (el) { return el.id; });
-            axios.post('/expense-submitted',{
-                ids: ids,
-                current_week: this.current_week
-            })
-            .then(response => {
-                window.location.href = window.location.origin+response.data;
-            })
-            .catch(error => {
-                error.response.data.errors
-            })
+        getExpenseSubmitted(name,expenses, errors){
+            this.tsrName = name;
+            this.expenseByTsr = expenses;
+            this.errorDetails = errors;
         },
         fetchExpenses(){
             this.loading = true;
@@ -189,7 +237,7 @@ export default {
             var moment2 = moment(date2);
             this.startDate = moment1.format('YYYY-MM-DD');
             this.endDate = moment2.format('YYYY-MM-DD');
-            axios.post('/expense-by-company', {
+            axios.post('/expense-unposteds', {
                 startDate: this.startDate,
                 endDate: this.endDate,
                 company: this.company
@@ -228,27 +276,9 @@ export default {
         countTotalExpenses(expenses){
             var totalExpenses = 0;
             expenses.forEach(element => {
-                element.expenses_model.forEach(e => {
-                    totalExpenses = totalExpenses + e.amount;  
-                })
+                totalExpenses = totalExpenses + element.amount;
             });
             return totalExpenses.toFixed(2);
-        },
-        showLegend(legend){
-            var paid = 0;
-            var unpaid = 0;
-            legend.filter(item => {
-                item.expenses_model.filter(i => {
-                   i.payments ? paid = paid + 1 : unpaid = unpaid + 1
-                })
-            });
-            if(paid && !unpaid){
-                return '<i class="fab fa-font-awesome-flag text-success pl-4" style="font-size: 20px;"></i>';
-            }else if(paid && unpaid){
-                return '<i class="fab fa-font-awesome-flag text-yellow pl-4" style="font-size: 20px;"></i>';
-            }else{
-                return '<i class="fab fa-font-awesome-flag text-danger pl-4" style="font-size: 20px;"></i>';
-            }
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -269,8 +299,8 @@ export default {
     computed:{
         filteredExpenses(){
             let self = this;
-            return Object.values(self.expenses[0]).filter(expense => {
-                return expense[0].user.name.toLowerCase().includes(this.keywords.toLowerCase())
+            return Object.values(self.expenses).filter(expense => {
+                return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase())
             });
         },
         totalPages() {
@@ -293,6 +323,9 @@ export default {
         years () {
             const year = new Date().getFullYear()
             return Array.from({length: year - 2018}, (value, index) => 2019 + index)
+        },
+        imageLink(){
+            return window.location.origin+'/storage/';
         }
     },
 }

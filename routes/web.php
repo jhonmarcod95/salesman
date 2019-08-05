@@ -200,6 +200,10 @@ Route::group(['middleware' => ['auth', 'role:ap|tax|audit']], function(){
     Route::get('/expense-posted', 'ExpenseController@expensePostedIndex');
     Route::post('/expense-posteds', 'ExpenseController@expensePostedIndexData');
 
+    // Expense Unposted
+    Route::get('/expense-unposted', 'ExpenseController@expenseUnPostedIndex');
+    Route::post('/expense-unposteds', 'ExpenseController@expenseUnPostedIndexData');
+
 
     // Show SAP user page
     Route::get('/sap/account', 'SapUserController@index')->name('sap_user');
