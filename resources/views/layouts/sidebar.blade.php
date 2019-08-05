@@ -262,6 +262,13 @@
                 </li>
             </ul>
             @endif
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/visited-customer') }}">
+                        <i class="ni ni-spaceship text-indigo"></i>Visited Customer
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>

@@ -51,6 +51,7 @@ Vue.component('user-change-password-index', require('./components/User/UserChang
 Vue.component('customer-index', require('./components/Customer/CustomerIndex.vue'));
 Vue.component('customer-form', require('./components/Customer/CustomerForm.vue'));
 Vue.component('customer-edit-form', require('./components/Customer/CustomerEditForm.vue'));
+Vue.component('customer-visited', require('./components/Customer/CustomerVisited.vue'));
 
 // Tsr
 Vue.component('tsr-index', require('./components/Tsr/TsrIndex.vue'));

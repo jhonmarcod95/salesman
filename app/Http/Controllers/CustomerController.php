@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use DB;
 use Auth;
 use App\Customer;
 use App\Message;
@@ -255,5 +255,43 @@ class CustomerController extends Controller
         if($customer->delete()){
             return $customer;
         }
+    }
+
+    /**
+     * Display customer visited page
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function customerVisitedIndex(){
+        session(['header_text' => 'Visited Customer']);
+
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
+
+        return view('customer.visited', compact('notification'));
+    }
+
+    /**
+     * Fetch all customer visited
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function customerVisitedIndexData(Request $request){
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate'
+        ]);
+        
+        $companyId = Auth::user()->companies[0]->id;
+
+        return DB::select("call p_customer_visited('$request->startDate','$request->endDate' , '$companyId')");
     }
 }
