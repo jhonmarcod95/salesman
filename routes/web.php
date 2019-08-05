@@ -177,7 +177,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::post('/expenses', 'ExpenseController@store');
     // Update Expenses
     Route::patch('/expenses/{expensesType}', 'ExpenseController@update');
-    
+
+
+    // Expense Unposted
+    Route::get('/expense-unposted', 'ExpenseController@expenseUnPostedIndex');
+    Route::post('/expense-unposteds', 'ExpenseController@expenseUnPostedIndexData');
 });
 
 // AP Routes
@@ -199,10 +203,6 @@ Route::group(['middleware' => ['auth', 'role:ap|tax|audit']], function(){
     // Expense Posted
     Route::get('/expense-posted', 'ExpenseController@expensePostedIndex');
     Route::post('/expense-posteds', 'ExpenseController@expensePostedIndexData');
-
-    // Expense Unposted
-    Route::get('/expense-unposted', 'ExpenseController@expenseUnPostedIndex');
-    Route::post('/expense-unposteds', 'ExpenseController@expenseUnPostedIndexData');
 
 
     // Show SAP user page
