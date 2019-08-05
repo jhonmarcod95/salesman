@@ -41,7 +41,7 @@ class SurveyControllerApi extends Controller
             'customer_id' => 'required',
             'brands' => 'required',
             'ranks' => 'required',
-            'customer_photo' => 'required'
+            // 'customer_photo' => 'required'
         ]);
 
         $survey = new Survey;
@@ -52,9 +52,9 @@ class SurveyControllerApi extends Controller
         $survey->remarks = $request->remarks;
         $survey->save();
 
-        if($survey) {
-            $this->uploadSurveyPhoto($request->customer_photo, $survey->id);
-        }
+        // if($survey) {
+        //     $this->uploadSurveyPhoto($request->customer_photo, $survey->id);
+        // }
 
         return new SurveyResource($survey);
 

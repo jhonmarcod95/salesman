@@ -14,7 +14,7 @@ class AddRankingFieldToSurveysTable extends Migration
     public function up()
     {
         Schema::table('surveys', function (Blueprint $table) {
-            $table->string('ranks',1000);
+            $table->longText('ranks');
         });
     }
 
