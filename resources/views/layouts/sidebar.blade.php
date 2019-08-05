@@ -127,6 +127,11 @@
                                         <i class="ni ni-collection text-indigo"></i> Expense Report
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/visited-customer') }}">
+                                        <i class="ni ni-spaceship text-indigo"></i>Visited Customer
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </li>
@@ -262,13 +267,6 @@
                 </li>
             </ul>
             @endif
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/visited-customer') }}">
-                        <i class="ni ni-spaceship text-indigo"></i>Visited Customer
-                    </a>
-                </li>
-            </ul>
         </div>
     </div>
 </nav>

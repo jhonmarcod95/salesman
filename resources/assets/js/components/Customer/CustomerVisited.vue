@@ -53,25 +53,25 @@
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
-                                    <th scope="col"></th>
-                                    <th scope="col">Document Code</th>
+<!--                                    <th scope="col"></th>-->
+                                    <th scope="col">Customer Code</th>
                                     <th scope="col">Customer Name</th>
                                     <th scope="col">Visit Count</th>
                                 </tr>
                                 </thead>
                                 <tbody v-if="customerVisiteds.length">
                                     <tr v-for="(customerVisited, c) in filteredQueues" v-bind:key="c">
-                                        <td class="text-right">
-                                            <div class="dropdown">
-                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </a>
-                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" href="#simulateModal" data-toggle="modal" @click="copyObject(customerVisited)">View</a>
-                                                </div>
-                                            </div>
-                                        </td>
+<!--                                        <td class="text-right">-->
+<!--                                            <div class="dropdown">-->
+<!--                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"-->
+<!--                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+<!--                                                    <i class="fas fa-ellipsis-v"></i>-->
+<!--                                                </a>-->
+<!--                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">-->
+<!--                                                    <a class="dropdown-item" href="#simulateModal" data-toggle="modal" @click="copyObject(customerVisited)">View</a>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </td>-->
                                         <td>{{ customerVisited.code }}</td>
                                         <td>{{ customerVisited.name }}</td>
                                         <td>{{ customerVisited.count }}</td>
