@@ -26,7 +26,11 @@ class SurveyControllerApi extends Controller
      */
     public function index()
     {
-        //
+        $surveys = Survey::orderBy('id','DESC')
+                        ->where('user_id', Auth::user()->id)
+                        ->get();
+        
+        return SurveyResource::collection($surveys); 
     }
 
     /**
@@ -71,7 +75,7 @@ class SurveyControllerApi extends Controller
 
         $newimg = file_put_contents(public_path('storage/surveys/') . $request->header('File-Name'), file_get_contents('php://input'));
 
-        $survey->attachment = 'surveys/'. $request->header('File-Name');
+        $survey->customer_photo = 'surveys/'. $request->header('File-Name');
         $survey->save();
 
         return $survey;

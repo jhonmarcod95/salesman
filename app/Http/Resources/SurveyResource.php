@@ -17,10 +17,11 @@ class SurveyResource extends JsonResource
         return [
             'id' => $this->id,
             'customer' => $this->customer,
+            'customer_photo' => $this->customer_photo,
             'ranks' => $this->ranks,
             'brands' => $this->brands,
             'remarks' => $this->remarks,
-            'customer_photo' => $this->customer_photo,
+            'created_at' => (string) $this->created_at
         ];
     }
 }
