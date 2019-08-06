@@ -127,6 +127,16 @@
                                         <i class="ni ni-collection text-indigo"></i> Expense Report
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/visited-customer') }}">
+                                        <i class="ni ni-spaceship text-indigo"></i>Visited Customer
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/expense-unposted') }}">
+                                        <i class="ni ni-chart-pie-35 text-danger"></i> Unposted Expenses
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </li>
@@ -185,6 +195,7 @@
                         <i class="ni ni-basket text-orange"></i> Posted Expenses
                     </a>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/users') }}">
                         <i class="ni ni-user-run text-blue"></i> Users

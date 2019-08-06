@@ -464,7 +464,7 @@ export default {
                 var line_one_amount = this.simulatedExpenses.Sum('amount') * -1;
                 this.lineOneExpenses = { //Generate the line 1 paramater to post
                     item: 1,
-                    item_text: 'REIMBURSEMENT; ' + this.dateEntry,
+                    item_text: 'SALESFORCE REIMBURSEMENT; ' + this.dateEntry,
                     gl_account: this.expenseByTsr[0].user.vendor.vendor_code,
                     description: this.expenseByTsr[0].user.name,
                     assignment: '',

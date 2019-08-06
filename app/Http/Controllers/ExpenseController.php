@@ -11,8 +11,10 @@ use App\{
     User,
     SapUser,
     SapServer,
-    PaymentHeader
+    PaymentHeader,
+    PaymentHeaderError
 };
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
@@ -280,7 +282,7 @@ class ExpenseController extends Controller
     } 
     
     /**
-     * Simulate submitted expenses
+     * Posted expenses page
      *
      * @return \Illuminate\Http\Response
      */
@@ -320,5 +322,56 @@ class ExpenseController extends Controller
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
             ->orderBy('id', 'desc')->get();
+    }
+
+    /**
+     *Unposted expenses page
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function expenseUnpostedIndex(){
+        
+        session(['header_text' => 'Unposted Expenses']);
+
+        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        $notification = 0;  
+        foreach($message as $notif){
+
+            $ids = collect(json_decode($notif->seen, true))->pluck('id');
+            if(!$ids->contains(Auth::user()->id)){
+                $notification++;
+            }
+        }
+
+        return view('payment-unposted.index', compact('notification'));
+    }
+
+    /**
+     * Fetch all expense unposted
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function expenseUnpostedIndexData(Request $request){
+        $request->validate([
+            'company' => 'required',
+            'startDate' => 'required',
+            'endDate' => 'required'
+        ]);
+        
+        $companyId = $request->company;
+        $startDate = $request->startDate;
+        $endDate = $request->endDate;
+        $coveredWeek = Carbon::parse($startDate)->format('m/d/Y') . ' to ' .Carbon::parse($endDate)->format('m/d/Y');
+        
+        return PaymentHeaderError::with('paymentHeaderDetailError','user','user.expenses.expensesType')
+        ->whereHas('user' , function($q) use ($companyId){
+            $q->whereHas('companies', function($q) use ($companyId){
+                $q->where('company_id', $companyId);
+            });
+        })->with(['user.expenses' => function ($q) use ($startDate, $endDate){
+            $q->whereDate('created_at', '>=',  $startDate)->whereDate('created_at' ,'<=', $endDate);
+        }])->where('cover_week','SALESFORCE REIMBURSEMENT; '. $coveredWeek)
+        ->where('posting_type', 'POST')->orderBy('id', 'desc')->get();
     }
 }

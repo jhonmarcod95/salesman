@@ -177,7 +177,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::post('/expenses', 'ExpenseController@store');
     // Update Expenses
     Route::patch('/expenses/{expensesType}', 'ExpenseController@update');
-    
+
+
+    // Expense Unposted
+    Route::get('/expense-unposted', 'ExpenseController@expenseUnPostedIndex');
+    Route::post('/expense-unposteds', 'ExpenseController@expenseUnPostedIndexData');
 });
 
 // AP Routes
@@ -273,3 +277,6 @@ Route::get('/sap/server', 'SapServerController@index');
 
 //Auth role
 Route::get('/auth-role', 'UserController@getRole');
+
+Route::get('/visited-customer', 'CustomerController@customerVisitedIndex');
+Route::post('/visited-customer-all', 'CustomerController@customerVisitedIndexData');

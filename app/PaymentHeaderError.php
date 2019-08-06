@@ -15,4 +15,8 @@ class PaymentHeaderError extends Model
     public function paymentHeaderDetailError() {
         return $this->hasMany(PaymentDetailError::class);
     }
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }

@@ -28,10 +28,11 @@ Vue.component('payment-index', require('./components/Payment/PaymentIndex.vue'))
 
 // Payment Posted
 Vue.component('payment-posted-index', require('./components/PaymentPosted/PaymentPostedIndex.vue'));
+// Payment Unposted
+Vue.component('payment-unposted-index', require('./components/PaymentUnposted/PaymentUnpostedIndex.vue'));
 
 // Companeies
 Vue.component('company-index', require('./components/Company/CompanyIndex.vue'));
-
 
 // Expenses
 Vue.component('expense-index', require('./components/Expense/ExpenseIndex.vue'));
@@ -51,6 +52,7 @@ Vue.component('user-change-password-index', require('./components/User/UserChang
 Vue.component('customer-index', require('./components/Customer/CustomerIndex.vue'));
 Vue.component('customer-form', require('./components/Customer/CustomerForm.vue'));
 Vue.component('customer-edit-form', require('./components/Customer/CustomerEditForm.vue'));
+Vue.component('customer-visited', require('./components/Customer/CustomerVisited.vue'));
 
 // Tsr
 Vue.component('tsr-index', require('./components/Tsr/TsrIndex.vue'));
