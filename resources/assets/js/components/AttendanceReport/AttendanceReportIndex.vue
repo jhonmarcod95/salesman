@@ -22,7 +22,7 @@
                                         <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                                     </div>
                                 </div>
-                                <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10">
+                                <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
                                     <div class="form-group">
                                         <label class="form-control-label" for="role">Company</label>
                                         <select class="form-control" v-model="company">
