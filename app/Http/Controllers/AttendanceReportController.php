@@ -54,6 +54,7 @@ class AttendanceReportController extends Controller
      */
 
     public function generateBydate(Request $request){
+
         $request->validate([
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
@@ -61,7 +62,7 @@ class AttendanceReportController extends Controller
 
         $company = $request->company;
         
-        if(Auth::user()->level() < 8 && !Auth::user()->hasRole('hr')){
+        if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
             $schedule = Schedule::with('user', 'attendances')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
