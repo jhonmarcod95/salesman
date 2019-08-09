@@ -32,6 +32,7 @@ class SchedulesResource extends JsonResource
             'lat' => $this->lat,
             'lng' => $this->lng,
             'km_distance' => $this->km_distance,
+            'type' => $this->type
         ];
     }
 }
