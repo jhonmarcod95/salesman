@@ -109,4 +109,8 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('surveys','API\SurveyControllerApi@store');
     Route::post('surveys/attach/{survey}','API\SurveyControllerApi@uploadSurveyPhoto');
 
+    //Grassroots
+    Route::get('grassroots/types','API\GrassrootsController@grassrootsExpenseTypes');
+    Route::post('grassroots','API\GrassrootsController@store');
+
 });
