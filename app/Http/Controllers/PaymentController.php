@@ -135,7 +135,7 @@ class PaymentController extends Controller
 
         $params = http_build_query($array) . "\n";
         $decode_params = urldecode($params);
-        $trimmed_params = preg_replace('/[\[{\(].*[\]}\)]/U' , '', $decode_params);
+        $trimmed_params = preg_replace('/\[[^\]]*\]/' , '', $decode_params);
 
         $curl = curl_init();
 
