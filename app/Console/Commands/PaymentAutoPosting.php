@@ -392,15 +392,8 @@ class PaymentAutoPosting extends Command
                                         $url = "http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking";
                                         $fields = "budget_line=". $array['acc_internal_order'][$key] ."&posting_date=". Carbon::parse($match[0])->format('Y-m-d') ."&company_server=".$sapCredential[0]['sap_server']->sap_server;
                                         $header = array(
-                                            "Accept: /",
-                                            "Accept-Encoding: gzip, deflate",
-                                            "Cache-Control: no-cache",
-                                            "Connection: keep-alive",
-                                            "Content-Length: 68",
                                             "Content-Type: application/x-www-form-urlencoded",
-                                            "Host: 10.96.4.39",
-                                            "Postman-Token: 8dc11d24-7520-476d-9ac2-65ae8fd1f423,bb8db084-e482-4a1a-a9e5-cbbe73e8b39b",
-                                            "User-Agent: PostmanRuntime/7.15.2",
+                                            "Postman-Token: bce74f1d-8de3-41e6-9384-5f8b39f75e71",
                                             "cache-control: no-cache"
                                         );
 
