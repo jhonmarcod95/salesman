@@ -326,7 +326,7 @@ class PaymentAutoPosting extends Command
         $err = curl_error($curl);
 
         curl_close($curl);
-
+   
         if ($err) {
             dd("cURL Error #:" . $err);
         } else {
@@ -384,7 +384,35 @@ class PaymentAutoPosting extends Command
                                     'supplier_address' => $array['acc_address'][$key],
                                     'supplier_tin_number' => $array['acc_tin_number'][$key],
                                 ];
-                                $payment_header->paymentDetail()->create($array_details); //Save posted expenses per line to Payment Detail table
+                                if($paymentDetail = $payment_header->paymentDetail()->create($array_details)){ //Save posted expenses per line to Payment Detail table
+                                    if($array['acc_internal_order'][$key] !== '~'){
+
+                                        preg_match('/\d{2}\/\d{2}\/\d{4}/',$array['acc_item_text'][$key],$match);
+
+                                        $url = "http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking";
+                                        $fields = "budget_line=". $array['acc_internal_order'][$key] ."&posting_date=". Carbon::parse($match[0])->format('Y-m-d') ."&company_server=".$sapCredential[0]['sap_server']->sap_server;
+                                        $header = array(
+                                            "Accept: /",
+                                            "Accept-Encoding: gzip, deflate",
+                                            "Cache-Control: no-cache",
+                                            "Connection: keep-alive",
+                                            "Content-Length: 68",
+                                            "Content-Type: application/x-www-form-urlencoded",
+                                            "Host: 10.96.4.39",
+                                            "Postman-Token: 8dc11d24-7520-476d-9ac2-65ae8fd1f423,bb8db084-e482-4a1a-a9e5-cbbe73e8b39b",
+                                            "User-Agent: PostmanRuntime/7.15.2",
+                                            "cache-control: no-cache"
+                                        );
+
+                                        $array_balance = [
+                                            'internal_order' => $array['acc_internal_order'][$key],
+                                            'date' => Carbon::parse($match[0])->format('Y-m-d'),
+                                            'to' => json_decode($this->APIconnection($url,$fields,$header), true)[0]['balance_amount']
+                                        ];
+
+                                        $paymentDetail->balanceHistory()->create($array_balance);
+                                    }
+                                }
                             }
                             // return $response;
                         }
@@ -462,6 +490,39 @@ class PaymentAutoPosting extends Command
 
             return array ($data);
         }
-    } 
+    }
+
+    /**
+     * API connection 
+     *
+     * @return \Illuminate\Http\Response
+     */
+ 
+    public function APIconnection($url, $fields, $header){
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => $fields,
+        CURLOPT_HTTPHEADER => $header,
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            echo "cURL Error #:" . $err;
+        } else {
+            return $response;
+        }
+    }
 
 }

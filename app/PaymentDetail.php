@@ -23,4 +23,8 @@ class PaymentDetail extends Model
         'supplier_tin_number',
         'payment_header_id',
     ];
+
+    public function balanceHistory() {
+        return $this->hasOne(BalanceHistory::class);
+    }
 }
