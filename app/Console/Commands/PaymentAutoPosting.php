@@ -66,11 +66,11 @@ class PaymentAutoPosting extends Command
             ->where('expenses_entry_id', '!=', 0)
             ->get()
             ->groupBy('user.id');
-            $this->simulateExpense($expenses,$coveredWeek);
+            $this->simulateExpense($expenses,$coveredWeek, $lastWeekMonday, $lastWeekSunday);
         }
     }
 
-    public function simulateExpense($expenses ,$coveredWeek){
+    public function simulateExpense($expenses ,$coveredWeek, $lastWeekMonday, $lastWeekSunday){
 
         foreach($expenses as  $expense){
             //Group entry by month
@@ -94,12 +94,13 @@ class PaymentAutoPosting extends Command
                 }
             }
             $posting_date = Carbon::now();
-            $loop_count = 1;
+            $isSameMonth = date("n",  strtotime($lastWeekMonday)) == date("n", strtotime($lastWeekSunday));
             //Simulate entry
             foreach($groupedArrayExpenses as $groupedExpenses){ // Loop month's. if there's an entry with different month
                
-                if(count($groupedArrayExpenses) > 1){ // Set posting date for different month
-                    $posting_date = $loop_count == 1 ? $groupedExpenses[0]->created_at->endOfMonth() : Carbon::now();
+                if(!$isSameMonth){ // Set posting date for different month
+                    $firstMonth = date("n",  strtotime($lastWeekMonday));
+                    $posting_date = $firstMonth == date('n', strtotime($groupedExpenses[0]->created_at)) ? $groupedExpenses[0]->created_at->endOfMonth() : Carbon::now();
                 }
                 
                 $acc_item_no = [];
