@@ -22,6 +22,7 @@ use App\Attendance;
 use Carbon\Carbon;
 use App\Schedule;
 use App\Expense;
+use App\CloseVisit;
 use App\Payment;
 use DB;
 
@@ -468,6 +469,10 @@ class AppAPIController extends Controller
         return $attendance;
     }
 
+
+    /**
+     * function to force close a visit
+     */
     public function closeVisit(Request $request, Schedule $schedule)
     {
         // update schedule
@@ -476,6 +481,20 @@ class AppAPIController extends Controller
         $schedule->save();
 
         return $schedule;
+    }
+
+    public function requestToCloseVisit(Request $request)
+    {
+        $this->validate($request,[
+            'schedule_id' => 'required',
+        ]);
+
+        $closevisit = new CloseVisit();
+        $closevisit->user_id = Auth::user()->id;
+        $closevisit->schedule()->associate($request->schedule_id);
+        $closevisit->save();
+
+        return $closevisit;
     }
 
     //User API
