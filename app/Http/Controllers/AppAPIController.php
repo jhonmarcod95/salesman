@@ -342,9 +342,13 @@ class AppAPIController extends Controller
                         ->whereBetween('date', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
                         ->where('isCurrent', 1)
                         ->where('status',2)
+                        ->with('closeVisit:id,schedule_id,isApproved')
                         ->first();
+                        
 
         return $currentSchedule;
+
+        // return new SchedulesResource($currentSchedule);
     }
 
     public function getSchedules() {

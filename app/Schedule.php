@@ -80,4 +80,9 @@ class Schedule extends Model implements Auditable
         'updated_at'
     ];
 
+    public function closeVisit()
+    {
+        return $this->hasOne(CloseVisit::class);
+    }
+
 }
