@@ -42,8 +42,13 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('schedules/exists','AppAPIController@checkHasSchedule');
     Route::get('schedules/visited/{schedule}','AppAPIController@markedVisited');
     Route::get('schedules/current','AppAPIController@getCurrentSchedule');
+    
+    // Close visit 
+    Route::post('/search/close-visits','CloseVisitController@searchCloseVisit');
     Route::get('schedules/close/{schedule}','AppAPIController@closeVisit');
     Route::post('schedules/request-close','AppAPIController@requestToCloseVisit');
+    Route::get('/close-visits','CloseVisitController@requestToClose');
+    Route::post('/confirm/close-visits/{closeVisit}','CloseVisitController@closeVisit');
 
     //Attendance
     Route::post('attendances/signin','AppAPIController@signIn');
@@ -96,7 +101,6 @@ Route::group(['middleware' => 'auth:api'], function() {
 
     //Expense Bypass API
     Route::post('expense-bypass','ExpenseBypassesController@store');
-
 
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');

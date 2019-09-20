@@ -1,4 +1,5 @@
 
+
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -73,6 +74,10 @@ Vue.component('loader', require('./components/Loader.vue'));
 
 // Internal Order
 Vue.component('internal-order-index', require('./components/InternalOrder/InternalOrderIndex.vue'));
+
+//Close Visit Index
+Vue.component('close-visit', require('./components/CloseVisit/Index.vue'));
+
 
 const app = new Vue({
     el: '#app',

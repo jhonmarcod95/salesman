@@ -254,6 +254,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 // Request Routes
 Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver']], function () {
 
+    // Request to close a visit
+    Route::get('/request-close','CloseVisitController@index');
     // Request schedules
     Route::get('/change-schedule', 'ScheduleController@changeScheduleIndex');
     // Fetch all companies

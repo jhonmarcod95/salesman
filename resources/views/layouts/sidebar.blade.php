@@ -236,6 +236,11 @@
                                         <i class="ni ni-books text-gray"></i> Change Schedule
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/request-close') }}">
+                                        <i class="ni ni-books text-gray"></i> Close visit requests
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </li>

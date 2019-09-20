@@ -491,10 +491,12 @@ class AppAPIController extends Controller
     {
         $this->validate($request,[
             'schedule_id' => 'required',
+            'reason' => 'required'
         ]);
 
         $closevisit = new CloseVisit();
         $closevisit->user_id = Auth::user()->id;
+        $closevisit->reason = $request->reason;
         $closevisit->schedule()->associate($request->schedule_id);
         $closevisit->save();
 

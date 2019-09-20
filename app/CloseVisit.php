@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class CloseVisit extends Model
 {
     protected $fillable = [
-        'isApproved'
+        'isApproved',
+        'reason',
+        'approved_date'
     ];
 
     public function user() 
@@ -20,8 +22,8 @@ class CloseVisit extends Model
         return $this->belongsTo(Schedule::class);
     }
 
-    public function approvedBy() 
+    public function confirmedBy() 
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'confirmed_by','id');
     }
 }

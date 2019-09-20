@@ -17,8 +17,10 @@ class CreateCloseVisitsTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('schedule_id')->unsigned();
-            $table->integer('approved_by')->unsigned()->nullable();
-            $table->boolean('isApproved')->default(false);
+            $table->integer('confirmed_by')->unsigned()->nullable();
+            $table->date('approved_date')->nullable();
+            $table->text('reason')->nullable();
+            $table->integer('isApproved')->default(0);
             $table->timestamps();
         });
     }
