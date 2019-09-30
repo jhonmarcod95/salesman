@@ -28,6 +28,7 @@ class AmountLimit implements Rule
         $this->expenses_type_id = $expenses_type_id;
         $this->expense_id = $expense_id;
         $this->io_balance = $io_balance;
+        $this->returnMessage = 'Budget Exceeded';
     }
 
     /**
@@ -67,6 +68,26 @@ class AmountLimit implements Rule
     }
 
     /**
+     * Get all unprocess expenses within the month
+     * 
+     * @param [integer] $expenses_type_id
+     * 
+     * @return json
+     * 
+     */
+    public function getUnprocessSubmittedExpense()
+    {
+        $expense = Expense::whereUserId(Auth::user()->id)
+                        ->where('expenses_type_id',$this->expenses_type_id)
+                        ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
+                        ->doesntHave('postedPayments')
+                        ->has('expensesEntry')
+                        ->get();
+
+        return $expense->sum('amount');
+    }
+
+    /**
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
@@ -86,11 +107,11 @@ class AmountLimit implements Rule
 
         //Check if user has a expense exception to bypass budget exceeded
         $expenseBypass = ExpenseBypass::bypass($this->expenses_type_id);
-
+        
         // set default budget total
         $budgetBalanceCurrent = 0;
 
-        // Check if user has expense bypase
+        // Check if user has expense bypass
         if($expenseBypass->exists()) {
             return true;
         }
@@ -98,18 +119,39 @@ class AmountLimit implements Rule
         // do not proceed if io_balance is empty
         // if io_balance is found
         if($this->io_balance || $this->io_balance === 'N/A') {
-            $budgetBalanceCurrent = (double) $this->io_balance - $this->getTodaysExpense($value);
+
+            // $simulatedBalance =  max((double) $this->io_balance - $this->getTodaysExpense($value), 0);
+
+            // Get simulated balance SAP Balance - Unposted Expense = Simulated balance
+            $simulatedBalance = max((double) $this->io_balance - $this->getUnprocessSubmittedExpense(), 0);
+
 
             // If user has SAP budget line assigned
-            if($maintainedExpenseRate->exists()) {
-                return $this->io_balance != 'N/A' ? $budgetBalanceCurrent >= 0 &&
-                    $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first() :
-                    $this->getTodaysExpense($value) <= $maintainedExpenseRate->pluck('amount')->first();
-            } else {
-                return $this->io_balance != 'N/A' ? $budgetBalanceCurrent >= 0 &&
-                    $this->getTodaysExpense($value) <= $defaultExpenseRate :
-                    $this->getTodaysExpense($value) <= $defaultExpenseRate;
-            }
+            $isMaintainedExpenseRate = $maintainedExpenseRate->exists() ? $maintainedExpenseRate->pluck('amount')->first() : $defaultExpenseRate;
+            
+            // default condition if no budget line found from the user
+            if($this->io_balance == 'N/A') {
+                return $this->getTodaysExpense($value) <= $defaultExpenseRate;
+            }  
+
+            switch(false) {
+                case (1 <= $value): // minimum input amount is 1
+                    $this->returnMessage = 'Invalid amount';
+                    return false;
+                    break;
+                case ($simulatedBalance > $value): // simulated budget ( SAP - unposted = simulated) should > value
+                    $this->returnMessage = 'Budget Exceeded, Please check your balance';
+                    return false;
+                    break;
+                case ($this->getTodaysExpense($value) <= $isMaintainedExpenseRate): // total expense for given expense type should be <= max set for the given expense type
+                    $this->returnMessage = "Allocated budget today for this expense type is exceeded";
+                    return false;
+                    break;
+                default: 
+                    return true;
+            }      
+
+            
         } else {
             return false;
         }
@@ -124,7 +166,7 @@ class AmountLimit implements Rule
     public function message()
     {
         if($this->io_balance || $this->io_balance == 'N/A') {
-            return 'Budget Exceeded';
+            return $this->returnMessage;
         } else {
             return 'No Budget Line Found';
         }

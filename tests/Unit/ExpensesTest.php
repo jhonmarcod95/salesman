@@ -155,4 +155,92 @@ class ExpensesTest extends TestCase
         $this->assertFalse($expense->exists());
     }
 
+    /**
+     * @test
+     */
+    public function check_internal_orders() 
+    {
+
+        $response = $this->actingAs($this->defaultUser(), 'api')->json('GET', 'api/internal_orders');
+
+        $response
+        ->assertStatus(200);
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
+
+    }
+
+    /**
+     * @test
+     */
+    public function can_store_expense() 
+    {
+
+        $types = 3; // toll
+        $amount = 800;
+
+        $response = $this->actingAs($this->defaultUser(), 'api')
+            ->json('POST', 'api/expenses', [
+                'types' => $types,
+                'amount' => $amount
+            ]);
+
+        \Log::info($response->getContent());
+
+        $response
+        ->assertJsonStructure([
+            'id','currencyAmount','amount','types'
+        ])
+        ->assertJson([
+            'amount' => $amount,
+        ])
+        ->assertStatus(200);
+
+        $this->assertDatabaseHas('expenses',[
+            'amount' => $amount,
+        ]);
+
+        
+    }
+
+    /**
+     * @test
+     */
+    public function check_unprocess_expenses()
+    {
+
+        $expenses_type_id = 6;
+
+        $expense = Expense::whereUserId(155)
+        ->where('expenses_type_id',$expenses_type_id)
+        ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
+        ->doesntHave('postedPayments')
+        ->has('expensesEntry')
+        ->get();
+
+        $this->assertTrue(true);
+
+        echo json_encode($expense, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * @test
+     */
+    public function check_real_internal_orders() 
+    {
+
+        $user = 155; // 
+
+        $response = $this->actingAs($this->defaultUser(), 'api')
+            ->json('GET', 'api/real_internal_orders', [
+                'user_id' => $user
+            ]);
+
+        $response
+        ->assertStatus(200);
+
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
+        
+    }
 }

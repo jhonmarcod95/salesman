@@ -173,6 +173,61 @@ class AppAPIController extends Controller
 
     }
 
+    /**
+     * Check all user's real remaining balance from SAP api
+     *
+     * @return void
+     */
+    public function checkUserRealBalance(Request $request)
+    {
+
+        $this->validate($request, [
+            'user_id' => 'required'
+        ]);
+
+        $internalOrders = SalesmanInternalOrder::where('user_id', $request->user_id)->get();
+
+        $expenseBalances = array();
+
+        foreach($internalOrders as $internalOrder) {
+
+            // SAP API
+            $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
+            ->withContentType('application/x-www-form-urlencoded')
+            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+            ->post();
+
+            $toJson = json_decode($response, true);
+
+            // Expense Charge Type
+            $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
+
+            // Return value or zero when negative
+            $simulatedBalancedReturn = (double) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id);
+
+            $zeroOrResult = $simulatedBalancedReturn < 0 ? 0 : $simulatedBalancedReturn;
+
+            //Calculate Ramaining total amound
+            // $totalBalance = $expenseChargeType->exists() ? $zeroOrResult : (double) $toJson[0]['balance_amount'];
+            $totalBalance = (double) $toJson[0]['balance_amount'];
+
+            $data = array(
+                'id' => $internalOrder->id,
+                'charge_type' => $internalOrder->charge_type,
+                'internal_order' => $internalOrder->internal_order,
+                'expense_type' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->name : null,
+                'expense_type_id' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->id : null,
+                'sap_server' => $internalOrder->sap_server,
+                'balance' => $totalBalance
+            );
+            array_push($expenseBalances,$data);
+
+        }
+
+        return $expenseBalances;
+
+    }
+
     public function getUnprocessSubmittedExpense($expenses_type_id)
     {
         $expense = Expense::whereUserId(Auth::user()->id)

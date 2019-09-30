@@ -75,6 +75,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 
     //Budget & Balance Checking API
     Route::get('internal_orders','AppAPIController@checkUserBalance');
+    Route::get('real_internal_orders','AppAPIController@checkUserRealBalance');
     Route::get('check_internal_order/{expense_type}','AppAPIController@checkInternalOrder');
     Route::get('charge_type/{expense_type}','AppAPIController@checkChargeType');
     Route::get('sap/budget_check/{expense_type}','AppAPIController@checkBudget');
