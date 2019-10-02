@@ -32,7 +32,8 @@ class RequestsAPIController extends Controller
 
     public function customers()
     {
-        $customers = Customer::select('name',
+        $customers = Customer::select('id',
+                                'name',
                                 'street',
                                 'town_city',
                                 'customer_code')->get();

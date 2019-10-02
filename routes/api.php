@@ -49,6 +49,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('schedules/request-close','AppAPIController@requestToCloseVisit');
     Route::get('/close-visits','CloseVisitController@requestToClose');
     Route::post('/confirm/close-visits/{closeVisit}','CloseVisitController@closeVisit');
+    Route::get('schedules/has-activity','AppAPIController@hasActivity');
 
     //Attendance
     Route::post('attendances/signin','AppAPIController@signIn');
@@ -107,5 +108,15 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('user', 'AppAPIController@getCurrentUser');
     // Route::get('users','API\UserApiController@index');
     Route::post('users/update','API\UserApiController@update');
+
+    //Survey API
+    Route::get('brands','API\SurveyControllerApi@brands');
+    Route::get('surveys','API\SurveyControllerApi@index');
+    Route::post('surveys','API\SurveyControllerApi@store');
+    Route::post('surveys/attach/{survey}','API\SurveyControllerApi@uploadSurveyPhoto');
+
+    //Grassroots
+    Route::get('grassroots/types','API\GrassrootsController@grassrootsExpenseTypes');
+    Route::post('grassroots','API\GrassrootsController@store');
 
 });

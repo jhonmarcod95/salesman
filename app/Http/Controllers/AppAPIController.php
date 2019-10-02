@@ -451,6 +451,25 @@ class AppAPIController extends Controller
         return SchedulesResource::collection($dailySchedule);
     }
 
+    // for grassroots
+    /**
+     * Will check if current schedule
+     * @return number of detected activity count
+     */
+    public function hasActivity()
+    {
+
+        $dailySchedule = Schedule::orderBy('id','DESC')
+                            ->whereDate('date', Carbon::today())
+                            ->where('user_id', Auth::user()->id)
+                            ->whereIn('type',[6])
+                            ->exists();
+
+        return response()->json($dailySchedule);
+
+    }
+
+
     public function markedVisited(Schedule $schedule)
     {
 
