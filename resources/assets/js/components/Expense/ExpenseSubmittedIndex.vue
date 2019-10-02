@@ -225,10 +225,11 @@
                         </table>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button id="post_btn" type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,expenseByTsr[0].user.companies[0].name,expenseByTsr[0].user.name,'POST')">POST</button>
-                    <button id="check_btn" type="button" class="btn btn-primary btn-round btn-fill" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,expenseByTsr[0].user.companies[0].name,expenseByTsr[0].user.name,'CHECK')">Check</button>
-                </div>
+                    <div class="modal-footer">
+                        <button id="manual_post_btn" type="button" class="btn btn-primary btn-round btn-fill" v-if="!hasSAPButton" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,expenseByTsr[0].user.companies[0].name,expenseByTsr[0].user.name,'POST',expenseByTsr[0].user.companies[0].hasSAP)">MANUAL POST</button>
+                        <button id="post_btn" type="button" class="btn btn-primary btn-round btn-fill" v-if="hasSAPButton" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,expenseByTsr[0].user.companies[0].name,expenseByTsr[0].user.name,'POST',expenseByTsr[0].user.companies[0].hasSAP)">POST</button>
+                        <button id="check_btn" type="button" class="btn btn-primary btn-round btn-fill" v-if="hasSAPButton" @click="checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,expenseByTsr[0].user.companies[0].name,expenseByTsr[0].user.name,'CHECK',expenseByTsr[0].user.companies[0].hasSAP)">Check</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -266,7 +267,8 @@ export default {
             errors: [],
             currentPage: 0,
             itemsPerPage: 10,
-            loading: true
+            loading: true,
+            hasSAPButton: false
         }
     },
     created(){
@@ -284,6 +286,12 @@ export default {
             .then(response => { 
                 this.expenseByTsr = response.data;
                 this.loading = false;
+                var hasSAP = this.expenseByTsr[0].user.companies[0].hasSAP;
+                if(hasSAP > 0){
+                    this.hasSAPButton = true;
+                }else{
+                    this.hasSAPButton = false;
+                }
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -291,7 +299,12 @@ export default {
             });
         },
         simulateExpenses(userId){
-            document.getElementById("check_btn").disabled = false;
+            if(this.hasSAPButton){
+                document.getElementById("check_btn").disabled = false;
+            }else{
+                document.getElementById("manual_post_btn").disabled = false;
+            }
+            
             this.responses = [];
             let vm = this;
             this.simulatedExpenses = [];
@@ -301,6 +314,7 @@ export default {
                 this.errorsExpense = true;
                 return false;
             } this.errorsExpense = false;
+
             checked.forEach(function(element) {
                vm.expenses_id.push(parseInt(element.value));
             });
@@ -484,7 +498,7 @@ export default {
                     axios.get(`/expense-simulate/${this.expenseEntryId}`)
                     .then(response => {
                         this.simulate = response.data;
-                        document.getElementById("post_btn").disabled = true; 
+                        // document.getElementById("post_btn").disabled = true; 
                         $('#simulateModal').modal('show');
                     })
                     .catch(error => { 
@@ -492,12 +506,17 @@ export default {
                     })
                 }
         },
-        checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,company_name,vendor_name,posting_type){
+        checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,company_name,vendor_name,posting_type,has_sap){
             this.loading = true;
             let vm = this;
             vm.sap_errors = 0;
-            document.getElementById("post_btn").disabled = true;
-            document.getElementById("check_btn").disabled = true; 
+            if(this.hasSAPButton){
+                document.getElementById("post_btn").disabled = true;
+                document.getElementById("check_btn").disabled = true; 
+            }else{
+                 document.getElementById("manual_post_btn").disabled = true;
+            }
+
             this.responses = [];
             axios.post('/payments', {
                 company_name: company_name,
@@ -524,27 +543,43 @@ export default {
                 payment_terms: payment_terms,
                 gl_account_i7: this.gl_account_i7[0].gl_account,
                 gl_account_i3: this.gl_account_i3[0].gl_account,
-                simulatedExpenses: simulatedExpenses
+                simulatedExpenses: simulatedExpenses,
+                has_sap : has_sap 
+
             })
             .then(response => {
                 this.responses = response.data;
-                this.responses.filter(function(response){
-                    if(response.return_message_type == 'E'){
-                        vm.sap_errors++
-                    }
-                });
-                if(posting_type == 'CHECK' && this.responses.length){
-                    if(vm.sap_errors == 0){
-                        this.post_successful = false;
-                        document.getElementById("post_btn").disabled = false;
-                        document.getElementById("check_btn").disabled = false;
-                    }
+                if(this.responses == 'success'){
+                    this.post_successful = true;
+                    document.getElementById("manual_post_btn").disabled = true;
+                    this.fetchExpenseByTsr(); 
                 }else{
-                    if(vm.sap_errors == 0){
-                        this.post_successful = true;
-                        document.getElementById("check_btn").disabled = true; 
-                        document.getElementById("post_btn").disabled = true;
-                        this.fetchExpenseByTsr(); 
+                    this.responses.filter(function(response){
+                        if(response.return_message_type == 'E'){
+                            vm.sap_errors++
+                        }
+                    });
+                    if(posting_type == 'CHECK' && this.responses.length){
+                        if(vm.sap_errors == 0){
+                            this.post_successful = false;
+                            if(this.hasSAPButton){
+                                document.getElementById("post_btn").disabled = false;
+                                document.getElementById("check_btn").disabled = false;
+                            }else{
+                                document.getElementById("manual_post_btn").disabled = false;
+                            }
+                        }
+                    }else{
+                        if(vm.sap_errors == 0){
+                            this.post_successful = true;
+                            if(this.hasSAPButton){
+                                document.getElementById("check_btn").disabled = true; 
+                                document.getElementById("post_btn").disabled = true;
+                            }else{
+                                document.getElementById("manual_post_btn").disabled = true;
+                            }
+                            this.fetchExpenseByTsr(); 
+                        }
                     }
                 }
                 this.loading = false;
