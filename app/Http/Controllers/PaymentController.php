@@ -320,19 +320,19 @@ class PaymentController extends Controller
                             foreach($request->simulatedExpenses as $expense){
                                 $array_details = [
                                     'item' => $expense['item'],
-                                    'item_text' => $expense['item_text'],
+                                    'item_text' => $expense['item_text'] ? $expense['item_text'] : '~',
                                     'gl_account' => $expense['gl_account'] ? $expense['gl_account'] : 0,
                                     'description' => $expense['description'],
-                                    'assignment' => $expense['assignment'],
-                                    'input_tax_code' => $expense['input_tax_code'],
-                                    'internal_order' => $expense['internal_order'],
+                                    'assignment' => $expense['assignment'] ? $expense['assignment'] : '~',
+                                    'input_tax_code' => $expense['input_tax_code'] ? $expense['input_tax_code'] : '~',
+                                    'internal_order' => $expense['internal_order'] ? $expense['internal_order'] : '~',
                                     'amount' => $expense['amount'],
-                                    'charge_type' => $expense['charge_type'],
-                                    'business_area' => $expense['business_area'],
-                                    'or_number' => $expense['or_number'],
-                                    'supplier_name' => $expense['supplier_name'],
-                                    'supplier_address' => $expense['supplier_address'],
-                                    'supplier_tin_number' => $expense['supplier_tin_number'],
+                                    'charge_type' => $expense['charge_type'] ? $expense['charge_type'] : '~',
+                                    'business_area' => $expense['business_area'] ? $expense['business_area'] : '~',
+                                    'or_number' => $expense['or_number'] ? $expense['or_number'] : '~',
+                                    'supplier_name' => $expense['supplier_name'] ? $expense['supplier_name'] : '~',
+                                    'supplier_address' => $expense['supplier_address'] ? $expense['supplier_address'] : '~',
+                                    'supplier_tin_number' => $expense['supplier_tin_number'] ? $expense['supplier_tin_number'] : '~',
                                 ];
                                 $payment_header->paymentDetail()->create($array_details);
                                 DB::commit();
