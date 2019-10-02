@@ -209,9 +209,9 @@ class ExpensesTest extends TestCase
     public function check_unprocess_expenses()
     {
 
-        $expenses_type_id = 6;
+        $expenses_type_id = 1;
 
-        $expense = Expense::whereUserId(155)
+        $expense = Expense::whereUserId(160)
         ->where('expenses_type_id',$expenses_type_id)
         ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
         ->doesntHave('postedPayments')
@@ -221,6 +221,7 @@ class ExpensesTest extends TestCase
         $this->assertTrue(true);
 
         echo json_encode($expense, JSON_PRETTY_PRINT);
+        echo "\n\n total Amount: ".json_encode($expense->sum('amount'), JSON_PRETTY_PRINT);
     }
 
     /**
@@ -229,7 +230,7 @@ class ExpensesTest extends TestCase
     public function check_real_internal_orders() 
     {
 
-        $user = 155; // 
+        $user = 160; // 
 
         $response = $this->actingAs($this->defaultUser(), 'api')
             ->json('GET', 'api/real_internal_orders', [
