@@ -38,13 +38,16 @@ class GrassrootsController extends Controller
     {
         $this->validate($request,[
             'amount' => 'required',
-            'expense_id' => 'required'
+            'expense_id' => 'required',
+            'grassroots_expense_type_id' => 'required'
+        ],[
+            'grassroots_expense_type_id.required' => 'Grassroot expense type is required'
         ]);
 
         $grassroot = new Grassroot();
         $grassroot->user_id = Auth::user()->id;
         $grassroot->expense_id = $request->expense_id;
-        $grassroot->grassrots_expense_type_id = $request->grassrots_expense_type_id;
+        $grassroot->grassroots_expense_type_id = $request->grassroots_expense_type_id;
         $grassroot->amount = $request->amount;
         $grassroot->remarks = $request->remarks;
         $grassroot->save();
