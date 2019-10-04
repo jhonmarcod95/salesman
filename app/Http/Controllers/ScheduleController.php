@@ -121,6 +121,7 @@ class ScheduleController extends Controller
 
                 $request->validate([
                     'customer_codes' => 'required',
+                    'radius' => 'numeric|max:5',
                 ]);
 
                 $customer_codes = $request->customer_codes;
@@ -197,10 +198,11 @@ class ScheduleController extends Controller
 
         $schedule_type = $request->type;
 
-        #Customer Visit
+        #Customer & Office Visit
         if($schedule_type == '1' || $schedule_type == '5'){
             $request->validate([
                 'customer_code' => [new GeocodeCustomerRule(), 'required'],
+                'radius' => 'numeric|max:5',
             ]);
 
             $customer = Customer::where('customer_code', $request->customer_code)->first();
