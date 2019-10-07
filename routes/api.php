@@ -42,8 +42,8 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('schedules/exists','AppAPIController@checkHasSchedule');
     Route::get('schedules/visited/{schedule}','AppAPIController@markedVisited');
     Route::get('schedules/current','AppAPIController@getCurrentSchedule');
-    
-    // Close visit 
+
+    // Close visit
     Route::post('/search/close-visits','CloseVisitController@searchCloseVisit');
     Route::get('schedules/close/{schedule}','AppAPIController@closeVisit');
     Route::post('schedules/request-close','AppAPIController@requestToCloseVisit');
@@ -106,6 +106,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');
+    Route::get('users/approver', 'AppAPIController@checkUserRole');
     // Route::get('users','API\UserApiController@index');
     Route::post('users/update','API\UserApiController@update');
 

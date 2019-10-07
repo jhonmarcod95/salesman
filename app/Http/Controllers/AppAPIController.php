@@ -399,7 +399,7 @@ class AppAPIController extends Controller
                         ->where('status',2)
                         ->with('closeVisit:id,schedule_id,isApproved')
                         ->first();
-                        
+
 
         return $currentSchedule;
 
@@ -825,6 +825,15 @@ class AppAPIController extends Controller
 
         return TinNumbersResource::collection($tinNumbers);
 
+    }
+
+    public function checkUserRole()
+    {
+        if(Auth::user()->hasRole(['admin','id','approver','manager','vp','president']))
+        {
+            return response()->json(true,200);
+        }
+            return response()->json(false,200);
     }
 
 
