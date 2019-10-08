@@ -300,6 +300,7 @@ export default {
         },
         simulateExpenses(userId){
             if(this.hasSAPButton){
+                document.getElementById("post_btn").disabled = true;
                 document.getElementById("check_btn").disabled = false;
             }else{
                 document.getElementById("manual_post_btn").disabled = false;
@@ -498,7 +499,7 @@ export default {
                     axios.get(`/expense-simulate/${this.expenseEntryId}`)
                     .then(response => {
                         this.simulate = response.data;
-                        // document.getElementById("post_btn").disabled = true; 
+                        document.getElementById("post_btn").disabled = true; 
                         $('#simulateModal').modal('show');
                     })
                     .catch(error => { 
