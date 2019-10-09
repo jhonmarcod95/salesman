@@ -24,6 +24,8 @@
     "dependencies": {
         "@saeris/vue-spinners": "^1.0.8",
         "laravel-echo": "^1.4.0",
+        "mapbox-gl": "^1.4.0",
+        "mapbox-gl-vue": "^2.0.3",
         "moment": "^2.22.2",
         "npm": "^6.10.3",
         "pusher-js": "^4.3.1",
