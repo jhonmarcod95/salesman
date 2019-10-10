@@ -32,11 +32,9 @@ class RequestsAPIController extends Controller
 
     public function customers()
     {
-        $customers = Customer::select('id',
-                                'name',
-                                'street',
-                                'town_city',
-                                'customer_code')->get();
+        $customers = Customer::where('company_id', Auth::user()->company_id)
+                    ->select('id','name','street','town_city','customer_code')
+                    ->get();
 
         return CustomerResource::collection($customers);
     }
