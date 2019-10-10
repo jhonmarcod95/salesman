@@ -7,6 +7,7 @@ use DB;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use App\{
+    User,
     Message,
     Payment,
     PaymentHeader,
@@ -49,6 +50,8 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
+        if($request->has_sap > 0){
+            
         $acc_item_no = [];
         $acc_item_text = [];
         $acc_gl_account = [];
@@ -265,6 +268,100 @@ class PaymentController extends Controller
                 }
             }
             return $response;
+        }
+
+        }else{
+            
+            $document_code = $this->generate_document_code();
+
+            if($request->posting_type == 'POST'){
+
+                $request->validate([
+                    'expenseId' => 'required',
+                    'userId' => 'required'
+                ]);
+
+                DB::beginTransaction();
+
+                try {
+                    $ids = [];
+                    foreach($request->expenseId as $expense){
+                        $ids[] = [
+                            'expense_id' => $expense,
+                            'user_id' => $request->userId,
+                            'document_code' => $document_code,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ];
+                    }
+                    $document_date = new DateTime($request->document_date);
+                    $posting_date = new DateTime($request->posting_date);
+                    $baseline_date = new DateTime($request->baseline_date);
+
+                    if(Payment::insert($ids)){
+
+                        $array_header = [
+                            'company_code' => $request->company_code ? $request->company_code : '',
+                            'company_name' => $request->company_name,
+                            'reference_number' => $request->reference_number,
+                            'ap_user' => $request->sap_user_id,
+                            'vendor_code' => $request->vendor_code ? $request->vendor_code : '',
+                            'vendor_name' =>  $request->vendor_name,
+                            'document_type' => $request->document_type,
+                            'payment_terms' => $request->payment_terms,
+                            'header_text' => $request->header_text,
+                            'document_date' => $document_date->format('Y-m-d'),
+                            'posting_date' => $posting_date->format('Y-m-d'),
+                            'baseline_date' => $baseline_date->format('Y-m-d'),
+                            'document_code' => $document_code,
+                        ];
+
+                        if($payment_header = PaymentHeader::create($array_header)){
+                            foreach($request->simulatedExpenses as $expense){
+                                $array_details = [
+                                    'item' => $expense['item'],
+                                    'item_text' => $expense['item_text'] ? $expense['item_text'] : '~',
+                                    'gl_account' => $expense['gl_account'] ? $expense['gl_account'] : 0,
+                                    'description' => $expense['description'],
+                                    'assignment' => $expense['assignment'] ? $expense['assignment'] : '~',
+                                    'input_tax_code' => $expense['input_tax_code'] ? $expense['input_tax_code'] : '~',
+                                    'internal_order' => $expense['internal_order'] ? $expense['internal_order'] : '~',
+                                    'amount' => $expense['amount'],
+                                    'charge_type' => $expense['charge_type'] ? $expense['charge_type'] : '~',
+                                    'business_area' => $expense['business_area'] ? $expense['business_area'] : '~',
+                                    'or_number' => $expense['or_number'] ? $expense['or_number'] : '~',
+                                    'supplier_name' => $expense['supplier_name'] ? $expense['supplier_name'] : '~',
+                                    'supplier_address' => $expense['supplier_address'] ? $expense['supplier_address'] : '~',
+                                    'supplier_tin_number' => $expense['supplier_tin_number'] ? $expense['supplier_tin_number'] : '~',
+                                ];
+                                $payment_header->paymentDetail()->create($array_details);
+                                DB::commit();
+                            }
+                            return 'success';
+                        }
+                        return 'success';
+                    }
+                }catch (Exception $e) {
+                    DB::rollBack();
+                }
+            }
+
+
+        }
+    }
+
+    private function generate_document_code(){
+        $max_document_code = DB::table('payments')
+                    ->join('users', 'users.id', '=', 'payments.user_id')
+                    ->join('companies', 'users.company_id', '=', 'companies.id')
+                    ->where('companies.hasSAP', 0)
+                    ->max('document_code');
+
+        if($max_document_code){
+            $key = $max_document_code + 1;
+            return $key;
+        }else{
+            return 7000000000;
         }
     }
 

@@ -352,11 +352,13 @@
 
                     resetModal();
 
-                    //disable delete button if current day is selected
+                    //disable delete & update button if current day is selected
                     if(calEvent.start.format() == moment().format('YYYY-MM-DD')){
+                        $('#btn_save_changes').prop('disabled', true);
                         $('#btn_delete').prop('disabled', true);
                     }
                     else{
+                        $('#btn_save_changes').prop('disabled', false);
                         $('#btn_delete').prop('disabled', false);
                     }
 
@@ -390,7 +392,7 @@
                 eventDrop: function(event, delta, revertFunc) {
 
                     //disable update if past date or sched already visited
-                    if(dragEvent.start.isBefore(currentDate) || event.start.isBefore(currentDate) || event.status == '1') {
+                    if(dragEvent.start.isBefore(currentDate) || event.start.isBefore(currentDate) || event.status == '1' || dragEvent.start.format('Y-M-DD') == currentDate) {
                         $('#calendar').fullCalendar('unselect');
                         revertFunc();
                         return false;

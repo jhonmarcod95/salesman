@@ -66,11 +66,11 @@ class PaymentAutoPosting extends Command
             ->where('expenses_entry_id', '!=', 0)
             ->get()
             ->groupBy('user.id');
-            $this->simulateExpense($expenses,$coveredWeek);
+            $this->simulateExpense($expenses,$coveredWeek, $lastWeekMonday, $lastWeekSunday);
         }
     }
 
-    public function simulateExpense($expenses ,$coveredWeek){
+    public function simulateExpense($expenses ,$coveredWeek, $lastWeekMonday, $lastWeekSunday){
 
         foreach($expenses as  $expense){
             //Group entry by month
@@ -93,15 +93,19 @@ class PaymentAutoPosting extends Command
                     }
                 }
             }
-            $posting_date = Carbon::now();
-            $loop_count = 1;
+            $posting_date = '';
+            $sameMonth = date("n",  strtotime($lastWeekMonday)) == date("n", strtotime($lastWeekSunday));
             //Simulate entry
             foreach($groupedArrayExpenses as $groupedExpenses){ // Loop month's. if there's an entry with different month
                
-                if(count($groupedArrayExpenses) > 1){ // Set posting date for different month
-                    $posting_date = $loop_count == 1 ? $groupedExpenses[0]->created_at->endOfMonth() : Carbon::now();
+                if(!$sameMonth){ // Set posting date for different month
+                    $firstMonth = date("n",  strtotime($lastWeekMonday));
+                    $posting_date = $firstMonth == date('n', strtotime($groupedExpenses[0]->created_at)) ? $groupedExpenses[0]->created_at->endOfMonth() : Carbon::now();
+                }else{// Same month but check first if cover week is same month in auto posting date run 
+                    $samePostingDate = date("n",  strtotime($lastWeekSunday)) == date("n", strtotime(Carbon::now()));
+                    $posting_date = !$samePostingDate ? Carbon::parse($lastWeekSunday)->endOfMonth() : Carbon::now();
                 }
-                
+
                 $acc_item_no = [];
                 $acc_item_text = [];
                 $acc_gl_account = [];
@@ -256,7 +260,6 @@ class PaymentAutoPosting extends Command
                 // Post Simulated Expeses to SAP                
                 $this->postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date);
 
-                $loop_count = $loop_count + 1;
 
             }
         }

@@ -229,7 +229,7 @@ export default {
                 type: request.type,
                 start_date: request.date,
                 end_date: request.date,
-                radius: '2',
+                radius: '0.5',
                 start_time: request.start_time,
                 end_time: request.end_time,
                 customer_codes: [request.code],
