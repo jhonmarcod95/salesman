@@ -85,4 +85,9 @@ class Schedule extends Model implements Auditable
         return $this->hasOne(CloseVisit::class);
     }
 
+    public function scheduleBase()
+    {
+        return $this->belongsTo(ScheduleBase::class);
+    }
+
 }
