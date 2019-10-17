@@ -352,10 +352,14 @@
 
                     resetModal();
 
-                    //disable delete & update button if current day is selected
+                    //disable delete current day is selected
                     if(calEvent.start.format() == moment().format('YYYY-MM-DD')){
-                        $('#btn_save_changes').prop('disabled', true);
                         $('#btn_delete').prop('disabled', true);
+
+                        //disable update if current day and type is mapping and activity
+                        if(calEvent.type == '1' || calEvent.type == '5'){
+                            $('#btn_save_changes').prop('disabled', true);
+                        }
                     }
                     else{
                         $('#btn_save_changes').prop('disabled', false);

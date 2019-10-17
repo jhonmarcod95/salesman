@@ -5,8 +5,10 @@ use DB;
 use Auth;
 use App\Customer;
 use App\Message;
+use App\Schedule;
 use Illuminate\Http\Request;
 use Spatie\Geocoder\Facades\Geocoder;
+use Carbon\Carbon;
 
 class CustomerController extends Controller
 {
@@ -166,6 +168,10 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
+
+        $date_now = Carbon::now();
+        $date_now = date("Y-m-d", strtotime($date_now));
+
         $request->validate([
             'customer_code' => 'required|unique:customers,customer_code,'. $customer->id,
             'name' => 'required',
@@ -175,7 +181,7 @@ class CustomerController extends Controller
             'province' => 'required',
             'google_address' => 'required',
         ]);
-        
+
         $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
 
         $customer->company_id = Auth::user()->companies->pluck('id')[0];
@@ -192,6 +198,10 @@ class CustomerController extends Controller
         $customer->telephone_2 = $request->telephone_2;
         $customer->fax_number = $request->fax_number;
         $customer->remarks = $request->remarks;
+        
+        Schedule::where('code', $request->customer_code)
+                    ->where('date', '>=', $date_now)
+                    ->update(['lat' => $geocode['lat'],'lng' => $geocode['lng']]);
 
         if($customer->save()){
             return ['redirect' => route('customers_list')];
