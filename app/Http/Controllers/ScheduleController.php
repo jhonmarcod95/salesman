@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\CustomerClassification;
 use App\Rules\GeocodeCustomerRule;
 use App\Rules\GeocodeEventRule;
+use App\Rules\SchedBaseCompanyRule;
+use App\ScheduleBase;
 use Auth;
 use Carbon;   
 use App\Customer;
@@ -58,13 +60,21 @@ class ScheduleController extends Controller
                 'id')
             ->put('', '');
 
+        $scheduleBases = ScheduleBase::all()
+            ->pluck(
+                'name',
+                'id'
+            )
+            ->put('', '');
+
         $notification = Message::where('user_id', '!=', Auth::user()->id)->whereNull('seen')->count();
 
         return view('schedule.index', compact(
             'tsrs',
             'scheduleTypes',
             'customers',
-            'notification'
+            'notification',
+            'scheduleBases'
         ));
     }
 
@@ -105,6 +115,7 @@ class ScheduleController extends Controller
             'radius' => 'required',
             'end_date' => 'required|after_or_equal:start_date',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
+            'base' => [new SchedBaseCompanyRule()],
             'end_time' => 'required',
         ]);
 
@@ -143,6 +154,7 @@ class ScheduleController extends Controller
                     $schedule->lat = $customer->lat;
                     $schedule->lng = $customer->lng;
                     $schedule->km_distance = $request->radius;
+                    $schedule->schedule_base_id = $request->base;
                     $schedule->save();
 
                     $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -172,6 +184,7 @@ class ScheduleController extends Controller
                 $schedule->lat = $geocode['lat'];
                 $schedule->lng = $geocode['lng'];
                 $schedule->km_distance = $request->radius;
+                $schedule->schedule_base_id = $request->base;
                 $schedule->save();
 
                 $data[] = $this->dataOutput($date,$date,$request->user_id,$schedule->code);
@@ -193,6 +206,7 @@ class ScheduleController extends Controller
             'date' => 'required',
             'radius' => 'required',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
+            'base' => [new SchedBaseCompanyRule()],
             'end_time' => 'required',
         ]);
 
@@ -219,6 +233,7 @@ class ScheduleController extends Controller
             $schedule->lat = $customer->lat;
             $schedule->lng = $customer->lng;
             $schedule->km_distance = $request->radius;
+            $schedule->schedule_base_id = $request->base;
             $schedule->save();
         }
         #Event & Mapping
@@ -243,6 +258,7 @@ class ScheduleController extends Controller
             $schedule->lat = $geocode['lat'];
             $schedule->lng = $geocode['lng'];
             $schedule->km_distance = $request->radius;
+            $schedule->schedule_base_id = $request->base;
             $schedule->save();
         }
 

@@ -20,12 +20,23 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <h5>Schedule Type</h5>
                             {!! Form::select('type', $scheduleTypes, null, ['id' => 'sel_add_sched_type', 'class' => 'addScheduleModalSel2']) !!}
                         </div>
                     </div>
+
+                    <div class="col-md-3">
+                        {{-- for agrisol only --}}
+                        @if(Auth::user()->companies->pluck('id')->first() == '3')
+                        <div class="form-group">
+                            <h5>Base</h5>
+                            {!! Form::select('base', $scheduleBases, null, ['id' => 'sel-add-sched-base', 'class' => 'addScheduleModalSel2']) !!}
+                        </div>
+                        @endif
+                    </div>
+
                 </div>
 
                 {{-- Customer --}}
@@ -145,12 +156,23 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <h5>Schedule Type</h5>
                             {!! Form::select('type', $scheduleTypes, null, ['id' => 'sel_update_sched_type', 'class' => 'updateScheduleModalSel2']) !!}
                         </div>
                     </div>
+
+                    <div class="col-md-3">
+                        {{-- for agrisol only --}}
+                        @if(Auth::user()->companies->pluck('id')->first() == '3')
+                        <div class="form-group">
+                            <h5>Base</h5>
+                            {!! Form::select('base', $scheduleBases, null, ['id' => 'sel-update-sched-base', 'class' => 'updateScheduleModalSel2']) !!}
+                        </div>
+                        @endif
+                    </div>
+
                 </div>
 
                 {{-- Customer --}}

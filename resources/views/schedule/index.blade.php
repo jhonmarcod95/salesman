@@ -120,6 +120,7 @@
                 lat: data.lat,
                 lng: data.lng,
                 km_distance: data.km_distance,
+                schedule_base_id: data.schedule_base_id,
                 backgroundColor: data.color,
                 borderColor    : data.color,
                 textColor: '#ffffff',
@@ -209,6 +210,7 @@
                     selectedSchedule.lat = eventData.lat;
                     selectedSchedule.lng = eventData.lng;
                     selectedSchedule.km_distance = eventData.km_distance;
+                    selectedSchedule.schedule_base_id = eventData.schedule_base_id;
 
 
                     $('#calendar').fullCalendar('updateEvent', selectedSchedule);
@@ -372,10 +374,12 @@
 
                     $('#user_id').val(calEvent.user_id);
                     $('#tsr_name').val(calEvent.fullname);
-
+console.log(calEvent);
                     //set a value in select2
                     $('#sel_update_sched_type').val(calEvent.type).trigger('change');
                     $('#sel_customer_code').val(calEvent.code).trigger('change');
+                    $('#sel-update-sched-base').val(calEvent.schedule_base_id).trigger('change');
+
                     setModalElementVisibility(calEvent.type);
 
                     $('#schedule_name').val(calEvent.name);
