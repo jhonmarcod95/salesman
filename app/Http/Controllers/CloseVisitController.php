@@ -39,7 +39,11 @@ class CloseVisitController extends Controller
 
     public function requestToClose() {
 
-        $closevisits = CloseVisit::orderBy('id','desc')->get();
+
+        $closevisits = CloseVisit::whereHas('user', function($q) {
+            $q->where('company_id',Auth::user()->company_id);
+        })->orderBy('id','desc')->get();
+
         return CloseVisitResource::collection($closevisits);
     
     }

@@ -114,4 +114,9 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(ExpenseBypass::class);
     }
+
+    public function closeVisits()
+    {
+        return $this->hasMany(CloseVisit::class);
+    }
 }

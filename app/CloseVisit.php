@@ -26,4 +26,9 @@ class CloseVisit extends Model
     {
         return $this->belongsTo(User::class,'confirmed_by','id');
     }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }
