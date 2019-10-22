@@ -495,16 +495,22 @@ export default {
                 };
                 this.simulatedExpenses.unshift(this.lineOneExpenses); //push at first index instead last
                 /* ****************************************************/
+                    if(this.hasSAPButton){
+                        
+                        axios.get(`/expense-simulate/${this.expenseEntryId}`)
+                        .then(response => {
+                            this.simulate = response.data;
+                            document.getElementById("post_btn").disabled = true; 
+                            $('#simulateModal').modal('show');
 
-                    axios.get(`/expense-simulate/${this.expenseEntryId}`)
-                    .then(response => {
-                        this.simulate = response.data;
-                        document.getElementById("post_btn").disabled = true; 
+                        })
+                        .catch(error => { 
+                            this.errors = error.response.data.errors;
+                        
+                        })
+                    }else{
                         $('#simulateModal').modal('show');
-                    })
-                    .catch(error => { 
-                        this.errors = error.response.data.errors;
-                    })
+                    }
                 }
         },
         checkExpenses(expenseByTsr,simulatedExpenses,document_type,document_date,payment_terms,posting_date,header_text,baseline_date,company_name,vendor_name,posting_type,has_sap){
@@ -614,7 +620,7 @@ export default {
             if(moment(c).isSame(s, 'day')){
                return false;
             }else if(moment(c).diff(s, 'day') <= 7){
-               return false;
+                return false;
             }else{
                 return true
             }
