@@ -6,7 +6,7 @@
         </button>
         <!-- Brand -->
         <a class="navbar-brand pt-0" href="{{ url('/home') }}">
-            <img src="{{ url(Auth::user()->companies->pluck('company_logo')[0]) }}" class="navbar-brand-img" alt="...">&nbsp; Salesforce
+            {{-- <img src="{{ url(Auth::user()->companies->pluck('company_logo')[0]) }}" class="navbar-brand-img" alt="...">&nbsp; Salesforce --}}
         </a>
 
         {{--Mobile Navigation--}}
@@ -137,6 +137,13 @@
                                         <i class="ni ni-chart-pie-35 text-danger"></i> Unposted Expenses
                                     </a>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/map-analytics-report') }}">
+                                        <i class="ni ni-pin-3 text-gray"></i> Map Analytics Report
+                                    </a>
+                                </li>
+
                             </ul>
                         </div>
                     </li>

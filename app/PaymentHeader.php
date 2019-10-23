@@ -3,9 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class PaymentHeader extends Model
+class PaymentHeader extends Model implements Auditable
 {
+
+    use \OwenIt\Auditing\Auditable;
+
     protected $fillable = [
         'company_code',
         'company_name',

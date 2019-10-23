@@ -78,6 +78,9 @@ Vue.component('internal-order-index', require('./components/InternalOrder/Intern
 //Close Visit Index
 Vue.component('close-visit', require('./components/CloseVisit/Index.vue'));
 
+// Map Analytics Report
+Vue.component('map-analytics-report-index', require('./components/MapAnalyticsReport/MapAnalyticsReportIndex.vue'));
+
 
 const app = new Vue({
     el: '#app',

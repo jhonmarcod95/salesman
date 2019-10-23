@@ -182,6 +182,15 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Expense Unposted
     Route::get('/expense-unposted', 'ExpenseController@expenseUnPostedIndex');
     Route::post('/expense-unposteds', 'ExpenseController@expenseUnPostedIndexData');
+
+
+    //Map Analytic Report
+    Route::get('/map-analytics-report', 'MapAnalyticsReportController@index');
+
+    //Get Map Customers Data 
+    Route::post('/users-data', 'MapAnalyticsReportController@usersData');
+    Route::get('/customers-all', 'MapAnalyticsReportController@customersData');
+
 });
 
 // AP Routes

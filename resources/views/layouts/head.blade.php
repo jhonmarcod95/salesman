@@ -25,6 +25,17 @@
 <!-- Fonts -->
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
 
+
+<!-- Mapbox GL CSS -->
+<link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.2/mapbox-gl.css" rel="stylesheet"/>
+
+<!-- Mapbox GL JS -->
+<script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.2/mapbox-gl.js"></script>
+
+<!-- Mapbox GL DRAW CSS -->
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.css' type='text/css'/>
+
+
 {{-- Loading Screen --}}
 <style>
     #loading {
@@ -39,6 +50,8 @@
     }
 </style>
 
+<script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.js'></script>
 
 {{-- Map Autocomplete --}}
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyDIhjFU9P-kWdC777Mmc1IuE5ABRJBdFeo"></script>
