@@ -525,6 +525,7 @@ export default {
             }
 
             this.responses = [];
+            
             axios.post('/payments', {
                 company_name: company_name,
                 vendor_name: vendor_name,
@@ -532,19 +533,19 @@ export default {
                 userId: this.expenseByTsr[0].user.id,
                 expenseEntryId: this.expenseEntryId,
                 posting_type: posting_type,
-                app_server: this.simulate[0].sap_server.app_server, // sap_server.app_server
-                system_id: this.simulate[0].sap_server.system_id, // sap_server.system_id
-                instance_number: this.simulate[0].sap_server.system_number, // sap_server.system_number
-                sap_name: this.simulate[0].sap_server.name, // sap_server.name
-                client: this.simulate[0].sap_server.client,  // sap_server.client
-                sap_user_id: this.simulate[0].sap_user.sap_id, //sap_user.id need to check first the server of tsr
-                sap_password: this.simulate[0].sap_user.sap_password, // sap_user.password need to check first the server of tsr
+                app_server: has_sap > 0 ? this.simulate[0].sap_server.app_server : "-", // sap_server.app_server
+                system_id: has_sap > 0 ? this.simulate[0].sap_server.system_id  : "-", // sap_server.system_id
+                instance_number: has_sap > 0 ? this.simulate[0].sap_server.system_number  : "-", // sap_server.system_number
+                sap_name: has_sap > 0 ? this.simulate[0].sap_server.name  : "-", // sap_server.name
+                client: has_sap > 0 ? this.simulate[0].sap_server.client  : "-",  // sap_server.client
+                sap_user_id: has_sap > 0 ? this.simulate[0].sap_user.sap_id  : "-", //sap_user.id need to check first the server of tsr
+                sap_password: has_sap > 0 ? this.simulate[0].sap_user.sap_password  : "-", // sap_user.password need to check first the server of tsr
                 header_text: header_text,
                 company_code: expenseByTsr[0].user.companies[0].code,
                 document_date: moment(document_date).format('L'),
                 posting_date: moment(posting_date).format('L'),
                 document_type: document_type,
-                reference_number: this.simulate[0].reference_number,
+                reference_number: has_sap > 0 ? this.simulate[0].reference_number : "-",
                 baseline_date: moment(baseline_date).format('L'),
                 vendor_code: expenseByTsr[0].user.vendor.vendor_code,
                 payment_terms: payment_terms,
