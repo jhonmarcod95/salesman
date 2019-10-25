@@ -208,6 +208,12 @@
                         <i class="ni ni-user-run text-blue"></i> Users
                     </a>
                 </li>
+
+                <li>
+                    <a class="nav-link" href="{{ url('/tsr') }}">
+                        <i class="ni ni-circle-08 text-pink"></i> Salesman
+                    </a>
+                </li>
                 @endif
             </ul>
             @endif
