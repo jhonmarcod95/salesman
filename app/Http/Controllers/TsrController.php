@@ -86,7 +86,7 @@ class TsrController extends Controller
             'date_of_birth' => 'required',
             'company' => 'required',
             'location' => 'required',
-            'vendor_code' => 'required'
+            // 'vendor_code' => 'required'
         ]);
 
 
