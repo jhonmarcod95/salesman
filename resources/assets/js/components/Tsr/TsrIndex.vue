@@ -14,7 +14,7 @@
                                     <h3 class="mb-0">Salesman List</h3>
                                 </div>
                                 <div class="col text-right">
-                                    <a :href="addLink" class="btn btn-sm btn-primary">Add New</a>
+                                    <a :href="addLink" v-if="indexVisibleButton"  class="btn btn-sm btn-primary">Add New</a>
                                 </div>
                             </div>
                         </div>
@@ -48,7 +48,7 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+tsr.id">Edit</a>
-                                                    <a class="dropdown-item" data-toggle="modal" href="#changePassword" @click="getTsrId(tsr.user_id)">Change Password</a>
+                                                    <a class="dropdown-item" v-if="indexVisibleButton" data-toggle="modal" href="#changePassword" @click="getTsrId(tsr.user_id)">Change Password</a>
                                                     <!--<a class="dropdown-item" href="#">Delete</a>-->
                                                 </div>
                                             </div>
@@ -131,6 +131,7 @@
 
 <script>
 export default {
+    props:['role'],
     data(){
         return{
             tsrs: [],
@@ -143,12 +144,21 @@ export default {
             },
             currentPage: 0,
             itemsPerPage: 10,
+            indexVisibleButton: false
         }
     },
     created(){
         this.fetchTsr();
+        this.checkUser();
     },
     methods:{
+        checkUser(){
+            if(this.role == 'Ap'){
+                this.indexVisibleButton = false;
+            }else{
+               this.indexVisibleButton = true;
+            }
+        },
         getTsrId(id){
             this.user.user_id = id;
         },
