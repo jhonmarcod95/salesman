@@ -88,10 +88,6 @@
                                     show: true,
                                     position: 'top-left'
                                 }"
-                                :fullscreen-control="{
-                                    show: true,
-                                    position: 'top-right'
-                                }"
                             />
                         </div>
                          
@@ -100,35 +96,91 @@
             </div>
         </div>
 
-         <!-- Customer Modal -->
-        <div class="modal fade" id="showCustomerInfo" tabindex="1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
-            <span class="closed" data-dismiss="modal">&times;</span>
-            <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-                <div class="modal-content bg-gradient-success">
+        
+
+        <!-- Customer Users List Modal -->
+        <div class="modal fade" id="showUserList" tabindex="1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title text-white" id="modal-title-default">Customer Details</h4>
+                    <h4 class="modal-title" id="modal-title-default">User's List</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="px-4">
-                        <div class="text-center mt-5">
-                            <h3 class="text-white">{{ customer.name }}</h3>
-                            <div class="h4 font-weight-500 text-white"><i class="ni location_pin mr-2"></i>{{ customer.google_address }}</div>
-                            <div class="h4 font-weight-500 text-white" v-if="customer.telephone_1"><i class="ni location_pin mr-2"></i>{{ customer.telephone_1 }}</div>
-                            <div class="h4 font-weight-500 text-white" v-if="customer.telephone_2"><i class="ni location_pin mr-2"></i>{{ customer.telephone_2 }}</div>
+                    <h1 class="text-center" style="color:#5e72e4">{{ customer.name }}</h1>
+                    <p class="description text-center">{{ customer.google_address }}</p>
+
+                    <div class="col-md-4 float-left">
+                        <div class="form-group">
+                            <label for="name" class="form-control-label">Search</label> 
+                            <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-items-center table-flush">
+                            <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Schedule Time In - Out</th>
+                                <th scope="col">Time In - Out</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                            </thead>
+                                <tbody v-if="usersList">
+                                    <tr v-for="(user, e) in filteredQueues" v-bind:key="e">  
+                                        <td>{{ user.schedule_date }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.schedule_time }}</td>
+                                        <td>{{ user.sign_in_out }}</td>
+                                        <td>
+                                            <span class="badge badge-pill badge-success text-uppercase mb-3" v-if="user.status == 'inside'">{{ user.status }}</span>
+                                            <span class="badge badge-pill badge-danger text-uppercase mb-3" v-else-if="user.status == 'outside'">{{ user.status }}</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                 <tbody v-else>
+                                       <tr>
+                                           <td>No data available in the table</td>
+                                       </tr>
+                                </tbody>
+                        </table>
+                         <div class="row mb-3 mt-3 ml-1" v-if="filteredQueues.length ">
+                            <div class="col-6 text-left">
+                                    <span>{{ filteredQueues.length }} Filtered User(s)</span><br>
+                                    <span>{{ Object.keys(usersList).length }} Total User(s)</span>
+                            </div>
+                            <div class="col-6 text-right">
+                                
+                                    <nav aria-label="...">
+                                        <ul class="pagination justify-content-end mb-0">
+                                            <li class="page-item">
+                                                <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
+                                            </li>
+                                            <li class="page-item">
+                                                Page {{ currentPage + 1 }} of {{ totalPages }}
+                                            </li>
+                                            <li class="page-item">
+                                                <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                            
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-link  ml-auto text-white" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-link  ml-auto" data-dismiss="modal">Close</button>
                 </div>
                 </div>
             </div>
         </div>
 
-         <!-- User Modal -->
+
+        <!-- User Modal -->
         <div class="modal fade" id="showUserInfo" tabindex="2" role="dialog" aria-labelledby="exampleModalLabel1" aria-hidden="true" data-backdrop="true">
             <span class="closed" data-dismiss="modal">&times;</span>
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -254,7 +306,11 @@
                 selectMonth:'',
                 selectYear:'',
                 imageModalSrc : '',
-                imageModalTitle : ''
+                imageModalTitle : '',
+                usersList : [],
+                keywords : '',
+                currentPage: 0,
+                itemsPerPage: 10,
             };
         },
         created() {
@@ -392,7 +448,8 @@
                             buttonCustomer.addEventListener('click', e => {
                                 e.stopPropagation();
                                 v.customer = marker;
-                                $('#showCustomerInfo').modal('show');
+                                v.userList();
+                                $('#showUserList').modal('show');
                             }, true);
 
                         }, true);
@@ -500,12 +557,11 @@
                     });
                 }
                 this.createCustomerMap(map);
-                // console.log(v.customerCoordinates);
             },
             getUserCircleStatus(){
                 let v = this;
                 if(v.user){
-                    console.log(v.user.schedule_code);
+
                     var customer_circle_coords=[];
                     var user_coords = [];
                     if(v.customerCoordinates){
@@ -577,8 +633,84 @@
                 .catch(error => {
                     this.errors = error.response.data.errors;
                 })  
+            },
+            userList(){
+                let v = this;
+                v.keywords = '';
+                v.usersList = [];
+                var users_list = [];
+                const user_data_arr = JSON.parse(JSON.stringify(v.users));
+
+                user_data_arr.features.forEach(element => {
+                    var status = '';
+                    if(v.customer.customer_code == element.properties.schedule_code){
+
+                        var customer_obj = v.customerCoordinates.find(item => item.customer_code === element.properties.schedule_code);
+                        
+                        var pt = turf.point(element.geometry.coordinates);
+                        var poly = turf.polygon([
+                           customer_obj.coords
+                        ]);
+
+                        var pts = turf.booleanPointInPolygon(pt, poly);
+                        if(pts){
+                            status = 'inside'; 
+                        }else{
+                            status = 'outside';
+                        }
+
+                        users_list.push({
+                            'schedule_date' : element.properties.schedule_date,  
+                            'name' : element.properties.name,  
+                            'schedule_time' : element.properties.schedule_start_time + ' - ' + element.properties.schedule_end_time,  
+                            'sign_in_out' : element.properties.sign_in + ' - ' + element.properties.sign_out,  
+                            'status' : status
+                        });    
+                    }
+                });
+
+                v.usersList = Object.assign({}, users_list);
+
+            },
+             setPage(pageNumber) {
+                this.currentPage = pageNumber;
+            },
+
+            resetStartRow() {
+                this.currentPage = 0;
+            },
+
+            showPreviousLink() {
+                return this.currentPage == 0 ? false : true;
+            },
+
+            showNextLink() {
+                return this.currentPage == (this.totalPages - 1) ? false : true;
             }
-    
+        },
+        computed:{
+            filteredUsers(){
+                let self = this;
+                return Object.values(self.usersList).filter(user => {
+                    return user.name.toLowerCase().includes(this.keywords.toLowerCase()) || user.status.toLowerCase().includes(this.keywords.toLowerCase()) || user.schedule_date.toLowerCase().includes(this.keywords.toLowerCase())
+                });
+            },
+            totalPages() {
+                return Math.ceil(Object.values(this.filteredUsers).length / this.itemsPerPage)
+            },
+            filteredQueues() {
+                var index = this.currentPage * this.itemsPerPage;
+                var queues_array = Object.values(this.filteredUsers).slice(index, index + this.itemsPerPage);
+                if(this.currentPage >= this.totalPages) {
+                    this.currentPage = this.totalPages - 1
+                }
+
+                if(this.currentPage == -1) {
+                    this.currentPage = 0;
+                }
+
+                return queues_array;
+            }
         }
     }
 
@@ -651,6 +783,10 @@
         margin-right: auto;
         border-radius:5px;
         
+    }
+
+    .modal-xl{
+        max-width: 1140px!important;
     }
     
 </style>

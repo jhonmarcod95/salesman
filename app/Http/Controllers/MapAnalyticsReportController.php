@@ -35,18 +35,27 @@ class MapAnalyticsReportController extends Controller
             }
         }
 
+        $select_month = $request->selectMonth;
+        $select_year = $request->selectYear;
+
         $schedules = Schedule::with('attendances', 'user')
-        ->whereMonth('created_at', '=', $request->selectMonth ? $request->selectMonth : '')
-        ->whereYear('created_at', '=', $request->selectYear ? $request->selectYear : '')
-        ->where('type', '1')
-        ->where('status', '1')
-        ->whereIn('code', $customer_codes)
-        ->get();
+                    ->when($request->selectMonth, function($q) use($select_month) {
+                        $q->whereMonth('date', '=', $select_month);
+                    })
+                    ->when($request->selectYear, function($q) use($select_year) {
+                        $q->whereYear('date', '=', $select_year);
+                    })
+                    ->when(!empty($customer_codes), function($q) use($customer_codes) {
+                        $q->whereIn('code', $customer_codes);
+                    })
+                    ->where('type', '1')
+                    ->where('status', '1')
+                    ->orderBy('date','ASC')
+                    ->get();
 
         
-
+        $features = [];
         if(count($schedules) > 0){
-            $features = [];
             foreach ($schedules as $schedule){
                 $features[] = '
                 {
@@ -76,17 +85,18 @@ class MapAnalyticsReportController extends Controller
             }
 
 
-            $features = implode(',', $features);
-        
-            $map_markers = '
-            {
-                "type": "FeatureCollection",
-                "features": [' . $features . ']
-            }
-            ';
-        
-            return json_decode($map_markers, true);
+            $features = implode(',', $features);   
         }
+
+        $map_markers = '
+        {
+            "type": "FeatureCollection",
+            "features": [' . $features . ']
+        }
+        ';
+    
+        return json_decode($map_markers, true);
+        
 
     }
 
