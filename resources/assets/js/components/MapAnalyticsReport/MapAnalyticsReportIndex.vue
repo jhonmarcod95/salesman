@@ -34,7 +34,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3 float-left">
+                                <div class="col-md-2 float-left">
                                     <div class="form-group">
                                         <label for="selectMonth" class="form-control-label">Select Month</label> 
                                         <multiselect
@@ -49,6 +49,24 @@
                                         </multiselect>
                                     </div>
                                 </div>
+
+                                <div class="col-md-2 float-left">
+                                    <div class="form-group">
+                                        <label for="selectYear" class="form-control-label">Select Year</label> 
+                                        <multiselect
+                                                v-model="selectYear"
+                                                :options="yearOptions"
+                                                :multiple="false"
+                                                track-by="id"
+                                                :custom-label="customLabelYear"
+                                                placeholder="Select Year"
+                                                id="selected_year"
+                                            >
+                                        </multiselect>
+                                    </div>
+                                </div>
+
+
                                 <div class="col-md-2">
                                     <button class="btn btn-sm btn-primary" @click="getUsers"> Filter</button>
                                 </div>
@@ -232,7 +250,9 @@
                 error: '',
                 loading: false,
                 monthOptions:[],
+                yearOptions:[],
                 selectMonth:'',
+                selectYear:'',
                 imageModalSrc : '',
                 imageModalTitle : ''
             };
@@ -241,6 +261,7 @@
             this.mapbox = Mapbox;
             this.fetchCustomers();
             this.getMonths();
+            this.getYears();
         },
         methods: {
             imageLoadError(event){
@@ -261,6 +282,9 @@
             },
             customLabelMonth (month) {
                 return `${month.name}`
+            },
+            customLabelYear (year) {
+                return `${year.name}`
             },
             customLabelCustomer (customer) {
                 return `${customer.name  }`
@@ -511,6 +535,7 @@
                     request_status: this.request_status,
                     customerSelect: this.customerSelect,
                     selectMonth: this.selectMonth.id,
+                    selectYear: this.selectYear.id,
                 })
                 .then(response =>{
                     this.users = response.data ? response.data : [];
@@ -539,8 +564,20 @@
                     {id:'11', name: 'Nov'},
                     {id:'12', name: 'Dec'}
                 ];
-
             },
+            getYears(){
+                var yearArr = [];
+                axios.get('/map-year')
+                .then(response => { 
+                    response.data.forEach(year => {
+                        yearArr.push({'id':year,'name':year});
+                    });
+                    this.yearOptions = yearArr;
+                })
+                .catch(error => {
+                    this.errors = error.response.data.errors;
+                })  
+            }
     
         }
     }

@@ -186,6 +186,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     //Map Analytic Report
     Route::get('/map-analytics-report', 'MapAnalyticsReportController@index');
+    Route::get('/map-year', 'MapAnalyticsReportController@getYear');
 
     //Get Map Customers Data 
     Route::post('/users-data', 'MapAnalyticsReportController@usersData');

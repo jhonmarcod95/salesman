@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 use App\{
     Schedule,
     Customer
 };
+
+use \Carbon\Carbon;
+
+
 
 class MapAnalyticsReportController extends Controller
 {
@@ -32,8 +36,8 @@ class MapAnalyticsReportController extends Controller
         }
 
         $schedules = Schedule::with('attendances', 'user')
-        ->whereMonth('created_at', '=', $request->selectMonth)
-        ->whereYear('created_at', '=', '2019')
+        ->whereMonth('created_at', '=', $request->selectMonth ? $request->selectMonth : '')
+        ->whereYear('created_at', '=', $request->selectYear ? $request->selectYear : '')
         ->where('type', '1')
         ->where('status', '1')
         ->whereIn('code', $customer_codes)
@@ -84,5 +88,11 @@ class MapAnalyticsReportController extends Controller
             return json_decode($map_markers, true);
         }
 
+    }
+
+    public function getYear(){
+        $result = Schedule::select(DB::raw('YEAR(created_at) as year'))->whereNotNull('created_at')->distinct()->get();
+        $years = $result->pluck('year');
+        return $years;
     }
 }
