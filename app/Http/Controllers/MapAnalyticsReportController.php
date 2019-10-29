@@ -56,7 +56,9 @@ class MapAnalyticsReportController extends Controller
         
         $features = [];
         if(count($schedules) > 0){
+           
             foreach ($schedules as $schedule){
+                $name = $schedule->user['name'] ? $schedule->user['name'] : '';
                 $features[] = '
                 {
                     "type": "Feature",
@@ -66,8 +68,7 @@ class MapAnalyticsReportController extends Controller
                     },
                     "properties": {
                         "id": "' . $schedule->attendances->id . '",
-                        "user_id": "' . $schedule->user->id . '",
-                        "name": "' . $schedule->user->name . '",
+                        "name": "' .  $name . '",
                         "sign_in": "' . $schedule->attendances->sign_in . '",
                         "sign_out": "' . $schedule->attendances->sign_out . '",
                         "remarks": "' . $schedule->attendances->remarks . '",
@@ -83,8 +84,6 @@ class MapAnalyticsReportController extends Controller
                 }
                 ';
             }
-
-
             $features = implode(',', $features);   
         }
 

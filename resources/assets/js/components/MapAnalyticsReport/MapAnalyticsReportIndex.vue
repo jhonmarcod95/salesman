@@ -99,7 +99,7 @@
         
 
         <!-- Customer Users List Modal -->
-        <div class="modal fade" id="showUserList" tabindex="1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal fade" id="showUserList" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
                 <div class="modal-header">
@@ -124,8 +124,10 @@
                             <tr>
                                 <th scope="col">Date</th>
                                 <th scope="col">Name</th>
-                                <th scope="col">Schedule Time In - Out</th>
-                                <th scope="col">Time In - Out</th>
+                                <th scope="col">Schedule Sign In - Out</th>
+                                <th scope="col">Sign In - Out</th>
+                                <th scope="col">Image</th>
+                                <th scope="col">Remarks</th>
                                 <th scope="col">Status</th>
                             </tr>
                             </thead>
@@ -136,9 +138,21 @@
                                         <td>{{ user.schedule_time }}</td>
                                         <td>{{ user.sign_in_out }}</td>
                                         <td>
+                                            <div class="row" style="width:110px!important;">
+                                                <div class="col-sm-6">
+                                                    <img id="sign-in-image" class="image-modal-list-thumb img-center" :src="'/storage/attendances/' + user.sign_in_image" @error="imageLoadError" alt="Sign In Image"  data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/attendances/' + user.sign_in_image, 'Sign in image')">
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <img id="sign-out-image" class="image-modal-list-thumb img-center" :src="'/storage/attendances/' + user.sign_out_image" @error="imageLoadError" alt="Sign Out Image"  data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/attendances/' + user.sign_out_image, 'Sign out image')">
+                                                </div>
+                                             </div>
+                                        </td>
+                                        <td>{{ user.remarks }}</td>
+                                        <td>
                                             <span class="badge badge-pill badge-success text-uppercase mb-3" v-if="user.status == 'inside'">{{ user.status }}</span>
                                             <span class="badge badge-pill badge-danger text-uppercase mb-3" v-else-if="user.status == 'outside'">{{ user.status }}</span>
                                         </td>
+                                        
                                     </tr>
                                 </tbody>
                                  <tbody v-else>
@@ -224,11 +238,11 @@
                             <div class="row">
                                 <div class="col-4">
                                     <h4 class="text-center">Sign in image</h4>  
-                                    <img id="sign-in-image" class="image-modal-thumb img-center" :src="'/storage/attendances/' + user.sign_in_image" @error="imageLoadError" alt="Sign In Image"  data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/attendances/' + user.sign_in_image, 'Sign in image')">   
+                                    <img id="sign-in-image" class="image-modal-thumb img-center" :src="'/storage/attendances/' + user.sign_in_image" @error="imageLoadError" alt="Sign In Image"  @click="imageModal('/storage/attendances/' + user.sign_in_image, 'Sign in image')">   
                                 </div>
                                 <div class="col-4">
                                     <h4 class="text-center">Sign out image</h4>
-                                    <img id="sign-out-image" class="image-modal-thumb img-center"  :src="'/storage/attendances/' + user.sign_out_image" @error="imageLoadError" alt="Sign Out Image" data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/attendances/' + user.sign_out_image, 'Sign out image')">     
+                                    <img id="sign-out-image" class="image-modal-thumb img-center"  :src="'/storage/attendances/' + user.sign_out_image" @error="imageLoadError" alt="Sign Out Image"  @click="imageModal('/storage/attendances/' + user.sign_out_image, 'Sign out image')">     
                                 </div>
                             </div>
 
@@ -242,26 +256,11 @@
             </div>
         </div>
 
-        <!-- Image -->
-
-        <div class="modal fade" id="showUserImage" tabindex="3" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true" data-backdrop="true">
-            <span class="closed" data-dismiss="modal">&times;</span>
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header border-bottom">
-                        <h4 class="modal-title" id="modal-title-default">{{ imageModalTitle }}</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body text-center bg-image-modal">
-                        <img id="sign-in-image" :src="imageModalSrc" @error="imageLoadError" alt="Image">   
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-link  ml-auto" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
+        <!-- The Modal -->
+        <div id="showImageModal" tabindex="1" class="imageModal">
+            <span class="closeImage" @click="closeImageModal">&times;</span>
+            <img class="modal-content2" :src="imageModalSrc" @error="imageLoadError" alt="Image" id="imgModal">
+            <div id="caption">{{ imageModalTitle }}</div>
         </div>
         
         </div>
@@ -326,6 +325,17 @@
             imageModal(src,title){
                 this.imageModalSrc = src;
                 this.imageModalTitle = title;
+                var modal = document.getElementById('showImageModal');
+                modal.style.display = "block";
+            },
+            closeImageModal(){
+                 var modal = document.getElementById('showImageModal');
+                // Get the <span> element that closes the modal
+                var span = document.getElementsByClassName("closeImage")[0];
+                // When the user clicks on <span> (x), close the modal
+                span.onclick = function() { 
+                    modal.style.display = "none";
+                }
             },
             fetchCustomers(){
                 axios.get('/customers-all')
@@ -539,7 +549,7 @@
                         el.addEventListener('click', e => {
                             e.stopPropagation();
 
-                            console.log(marker);
+                            // console.log(marker);
                             new mapboxgl.Popup()
                             .setLngLat(marker.geometry.coordinates)
                             .setHTML('<div class="text-center"><h3 class="map-pop-up-text">' + marker.properties.name + '</h3><button id="user'+marker.properties.id+'" class="btn btn-sm btn-danger">View Details</button></div>')
@@ -584,6 +594,7 @@
                     }
                 }
             },
+         
             getUsers(){
                 this.loading = true;
                 this.errors = [];
@@ -664,7 +675,10 @@
                             'name' : element.properties.name,  
                             'schedule_time' : element.properties.schedule_start_time + ' - ' + element.properties.schedule_end_time,  
                             'sign_in_out' : element.properties.sign_in + ' - ' + element.properties.sign_out,  
-                            'status' : status
+                            'status' : status,
+                            'sign_in_image' : element.properties.sign_in_image,
+                            'sign_out_image' : element.properties.sign_out_image,
+                            'remarks' : element.properties.remarks,
                         });    
                     }
                 });
@@ -767,6 +781,11 @@
         height:200px;
         border-radius:5px;
      }
+     .image-modal-list-thumb{
+        height:50px;
+        width:50px;
+        border-radius:5px;
+     }
 
     .image-modal-thumb:hover {
         -webkit-filter: brightness(50%);
@@ -787,6 +806,92 @@
 
     .modal-xl{
         max-width: 1140px!important;
+    }
+
+    #myImg {
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    #myImg:hover {opacity: 0.7;}
+
+    /* The Modal (background) */
+    .imageModal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 10000; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+    }
+
+    /* Modal Content (image) */
+    .modal-content2 {
+        margin: auto;
+        display: block;
+        width: 80%;
+        max-width: 700px;
+    }
+
+    /* Caption of Modal Image */
+    #caption {
+        margin: auto;
+        display: block;
+        width: 80%;
+        max-width: 700px;
+        text-align: center;
+        color: #ccc;
+        padding: 10px 0;
+        height: 150px;
+    }
+
+    /* Add Animation */
+    .modal-content2, #caption {    
+        -webkit-animation-name: zoom;
+        -webkit-animation-duration: 0.6s;
+        animation-name: zoom;
+        animation-duration: 0.6s;
+    }
+
+    @-webkit-keyframes zoom {
+        from {-webkit-transform:scale(0)} 
+        to {-webkit-transform:scale(1)}
+    }
+
+    @keyframes zoom {
+        from {transform:scale(0)} 
+        to {transform:scale(1)}
+    }
+
+    /* The Close Button */
+    .closeImage {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .closeImage:hover,
+    .closeImage:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* 100% Image Width on Smaller Screens */
+    @media only screen and (max-width: 700px){
+        .modal-content2 {
+            width: 100%;
+        }
     }
     
 </style>
