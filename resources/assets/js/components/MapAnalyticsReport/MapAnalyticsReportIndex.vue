@@ -122,23 +122,19 @@
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
+                                <th scope="col">Image In - Out</th>
                                 <th scope="col">Date</th>
                                 <th scope="col">Name</th>
                                 <th scope="col">Schedule Sign In - Out</th>
                                 <th scope="col">Sign In - Out</th>
-                                <th scope="col">Image</th>
                                 <th scope="col">Remarks</th>
                                 <th scope="col">Status</th>
                             </tr>
                             </thead>
                                 <tbody v-if="usersList">
-                                    <tr v-for="(user, e) in filteredQueues" v-bind:key="e">  
-                                        <td>{{ user.schedule_date }}</td>
-                                        <td>{{ user.name }}</td>
-                                        <td>{{ user.schedule_time }}</td>
-                                        <td>{{ user.sign_in_out }}</td>
+                                    <tr v-for="(user, e) in filteredQueues" v-bind:key="e"> 
                                         <td>
-                                            <div class="row" style="width:110px!important;">
+                                            <div class="row" style="width:105px!important;">
                                                 <div class="col-sm-6">
                                                     <img id="sign-in-image" class="image-modal-list-thumb img-center" :src="'/storage/attendances/' + user.sign_in_image" @error="imageLoadError" alt="Sign In Image"  data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/attendances/' + user.sign_in_image, 'Sign in image')">
                                                 </div>
@@ -146,7 +142,11 @@
                                                     <img id="sign-out-image" class="image-modal-list-thumb img-center" :src="'/storage/attendances/' + user.sign_out_image" @error="imageLoadError" alt="Sign Out Image"  data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/attendances/' + user.sign_out_image, 'Sign out image')">
                                                 </div>
                                              </div>
-                                        </td>
+                                        </td> 
+                                        <td>{{ user.schedule_date }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.schedule_time }}</td>
+                                        <td>{{ user.sign_in_out }}</td>
                                         <td>{{ user.remarks }}</td>
                                         <td>
                                             <span class="badge badge-pill badge-success text-uppercase mb-3" v-if="user.status == 'inside'">{{ user.status }}</span>
@@ -161,28 +161,30 @@
                                        </tr>
                                 </tbody>
                         </table>
-                         <div class="row mb-3 mt-3 ml-1" v-if="filteredQueues.length ">
-                            <div class="col-6 text-left">
-                                    <span>{{ filteredQueues.length }} Filtered User(s)</span><br>
-                                    <span>{{ Object.keys(usersList).length }} Total User(s)</span>
-                            </div>
-                            <div class="col-6 text-right">
-                                
-                                    <nav aria-label="...">
-                                        <ul class="pagination justify-content-end mb-0">
-                                            <li class="page-item">
-                                                <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
-                                            </li>
-                                            <li class="page-item">
-                                                Page {{ currentPage + 1 }} of {{ totalPages }}
-                                            </li>
-                                            <li class="page-item">
-                                                <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
+                         
+                    </div>
+
+                    <div class="row mb-3 mt-3 ml-1" v-if="filteredQueues.length ">
+                        <div class="col-6 text-left">
+                                <span>{{ filteredQueues.length }} Filtered User(s)</span><br>
+                                <span>{{ Object.keys(usersList).length }} Total User(s)</span>
+                        </div>
+                        <div class="col-6 text-right">
                             
-                            </div>
+                                <nav aria-label="...">
+                                    <ul class="pagination justify-content-end mb-0">
+                                        <li class="page-item">
+                                            <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
+                                        </li>
+                                        <li class="page-item">
+                                            Page {{ currentPage + 1 }} of {{ totalPages }}
+                                        </li>
+                                        <li class="page-item">
+                                            <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
+                                        </li>
+                                    </ul>
+                                </nav>
+                        
                         </div>
                     </div>
                 </div>
@@ -740,15 +742,15 @@
     }
 
     .employee {
-        background-image: url('/img/map/user-pin.png');
+        background-image: url('/img/map/user.png');
         background-size: cover;
-        width: 25px;
-        height: 25px;
+        width: 30px;
+        height: 30px;
         /* border-radius: 50%; */
         cursor: pointer;
     }
     .building {
-        background-image: url('/img/map/building-pin.png');
+        background-image: url('/img/map/customer.png');
         background-size: cover;
         width: 35px;
         height: 35px;
@@ -784,7 +786,7 @@
      .image-modal-list-thumb{
         height:50px;
         width:50px;
-        border-radius:5px;
+        border-radius:25px!important;
      }
 
     .image-modal-thumb:hover {
@@ -836,7 +838,7 @@
         margin: auto;
         display: block;
         width: 80%;
-        max-width: 700px;
+        max-width: 600px;
     }
 
     /* Caption of Modal Image */
