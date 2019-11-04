@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\{
+    Attendance,
     Schedule,
-    Customer
+    ScheduleTypes,
+    Customer,
+    User
 };
 
 use \Carbon\Carbon;
@@ -16,9 +19,6 @@ use \Carbon\Carbon;
 class MapAnalyticsReportController extends Controller
 {
     public function index(){
-
-        session(['header_text' => 'Map Anaytics Report']);
-
         return view('map-analytics-report.index');
     }
 
@@ -97,6 +97,50 @@ class MapAnalyticsReportController extends Controller
         return json_decode($map_markers, true);
         
 
+    }
+
+    public function mapUsers(){
+        // return 'Map User';
+        return view('map-analytics-report.map_users');
+    }
+
+    public function users(){
+        return User::orderBy('id', 'desc')->get();
+    }
+
+    public function scheduleTypes(){
+        return ScheduleTypes::orderBy('id', 'desc')->get();
+    }
+
+    public function userLocations(Request $request){
+
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate'
+        ]);
+
+        $user_id = $request->userId;
+        $schedule_type = $request->scheduleType;
+        $schedules = Schedule::with('attendances','user','schedule_type')
+                    ->when(!empty($request->userId), function($q) use($user_id) {
+                        $q->where('user_id',  $user_id);
+                    })
+                    ->when(!empty($request->scheduleType), function($q) use($schedule_type) {
+                        $q->where('type',  $schedule_type);
+                    })
+                    ->where('date', '>=',  $request->startDate)
+                    ->whereDate('date' ,'<=', $request->endDate)
+                    ->where('status', '1')
+                    ->orderBy('date', 'desc')->get();
+        
+        if($schedules){
+            return $schedules;
+        }
+        else{
+            return 'Empty';
+        }
+
+        
     }
 
     public function getYear(){

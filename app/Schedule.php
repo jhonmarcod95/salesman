@@ -75,6 +75,10 @@ class Schedule extends Model implements Auditable
         return $this->hasOne(Attendance::class, 'schedule_id', 'id');
     }
 
+    public function schedule_type(){
+        return $this->belongsTo(ScheduleTypes::class, 'type', 'id');
+    }
+
     protected $hidden = [
         'created_at',
         'updated_at'
