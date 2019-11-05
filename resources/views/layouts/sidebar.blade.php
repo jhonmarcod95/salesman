@@ -139,9 +139,31 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ url('/map-analytics-report') }}">
-                                        <i class="ni ni-pin-3 text-gray"></i> Map Analytics Report
+
+
+                                    <a data-toggle="collapse" href="#Map" class="collapsed" aria-expanded="false">
+                                        <div class="nav-link">
+                                            <i class="ni ni-square-pin text-blue"></i>
+                                            <span>Map</span>
+                                        </div>
                                     </a>
+
+                                    <div class="collapse space-left" id="Map" style="">
+                                            <ul class="nav" style="list-style-type: none;">
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="{{ url('/map-analytics-report-user') }}">
+                                                        <i class="ni ni-pin-3 text-green"></i> Users
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="{{ url('/map-analytics-report') }}">
+                                                        <i class="ni ni-pin-3 text-orange"></i> Customers
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                    </div>
+
+                                 
                                 </li>
 
                             </ul>
