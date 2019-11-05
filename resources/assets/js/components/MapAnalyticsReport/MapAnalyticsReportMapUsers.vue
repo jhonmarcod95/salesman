@@ -176,13 +176,14 @@
                             <thead class="thead-light">
                             <tr>
                                 <th scope="col">Image In - Out</th>
-                                <th scope="col">Date</th>
                                 <th scope="col">Name</th>
-                                 <th scope="col">Schedule Type</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Schedule</th>
+                                <th scope="col">Address</th>
+                                <th scope="col">Type</th>
                                 <th scope="col">Schedule Sign In - Out</th>
-                                <th scope="col">Sign In - Out</th>
+                                <th scope="col">Time In - Out</th>
                                 <th scope="col">Remarks</th>
-                               
                             </tr>
                             </thead>
                                 <tbody v-if="usersList">
@@ -197,8 +198,10 @@
                                                 </div>
                                              </div>
                                         </td> 
-                                        <td>{{ user.date }}</td>
                                         <td>{{ user.user.name }}</td>
+                                        <td>{{ user.date }}</td>    
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.address }}</td>
                                         <td>{{ user.schedule_type.description }}</td>
                                         <td>{{ user.start_time }} - {{ user.end_time }}</td>
                                         <td>{{ user.attendances.sign_in }} - {{ user.attendances.sign_out }}</td>
@@ -441,6 +444,8 @@
                         }, true);
                     });
                 }
+
+                v.loading = false;
             },
             getUserLocations(){
                 this.loading = true;
@@ -458,7 +463,6 @@
                     this.users = response.data ? response.data : [];
                     this.usersList = Object.assign({},  this.users);
                     this.createUsersMap();
-                    this.loading = false;
                 })
                 .catch(error => {
                     this.loading = false;
