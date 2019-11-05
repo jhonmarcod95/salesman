@@ -199,6 +199,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     
     Route::post('/user-locations', 'MapAnalyticsReportController@userLocations');
 
+    Route::get('/map-users-all', 'MapAnalyticsReportController@users');
+
 });
 
 // AP Routes

@@ -105,7 +105,12 @@ class MapAnalyticsReportController extends Controller
     }
 
     public function users(){
-        return User::orderBy('id', 'desc')->get();
+        return User::with('roles')
+                    ->whereHas('roles', function ($query) {
+                        $query->where('slug', '=', 'tsr');
+                    })
+                    ->orderBy('id', 'desc')
+                    ->get();
     }
 
     public function scheduleTypes(){

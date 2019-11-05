@@ -135,11 +135,11 @@
                             <div class="row">
                                 <div class="col-4">
                                     <h4 class="text-center">Sign in image</h4>  
-                                    <img id="sign-in-image" class="image-modal-thumb img-center" :src="'/storage/attendances/' + sign_in_image" @error="imageLoadError" alt="Sign In Image"  @click="imageModal('/storage/attendances/' + sign_in_image, 'Sign in image')">   
+                                    <img id="sign-in-image" class="image-modal-thumb img-center" :src="'/storage/' + sign_in_image" @error="imageLoadError" alt="Sign In Image"  @click="imageModal('/storage/' + sign_in_image, 'Sign in image')">   
                                 </div>
                                 <div class="col-4">
                                     <h4 class="text-center">Sign out image</h4>
-                                    <img id="sign-out-image" class="image-modal-thumb img-center"  :src="'/storage/attendances/' + sign_out_image" @error="imageLoadError" alt="Sign Out Image"  @click="imageModal('/storage/attendances/' + sign_out_image, 'Sign out image')">     
+                                    <img id="sign-out-image" class="image-modal-thumb img-center"  :src="'/storage/' + sign_out_image" @error="imageLoadError" alt="Sign Out Image"  @click="imageModal('/storage/' + sign_out_image, 'Sign out image')">     
                                 </div>
                             </div>
 
@@ -153,7 +153,7 @@
             </div>
         </div>
 
-        <!-- Customer Users List Modal -->
+        <!-- Users List Modal -->
 
         <div class="modal fade" id="showUserList" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
@@ -191,10 +191,10 @@
                                         <td>
                                             <div class="row" style="width:105px!important;">
                                                 <div class="col-sm-6">
-                                                    <img id="sign-in-image" class="image-modal-list-thumb img-center" :src="'/storage/attendances/' + user.attendances.sign_in_image" @error="imageLoadError" alt="Sign In Image"  data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/attendances/' + user.attendances.sign_in_image, 'Sign in image')">
+                                                    <img id="sign-in-image" class="image-modal-list-thumb img-center" :src="'/storage/' + user.attendances.sign_in_image" @error="imageLoadError" alt="Sign In Image"  data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/' + user.attendances.sign_in_image, 'Sign in image')">
                                                 </div>
                                                 <div class="col-sm-6">
-                                                    <img id="sign-out-image" class="image-modal-list-thumb img-center" :src="'/storage/attendances/' + user.attendances.sign_out_image" @error="imageLoadError" alt="Sign Out Image"  data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/attendances/' + user.attendances.sign_out_image, 'Sign out image')">
+                                                    <img id="sign-out-image" class="image-modal-list-thumb img-center" :src="'/storage/' + user.attendances.sign_out_image" @error="imageLoadError" alt="Sign Out Image"  data-toggle="modal" data-target="#showUserImage" @click="imageModal('/storage/' + user.attendances.sign_out_image, 'Sign out image')">
                                                 </div>
                                              </div>
                                         </td> 
@@ -330,7 +330,7 @@
                 modal.style.display = "none";
             },
             fetchUsers(){
-                axios.get('/users-all')
+                axios.get('/map-users-all')
                 .then(response => { 
                     this.userOptions = response.data;
                 })
