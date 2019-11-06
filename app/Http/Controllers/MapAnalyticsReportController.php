@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\{
@@ -105,12 +105,26 @@ class MapAnalyticsReportController extends Controller
     }
 
     public function users(){
-        return User::with('roles')
+
+        if(Auth::user()->roles[0]->slug == 'it'|| Auth::user()->roles[0]->slug == 'audit' || Auth::user()->roles[0]->slug == 'president'){
+            return User::with('roles','company')
                     ->whereHas('roles', function ($query) {
                         $query->where('slug', '=', 'tsr');
                     })
-                    ->orderBy('id', 'desc')
+                    ->orderBy('name', 'ASC')
                     ->get();
+        }
+        else{
+            return User::with('roles','company')
+                        ->whereHas('roles', function ($query) {
+                            $query->where('slug', '=', 'tsr');
+                        })
+                        ->whereHas('company', function ($query) {
+                            $query->where('id', '=', Auth::user()->company_id);
+                        })
+                        ->orderBy('name', 'ASC')
+                        ->get();
+        }
     }
 
     public function scheduleTypes(){
@@ -123,12 +137,21 @@ class MapAnalyticsReportController extends Controller
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
+        $default_user_ids = [];
+        if($request->defaultUsers){
+            foreach ($request->defaultUsers as $id){
+                array_push($default_user_ids,$id['id']);
+             }
+        }
 
-        $user_id = $request->userId;
+        $selected_user_id = $request->userId;
         $schedule_type = $request->scheduleType;
         $schedules = Schedule::with('attendances','user','schedule_type')
-                    ->when(!empty($request->userId), function($q) use($user_id) {
-                        $q->where('user_id',  $user_id);
+                    ->when(!empty($request->userId), function($q) use($selected_user_id) {
+                        $q->where('user_id',  $selected_user_id);
+                    })
+                    ->when(empty($request->userId), function($q) use($default_user_ids) {
+                        $q->whereIn('user_id',  $default_user_ids);
                     })
                     ->when(!empty($request->scheduleType), function($q) use($schedule_type) {
                         $q->where('type',  $schedule_type);
