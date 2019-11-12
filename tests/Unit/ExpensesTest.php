@@ -244,4 +244,17 @@ class ExpensesTest extends TestCase
         echo json_encode($response, JSON_PRETTY_PRINT);
         
     }
+
+    /**
+     * @test
+     */
+    public function check_if_has_schedule()
+    {
+        $response = $this->actingAs($this->defaultUser(),'api')
+            ->json('GET','api/schedules/exists');
+
+        $response->assertStatus(200);
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
+    }
 }
