@@ -103,7 +103,7 @@ class CustomerController extends Controller
             'province' => 'required',
         ]);
 
-        $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
+        // $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
         
         $customers = new Customer;
 
@@ -115,12 +115,14 @@ class CustomerController extends Controller
         $customers->town_city = $request->town_city;
         $customers->province_id = $request->province;
         $customers->google_address = $request->google_address;
-        $customers->lat = $geocode['lat'];
-        $customers->lng = $geocode['lng'];
+        $customers->lat = $request->lat;
+        $customers->lng = $request->lng;
         $customers->telephone_1 = $request->telephone_1;
         $customers->telephone_2 = $request->telephone_2;
         $customers->fax_number = $request->fax_number;
         $customers->remarks = $request->remarks;
+        
+        // return $customers;
 
         if($customers->save()){
             return ['redirect' => route('customers_list')];
@@ -176,7 +178,7 @@ class CustomerController extends Controller
             'google_address' => 'required',
         ]);
         
-        $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
+        // $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
 
         $customer->company_id = Auth::user()->companies->pluck('id')[0];
         $customer->classification = $request->classification;
@@ -186,8 +188,8 @@ class CustomerController extends Controller
         $customer->town_city = $request->town_city;
         $customer->province_id = $request->province;
         $customer->google_address = $request->google_address;
-        $customer->lat = $geocode['lat'];
-        $customer->lng = $geocode['lng'];
+        $customer->lat = $request->lat;
+        $customer->lng = $request->lng;
         $customer->telephone_1 = $request->telephone_1;
         $customer->telephone_2 = $request->telephone_2;
         $customer->fax_number = $request->fax_number;
@@ -230,6 +232,11 @@ class CustomerController extends Controller
             $customer_code = str_pad($customer_code, 10, "0");
             return $customer_code;
         }
+    }
+
+    public function getGeocodeCustomer($address){
+        $geocode = Geocoder::getCoordinatesForAddress($address);
+        return $geocode;
     }
 
     /**
