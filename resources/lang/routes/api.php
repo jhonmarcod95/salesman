@@ -63,6 +63,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('receipt/expenses','AppAPIController@storeReceiptExpense');
     Route::get('receipt/tin-numbers','AppAPIController@getTinNumbers');
 
+    //Send Location Api
+    Route::post('send-location','Api\SendLocationApiController@store');
+
     //Users
     Route::get('user', 'AppAPIController@getCurrentUser');
     // Route::get('users','API\UserApiController@index');
