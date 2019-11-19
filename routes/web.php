@@ -129,6 +129,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Get customers address geocode
     Route::get('/customers-geocode/{address}', 'CustomerController@getGeocode');
 
+    Route::get('/customers-geocode-json/{address}', 'CustomerController@getGeocodeCustomer');
+
     //Customer Classfication
     // show customer classfication page
     Route::get('/customers-classification', 'CustomerClassificationController@index')->name('classification_list');
