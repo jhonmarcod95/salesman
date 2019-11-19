@@ -31,6 +31,7 @@
                                                 id="selected_customer"
                                         >
                                         </multiselect>
+                                        <span class="text-danger" v-if="errors.customerSelect"> {{ errors.customerSelect[0] }} </span>
                                     </div>
                                 </div>
 

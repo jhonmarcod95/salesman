@@ -393,7 +393,7 @@
                         v.customer.lng = lngLat.lng;
                         v.customer.lat = lngLat.lat;
 
-                        map.flyTo({center: [v.customer.lng,v.customer.lat], zoom: 17})
+                        // map.flyTo({center: [v.customer.lng,v.customer.lat], zoom: 17})
                     }
                     
                     marker.on('dragend', onDragEnd)
