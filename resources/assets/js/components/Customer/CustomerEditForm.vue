@@ -1,5 +1,6 @@
 <template>
     <div>
+        <loader v-if="loading"></loader>
         <div class="header bg-green pb-6 pt-5 pt-md-6"> </div>
         <!-- Page content -->
         <div class="container-fluid mt--7">
@@ -186,6 +187,7 @@
 <script>
     import Mapbox from 'mapbox-gl-vue';
     import mapboxgl from 'mapbox-gl';
+    import loader from '../Loader';
     export default {
        components: {
             Mapbox
@@ -208,6 +210,7 @@
                 mapStyle: 'mapbox://styles/mapbox/streets-v11',
                 mapCenter: [121.035249, 14.675647],
                 showMap:true,
+                loading: false,
             }
         },
         created(){
@@ -242,7 +245,7 @@
                 //Map
                 vm.customers.google_address = document.getElementById("google_address").value;
                 vm.getGeocodeCustomer(vm.customers.google_address);
-                vm.showMap = false;
+                
                 
 
             });
@@ -375,6 +378,7 @@
             },
             getGeocodeCustomer(address){
                 let v = this;
+                v.loading = true;
                 axios.get(`/customers-geocode-json/${address.replace(/[/#]/g, '')}`)
                 .then(response => { 
                     const mapcontainer = document.getElementById("map");
@@ -382,6 +386,12 @@
                     v.customers.lat = response.data.lat;
                     v.customers.lng = response.data.lng;
                     mapboxgl.accessToken = v.accessToken;
+
+                    if(response.data.lat && response.data.lng){
+                        v.showMap = false;
+                        v.loading = false;
+                    }
+                    
                     var map = new mapboxgl.Map({
                         container: 'map',
                         style: v.mapStyle,
