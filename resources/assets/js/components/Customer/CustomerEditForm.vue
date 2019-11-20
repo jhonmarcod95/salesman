@@ -409,7 +409,7 @@
                         v.customers.lng = lngLat.lng;
                         v.customers.lat = lngLat.lat;
 
-                        map.flyTo({center: [v.customers.lng,v.customers.lat], zoom: 17});
+                        // map.flyTo({center: [v.customers.lng,v.customers.lat], zoom: 17});
                     }
                     
                     marker.on('dragend', onDragEnd)
@@ -452,7 +452,7 @@
                         v.customers.lng = lngLat.lng;
                         v.customers.lat = lngLat.lat;
 
-                        map.flyTo({center: [v.customers.lng,v.customers.lat], zoom: 17});
+                        // map.flyTo({center: [v.customers.lng,v.customers.lat], zoom: 17});
                     }
                     
                     marker.on('dragend', onDragEnd)
