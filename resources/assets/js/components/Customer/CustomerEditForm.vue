@@ -244,7 +244,7 @@
 
                 //Map
                 vm.customers.google_address = document.getElementById("google_address").value;
-                vm.getGeocodeCustomer(vm.customers.google_address);
+                vm.getGeocodeCustomerEdit(vm.customers.google_address);
                 
                 
 
@@ -376,7 +376,7 @@
 
                 }
             },
-            getGeocodeCustomer(address){
+            getGeocodeCustomerEdit(address){
                 let v = this;
                 v.loading = true;
                 axios.get(`/customers-geocode-json/${address.replace(/[/#]/g, '')}`)
