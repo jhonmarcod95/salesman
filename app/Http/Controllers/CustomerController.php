@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Schedule;
+use Carbon\Carbon;
 use DB;
 use Auth;
 use App\Customer;
@@ -177,8 +179,6 @@ class CustomerController extends Controller
             'province' => 'required',
             'google_address' => 'required',
         ]);
-        
-        // $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
 
         $customer->company_id = Auth::user()->companies->pluck('id')[0];
         $customer->classification = $request->classification;
@@ -194,6 +194,17 @@ class CustomerController extends Controller
         $customer->telephone_2 = $request->telephone_2;
         $customer->fax_number = $request->fax_number;
         $customer->remarks = $request->remarks;
+
+        // apply changes in schedule
+        $date_now = Carbon::now();
+        $date_now = date("Y-m-d", strtotime($date_now));
+
+        Schedule::where('code', $request->customer_code)
+            ->where('date', '>=', $date_now)
+            ->update([
+                'lat' =>  $request->lat,
+                'lng' => $request->lng
+            ]);
 
         if($customer->save()){
             return ['redirect' => route('customers_list')];
