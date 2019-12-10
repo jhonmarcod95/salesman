@@ -10,13 +10,13 @@
                         <div class="card-header border-0">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h3 class="mb-0">Map Analytics Report - Users</h3>
+                                    <h3 class="mb-0">Map Analytics Report</h3>
                                 </div>
                             </div>
                         </div>
                        
                         <div class="mb-3">
-                            <div class="row ml-2">
+                            <div class="row col-sm-12">
                                 <div class="col-md-3 float-left">
                                     <div class="form-group">
                                         <label for="customerSelect" class="form-control-label">Select User</label> 
@@ -45,6 +45,13 @@
                                                 id="selected_schedule_type"
                                         >
                                         </multiselect>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 float-left">
+                                    <div class="form-group">
+                                        <label for="customerSelect" class="form-control-label">Address</label> 
+                                        <input type="text" id="searchAddress" placeholder="Address" class="form-control form-control-alternative" v-model="searchAddress">
+                                        <span class="text-danger" v-if="errors.searchAddress"> {{ errors.searchAddress[0] }} </span>
                                     </div>
                                 </div>
                                 <div class="col-md-2 float-left">
@@ -298,6 +305,7 @@
                 schedule_start_time:'',
                 schedule_end_time:'',
                 schedule_type:'',
+                searchAddress:'',
                 startDate:'',
                 endDate:'',
                 errors: [],
@@ -407,7 +415,7 @@
                         
                         const el = document.createElement('div')
                         el.id = 'user-marker' + marker.id 
-                        el.title = 'Name: ' + marker.user.name + '\nType: ' +  marker.schedule_type.description  + '\nDate: ' +  marker.date 
+                        el.title = 'Name: ' + marker.user.name + '\nAddress: ' + marker.address  + '\nType: ' +  marker.schedule_type.description  + '\nDate: ' +  marker.date 
                         el.className = 'employee'
                      
                         new mapboxgl.Marker(el)
@@ -457,6 +465,7 @@
                     defaultUsers: this.userOptions,
                     userId: this.userId ? this.userId['id'] : '',
                     scheduleType: this.scheduleType ? this.scheduleType['id'] : '',
+                    searchAddress: this.searchAddress ? this.searchAddress : '',
                     startDate: this.startDate,
                     endDate: this.endDate,
                 })

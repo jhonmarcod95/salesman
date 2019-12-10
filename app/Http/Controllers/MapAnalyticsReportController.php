@@ -146,6 +146,7 @@ class MapAnalyticsReportController extends Controller
 
         $selected_user_id = $request->userId;
         $schedule_type = $request->scheduleType;
+        $searchAddress = $request->searchAddress;
         $schedules = Schedule::with('attendances','user','schedule_type')
                     ->when(!empty($request->userId), function($q) use($selected_user_id) {
                         $q->where('user_id',  $selected_user_id);
@@ -155,6 +156,9 @@ class MapAnalyticsReportController extends Controller
                     })
                     ->when(!empty($request->scheduleType), function($q) use($schedule_type) {
                         $q->where('type',  $schedule_type);
+                    })
+                    ->when(!empty($request->searchAddress), function($q) use($searchAddress) {
+                        $q->where('address',  'like', '%'.$searchAddress.'%');
                     })
                     ->where('date', '>=',  $request->startDate)
                     ->whereDate('date' ,'<=', $request->endDate)
