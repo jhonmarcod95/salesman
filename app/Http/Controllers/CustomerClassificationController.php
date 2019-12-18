@@ -26,6 +26,13 @@ class CustomerClassificationController extends Controller
         return CustomerClassification::orderBy('id', 'desc')->get();
     }
 
+    public function classificationData(){
+        return CustomerClassification::whereNotIn('id',['1','2','3','4','15'])->orderBy('id', 'ASC')->get();
+    }
+    public function statusData(){
+        return CustomerClassification::whereIn('id',['1','2','3','4'])->orderBy('id', 'ASC')->get();
+    }
+
     /**
      * Show the form for creating a new resource.
      *

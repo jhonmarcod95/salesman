@@ -156,7 +156,7 @@
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link" href="{{ url('/map-analytics-report') }}">
+                                                    <a class="nav-link" href="{{ url('/map-analytics-report-customer') }}">
                                                         <i class="ni ni-pin-3 text-orange"></i> Customers
                                                     </a>
                                                 </li>

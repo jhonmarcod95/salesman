@@ -13,7 +13,17 @@ class Customer extends Model implements Auditable
     use SoftDeletes;
 
     protected $dates = ['deleted_at'];
-    // public function province(){
-    //     return $this->hasOne('App/')
-    // }
+
+    public function visits(){
+        return $this->hasMany('App\Schedule', 'code', 'customer_code')->where('schedules.status', '=', '1')->where('schedules.type', '=', '1');
+    }
+    public function classifications(){
+        return $this->hasOne('App\CustomerClassification', 'id', 'classification');
+    }
+    public function statuses(){
+        return $this->hasOne('App\CustomerClassification', 'id', 'status');
+    }
+    public function provinces(){
+        return $this->hasOne('App\Province', 'id', 'province_id');
+    }
 }

@@ -111,6 +111,7 @@ class CustomerController extends Controller
 
         $customers->company_id = Auth::user()->companies->pluck('id')[0];
         $customers->classification = $request->classification;
+        $customers->status = $request->status;
         $customers->customer_code = $request->customer_code;
         $customers->name = $request->name;
         $customers->street = $request->street;
@@ -182,6 +183,7 @@ class CustomerController extends Controller
 
         $customer->company_id = Auth::user()->companies->pluck('id')[0];
         $customer->classification = $request->classification;
+        $customer->status = $request->status;
         $customer->customer_code = $request->customer_code;
         $customer->name = $request->name;
         $customer->street = $request->street;
@@ -311,5 +313,9 @@ class CustomerController extends Controller
         $companyId = Auth::user()->companies[0]->id;
 
         return DB::select("call p_customer_visited('$request->startDate','$request->endDate' , '$companyId')");
+    }
+
+    public function getCustomerDetails($customer){
+       return Customer::findOrFail($customer);
     }
 }

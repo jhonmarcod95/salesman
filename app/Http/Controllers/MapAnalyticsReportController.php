@@ -100,8 +100,11 @@ class MapAnalyticsReportController extends Controller
     }
 
     public function mapUsers(){
-        // return 'Map User';
         return view('map-analytics-report.map_users');
+    }
+
+    public function mapCustomers(){
+        return view('map-analytics-report.map_customers');
     }
 
     public function users(){
@@ -175,9 +178,62 @@ class MapAnalyticsReportController extends Controller
         
     }
 
+    public function customerLocations(Request $request){
+        
+        $selected_classification_ids = [];
+        if($request->selectedClassifications){
+            foreach ($request->selectedClassifications as $id){
+                array_push($selected_classification_ids,$id['id']);
+             }
+        }
+        
+        $selected_status_ids = [];
+        if($request->selectedStatuses){
+            foreach ($request->selectedStatuses as $id){
+                array_push($selected_status_ids,$id['id']);
+             }
+        }
+
+        $selected_province_ids = [];
+        if($request->selectedProvinces){
+            foreach ($request->selectedProvinces as $id){
+                array_push($selected_province_ids,$id['id']);
+             }
+        }
+
+        $customers = Customer::with('classifications','statuses','provinces','visits')
+                    ->when(!empty($request->selectedClassifications), function($q) use($selected_classification_ids) {
+                        $q->whereIn('classification',  $selected_classification_ids);
+                    })
+                    ->when(!empty($request->selectedStatuses), function($q) use($selected_status_ids) {
+                        $q->whereIn('status',  $selected_status_ids);
+                    })
+                    ->when(!empty($request->selectedProvinces), function($q) use($selected_province_ids) {
+                        $q->whereIn('province_id',  $selected_province_ids);
+                    })
+                    ->orderBy('classification', 'ASC')->get();
+        if($customers){
+            return $customers;
+        }
+        else{
+            return 'Empty';
+        }
+    }
+
     public function getYear(){
         $result = Schedule::select(DB::raw('YEAR(created_at) as year'))->whereNotNull('created_at')->distinct()->get();
         $years = $result->pluck('year');
         return $years;
     }
+
+    public function customerVisits($customer_code){
+        return Schedule::with('attendances', 'user')
+                    
+                    ->where('code', $customer_code)
+                    ->where('type', '1')
+                    ->where('status', '1')
+                    ->orderBy('date','ASC')
+                    ->get();
+    }
+
 }

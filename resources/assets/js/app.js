@@ -81,6 +81,7 @@ Vue.component('close-visit', require('./components/CloseVisit/Index.vue'));
 // Map Analytics Report
 Vue.component('map-analytics-report-index', require('./components/MapAnalyticsReport/MapAnalyticsReportIndex.vue'));
 Vue.component('map-analytics-report-map-users', require('./components/MapAnalyticsReport/MapAnalyticsReportMapUsers.vue'));
+Vue.component('map-analytics-report-map-customers', require('./components/MapAnalyticsReport/MapAnalyticsReportMapCustomers.vue'));
 
 
 const app = new Vue({
