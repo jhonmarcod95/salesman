@@ -53,7 +53,7 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+customer.id">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getCustomerId(customer.id)">Delete</a>
-                                                    <a class="dropdown-item" @click="getGeocode(customer.google_address)">View address</a>
+                                                    <a class="dropdown-item" @click="getGeocode(customer.lat,customer.lng)">View address</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -138,14 +138,13 @@ export default {
       getCustomerId(id){
           this.customer_id = id;
       },
-      getGeocode(address){
-          axios.get(`/customers-geocode/${address.replace(/[/#]/g, '')}`)
-          .then(response => { 
-               window.open('https://www.google.com/maps/place/'+response.data, '_blank');
-          })
-          .catch(error => {
-              this.errors = error.response.data.errors;
-          })
+      getGeocode(lat,lng){
+        var geo_code = lat + ',' + lng;
+        if(lat && lng){
+            window.open('https://www.google.com/maps/place/'+ geo_code, '_blank');
+        }else{
+            alert('Google Map Address not available.');
+        }
       },
       fetchCustomer(){
           axios.get('/customers-all')

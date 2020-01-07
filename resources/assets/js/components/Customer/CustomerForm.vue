@@ -91,7 +91,11 @@
                                                 <label class="form-control-label" for="google_address">Google Map Address</label>
                                                 <input id="google_address" class="form-control form-control-alternative" type="text" v-model="customer.google_address" placeholder="Enter a Location">
                                                 <span class="text-danger small" v-if="errors.google_address">{{ errors.google_address[0] }}</span>
+
+                                                <button type="button" :disabled="showMap" class="btn btn-sm btn-primary mt-2" data-toggle="modal" data-target="#showMap">Show Map</button>
                                             </div>
+
+                                            
                                         </div>
                                     </div>
                                     <div class="row">
@@ -139,11 +143,36 @@
                 </div>
             </div>
         </div>
+        <!-- Map Modal -->
+        <div class="modal fade" id="showMap" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modal-title-default">Map</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="mapContainer" style="width:100%;height:300px;">
+                    <div id="map"></div>
+                    <pre id='coordinates' class='coordinates'></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link  ml-auto" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
+    import Mapbox from 'mapbox-gl-vue';
+    import mapboxgl from 'mapbox-gl';
     export default {
+         components: {
+            Mapbox
+        },
         props:['companyId'],
         data(){
             return{
@@ -161,7 +190,13 @@
                     telephone_2: '',
                     fax_number: '',
                     remarks: '',
+                    lat: '',
+                    lng: ''
                 },
+                accessToken: 'pk.eyJ1IjoiamF5LWx1bWFnZG9uZzEyMyIsImEiOiJjazFxNm5wZGwxNG02M2dtaXF2dHE1YzluIn0.SHUJTfNTrhGoyacA8H7Tbw',
+                mapStyle: 'mapbox://styles/mapbox/streets-v11',
+                mapCenter: [121.035249, 14.675647],
+                showMap:true,
                 show: false,
                 pilili_code: '',
                 provinces: [],
@@ -196,7 +231,13 @@
                     console.log("No details available for input: '" + place.name + "'");
                     return;
                 }
+
+                //Map
                 vm.customer.google_address = document.getElementById("google_address").value;
+                vm.mapbox = Mapbox;
+                vm.getGeocodeCustomer(vm.customer.google_address);
+                vm.showMap = false;
+
                 //Bind town or city of address to input
                 // place.address_components.filter(function(address){
                 //     address.types.filter(function(types) {
@@ -216,6 +257,8 @@
                     name: customer.name,
                     street: customer.street,
                     google_address: customer.google_address,
+                    lat: customer.lat,
+                    lng: customer.lng,
                     town_city: customer.town_city,
                     region: customer.region,
                     province: customer.province,
@@ -310,7 +353,101 @@
                     this.customer.customer_code = '';
                     document.getElementById("customer_code").disabled = false;
                 }
+            },
+            getGeocodeCustomer(address){
+                let v = this;
+                axios.get(`/customers-geocode-json/${address.replace(/[/#]/g, '')}`)
+                .then(response => { 
+                    const mapcontainer = document.getElementById("map");
+                    mapcontainer.innerHTML = '';
+                    v.customer.lat = response.data.lat;
+                    v.customer.lng = response.data.lng;
+                    mapboxgl.accessToken = v.accessToken;
+                    var map = new mapboxgl.Map({
+                        container: 'map',
+                        style: v.mapStyle,
+                        center: [v.customer.lng,v.customer.lat],
+                        minzoom:23,
+                        maxZoom:20,
+                        zoom: 17,
+                        maxBounds: [[110.446227,2.949317], [131.509814,21.637444 ]],
+                        height:100
+                    });
+                    
+                    map.resize();
+
+                    map.addControl(new mapboxgl.NavigationControl());
+                    map.addControl(new mapboxgl.FullscreenControl());
+
+                    var marker = new mapboxgl.Marker({
+                        draggable: true
+                    })
+                    .setLngLat([v.customer.lng,v.customer.lat])
+                    .addTo(map);
+                    
+                    coordinates.style.display = 'none';
+                    function onDragEnd() {   
+                        var lngLat = marker.getLngLat();
+                        coordinates.style.display = 'block';
+                        coordinates.innerHTML = 'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
+                        v.customer.lng = lngLat.lng;
+                        v.customer.lat = lngLat.lat;
+
+                        // map.flyTo({center: [v.customer.lng,v.customer.lat], zoom: 17})
+                    }
+                    
+                    marker.on('dragend', onDragEnd)
+                
+                   
+                })
+                .catch(error => {
+                    this.errors = error.response.data.errors;
+                })
             }
         },
     }
 </script>
+
+<style>
+    
+     #map{
+        position: relative;
+        height: 100%;
+        width: 100%;
+        background-color:#75CFF0!important;
+    }
+
+    .building {
+        background-image: url('/img/map/customer.png');
+        background-size: cover;
+        width: 35px;
+        height: 35px;
+        cursor: pointer;
+    }
+
+    .modal-xl{
+        width: 400px!important;
+    }
+
+    .mapboxgl-ctrl-logo{
+        display:none!important;
+    }
+    .mapboxgl-ctrl.mapboxgl-ctrl-attrib{
+        display:none!important;
+    }
+
+    .coordinates {
+        background: rgba(0,0,0,0.5);
+        color: #fff;
+        position: absolute;
+        bottom: 40px;
+        left: 10px;
+        padding:5px 10px;
+        margin: 0;
+        font-size: 11px;
+        line-height: 18px;
+        border-radius: 3px;
+        display: none;
+    }
+
+</style>
