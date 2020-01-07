@@ -61,6 +61,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     //Payments
     Route::get('payments','AppAPIController@getPayments');
 
+    //customer
+    Route::get('customer/{customer_code}','AppAPIController@getCustomer');
+
     // Requests Schedules
     Route::get('customers','RequestsAPIController@customers');
     Route::get('requests','RequestsAPIController@index');
@@ -114,6 +117,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('brands','API\SurveyControllerApi@brands');
     Route::get('surveys','API\SurveyControllerApi@index');
     Route::post('surveys','API\SurveyControllerApi@store');
+    Route::get('surveys/{survey}','API\SurveyControllerApi@show');
     Route::post('surveys/attach/{survey}','API\SurveyControllerApi@uploadSurveyPhoto');
 
     //Grassroots

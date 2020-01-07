@@ -20,4 +20,19 @@ class CustomerTest extends TestCase
         
         echo "\n\n".json_encode($response, JSON_PRETTY_PRINT);
     }
+
+    /**
+     * @test
+     */
+    public function view_customer_detail()
+    {   
+        $customer_code = 120900005756;
+
+        $response = $this->actingAs($this->defaultUser(),'api')
+                    ->json('GET','api/customer/'.$customer_code);
+
+        $response->assertStatus(200);
+
+        echo "\n\n".json_encode($response, JSON_PRETTY_PRINT);
+    }
 }

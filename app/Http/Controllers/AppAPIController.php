@@ -23,8 +23,7 @@ use Carbon\Carbon;
 use App\Schedule;
 use App\Expense;
 use App\CloseVisit;
-use App\Payment;
-use DB;
+use App\Customer;
 
 
 class AppAPIController extends Controller
@@ -834,6 +833,15 @@ class AppAPIController extends Controller
             return response()->json(true,200);
         }
             return response()->json(false,200);
+    }
+
+    // get customer id based from customer_code
+
+    public function getCustomer($customer_code)
+    {
+        $customer = Customer::where('customer_code', $customer_code)->first();
+
+        return $customer;
     }
 
 
