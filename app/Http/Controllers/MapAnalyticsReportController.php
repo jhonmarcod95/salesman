@@ -211,6 +211,7 @@ class MapAnalyticsReportController extends Controller
                     ->when(!empty($request->selectedProvinces), function($q) use($selected_province_ids) {
                         $q->whereIn('province_id',  $selected_province_ids);
                     })
+                    ->where('company_id',Auth::user()->company_id)
                     ->orderBy('classification', 'ASC')->get();
         if($customers){
             return $customers;
