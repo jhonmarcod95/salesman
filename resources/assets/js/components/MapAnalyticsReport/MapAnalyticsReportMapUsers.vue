@@ -75,6 +75,39 @@
                                     <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#showUserList"> List ({{ Object.keys(usersList).length }})</button>
                                 </div>
                             </div>
+
+                            <div class="row ml-3 mt-3 mb-3 pl-3">
+                                <h4 class="mt-3">Legend:</h4>
+                                <div class="col-sm-1">
+                                    <div class="icon icon-shape bg-info text-white rounded-circle shadow" style="font-size: .8rem!important;">{{ countCustomer }}</div>
+                                    <span class="text-sm"> Customer</span>
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="icon icon-shape text-white rounded-circle shadow" style="font-size: .8rem!important;background-color:#c442b3">{{ countMapping }}</div>
+                                    <span class="text-sm"> Mapping</span>
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="icon icon-shape bg-primary text-white rounded-circle shadow" style="font-size: .8rem!important;">{{ countEvent }}</div>
+                                    <span class="text-sm"> Event</span>
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="icon icon-shape bg-success text-white rounded-circle shadow" style="font-size: .8rem!important;">{{ countTravel }}</div>
+                                    <span class="text-sm"> Travel</span>
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="icon icon-shape bg-warning text-white rounded-circle shadow" style="font-size: .8rem!important;">{{ countOffice }}</div>
+                                    <span class="text-sm">Office</span>
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="icon icon-shape bg-danger text-white rounded-circle shadow" style="font-size: .8rem!important;">{{ countActivity }}</div>
+                                    <span class="text-sm">Activity</span>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="icon icon-shape bg-default text-white rounded-circle shadow" style="font-size: .8rem!important;">{{ countDefault }}</div>
+                                    <span class="text-sm">Unidentified</span>
+                                </div>
+                            </div>
+
                         </div>
                  
                         <Mapbox 
@@ -175,6 +208,22 @@
                             <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                         </div>
                     </div>
+                     <div class="col-md-3 float-left">
+                                    <div class="form-group">
+                            <label for="customerSelect" class="form-control-label">Schedule Type</label> 
+                            <multiselect
+                                    v-model="scheduleTypeFilter"
+                                    :options="scheduleTypeOptions"
+                                    :multiple="false"
+                                    track-by="id"
+                                    :custom-label="customLabelScheduleType"
+                                    placeholder="Schedule Type"
+                                    id="selected_schedule_type"
+                            >
+                            </multiselect>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
@@ -290,6 +339,7 @@
                 scheduleTypeOptions:[],
                 userId:'',
                 scheduleType:'',
+                scheduleTypeFilter:'',
                 users:[],
                 user:[],
                 name:'',
@@ -317,6 +367,13 @@
                 currentPage: 0,
                 itemsPerPage: 10,
                 loading: false,
+                countActivity: 0,
+                countOffice: 0,
+                countTravel: 0,
+                countEvent: 0,
+                countMapping: 0,
+                countCustomer: 0,
+                countDefault: 0,
             };
         },
         created() {
@@ -385,6 +442,15 @@
             },  
             createUsersMap() {
                 let v = this;
+
+                v.countActivity= 0,
+                v.countOffice= 0,
+                v.countTravel= 0,
+                v.countEvent= 0,
+                v.countMapping= 0,
+                v.countCustomer= 0,
+                v.countDefault= 0,
+
                 v.clearMap();
                 v.customerCoordinates = [];
                 mapboxgl.accessToken = this.accessToken;
@@ -417,6 +483,7 @@
                         el.id = 'user-marker' + marker.id 
                         el.title = 'Name: ' + marker.user.name + '\nAddress: ' + marker.address  + '\nType: ' +  marker.schedule_type.description  + '\nDate: ' +  marker.date 
                         el.className = 'employee'
+                        el.className = v.getUserColorType(marker.type);
                      
                         new mapboxgl.Marker(el)
                         .setLngLat([sign_in_longitude,sign_in_latitude])
@@ -456,6 +523,44 @@
                     });
                 }
                 v.loading = false;
+            },
+            getUserColorType(schedule_type_id){
+                let v=this;
+
+                if(schedule_type_id){
+                    if(schedule_type_id == '1'){
+                        v.countCustomer += 1;
+                        return 'customer-user';
+                    }
+                    else if(schedule_type_id == '2'){
+                        v.countMapping += 1;
+                        return 'mapping-user';
+                    }
+                    else if(schedule_type_id == '3'){
+                        v.countEvent += 1;
+                        return 'event-user';
+                    }
+                    else if(schedule_type_id == '4'){
+                        v.countTravel += 1;
+                        return 'travel-user';
+                    }
+                    else if(schedule_type_id == '5'){
+                        v.countOffice += 1;
+                        return 'office-user';
+                    }
+                    else if(schedule_type_id == '6'){
+                        v.countActivity += 1;
+                        return 'activity-user';
+                    }else{
+                        v.countDefault += 1;
+                        return 'default-user';
+                    }
+                }else{
+                    v.countDefault += 1;
+                    return 'default-user';
+                }
+
+
             },
             getUserLocations(){
                 this.loading = true;
@@ -517,7 +622,15 @@
                 let self = this;
                 return Object.values(self.usersList).filter(user => {
                     if(user.user){
-                       return user.user.name.toLowerCase().includes(this.keywords.toLowerCase()) || user.date.toLowerCase().includes(this.keywords.toLowerCase())
+                        if(self.scheduleTypeFilter){
+                            console.log('type:' + user.type);
+                             if(self.scheduleTypeFilter.id == user.type){
+                                return user.user.name.toLowerCase().includes(this.keywords.toLowerCase()) || user.date.toLowerCase().includes(this.keywords.toLowerCase())
+                            }
+                        }else{
+                           return user.user.name.toLowerCase().includes(this.keywords.toLowerCase()) || user.date.toLowerCase().includes(this.keywords.toLowerCase()) 
+                        }
+                       
                     }
                 });
             },
@@ -555,6 +668,7 @@
         height: 30px;
         cursor: pointer;
     }
+
     .building {
         background-image: url('/img/map/customer.png');
         background-size: cover;
@@ -697,4 +811,27 @@
         padding-top: 5px!important;
     }
     
+
+    .activity-user {
+        background-image: url('/img/map/user/activity_user.png');background-size: cover;width: 35px;height: 35px;cursor: pointer;
+    }
+    .office-user {
+        background-image: url('/img/map/user/office_user.png');background-size: cover;width: 35px;height: 35px;cursor: pointer;
+    }
+    .travel-user {
+        background-image: url('/img/map/user/travel_user.png');background-size: cover;width: 35px;height: 35px;cursor: pointer;
+    }
+    .event-user {
+        background-image: url('/img/map/user/event_user.png');background-size: cover;width: 35px;height: 35px;cursor: pointer;
+    }
+    .mapping-user {
+        background-image: url('/img/map/user/mapping_user.png');background-size: cover;width: 35px;height: 35px;cursor: pointer;
+    }
+    .customer-user {
+        background-image: url('/img/map/user/customer_user.png');background-size: cover;width: 35px;height: 35px;cursor: pointer;
+    }
+    .default-user {
+        background-image: url('/img/map/user/default_user.png');background-size: cover;width: 35px;height: 35px;cursor: pointer;
+    }
+
 </style>

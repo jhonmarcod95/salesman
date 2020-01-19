@@ -318,4 +318,59 @@ class CustomerController extends Controller
     public function getCustomerDetails($customer){
        return Customer::findOrFail($customer);
     }
+
+    public function customerSalesReport(){
+        session(['header_text' => 'Sales Report']);
+        return view('sales-report.index');
+    }
+
+
+    public function customersSalesReportData(Request $request){
+
+        $companyId = Auth::user()->companies[0]->id;
+        $params = $request->all(); 
+
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate'
+        ]);
+       
+        return $customers = Customer::with(['schedules' => function ($query) use($params) {
+                        $query->where('date', '>=', $params['startDate']);
+                        $query->where('date', '<=', $params['endDate']);
+                        $query->where('type', '1');
+                        $query->where('status', '1');
+                        $query->orderBy('date', 'DESC');
+                        $query->with('attendances','user');
+                    }])
+                    ->with('last_visited')
+                    ->where('company_id',$companyId)
+                    ->orderBy('id', 'DESC')
+                    ->get();
+
+    }
+
+    public function customerAppointmentDurationReport(){
+        session(['header_text' => 'Appointment Duration Report']);
+        return view('appointment-duration-report.index');
+    }
+
+    public function customerAppointmentDurationReportData(Request $request){
+
+        $params = $request->all(); 
+
+        $request->validate([
+            'selectedDate' => 'required',
+            'selectedUser' => 'required',
+        ]);
+
+        return $schedules = Schedule::with('attendances')
+                                        ->leftJoin('attendances','schedules.id','=','attendances.schedule_id')
+                                        ->where('schedules.date' , $params['selectedDate'])
+                                        ->where('schedules.user_id' , $params['selectedUser'])
+                                        ->select('attendances.*','schedules.*')
+                                        ->get();
+                                        
+    }
+
 }

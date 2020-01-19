@@ -317,3 +317,13 @@ Route::get('/auth-role', 'UserController@getRole');
 
 Route::get('/visited-customer', 'CustomerController@customerVisitedIndex');
 Route::post('/visited-customer-all', 'CustomerController@customerVisitedIndexData');
+
+Route::get('/sales-report', 'CustomerController@customerSalesReport');
+
+Route::post('/sales-report-customer-data', 'CustomerController@customersSalesReportData');
+
+Route::post('/sales-report-customer-visit-data', 'CustomerController@customersSalesReportData');
+
+Route::get('/appointment-duration-report', 'CustomerController@customerAppointmentDurationReport');
+
+Route::post('/appointment-duration-report-data', 'CustomerController@customerAppointmentDurationReportData');

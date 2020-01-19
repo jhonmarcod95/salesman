@@ -18,7 +18,7 @@
 
                         <div class="mb-3">
                             <div class="row col-sm-12">
-                                <div class="col-md-6 float-left">
+                                <div class="col-md-3 float-left">
                                     <div class="form-group">
 
                                         <label for="customerSelect" class="form-control-label">Select Classification</label> 
@@ -33,7 +33,23 @@
                                         >
                                         </multiselect>
                                         <span class="text-danger small" v-if="errors.selectedClassifications">{{ errors.selectedClassifications[0] }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 float-left">
+                                    <div class="form-group">
 
+                                        <label for="customerSelect" class="form-control-label">Select Company</label> 
+                                        <multiselect
+                                                v-model="companyIds"
+                                                :options="companyOptions"
+                                                :multiple="true"
+                                                track-by="id"
+                                                :custom-label="customLabelCompany"
+                                                placeholder="Select Company"
+                                                id="selected_company"
+                                        >
+                                        </multiselect>
+                                        <span class="text-danger small" v-if="errors.selectedCompanies">{{ errors.selectedCompanies[0] }}</span>
                                     </div>
                                 </div>
                                 <div class="col-md-3 float-left">
@@ -50,7 +66,7 @@
                                                 id="selected_status"
                                         >
                                         </multiselect>
-                                        <span class="text-danger small" v-if="errors.selectedClassifications">{{ errors.selectedClassifications[0] }}</span>
+                                        <span class="text-danger small" v-if="errors.selectedStatuses">{{ errors.selectedStatuses[0] }}</span>
 
                                     </div>
                                 </div>
@@ -326,7 +342,9 @@
                 classificationIds:[],
                 statusIds:[],
                 provinceIds:[],
+                companyIds:[],
                 classificationOptions:[],
+                companyOptions:[],
                 statusOptions:[],
                 provinceOptions:[],
                 customers : [],
@@ -354,6 +372,7 @@
         created(){
              this.mapbox = Mapbox;
              this.fetchClassification();
+             this.fetchCompany();
              this.fetchStatus();
              this.fetchProvince();
         },
@@ -383,6 +402,7 @@
                 this.loading = true;
                 axios.post('/customer-locations', {
                     selectedClassifications: this.classificationIds,
+                    selectedCompanies: this.companyIds,
                     selectedStatuses: this.statusIds,
                     selectedProvinces: this.provinceIds,
                 })
@@ -411,6 +431,15 @@
                     this.errors = error.response.data.errors;
                 })
             },
+            fetchCompany(){
+                axios.get('/companies-all')
+                .then(response => { 
+                    this.companyOptions = response.data;
+                })
+                .catch(error =>{
+                    this.errors = error.response.data.errors;
+                })
+            },
             fetchStatus(){
                 axios.get('/customers-status-options')
                 .then(response => { 
@@ -431,6 +460,9 @@
             },
             customLabelClassification (classification) {
                 return `${classification.description}`
+            },
+            customLabelCompany (company) {
+                return `${company.name}`
             },
             customLabelStatus (status) {
                 return `${status.description}`

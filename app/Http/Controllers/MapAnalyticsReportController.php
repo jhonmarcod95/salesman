@@ -179,11 +179,23 @@ class MapAnalyticsReportController extends Controller
     }
 
     public function customerLocations(Request $request){
-        
+    
+        $request->validate([
+            'selectedClassifications' => 'required',
+            'selectedCompanies' => 'required',
+        ]);
+
         $selected_classification_ids = [];
         if($request->selectedClassifications){
             foreach ($request->selectedClassifications as $id){
                 array_push($selected_classification_ids,$id['id']);
+             }
+        }
+
+        $selected_company_ids = [];
+        if($request->selectedCompanies){
+            foreach ($request->selectedCompanies as $id){
+                array_push($selected_company_ids,$id['id']);
              }
         }
         
@@ -205,13 +217,15 @@ class MapAnalyticsReportController extends Controller
                     ->when(!empty($request->selectedClassifications), function($q) use($selected_classification_ids) {
                         $q->whereIn('classification',  $selected_classification_ids);
                     })
+                    ->when(!empty($request->selectedCompanies), function($q) use($selected_company_ids) {
+                        $q->whereIn('company_id',  $selected_company_ids);
+                    })
                     ->when(!empty($request->selectedStatuses), function($q) use($selected_status_ids) {
                         $q->whereIn('status',  $selected_status_ids);
                     })
                     ->when(!empty($request->selectedProvinces), function($q) use($selected_province_ids) {
                         $q->whereIn('province_id',  $selected_province_ids);
                     })
-                    ->where('company_id',Auth::user()->company_id)
                     ->orderBy('classification', 'ASC')->get();
         if($customers){
             return $customers;

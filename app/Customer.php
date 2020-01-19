@@ -17,6 +17,19 @@ class Customer extends Model implements Auditable
     public function visits(){
         return $this->hasMany('App\Schedule', 'code', 'customer_code')->where('schedules.status', '=', '1')->where('schedules.type', '=', '1');
     }
+
+    public function schedules(){
+        return $this->hasMany('App\Schedule', 'code', 'customer_code');
+    }
+
+    public function last_visited(){
+        return $this->hasMany('App\Schedule', 'code', 'customer_code')
+                            ->with('attendances')
+                            ->where('schedules.status', '=', '1')
+                            ->where('schedules.type', '=', '1')
+                            ->orderBy('date', 'DESC');
+    }
+    
     public function classifications(){
         return $this->hasOne('App\CustomerClassification', 'id', 'classification');
     }
