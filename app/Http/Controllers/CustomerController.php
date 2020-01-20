@@ -369,6 +369,7 @@ class CustomerController extends Controller
                                         ->where('schedules.date' , $params['selectedDate'])
                                         ->where('schedules.user_id' , $params['selectedUser'])
                                         ->select('attendances.*','schedules.*')
+                                        ->orderBy('sign_in','ASC')
                                         ->get();
                                         
     }

@@ -19,6 +19,7 @@ use \Carbon\Carbon;
 class MapAnalyticsReportController extends Controller
 {
     public function index(){
+        session(['header_text' => 'Map Analytics Report']);
         return view('map-analytics-report.index');
     }
 
