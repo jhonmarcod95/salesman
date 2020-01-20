@@ -59,11 +59,11 @@
                                     <span class="text-sm"> Non Visited</span>
                                 </div>
                             </div>
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-md-12 ml-2" v-if="name">
                                     <h4>Name: {{ name }}</h4>
                                 </div>
-                            </div>
+                            </div> -->
                         
                             <div class="table-responsive">
                                
@@ -186,14 +186,17 @@
 
                             
                             if(first){
-                                last_date_time = appointment.attendances ? appointment.attendances.sign_out : '';
+                                
                                 travel_time = '';
                                 first = false;
 
                                 if(appointment.attendances){
+                                    last_date_time = appointment.attendances ? appointment.attendances.sign_out : '';
                                     datetime = appointment.attendances.sign_in + ' - ' + appointment.attendances.sign_out;
-                                    duration = v.rendered(appointment.attendances.sign_out, appointment.attendances.sign_in);
+                                    
+                                    duration = v.rendered(appointment.attendances.sign_out ? appointment.attendances.sign_out : "", appointment.attendances.sign_in ? appointment.attendances.sign_in : "");
                                     total_duration += v.getTotalMinutes(appointment.attendances.sign_out ? appointment.attendances.sign_out : "", appointment.attendances.sign_in ? appointment.attendances.sign_in : "");
+                                    
                                     v.countVisited += 1;
                                 }else{
                                     datetime = '';
@@ -204,20 +207,35 @@
 
                             }else{
 
-                                if(last_date_time){
-                                    travel_time = v.rendered(appointment.attendances ? appointment.attendances.sign_in : '',last_date_time);
-                                    total_travel_time += v.getTotalMinutes(appointment.attendances ? appointment.attendances.sign_in : "",last_date_time);
-                                    last_date_time = appointment.attendances ? appointment.attendances.sign_out : '';
-                                }else{
-                                    travel_time = '';
-                                }
+                                // if(last_date_time){
+                                    // if(appointment.attendances){
+                                    //     travel_time = v.rendered(appointment.attendances.sign_in ? appointment.attendances.sign_in : '',last_date_time ? last_date_time : '');  
+                                    //     total_travel_time += v.getTotalMinutes(appointment.attendances.sign_in ? appointment.attendances.sign_in : "",last_date_time ? last_date_time : '');  
+                                    //     last_date_time = appointment.attendances.sign_out ? appointment.attendances.sign_out : '';     
+                                    // }else{
+                                    //     travel_time = '';
+                                    // }
+                                // }else{
+                                //     travel_time = v.rendered(appointment.attendances ? appointment.attendances.sign_in : '',last_date_time);
+                                //     total_travel_time += v.getTotalMinutes(appointment.attendances ? appointment.attendances.sign_in : "",last_date_time);
+                                //     last_date_time = appointment.attendances ? appointment.attendances.sign_out : '';
+                                // }
                                 
                                 if(appointment.attendances){
+
+                                    travel_time = v.rendered(appointment.attendances.sign_in ? appointment.attendances.sign_in : '',last_date_time ? last_date_time : '');  
+                                    total_travel_time += v.getTotalMinutes(appointment.attendances.sign_in ? appointment.attendances.sign_in : "",last_date_time ? last_date_time : '');  
+                                    
+                                    last_date_time = appointment.attendances.sign_out ? appointment.attendances.sign_out : '';  
+
                                     datetime = appointment.attendances.sign_in + ' - ' + appointment.attendances.sign_out;
+                                    
                                     duration = v.rendered(appointment.attendances.sign_out ? appointment.attendances.sign_out : "", appointment.attendances.sign_in ? appointment.attendances.sign_in : "");
                                     total_duration += v.getTotalMinutes(appointment.attendances.sign_out ? appointment.attendances.sign_out : "", appointment.attendances.sign_in ? appointment.attendances.sign_in : "");
+                                    
                                     v.countVisited += 1;
                                 }else{
+                                    travel_time = '';
                                     datetime = '';
                                     duration = '';
                                     total_duration += 0;
