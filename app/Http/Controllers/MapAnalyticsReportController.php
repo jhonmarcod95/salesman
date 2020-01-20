@@ -182,7 +182,7 @@ class MapAnalyticsReportController extends Controller
     public function customerLocations(Request $request){
     
         $request->validate([
-            'selectedClassifications' => 'required',
+            // 'selectedClassifications' => 'required',
             'selectedCompanies' => 'required',
         ]);
 
