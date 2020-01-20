@@ -226,7 +226,7 @@
                                     travel_time = v.rendered(appointment.attendances.sign_in ? appointment.attendances.sign_in : '',last_date_time ? last_date_time : '');  
                                     total_travel_time += v.getTotalMinutes(appointment.attendances.sign_in ? appointment.attendances.sign_in : "",last_date_time ? last_date_time : '');  
                                     
-                                    last_date_time = appointment.attendances.sign_out ? appointment.attendances.sign_out : '';  
+                                    last_date_time = appointment.attendances.sign_out ? appointment.attendances.sign_out : appointment.attendances.sign_in;  
 
                                     datetime = appointment.attendances.sign_in + ' - ' + appointment.attendances.sign_out;
                                     
@@ -235,6 +235,7 @@
                                     
                                     v.countVisited += 1;
                                 }else{
+                                    last_date_time = '';
                                     travel_time = '';
                                     datetime = '';
                                     duration = '';
@@ -278,7 +279,7 @@
                     var minutes = moment.utc(ms).format("mm");
                     return hours + 'h '+ minutes+' min.'; 
                 }else{
-                    return '';
+                    return 0;
                 }                                  
             },
             getTotalMinutes(endTime, startTime){
