@@ -83,7 +83,8 @@
                                         <td>{{ appointment.name }}</td>
                                         <td>{{ appointment.address }}</td>
                                         <td>{{ appointment.schedule }}</td>
-                                        <td>{{ appointment.datetime }}</td>
+                                        <td v-if="appointment.isCompleteAttendance" style="color:black">{{ appointment.datetime }}</td>
+                                        <td v-else style="color:orange;font-weight:bold;">{{ appointment.datetime }}</td>
                                         <td>{{ appointment.duration }}</td>
                                         <td>{{ appointment.travel_time }}</td>
                                     </tr>
@@ -183,6 +184,7 @@
                             var duration = '';
                             var travel_time = '';
                             var get_duration = 0;
+                            var isCompleteAttendance = false;
 
                             
                             if(first){
@@ -192,7 +194,14 @@
 
                                 if(appointment.attendances){
                                     last_date_time = appointment.attendances ? appointment.attendances.sign_out : '';
-                                    datetime = appointment.attendances.sign_in + ' - ' + appointment.attendances.sign_out;
+                                    
+                                    if(appointment.attendances.sign_out){
+                                        datetime = appointment.attendances.sign_in  + ' - ' + appointment.attendances.sign_out;
+                                        isCompleteAttendance = true;
+                                    }else{
+                                        datetime = appointment.attendances.sign_in  + ' - No Sign Out';
+                                        isCompleteAttendance = false;
+                                    }
                                     
                                     duration = v.rendered(appointment.attendances.sign_out ? appointment.attendances.sign_out : "", appointment.attendances.sign_in ? appointment.attendances.sign_in : "");
                                     total_duration += v.getTotalMinutes(appointment.attendances.sign_out ? appointment.attendances.sign_out : "", appointment.attendances.sign_in ? appointment.attendances.sign_in : "");
@@ -207,20 +216,7 @@
 
                             }else{
 
-                                // if(last_date_time){
-                                    // if(appointment.attendances){
-                                    //     travel_time = v.rendered(appointment.attendances.sign_in ? appointment.attendances.sign_in : '',last_date_time ? last_date_time : '');  
-                                    //     total_travel_time += v.getTotalMinutes(appointment.attendances.sign_in ? appointment.attendances.sign_in : "",last_date_time ? last_date_time : '');  
-                                    //     last_date_time = appointment.attendances.sign_out ? appointment.attendances.sign_out : '';     
-                                    // }else{
-                                    //     travel_time = '';
-                                    // }
-                                // }else{
-                                //     travel_time = v.rendered(appointment.attendances ? appointment.attendances.sign_in : '',last_date_time);
-                                //     total_travel_time += v.getTotalMinutes(appointment.attendances ? appointment.attendances.sign_in : "",last_date_time);
-                                //     last_date_time = appointment.attendances ? appointment.attendances.sign_out : '';
-                                // }
-                                
+                              
                                 if(appointment.attendances){
 
                                     travel_time = v.rendered(appointment.attendances.sign_in ? appointment.attendances.sign_in : '',last_date_time ? last_date_time : '');  
@@ -228,7 +224,14 @@
                                     
                                     last_date_time = appointment.attendances.sign_out ? appointment.attendances.sign_out : appointment.attendances.sign_in;  
 
-                                    datetime = appointment.attendances.sign_in + ' - ' + appointment.attendances.sign_out;
+                                    if(appointment.attendances.sign_out){
+                                        datetime = appointment.attendances.sign_in  + ' - ' + appointment.attendances.sign_out;
+                                        isCompleteAttendance = true;
+                                    }else{
+                                        datetime = appointment.attendances.sign_in  + ' - No Sign Out';
+                                        isCompleteAttendance = false;
+                                    }
+                                    
                                     
                                     duration = v.rendered(appointment.attendances.sign_out ? appointment.attendances.sign_out : "", appointment.attendances.sign_in ? appointment.attendances.sign_in : "");
                                     total_duration += v.getTotalMinutes(appointment.attendances.sign_out ? appointment.attendances.sign_out : "", appointment.attendances.sign_in ? appointment.attendances.sign_in : "");
@@ -250,7 +253,8 @@
                                 'schedule': appointment.date + ' ' + appointment.start_time + '-' + appointment.end_time,
                                 'datetime':datetime,
                                 'duration':duration,
-                                'travel_time':travel_time
+                                'travel_time':travel_time,
+                                'isCompleteAttendance':isCompleteAttendance
                             });
 
                         });
