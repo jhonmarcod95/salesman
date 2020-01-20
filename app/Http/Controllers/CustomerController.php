@@ -370,6 +370,7 @@ class CustomerController extends Controller
                                         ->where('schedules.user_id' , $params['selectedUser'])
                                         ->select('attendances.*','schedules.*')
                                         ->orderBy('sign_in','ASC')
+                                        ->orderBy('sign_out','ASC')
                                         ->get();
                                         
     }
