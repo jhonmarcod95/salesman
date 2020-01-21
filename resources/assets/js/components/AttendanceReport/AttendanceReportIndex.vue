@@ -211,7 +211,15 @@ export default {
                         }
                     }
                 },
-                'REMARKS': 'remarks',
+                'REMARKS': {
+                    callback: (value) => {
+                        if(value.attendances){
+                            return value.attendances.remarks;
+                        }else{
+                            return '';
+                        }
+                    }
+                },
                 'SALES PERSONNEL': {
                     callback: (value) => {
                         return value.user.name;
