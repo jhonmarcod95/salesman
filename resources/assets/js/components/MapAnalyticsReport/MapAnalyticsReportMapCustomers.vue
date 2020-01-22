@@ -75,9 +75,9 @@
 
                                         <label for="customerSelect" class="form-control-label">Select Province</label> 
                                         <multiselect
-                                                v-model="provinceIds"
+                                                v-model="provinceId"
                                                 :options="provinceOptions"
-                                                :multiple="true"
+                                                :multiple="false"
                                                 track-by="id"
                                                 :custom-label="customLabelProvince"
                                                 placeholder="Select Province"
@@ -341,7 +341,7 @@
                 mapDefaultLayer: [],
                 classificationIds:[],
                 statusIds:[],
-                provinceIds:[],
+                provinceId:[],
                 companyIds:[],
                 classificationOptions:[],
                 companyOptions:[],
@@ -400,11 +400,12 @@
             },
             getCustomerLocations(){
                 this.loading = true;
+                this.errors = [];
                 axios.post('/customer-locations', {
                     selectedClassifications: this.classificationIds,
                     selectedCompanies: this.companyIds,
                     selectedStatuses: this.statusIds,
-                    selectedProvinces: this.provinceIds,
+                    selectedProvince: this.provinceId,
                 })
                 .then(response =>{
                     this.customers = response.data ? response.data : [];
@@ -494,6 +495,26 @@
 
                 map.addControl(new mapboxgl.NavigationControl());
                 map.addControl(new mapboxgl.FullscreenControl());
+
+                
+                
+                //Re center Map when Selected Province
+                if(v.provinceId){
+                    var current_zoom = map.getZoom();
+                    var province_data = [];
+                    axios.get('/customers-geocode-json/' + v.provinceId.name + ' philippines')
+                    .then(response => { 
+                        province_data = response.data;
+                        if(province_data.lng && province_data.lat){
+                            map.flyTo({center: [province_data.lng,province_data.lat],zoom: current_zoom > 10 ? current_zoom : 10});
+                        }
+                    })
+                    .catch(error =>{
+                        console.log(error.response.data);
+                    })
+                    
+                }
+                
 
                 const geojson = JSON.parse(JSON.stringify(this.customers));
 
