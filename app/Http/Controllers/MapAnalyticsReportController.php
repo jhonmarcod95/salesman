@@ -182,7 +182,6 @@ class MapAnalyticsReportController extends Controller
     public function customerLocations(Request $request){
     
         $request->validate([
-            // 'selectedClassifications' => 'required',
             'selectedCompanies' => 'required',
         ]);
 
@@ -207,13 +206,8 @@ class MapAnalyticsReportController extends Controller
              }
         }
 
-        $selected_province_ids = [];
-        if($request->selectedProvinces){
-            foreach ($request->selectedProvinces as $id){
-                array_push($selected_province_ids,$id['id']);
-             }
-        }
-
+        $selected_province_id = $request->selectedProvince ? $request->selectedProvince['id'] : '';
+       
         $customers = Customer::with('classifications','statuses','provinces','visits')
                     ->when(!empty($request->selectedClassifications), function($q) use($selected_classification_ids) {
                         $q->whereIn('classification',  $selected_classification_ids);
@@ -224,8 +218,8 @@ class MapAnalyticsReportController extends Controller
                     ->when(!empty($request->selectedStatuses), function($q) use($selected_status_ids) {
                         $q->whereIn('status',  $selected_status_ids);
                     })
-                    ->when(!empty($request->selectedProvinces), function($q) use($selected_province_ids) {
-                        $q->whereIn('province_id',  $selected_province_ids);
+                    ->when(!empty($request->selectedProvince), function($q) use($selected_province_id) {
+                        $q->where('province_id',  $selected_province_id);
                     })
                     ->orderBy('classification', 'ASC')->get();
         if($customers){
