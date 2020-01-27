@@ -356,26 +356,6 @@ class CustomerController extends Controller
         return view('appointment-duration-report.index');
     }
 
-    // public function customerAppointmentDurationReportData(Request $request){
-
-    //     $params = $request->all(); 
-
-    //     $request->validate([
-    //         'selectedDate' => 'required',
-    //         'selectedUser' => 'required',
-    //     ]);
-
-    //     return $schedules = Schedule::with('attendances')
-    //                                     ->leftJoin('attendances','schedules.id','=','attendances.schedule_id')
-    //                                     ->where('schedules.date' , $params['selectedDate'])
-    //                                     ->where('schedules.user_id' , $params['selectedUser'])
-    //                                     ->select('attendances.*','schedules.*')
-    //                                     ->orderBy('sign_in','ASC')
-    //                                     ->orderBy('sign_out','ASC')
-    //                                     ->get();
-                                        
-    // }
-
     public function customerAppointmentDurationReportData(Request $request){
 
         $params = $request->all(); 
@@ -395,14 +375,11 @@ class CustomerController extends Controller
 
         $users_schedules_data = User::with(['schedules' => function ($query) use($params) {
                                     $query->with('attendances');
-                                    $query->join('attendances',function($query){
+                                    $query->leftjoin('attendances',function($query){
                                         $query->on('attendances.schedule_id','=','schedules.id');
-
                                     });
                                     $query->where('date', '>=', $params['startDate']);
                                     $query->where('date', '<=', $params['endDate']);
-                                    $query->where('type', '1');
-                                    $query->where('status', '1');
                                     $query->select('attendances.sign_in','schedules.*');
                                     $query->orderBy('sign_in','ASC');
                                 }])
@@ -410,9 +387,7 @@ class CustomerController extends Controller
                                 ->get();
 
         return $users_schedules_data;
-
-      
-                                        
+                                  
     }
 
 }
