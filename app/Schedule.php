@@ -94,4 +94,9 @@ class Schedule extends Model implements Auditable
         return $this->belongsTo(ScheduleBase::class);
     }
 
+    public function customer()
+    {
+        return $this->hasOne(Customer::class,'customer_code','code');
+    }
+
 }

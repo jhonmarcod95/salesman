@@ -132,6 +132,7 @@
                                         <i class="ni ni-spaceship text-indigo"></i>Visited Customer
                                     </a>
                                 </li>
+
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ url('/expense-unposted') }}">
                                         <i class="ni ni-chart-pie-35 text-danger"></i> Unposted Expenses
@@ -139,8 +140,17 @@
                                 </li>
 
                                 <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/sales-report') }}">
+                                        <i class="ni ni-book-bookmark text-green"></i> Sales Report
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/appointment-duration-report') }}">
+                                        <i class="ni ni-watch-time text-warning"></i> Appointment Duration Report
+                                    </a>
+                                </li>
 
-
+                                <li class="nav-item">
                                     <a data-toggle="collapse" href="#Map" class="collapsed" aria-expanded="false">
                                         <div class="nav-link">
                                             <i class="ni ni-square-pin text-blue"></i>
@@ -156,7 +166,7 @@
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link" href="{{ url('/map-analytics-report') }}">
+                                                    <a class="nav-link" href="{{ url('/map-analytics-report-customer') }}">
                                                         <i class="ni ni-pin-3 text-orange"></i> Customers
                                                     </a>
                                                 </li>

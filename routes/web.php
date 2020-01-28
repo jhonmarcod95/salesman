@@ -131,11 +131,18 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     Route::get('/customers-geocode-json/{address}', 'CustomerController@getGeocodeCustomer');
 
+    Route::get('/customer-details/{customer}', 'CustomerController@getCustomerDetails');
+
     //Customer Classfication
     // show customer classfication page
     Route::get('/customers-classification', 'CustomerClassificationController@index')->name('classification_list');
+    
     // fetch all customer classfication
     Route::get('/customers-classification-all', 'CustomerClassificationController@indexData');
+
+    Route::get('/customers-status-options', 'CustomerClassificationController@statusData');
+    Route::get('/customers-classification-options', 'CustomerClassificationController@classificationData');
+    
 
     
     //Messages
@@ -192,6 +199,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     Route::get('/map-analytics-report-user', 'MapAnalyticsReportController@mapUsers');
 
+    Route::get('/map-analytics-report-customer', 'MapAnalyticsReportController@mapCustomers');
+
     //Get Map Customers Data 
     Route::post('/users-data', 'MapAnalyticsReportController@usersData');
     
@@ -202,6 +211,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::post('/user-locations', 'MapAnalyticsReportController@userLocations');
 
     Route::get('/map-users-all', 'MapAnalyticsReportController@users');
+
+    Route::post('/customer-locations', 'MapAnalyticsReportController@customerLocations');
+
+    //Customer Visits
+    Route::get('/customer-visits/{customer_code}', 'MapAnalyticsReportController@customerVisits');
 
 });
 
@@ -303,3 +317,13 @@ Route::get('/auth-role', 'UserController@getRole');
 
 Route::get('/visited-customer', 'CustomerController@customerVisitedIndex');
 Route::post('/visited-customer-all', 'CustomerController@customerVisitedIndexData');
+
+Route::get('/sales-report', 'CustomerController@customerSalesReport');
+
+Route::post('/sales-report-customer-data', 'CustomerController@customersSalesReportData');
+
+Route::post('/sales-report-customer-visit-data', 'CustomerController@customersSalesReportData');
+
+Route::get('/appointment-duration-report', 'CustomerController@customerAppointmentDurationReport');
+
+Route::post('/appointment-duration-report-data', 'CustomerController@customerAppointmentDurationReportData');

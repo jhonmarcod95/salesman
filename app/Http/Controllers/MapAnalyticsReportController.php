@@ -19,6 +19,7 @@ use \Carbon\Carbon;
 class MapAnalyticsReportController extends Controller
 {
     public function index(){
+        session(['header_text' => 'Map Analytics Report']);
         return view('map-analytics-report.index');
     }
 
@@ -100,8 +101,11 @@ class MapAnalyticsReportController extends Controller
     }
 
     public function mapUsers(){
-        // return 'Map User';
         return view('map-analytics-report.map_users');
+    }
+
+    public function mapCustomers(){
+        return view('map-analytics-report.map_customers');
     }
 
     public function users(){
@@ -146,6 +150,7 @@ class MapAnalyticsReportController extends Controller
 
         $selected_user_id = $request->userId;
         $schedule_type = $request->scheduleType;
+        $searchAddress = $request->searchAddress;
         $schedules = Schedule::with('attendances','user','schedule_type')
                     ->when(!empty($request->userId), function($q) use($selected_user_id) {
                         $q->where('user_id',  $selected_user_id);
@@ -155,6 +160,9 @@ class MapAnalyticsReportController extends Controller
                     })
                     ->when(!empty($request->scheduleType), function($q) use($schedule_type) {
                         $q->where('type',  $schedule_type);
+                    })
+                    ->when(!empty($request->searchAddress), function($q) use($searchAddress) {
+                        $q->where('address',  'like', '%'.$searchAddress.'%');
                     })
                     ->where('date', '>=',  $request->startDate)
                     ->whereDate('date' ,'<=', $request->endDate)
@@ -171,9 +179,77 @@ class MapAnalyticsReportController extends Controller
         
     }
 
+    public function customerLocations(Request $request){
+    
+        $request->validate([
+            // 'selectedClassifications' => 'required',
+            'selectedCompanies' => 'required',
+        ]);
+
+        $selected_classification_ids = [];
+        if($request->selectedClassifications){
+            foreach ($request->selectedClassifications as $id){
+                array_push($selected_classification_ids,$id['id']);
+             }
+        }
+
+        $selected_company_ids = [];
+        if($request->selectedCompanies){
+            foreach ($request->selectedCompanies as $id){
+                array_push($selected_company_ids,$id['id']);
+             }
+        }
+        
+        $selected_status_ids = [];
+        if($request->selectedStatuses){
+            foreach ($request->selectedStatuses as $id){
+                array_push($selected_status_ids,$id['id']);
+             }
+        }
+
+        $selected_province_ids = [];
+        if($request->selectedProvinces){
+            foreach ($request->selectedProvinces as $id){
+                array_push($selected_province_ids,$id['id']);
+             }
+        }
+
+        $customers = Customer::with('classifications','statuses','provinces','visits')
+                    ->when(!empty($request->selectedClassifications), function($q) use($selected_classification_ids) {
+                        $q->whereIn('classification',  $selected_classification_ids);
+                    })
+                    ->when(!empty($request->selectedCompanies), function($q) use($selected_company_ids) {
+                        $q->whereIn('company_id',  $selected_company_ids);
+                    })
+                    ->when(!empty($request->selectedStatuses), function($q) use($selected_status_ids) {
+                        $q->whereIn('status',  $selected_status_ids);
+                    })
+                    ->when(!empty($request->selectedProvinces), function($q) use($selected_province_ids) {
+                        $q->whereIn('province_id',  $selected_province_ids);
+                    })
+                    ->orderBy('classification', 'ASC')->get();
+        if($customers){
+            return $customers;
+        }
+        else{
+            return 'Empty';
+        }
+    }
+
     public function getYear(){
         $result = Schedule::select(DB::raw('YEAR(created_at) as year'))->whereNotNull('created_at')->distinct()->get();
         $years = $result->pluck('year');
         return $years;
     }
+
+    public function customerVisits($customer_code){
+        return Schedule::with('attendances', 'user')
+                    
+                    ->where('code', $customer_code)
+                    ->where('type', '1')
+                    ->where('status', '1')
+                    ->orderBy('date','ASC')
+                    ->get();
+    }
+
 }

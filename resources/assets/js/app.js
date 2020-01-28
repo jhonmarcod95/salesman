@@ -81,6 +81,14 @@ Vue.component('close-visit', require('./components/CloseVisit/Index.vue'));
 // Map Analytics Report
 Vue.component('map-analytics-report-index', require('./components/MapAnalyticsReport/MapAnalyticsReportIndex.vue'));
 Vue.component('map-analytics-report-map-users', require('./components/MapAnalyticsReport/MapAnalyticsReportMapUsers.vue'));
+Vue.component('map-analytics-report-map-customers', require('./components/MapAnalyticsReport/MapAnalyticsReportMapCustomers.vue'));
+
+
+//Sales Report 
+Vue.component('sales-report-index', require('./components/SalesReport/SalesReportIndex.vue'));
+
+//Appointment Duration Report
+Vue.component('appointment-duration-report-index', require('./components/AppointmentDurationReport/AppointmentDurationReportIndex.vue'));
 
 
 const app = new Vue({

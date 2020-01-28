@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use DB;
 use Auth;
 use App\Customer;
+use App\User;
 use App\Message;
 use Illuminate\Http\Request;
 use Spatie\Geocoder\Facades\Geocoder;
@@ -111,6 +112,7 @@ class CustomerController extends Controller
 
         $customers->company_id = Auth::user()->companies->pluck('id')[0];
         $customers->classification = $request->classification;
+        $customers->status = $request->status;
         $customers->customer_code = $request->customer_code;
         $customers->name = $request->name;
         $customers->street = $request->street;
@@ -182,6 +184,7 @@ class CustomerController extends Controller
 
         $customer->company_id = Auth::user()->companies->pluck('id')[0];
         $customer->classification = $request->classification;
+        $customer->status = $request->status;
         $customer->customer_code = $request->customer_code;
         $customer->name = $request->name;
         $customer->street = $request->street;
@@ -312,4 +315,104 @@ class CustomerController extends Controller
 
         return DB::select("call p_customer_visited('$request->startDate','$request->endDate' , '$companyId')");
     }
+
+    public function getCustomerDetails($customer){
+       return Customer::findOrFail($customer);
+    }
+
+    public function customerSalesReport(){
+        session(['header_text' => 'Sales Report']);
+        return view('sales-report.index');
+    }
+
+
+    public function customersSalesReportData(Request $request){
+
+        $companyId = Auth::user()->companies[0]->id;
+        $params = $request->all(); 
+
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate'
+        ]);
+       
+        return $customers = Customer::with(['schedules' => function ($query) use($params) {
+                        $query->where('date', '>=', $params['startDate']);
+                        $query->where('date', '<=', $params['endDate']);
+                        $query->where('type', '1');
+                        $query->where('status', '1');
+                        $query->orderBy('date', 'DESC');
+                        $query->with('attendances','user');
+                    }])
+                    ->with('last_visited')
+                    ->where('company_id',$companyId)
+                    ->orderBy('id', 'DESC')
+                    ->get();
+
+    }
+
+    public function customerAppointmentDurationReport(){
+        session(['header_text' => 'Appointment Duration Report']);
+        return view('appointment-duration-report.index');
+    }
+
+    // public function customerAppointmentDurationReportData(Request $request){
+
+    //     $params = $request->all(); 
+
+    //     $request->validate([
+    //         'selectedDate' => 'required',
+    //         'selectedUser' => 'required',
+    //     ]);
+
+    //     return $schedules = Schedule::with('attendances')
+    //                                     ->leftJoin('attendances','schedules.id','=','attendances.schedule_id')
+    //                                     ->where('schedules.date' , $params['selectedDate'])
+    //                                     ->where('schedules.user_id' , $params['selectedUser'])
+    //                                     ->select('attendances.*','schedules.*')
+    //                                     ->orderBy('sign_in','ASC')
+    //                                     ->orderBy('sign_out','ASC')
+    //                                     ->get();
+                                        
+    // }
+
+    public function customerAppointmentDurationReportData(Request $request){
+
+        $params = $request->all(); 
+
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required',
+            'selectedUsers' => 'required',
+        ]);
+
+        $selected_user_ids = [];
+        if($request->selectedUsers){
+            foreach ($request->selectedUsers as $id){
+                array_push($selected_user_ids,$id['id']);
+             }
+        }
+
+        $users_schedules_data = User::with(['schedules' => function ($query) use($params) {
+                                    $query->with('attendances');
+                                    $query->join('attendances',function($query){
+                                        $query->on('attendances.schedule_id','=','schedules.id');
+
+                                    });
+                                    $query->where('date', '>=', $params['startDate']);
+                                    $query->where('date', '<=', $params['endDate']);
+                                    $query->where('type', '1');
+                                    $query->where('status', '1');
+                                    $query->select('attendances.sign_in','schedules.*');
+                                    $query->orderBy('sign_in','ASC');
+                                }])
+                                ->whereIn('id',$selected_user_ids)
+                                ->get();
+
+        return $users_schedules_data;
+
+      
+                                        
+    }
+
 }

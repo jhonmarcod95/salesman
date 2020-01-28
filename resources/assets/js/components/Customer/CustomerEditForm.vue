@@ -45,6 +45,15 @@
                                                 <span class="text-danger small" v-if="errors.classification">{{ errors.classification[0] }}</span>
                                             </div>
                                         </div>
+                                        <div class="col-lg-6">
+                                           <div class="form-group">
+                                                <label class="form-control-label" for="classification">Status</label>
+                                                <select class="form-control" v-model="customers.status">
+                                                    <option v-for="(status, c) in statuses" v-bind:key="c" :value="status.id">{{ status.description}}</option>
+                                                </select>
+                                                <span class="text-danger small" v-if="errors.status">{{ errors.status[0] }}</span>
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -198,6 +207,7 @@
                 customers: [],
                 provinces: [],
                 classifications:[],
+                statuses:[],
                 regions:[],
                 errors: [],
                 default_code: '',
@@ -219,6 +229,7 @@
             this.fetchProvince();
             this.fetchCustomer();
             this.fetchClassification();
+            this.fetchStatus();
         },
         mounted() {
             let vm  = this;
@@ -254,6 +265,7 @@
             updateCustomer(customers){  
                 axios.patch(`/customers/${customers.id}`,{
                     classification : customers.classification,
+                    status : customers.status,
                     customer_code : customers.customer_code,
                     group: customers.group,
                     name: customers.name,
@@ -273,6 +285,15 @@
                     window.location.href = response.data.redirect;
                 })
                 .catch(error => {
+                    this.errors = error.response.data.errors;
+                })
+            },
+            fetchStatus(){
+                axios.get('/customers-status-options')
+                .then(response => { 
+                    this.statuses = response.data;
+                })
+                .catch(error =>{
                     this.errors = error.response.data.errors;
                 })
             },
@@ -312,7 +333,7 @@
                 })
             },
             fetchClassification(){
-                axios.get('/customers-classification-all')
+                axios.get('/customers-classification-options')
                 .then(response => { 
                     this.classifications = response.data;
                 })

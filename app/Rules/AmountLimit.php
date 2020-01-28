@@ -69,11 +69,11 @@ class AmountLimit implements Rule
 
     /**
      * Get all unprocess expenses within the month
-     * 
+     *
      * @param [integer] $expenses_type_id
-     * 
+     *
      * @return json
-     * 
+     *
      */
     public function getUnprocessSubmittedExpense()
     {
@@ -107,7 +107,7 @@ class AmountLimit implements Rule
 
         //Check if user has a expense exception to bypass budget exceeded
         $expenseBypass = ExpenseBypass::bypass($this->expenses_type_id);
-        
+
         // set default budget total
         $budgetBalanceCurrent = 0;
 
@@ -128,18 +128,18 @@ class AmountLimit implements Rule
 
             // If user has SAP budget line assigned
             $isMaintainedExpenseRate = $maintainedExpenseRate->exists() ? $maintainedExpenseRate->pluck('amount')->first() : $defaultExpenseRate;
-            
+
             // default condition if no budget line found from the user
             if($this->io_balance == 'N/A') {
                 return $this->getTodaysExpense($value) <= $defaultExpenseRate;
-            }  
+            }
 
             switch(false) {
                 case (1 <= $value): // minimum input amount is 1
                     $this->returnMessage = 'Invalid amount';
                     return false;
                     break;
-                case ($simulatedBalance > $value): // simulated budget ( SAP - unposted = simulated) should > value
+                case ($simulatedBalance >= $value): // simulated budget ( SAP - unposted = simulated) should > value
                     $this->returnMessage = 'Budget Exceeded, Please check your balance';
                     return false;
                     break;
@@ -147,11 +147,11 @@ class AmountLimit implements Rule
                     $this->returnMessage = "Allocated budget today for this expense type is exceeded";
                     return false;
                     break;
-                default: 
+                default:
                     return true;
-            }      
+            }
 
-            
+
         } else {
             return false;
         }
