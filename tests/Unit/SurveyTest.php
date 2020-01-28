@@ -27,4 +27,17 @@ class SurveyTest extends TestCase
 
     }
 
+    /**
+     * @test
+     */
+    public function view_survey_questionnaires()
+    {
+        $response = $this->actingAs($this->defaultUser(), 'api')
+                        ->json('GET',"api/surveys/questionnaires");
+
+        $response->assertStatus(200);
+
+        echo "\n\n".json_encode($response, JSON_PRETTY_PRINT);
+    }
+
 }
