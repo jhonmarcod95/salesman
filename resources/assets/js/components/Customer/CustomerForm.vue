@@ -22,7 +22,7 @@
                                             <div class="form-group">
                                                 <span v-if="show">Last customer code: {{ pilili_code }}<br></span>
                                                 <label class="form-control-label" for="customer_code">Customer Code</label>
-                                                <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code">
+                                                <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code" :disabled="disabledCustomerCode" >
                                                 <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
                                             </div>
                                         </div>
@@ -38,7 +38,7 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="classification">Classification</label>
-                                                  <select class="form-control" v-model="customer.classification" @change="checkCustomerCode">
+                                                  <select class="form-control" v-model="customer.classification">
                                                     <option v-for="(classification, c) in classifications" v-bind:key="c" :value="classification.id">{{ classification.description}}</option>
                                                   </select>
                                                   <span class="text-danger small" v-if="errors.classification">{{ errors.classification[0] }}</span>
@@ -47,7 +47,7 @@
                                         <div class="col-lg-6">
                                            <div class="form-group">
                                                 <label class="form-control-label" for="classification">Status</label>
-                                                <select class="form-control" v-model="customer.status">
+                                                <select class="form-control" v-model="customer.status" @change="disableCustomerCode">
                                                     <option v-for="(status, c) in statuses" v-bind:key="c" :value="status.id">{{ status.description}}</option>
                                                 </select>
                                                 <span class="text-danger small" v-if="errors.status">{{ errors.status[0] }}</span>
@@ -212,7 +212,8 @@
                 regions:[],
                 classifications:[],
                 statuses:[],
-                errors: []
+                errors: [],
+                disabledCustomerCode:true,
             }   
         },
         created(){
@@ -424,8 +425,16 @@
                 .catch(error => {
                     this.errors = error.response.data.errors;
                 })
+            },
+            disableCustomerCode(){
+                if(this.customer.status == 3){
+                    this.disabledCustomerCode = true;
+                }else{
+                    this.disabledCustomerCode = false;
+                }
             }
         },
+      
     }
 </script>
 

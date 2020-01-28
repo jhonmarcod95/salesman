@@ -39,4 +39,8 @@ class Customer extends Model implements Auditable
     public function provinces(){
         return $this->hasOne('App\Province', 'id', 'province_id');
     }
+
+    public function customer_activity(){
+        return $this->hasMany('App\CustomerActivity')->orderBy('activity_date','ASC');
+    }
 }

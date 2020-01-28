@@ -8,6 +8,7 @@ use Auth;
 use App\Customer;
 use App\User;
 use App\Message;
+use App\CustomerActivity;
 use Illuminate\Http\Request;
 use Spatie\Geocoder\Facades\Geocoder;
 
@@ -96,16 +97,27 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
-        $request->validate([
-            'customer_code' => 'required|unique:customers,customer_code',
-            'name' => 'required',
-            'classification' => 'required',
-            'street' => 'required',
-            'google_address' => 'required',
-            'town_city' => 'required',
-            'province' => 'required',
-        ]);
 
+        if($request->status == 3){
+            $request->validate([
+                'name' => 'required',
+                'classification' => 'required',
+                'street' => 'required',
+                'google_address' => 'required',
+                'town_city' => 'required',
+                'province' => 'required',
+            ]);
+        }else{
+            $request->validate([
+                'customer_code' => 'required|unique:customers,customer_code',
+                'name' => 'required',
+                'classification' => 'required',
+                'street' => 'required',
+                'google_address' => 'required',
+                'town_city' => 'required',
+                'province' => 'required',
+            ]);
+        }
         // $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
         
         $customers = new Customer;
@@ -129,8 +141,27 @@ class CustomerController extends Controller
         // return $customers;
 
         if($customers->save()){
+            
+             //generate prospect id 
+            $prospect_id = '';
+            if($request->status == 3){
+                $classification_customer_id = str_pad($customers->classification, 1, '0', STR_PAD_RIGHT);
+                $prospect_id = 'P'  . $classification_customer_id . str_pad($customers->id, 9, '0', STR_PAD_LEFT);
+                Customer::where('id', $customers->id)->update([
+                    'customer_code' => $prospect_id,
+                    'prospect_id' => $prospect_id
+                ]);
+
+                $customer_activity = [];
+                $customer_activity['customer_id'] = $customers->id;
+                $customer_activity['activity_description'] = 'Prospect';
+                $customer_activity['activity_date'] = Carbon::now();
+                CustomerActivity::create($customer_activity);
+            }
+
+          
             return ['redirect' => route('customers_list')];
-        }
+        }   
     }
 
     /**
@@ -390,4 +421,24 @@ class CustomerController extends Controller
                                   
     }
 
+    public function salesActivityCustomerReport(){
+        return view('sales-activity-customer-report.index');
+    }
+
+    public function salesActivityCustomerReportData(Request $request){
+        
+        $search = $request->searchData;
+
+        $customer_activity = CustomerActivity::leftjoin('customers',function($query){
+                                    $query->on('customer_activities.customer_id','=','customers.id');
+                                })
+                                ->where(function($q) use($search){
+                                    $q->where('customer_code', 'like', '%'.$search.'%');
+                                })
+                                ->orderBy('activity_date','ASC')
+                                ->get();
+
+        return $customer_activity;
+
+    }
 }

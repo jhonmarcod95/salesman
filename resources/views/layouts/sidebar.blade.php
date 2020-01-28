@@ -151,6 +151,12 @@
                                 </li>
 
                                 <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/sales-activity-customer-report') }}">
+                                        <i class="ni ni-single-copy-04 text-yellow"></i> Sales Activity Customer Report
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
                                     <a data-toggle="collapse" href="#Map" class="collapsed" aria-expanded="false">
                                         <div class="nav-link">
                                             <i class="ni ni-square-pin text-blue"></i>

@@ -327,3 +327,7 @@ Route::post('/sales-report-customer-visit-data', 'CustomerController@customersSa
 Route::get('/appointment-duration-report', 'CustomerController@customerAppointmentDurationReport');
 
 Route::post('/appointment-duration-report-data', 'CustomerController@customerAppointmentDurationReportData');
+
+Route::get('/sales-activity-customer-report', 'CustomerController@salesActivityCustomerReport');
+
+Route::post('/sales-activity-customer-report-data', 'CustomerController@salesActivityCustomerReportData');
