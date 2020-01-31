@@ -23,7 +23,7 @@
                                             <div class="form-group">
                                                 <span v-if="show">Last customer code: {{ pilili_code }}<br></span>
                                                 <label class="form-control-label" for="customer_code">Customer Code</label>
-                                                <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customers.customer_code">
+                                                <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customers.customer_code" :disabled="disabledCustomerCode" >
                                                 <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
                                             </div>
                                         </div>
@@ -39,7 +39,7 @@
                                         <div class="col-lg-6">
                                            <div class="form-group">
                                                 <label class="form-control-label" for="classification">Classification</label>
-                                                <select class="form-control" v-model="customers.classification" @change="checkCustomerCode">
+                                                <select class="form-control" v-model="customers.classification">
                                                     <option v-for="(classification, c) in classifications" v-bind:key="c" :value="classification.id">{{ classification.description}}</option>
                                                 </select>
                                                 <span class="text-danger small" v-if="errors.classification">{{ errors.classification[0] }}</span>
@@ -48,7 +48,7 @@
                                         <div class="col-lg-6">
                                            <div class="form-group">
                                                 <label class="form-control-label" for="classification">Status</label>
-                                                <select class="form-control" v-model="customers.status">
+                                                <select class="form-control" v-model="customers.status" @change="disableCustomerCode">
                                                     <option v-for="(status, c) in statuses" v-bind:key="c" :value="status.id">{{ status.description}}</option>
                                                 </select>
                                                 <span class="text-danger small" v-if="errors.status">{{ errors.status[0] }}</span>
@@ -221,6 +221,7 @@
                 mapCenter: [121.035249, 14.675647],
                 showMap:true,
                 loading: false,
+                disabledCustomerCode:true,
             }
         },
         created(){
@@ -303,11 +304,12 @@
                     this.customers = response.data;
                     this.default_code = this.customers.customer_code;
                     this.default_classification = this.customers.classification;
-                    if(this.customers.classification != 1 && this.customers.classification != 2){
-                        document.getElementById("customer_code").disabled = true;
-                    }else{
-                        document.getElementById("customer_code").disabled = false;
-                    }
+                    // if(this.customers.classification != 1 && this.customers.classification != 2){
+                    //     document.getElementById("customer_code").disabled = true;
+                    // }else{
+                    //     document.getElementById("customer_code").disabled = false;
+                    // }
+                    this.disableCustomerCode();
                     this.showEditMap(this.customers.lat,this.customers.lng);
                 })
                 .catch(error =>{
@@ -352,7 +354,7 @@
                             this.customers.customer_code = '';
                             this.customers.customer_code = response.data;
                             this.show = false;
-                            document.getElementById("customer_code").disabled = true;
+                            // document.getElementById("customer_code").disabled = true;
                         })
                         .catch(error => {
                             this.errors = error.response.data.errors;
@@ -366,7 +368,7 @@
                             this.customers.customer_code = '';
                             this.show = true;
                             this.pilili_code = response.data
-                            document.getElementById("customer_code").disabled = false;
+                            // document.getElementById("customer_code").disabled = false;
                         })
                         .catch(error => {
                             this.errors = error.response.data.errors;
@@ -374,26 +376,26 @@
                     }else if(this.default_classification != 8 && this.customers.classification != 1 && this.customers.classification != 2){
                         this.show = false;
                         this.customers.customer_code = this.default_code;
-                        document.getElementById("customer_code").disabled = true;
+                        // document.getElementById("customer_code").disabled = true;
                     }else if(this.default_classification == 8 && this.customers.classification == 8){
                         this.show = false;
                         this.customers.customer_code = this.default_code;
-                        document.getElementById("customer_code").disabled = true;
+                        // document.getElementById("customer_code").disabled = true;
                     }
                     else{
                         this.show = false;
                         this.customers.customer_code = '';
-                        document.getElementById("customer_code").disabled = false;
+                        // document.getElementById("customer_code").disabled = false;
                     }
 
                 }else{
-                    if(this.customers.classification != 1 && this.customers.classification != 2){
-                        this.customers.customer_code = this.default_code;
-                        document.getElementById("customer_code").disabled = true;
-                    }else{
-                        this.customers.customer_code = '';
-                        document.getElementById("customer_code").disabled = false;
-                    }
+                    // if(this.customers.classification != 1 && this.customers.classification != 2){
+                    //     this.customers.customer_code = this.default_code;
+                    //     document.getElementById("customer_code").disabled = true;
+                    // }else{
+                    //     this.customers.customer_code = '';
+                    //     document.getElementById("customer_code").disabled = false;
+                    // }
 
                 }
             },
@@ -488,6 +490,13 @@
                     
                     marker.on('dragend', onDragEnd)
                     v.showMap = false;
+                }
+            },
+            disableCustomerCode(){
+                if(this.customers.status == 3){
+                    this.disabledCustomerCode = true;
+                }else{
+                    this.disabledCustomerCode = false;
                 }
             }
         },

@@ -28,14 +28,14 @@
                                                 :multiple="true"
                                                 track-by="id"
                                                 :custom-label="customLabelClassification"
-                                                placeholder="Select Classification"
+                                                placeholder="Classification"
                                                 id="selected_classification"
                                         >
                                         </multiselect>
                                         <span class="text-danger small" v-if="errors.selectedClassifications">{{ errors.selectedClassifications[0] }}</span>
                                     </div>
                                 </div>
-                                <div class="col-md-3 float-left">
+                                <div class="col-md-2 float-left">
                                     <div class="form-group">
 
                                         <label for="customerSelect" class="form-control-label">Select Company</label> 
@@ -45,14 +45,14 @@
                                                 :multiple="true"
                                                 track-by="id"
                                                 :custom-label="customLabelCompany"
-                                                placeholder="Select Company"
+                                                placeholder="Company"
                                                 id="selected_company"
                                         >
                                         </multiselect>
                                         <span class="text-danger small" v-if="errors.selectedCompanies">{{ errors.selectedCompanies[0] }}</span>
                                     </div>
                                 </div>
-                                <div class="col-md-3 float-left">
+                                <div class="col-md-2 float-left">
                                     <div class="form-group">
 
                                         <label for="customerSelect" class="form-control-label">Select Status</label> 
@@ -62,7 +62,7 @@
                                                 :multiple="true"
                                                 track-by="id"
                                                 :custom-label="customLabelStatus"
-                                                placeholder="Select Status"
+                                                placeholder="Status"
                                                 id="selected_status"
                                         >
                                         </multiselect>
@@ -70,7 +70,7 @@
 
                                     </div>
                                 </div>
-                                <div class="col-md-3 float-left">
+                                <div class="col-md-2 float-left">
                                     <div class="form-group">
 
                                         <label for="customerSelect" class="form-control-label">Select Province</label> 
@@ -80,7 +80,7 @@
                                                 :multiple="false"
                                                 track-by="id"
                                                 :custom-label="customLabelProvince"
-                                                placeholder="Select Province"
+                                                placeholder="Province"
                                                 id="selected_province"
                                         >
                                         </multiselect>
@@ -88,6 +88,23 @@
 
                                     </div>
                                 </div>
+
+                                 <div class="col-md-3 float-left">
+                                    <div class="form-group">
+                                        <label for="customerSelect" class="form-control-label">Select Region</label> 
+                                        <multiselect
+                                                v-model="regionId"
+                                                :options="regionOptions"
+                                                :multiple="false"
+                                                track-by="id"
+                                                :custom-label="customLabelRegion"
+                                                placeholder="Region"
+                                                id="selected_region"
+                                        >
+                                        </multiselect>
+                                    </div>
+                                </div>
+                            
                                 <div class="col-md-3">
                                     <button class="btn btn-sm btn-primary" @click="getCustomerLocations"> Apply Filter</button>
                                     <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#showCustomerList"> Show List ({{ Object.keys(customersList).length }})</button>
@@ -110,8 +127,8 @@
                                     <span class="text-sm"> Inactive</span>
                                 </div>
                                 <div class="col-sm-2">
-                                    <div class="icon icon-shape bg-danger text-white rounded-circle shadow" style="font-size: .8rem!important;">{{ countBlocklist }}</div>
-                                    <span class="text-sm"> Blocklisted</span>
+                                    <div class="icon icon-shape bg-danger text-white rounded-circle shadow" style="font-size: .8rem!important;">{{ countBlacklist }}</div>
+                                    <span class="text-sm"> Blacklisted</span>
                                 </div>
                                 <div class="col-sm-3 mr-2">
                                     <div class="icon icon-shape bg-default text-white rounded-circle shadow" style="font-size: .8rem!important;">{{ countDefault }}</div>
@@ -342,6 +359,9 @@
                 classificationIds:[],
                 statusIds:[],
                 provinceId:[],
+                regionId:[],
+                regionProvinces:[],
+                regionOptions:[],
                 companyIds:[],
                 classificationOptions:[],
                 companyOptions:[],
@@ -364,7 +384,7 @@
                 countActive: 0,
                 countProspect: 0,
                 countInactive: 0,
-                countBlocklist: 0,
+                countBlacklist: 0,
                 countDefault: 0,
                 loading: false,
             };
@@ -375,6 +395,7 @@
              this.fetchCompany();
              this.fetchStatus();
              this.fetchProvince();
+             this.fetchRegion();
         },
         methods:{
             customerDetailsModal(customer_details){
@@ -401,11 +422,13 @@
             getCustomerLocations(){
                 this.loading = true;
                 this.errors = [];
+
                 axios.post('/customer-locations', {
                     selectedClassifications: this.classificationIds,
                     selectedCompanies: this.companyIds,
                     selectedStatuses: this.statusIds,
                     selectedProvince: this.provinceId,
+                    selectedRegion: this.regionId,
                 })
                 .then(response =>{
                     this.customers = response.data ? response.data : [];
@@ -459,6 +482,15 @@
                     this.errors = error.response.data.errors;
                 })
             },
+            fetchRegion(){
+                axios.get('/regions')
+                .then(response => { 
+                    this.regionOptions = response.data;
+                })
+                .catch(error =>{
+                    this.errors = error.response.data.errors;
+                })
+            },
             customLabelClassification (classification) {
                 return `${classification.description}`
             },
@@ -471,12 +503,15 @@
             customLabelProvince (province) {
                 return `${province.name}`
             },
+            customLabelRegion (region) {
+                return `${region.code}` + '-' +`${region.name}` 
+            },
             createCustomersMap(){
                 let v = this;
                 v.countActive= 0,
                 v.countProspect= 0,
                 v.countInactive= 0,
-                v.countBlocklist= 0,
+                v.countBlacklist= 0,
                 v.countDefault= 0,
                 
                 document.getElementById('map').innerHTML = "";
@@ -607,7 +642,7 @@
                                 return 'inactive-change-name';
                             }
                             else if(status == '4'){
-                                v.countBlocklist +=1;
+                                v.countBlacklist +=1;
                                 return 'blocklist-change-name';
                             }else{
                                 v.countDefault +=1;
@@ -631,7 +666,7 @@
                                 return 'inactive-trucking';
                             }
                             else if(status == '4'){
-                                v.countBlocklist +=1;
+                                v.countBlacklist +=1;
                                 return 'blocklist-trucking';
                             }else{
                                 v.countDefault +=1;
@@ -654,7 +689,7 @@
                                 return 'inactive-shipping';
                             }
                             else if(status == '4'){
-                                v.countBlocklist +=1;
+                                v.countBlacklist +=1;
                                 return 'blocklist-shipping';
                             }else{
                                 v.countDefault +=1;
@@ -677,7 +712,7 @@
                                 return 'inactive-hauler';
                             }
                             else if(status == '4'){
-                                v.countBlocklist +=1;
+                                v.countBlacklist +=1;
                                 return 'blocklist-hauler';
                             }else{
                                 v.countDefault +=1;
@@ -700,7 +735,7 @@
                                 return 'inactive-direct';
                             }
                             else if(status == '4'){
-                                v.countBlocklist +=1;
+                                v.countBlacklist +=1;
                                 return 'blocklist-direct';
                             }else{
                                 v.countDefault +=1;
@@ -723,7 +758,7 @@
                                 return 'inactive-end-user-subdealer';
                             }
                             else if(status == '4'){
-                                v.countBlocklist +=1;
+                                v.countBlacklist +=1;
                                 return 'blocklist-end-user-subdealer';
                             }else{
                                 v.countDefault +=1;
@@ -746,7 +781,7 @@
                                 return 'inactive-end-user-distributor';
                             }
                             else if(status == '4'){
-                                v.countBlocklist +=1;
+                                v.countBlacklist +=1;
                                 return 'blocklist-end-user-distributor';
                             }else{
                                 v.countDefault +=1;
@@ -769,7 +804,7 @@
                                 return 'inactive-office';
                             }
                             else if(status == '4'){
-                                v.countBlocklist +=1
+                                v.countBlacklist +=1
                                 return 'blocklist-office';
                             }else{
                                 v.countDefault +=1;
@@ -792,7 +827,7 @@
                                 return 'inactive-subdealer';
                             }
                             else if(status == '4'){
-                                v.countBlocklist +=1;
+                                v.countBlacklist +=1;
                                 return 'blocklist-subdealer';
                             }else{  
                                 v.countDefault +=1;
@@ -1082,7 +1117,7 @@
         background-image: url('/img/map/inactive/trucking.png');background-size: cover;width: 35px;height: 35px;cursor: pointer;
     }
 
-    /* Blocklist */
+    /* Blacklist */
     .blocklist-change-name {
         background-image: url('/img/map/blocklist/change_name.png');background-size: cover;width: 35px;height: 35px;cursor: pointer;
     }

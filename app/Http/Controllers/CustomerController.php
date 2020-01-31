@@ -12,6 +12,11 @@ use App\CustomerActivity;
 use Illuminate\Http\Request;
 use Spatie\Geocoder\Facades\Geocoder;
 
+use Config;
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
+
 class CustomerController extends Controller
 {
     /**
@@ -422,23 +427,299 @@ class CustomerController extends Controller
     }
 
     public function salesActivityCustomerReport(){
+        session(['header_text' => 'Sales Activity Customer Report']);
         return view('sales-activity-customer-report.index');
     }
 
-    public function salesActivityCustomerReportData(Request $request){
-        
-        $search = $request->searchData;
+    public function salesActivityCustomerReportAll(Request $request){
 
-        $customer_activity = CustomerActivity::leftjoin('customers',function($query){
-                                    $query->on('customer_activities.customer_id','=','customers.id');
-                                })
-                                ->where(function($q) use($search){
-                                    $q->where('customer_code', 'like', '%'.$search.'%');
-                                })
-                                ->orderBy('activity_date','ASC')
-                                ->get();
+        $request->validate([
+            'selectedCompany' => 'required',
+        ]);
 
-        return $customer_activity;
+        $company = $request->selectedCompany;
 
+        return $customers = Customer::with('statuses')->select('id','prospect_id','customer_code','name','status')
+                    ->where('company_id',$company['id'])
+                    ->orderBy('id', 'DESC')
+                    ->get();
     }
+    
+    public function salesCustomerActivities($customer_code){
+
+        $customer = Customer::where('customer_code' , '=',$customer_code )->first();
+        $activities_data = [];
+        $customer_activity = CustomerActivity::where('activity_description', '=','Prospect')
+                            ->where('customer_id', '=',$customer->id)
+                            ->orderBy('activity_date','ASC')
+                            ->first();
+
+        if(!empty($customer_activity)){
+            //Prospect
+            $date = $customer_activity['activity_date'] ? Carbon::parse($customer_activity['activity_date'])->format('Y-m-d') : '';
+
+            $activities_data = [
+                [
+                    'activity'=> 'Prospect',
+                    'activity_date'=> $date,
+                ]
+            ];
+        }
+                            
+        $get_sap_customer_lfug = $this->get_customer_lfug($customer_code);
+        $get_sap_purchase_orders_lfug = $this->get_customer_purchase_order_lfug($customer_code);
+        
+        //LFUG Server
+        if($get_sap_customer_lfug){
+            //Active Status
+            $first_date = '';
+            $last_date = '';
+            if($get_sap_purchase_orders_lfug){
+                $activities = [];
+                $key = count($get_sap_purchase_orders_lfug) - 1;
+                $first_date = $get_sap_purchase_orders_lfug[0]['purchase_date'] ? Carbon::parse($get_sap_purchase_orders_lfug[0]['purchase_date'])->format('Y-m-d') : '';
+                $last_date = $get_sap_purchase_orders_lfug[$key]['purchase_date'] ? Carbon::parse($get_sap_purchase_orders_lfug[$key]['purchase_date'])->format('Y-m-d') : '';
+                $activities['activity'] = 'Active';        
+                $activities['activity_date'] = $first_date;
+                array_push($activities_data, $activities);
+            }
+            //Inactive Status
+            $check_status_inactive = substr($get_sap_customer_lfug['name'], 0, 4);
+            if($check_status_inactive == 'XXX_'){
+                $activities = [];
+                $activities['activity'] = 'Inactive';        
+                $activities['activity_date'] = $last_date;
+                array_push($activities_data, $activities);
+            }
+            //Closed Status
+            $check_status_closed = $get_sap_customer_lfug['closed'];
+           
+            if($check_status_closed == 'X'){
+                $activities = [];
+                $activities['activity'] = 'Closed';        
+                $activities['activity_date'] = $last_date;
+                array_push($activities_data, $activities);
+            }
+
+            return $activities_data;
+        }else{
+            //PFMC Server
+            $get_sap_customer_pfmc = $this->get_customer_pfmc($customer_code);
+            $get_sap_purchase_orders_pfmc = $this->get_customer_purchase_order_pfmc($customer_code);
+
+            if($get_sap_customer_pfmc){
+                //Active Status
+                $first_date = '';
+                $last_date = '';
+                if($get_sap_purchase_orders_pfmc){
+                    $activities = [];
+                    $key = count($get_sap_purchase_orders_pfmc) - 1;
+                    $first_date = $get_sap_purchase_orders_pfmc[0]['purchase_date'] ? Carbon::parse($get_sap_purchase_orders_pfmc[0]['purchase_date'])->format('Y-m-d') : '';
+                    $last_date = $get_sap_purchase_orders_pfmc[$key]['purchase_date'] ? Carbon::parse($get_sap_purchase_orders_pfmc[$key]['purchase_date'])->format('Y-m-d') : '';
+                    $activities['activity'] = 'Active';        
+                    $activities['activity_date'] = $first_date;
+                    array_push($activities_data, $activities);
+                }
+                //Inactive Status
+                $check_status_inactive = substr($get_sap_customer_pfmc['name'], 0, 4);
+                if($check_status_inactive == 'XXX_'){
+                    $activities = [];
+                    $activities['activity'] = 'Inactive';        
+                    $activities['activity_date'] = $last_date;
+                    array_push($activities_data, $activities);
+                }
+                //Closed Status
+                $check_status_closed = $get_sap_customer_pfmc['closed'];
+               
+                if($check_status_closed == 'X'){
+                    $activities = [];
+                    $activities['activity'] = 'Closed';        
+                    $activities['activity_date'] = $last_date;
+                    array_push($activities_data, $activities);
+                }
+    
+                return $activities_data;
+            }
+
+        }
+    
+        return $activities_data;
+    }
+
+    private function get_customer_lfug($customer_code){
+
+        $client = new Client();
+        $connection = Config::get('constants.sap_api.connection_lfug');
+
+        try {
+
+            $response = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+            ['query' => 
+                ['connection' => $connection,
+                    'table' => [
+                        'table' => ['KNA1' => 'customers'],
+                        'fields' => [
+                            'KUNNR' => 'customer_code',
+                            'NAME1' => 'name',
+                            'CASSD' => 'closed',
+                        ]
+                    ]
+                ]
+            ]);
+            
+            $customer = json_decode($response->getBody(), true);
+
+            $key = array_search($customer_code,array_column($customer, 'customer_code'));
+            $customer_data = [];
+            if($key){
+                if($customer_code == $customer[$key]['customer_code']){
+                    $customer_data['customer_code'] =  $customer[$key]['customer_code'];
+                    $customer_data['name'] =  $customer[$key]['name'];
+                    $customer_data['closed'] =  $customer[$key]['closed'];
+                }
+            }
+            return $customer_data;
+
+        }catch (BadResponseException $ex) {
+            $response = $ex->getResponse()->getBody();
+            return json_decode($response, true);
+        }
+    }
+
+    private function get_customer_purchase_order_lfug($customer_code){
+
+        $client = new Client();
+        $connection = Config::get('constants.sap_api.connection_lfug');
+        $table_customer_first_date = Config::get('constants.sap_api.table_customer_first_date');
+        try {
+            $response_do_number = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                        ['query' => 
+                            ['connection' => $connection,
+                                'table' =>  [
+                                    'table' => ['VBAK' => 'customer_first_date'],
+                                    'fields' => [
+                                        'KUNNR' => 'customer_code',
+                                        'VBELN' => 'do_number',
+                                        'ERDAT' => 'purchase_date',
+                                    ],
+                                    'options' => [
+                                        ['TEXT' => "KUNNR = '$customer_code' AND VBTYP = 'C'"]
+                                    ]
+                                ]
+                            ]
+                        ]);
+
+            $customer_purchase_orders = json_decode($response_do_number->getBody(), true);
+
+            return $customer_purchase_orders;
+
+        }catch (BadResponseException $ex) {
+            $response = $ex->getResponse()->getBody();
+            return json_decode($response, true);
+        }
+    }
+    
+    private function get_customer_pfmc($customer_code){
+
+        $client = new Client();
+        $connection = Config::get('constants.sap_api.connection_pfmc');
+
+        try {
+            $response = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+            ['query' => 
+                ['connection' => $connection,
+                    'table' => [
+                        'table' => ['KNA1' => 'customers'],
+                        'fields' => [
+                            'KUNNR' => 'customer_code',
+                            'NAME1' => 'name',
+                            'CASSD' => 'closed',
+                        ]
+                    ]
+                ]
+            ]);
+            
+            $customer = json_decode($response->getBody(), true);
+
+            $key = array_search($customer_code,array_column($customer, 'customer_code'));
+            $customer_data = [];
+            if($key){
+                if($customer_code == $customer[$key]['customer_code']){
+                    $customer_data['customer_code'] =  $customer[$key]['customer_code'];
+                    $customer_data['name'] =  $customer[$key]['name'];
+                    $customer_data['closed'] =  $customer[$key]['closed'];
+                }
+            }
+            return $customer_data;
+
+        }catch (BadResponseException $ex) {
+            $response = $ex->getResponse()->getBody();
+            return json_decode($response, true);
+        }
+    }
+
+    private function get_customer_purchase_order_pfmc($customer_code){
+
+        $client = new Client();
+        $connection = Config::get('constants.sap_api.connection_pfmc');
+        try {
+            $response_do_number = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                        ['query' => 
+                            ['connection' => $connection,
+                                'table' =>  [
+                                    'table' => ['VBAK' => 'customer_first_date'],
+                                    'fields' => [
+                                        'KUNNR' => 'customer_code',
+                                        'VBELN' => 'do_number',
+                                        'ERDAT' => 'purchase_date',
+                                    ],
+                                    'options' => [
+                                        ['TEXT' => "KUNNR = '$customer_code' AND VBTYP = 'C'"]
+                                    ]
+                                ]
+                            ]
+                        ]);
+
+            $customer_purchase_orders = json_decode($response_do_number->getBody(), true);
+
+            return $customer_purchase_orders;
+
+        }catch (BadResponseException $ex) {
+            $response = $ex->getResponse()->getBody();
+            return json_decode($response, true);
+        }
+    }
+
+    public function get_customer_pfmc_all(){
+
+        $client = new Client();
+        $connection = Config::get('constants.sap_api.connection_lfug');
+
+        try {
+
+            $response = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+            ['query' => 
+                ['connection' => $connection,
+                    'table' => [
+                        'table' => ['KNA1' => 'customers'],
+                        'fields' => [
+                            'KUNNR' => 'customer_code',
+                            'NAME1' => 'name',
+                            'CASSD' => 'closed',
+                        ]
+                    ]
+                ]
+            ]);
+            
+            $customer = json_decode($response->getBody(), true);
+
+            return $customer;
+
+        }catch (BadResponseException $ex) {
+            $response = $ex->getResponse()->getBody();
+            return json_decode($response, true);
+        }
+    }
+
+
 }

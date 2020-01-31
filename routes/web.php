@@ -330,4 +330,12 @@ Route::post('/appointment-duration-report-data', 'CustomerController@customerApp
 
 Route::get('/sales-activity-customer-report', 'CustomerController@salesActivityCustomerReport');
 
+Route::post('/sales-activity-customer-all', 'CustomerController@salesActivityCustomerReportAll');
+
+Route::get('/sales-customer-activities/{customer_code}', 'CustomerController@salesCustomerActivities');
+
 Route::post('/sales-activity-customer-report-data', 'CustomerController@salesActivityCustomerReportData');
+
+//Get SAP Customer API
+Route::get('/sap-customers', 'CustomerController@get_sap_customer');
+Route::get('/sap-activites', 'CustomerController@get_customer_pfmc_all');

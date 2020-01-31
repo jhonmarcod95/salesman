@@ -9,7 +9,8 @@ use App\{
     Schedule,
     ScheduleTypes,
     Customer,
-    User
+    User,
+    Province,
 };
 
 use \Carbon\Carbon;
@@ -101,10 +102,12 @@ class MapAnalyticsReportController extends Controller
     }
 
     public function mapUsers(){
+        session(['header_text' => 'Map Analytics Report']);
         return view('map-analytics-report.map_users');
     }
 
     public function mapCustomers(){
+        session(['header_text' => 'Map Analytics Report']);
         return view('map-analytics-report.map_customers');
     }
 
@@ -207,7 +210,21 @@ class MapAnalyticsReportController extends Controller
         }
 
         $selected_province_id = $request->selectedProvince ? $request->selectedProvince['id'] : '';
-       
+
+        
+        $selected_region_provinces_id = [];
+        if($request->selectedRegion){
+            $selected_region_id = $request->selectedRegion;
+            $provinces = Province::where('region_id','=',$selected_region_id['id'])->get();
+
+            
+            if($provinces){
+                foreach($provinces as $province){
+                    array_push($selected_region_provinces_id,$province['id']);
+                }
+            }
+        }
+
         $customers = Customer::with('classifications','statuses','provinces','visits')
                     ->when(!empty($request->selectedClassifications), function($q) use($selected_classification_ids) {
                         $q->whereIn('classification',  $selected_classification_ids);
@@ -220,6 +237,9 @@ class MapAnalyticsReportController extends Controller
                     })
                     ->when(!empty($request->selectedProvince), function($q) use($selected_province_id) {
                         $q->where('province_id',  $selected_province_id);
+                    })
+                    ->when(!empty($request->selectedRegion), function($q) use($selected_region_provinces_id) {
+                        $q->whereIn('province_id',  $selected_region_provinces_id);
                     })
                     ->orderBy('classification', 'ASC')->get();
         if($customers){
