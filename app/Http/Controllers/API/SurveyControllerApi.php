@@ -7,11 +7,31 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\BrandResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\SurveyResource;
+use App\Http\Resources\SurveyHeaderResource;
+use App\SurveyHeader;
 use App\Brand;
 use App\Survey;
 
 class SurveyControllerApi extends Controller
 {
+
+    public function surveyQuestionnaires()
+    {
+
+        // check user company
+        // show only status active
+        $user_company = Auth::user()->company->id;
+        
+        $questionnaires = SurveyHeader::where('company_id', $user_company)
+                        ->whereHas('surveyQuestionnaires', function($q) {
+                            $q->where('status',1);
+                        })
+                        ->with('surveyQuestionnaires')
+                        ->get();
+
+        return SurveyHeaderResource::collection($questionnaires);
+
+    }
 
     public function brands()
     {
@@ -88,9 +108,9 @@ class SurveyControllerApi extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Survey $survey)
     {
-        //
+        return new SurveyResource($survey);
     }
 
     /**

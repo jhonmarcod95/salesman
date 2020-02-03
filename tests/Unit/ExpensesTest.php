@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Expense;
+use App\ExpenseExclusive;
 use App\ExpenseRate;
 use App\ExpensesType;
 use App\ExpenseChargeType;
@@ -158,7 +159,7 @@ class ExpensesTest extends TestCase
     /**
      * @test
      */
-    public function check_internal_orders() 
+    public function check_internal_orders()
     {
 
         $response = $this->actingAs($this->defaultUser(), 'api')->json('GET', 'api/internal_orders');
@@ -173,10 +174,10 @@ class ExpensesTest extends TestCase
     /**
      * @test
      */
-    public function can_store_expense() 
+    public function can_store_expense()
     {
 
-        $types = 3; // toll
+        $types = 19; // toll
         $amount = 800;
 
         $response = $this->actingAs($this->defaultUser(), 'api')
@@ -200,7 +201,7 @@ class ExpensesTest extends TestCase
             'amount' => $amount,
         ]);
 
-        
+
     }
 
     /**
@@ -227,10 +228,10 @@ class ExpensesTest extends TestCase
     /**
      * @test
      */
-    public function check_real_internal_orders() 
+    public function check_real_internal_orders()
     {
 
-        $user = 160; // 
+        $user = 160; //
 
         $response = $this->actingAs($this->defaultUser(), 'api')
             ->json('GET', 'api/real_internal_orders', [
@@ -242,7 +243,7 @@ class ExpensesTest extends TestCase
 
 
         echo json_encode($response, JSON_PRETTY_PRINT);
-        
+
     }
 
     /**
@@ -256,5 +257,25 @@ class ExpensesTest extends TestCase
         $response->assertStatus(200);
 
         echo json_encode($response, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * @test
+     */
+    public function check_expense_restriction()
+    {
+        $expense_type = 20;
+
+        $check_expense_type = ExpenseExclusive::where('expense_exlusibable_type', 'App\ExpensesTypes')->where('expense_exlusivable_id', $expense_type);
+
+        $this->assertTrue(true);
+
+        if ($check_expense_type->count() > 0) {
+            $expnese_exclusive = collect(json_decode($check_expense_type->first()->users_array_id, true));
+            $result =  in_array($this->defaultUser()->id, $expnese_exclusive->toArray()) ? 'true' : null;
+            echo json_encode($result, JSON_PRETTY_PRINT);
+        } else {
+            echo json_encode('Expense type is not restricted', JSON_PRETTY_PRINT);
+        }
     }
 }

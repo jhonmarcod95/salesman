@@ -23,7 +23,9 @@ use Carbon\Carbon;
 use App\Schedule;
 use App\Expense;
 use App\CloseVisit;
+use App\Customer;
 use App\Payment;
+use App\ExpenseExclusive;
 use DB;
 
 
@@ -257,6 +259,24 @@ class AppAPIController extends Controller
 
     }
 
+    /**
+     * Check if user has expense restriction from
+     * Model ExpenseExclusive
+     */
+    public function expenseRestriction($expense_type)
+    {
+        $check_expense_type = ExpenseExclusive::where('expense_exlusibable_type', 'App\ExpensesTypes')->where('expense_exlusivable_id', $expense_type);
+
+        // the result should be false in order to allow the current user to claim this specific expense type
+        if($check_expense_type->count() > 0) {
+            $expnese_exclusive = collect(json_decode($check_expense_type->first()->users_array_id, true));
+            return in_array(Auth::user()->id, $expnese_exclusive->toArray()) ? 'true' : 'false';
+        }
+
+        return false;
+
+    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -270,6 +290,14 @@ class AppAPIController extends Controller
             'types' => 'required',
             'amount' => [new AmountLimit($request->input('types'), 0, $this->checkBudget($request->input('types'))), 'required'],
         ]);
+
+        if($this->expenseRestriction($request->input('types')) == 'false') {
+            $this->validate($request, [
+                'expense_restriction' => 'required'
+            ],[
+                'expense_restriction.required' => 'Your account is not entitled to claim for this expense type'
+            ]);
+        }
 
         $expense = new Expense();
         $expense->user()->associate(Auth::user()->id);
@@ -336,7 +364,7 @@ class AppAPIController extends Controller
 
     public function sweepExpenses()
     {
-        $sweepExpense = Exepense::where('user_id',Auth::user()->id)
+        $sweepExpense = Expense::where('user_id',Auth::user()->id)
                                 ->where('created_at', Carbon::today())->delete();
     }
 
@@ -834,6 +862,15 @@ class AppAPIController extends Controller
             return response()->json(true,200);
         }
             return response()->json(false,200);
+    }
+
+    // get customer id based from customer_code
+
+    public function getCustomer($customer_code)
+    {
+        $customer = Customer::where('customer_code', $customer_code)->first();
+
+        return $customer;
     }
 
 
