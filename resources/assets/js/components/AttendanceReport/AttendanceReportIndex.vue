@@ -270,7 +270,7 @@ export default {
     methods:{
         moment,
         fetchCompanies(){
-            axios.get('/companies-all')
+            axios.get('/companies-filter-all')
             .then(response => {
                 this.companies = response.data;
             })

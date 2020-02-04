@@ -43,4 +43,9 @@ class Customer extends Model implements Auditable
     public function customer_activity(){
         return $this->hasMany('App\CustomerActivity')->orderBy('activity_date','ASC');
     }
+
+    public function company(){
+        return $this->belongsTo(Company::class);
+    }
+    
 }

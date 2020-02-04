@@ -17,13 +17,13 @@
 
                         <div class="mb-3">
                             <div class="row ml-2">
-                                <div class="col-md-3 float-left">
+                                <div class="col-md-6 float-left">
                                     <div class="form-group">
                                         <label for="name" class="form-control-label">Search</label> 
                                         <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="start_date" class="form-control-label">Visit Status</label> 
                                         <multiselect
@@ -36,18 +36,37 @@
                                         </multiselect>
                                     </div>
                                 </div>
+
+                                <div class="col-md-4 float-left">
+                                    <div class="form-group">
+
+                                        <label for="customerSelect" class="form-control-label">Select Company</label> 
+                                        <multiselect
+                                                v-model="companyIds"
+                                                :options="companyOptions"
+                                                :multiple="true"
+                                                track-by="id"
+                                                :custom-label="customLabelCompany"
+                                                placeholder="Company"
+                                                id="selected_company"
+                                        >
+                                        </multiselect>
+                                        <span class="text-danger small" v-if="errors.selectedCompanies">{{ errors.selectedCompanies[0] }}</span>
+                                    </div>
+                                </div>
+
                                  <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="start_date" class="form-control-label">Start Date</label> 
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
-                                        <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
+                                        <span class="text-danger small" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">End Date</label> 
                                         <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
-                                        <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
+                                        <span class="text-danger small" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -75,6 +94,7 @@
                                 <tr>
                                     <th scope="col">Customer Code</th>
                                     <th scope="col">Customer Name</th>
+                                    <th scope="col">Company</th>
                                     <th scope="col">Visit Count</th>
                                     <th scope="col">Last Visited Date</th>
                                 </tr>
@@ -83,14 +103,17 @@
                                     <tr v-if="table_loading">
                                         <td colspan="15">
                                             <content-placeholders>
-                                                <content-placeholders-heading :img="false" />
                                                 <content-placeholders-text :lines="3" />
                                             </content-placeholders>
+                                            <div width="100%" align="center">
+                                                <span class="text-muted">Loading..</span>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr v-for="(customer, p) in filteredQueues" v-bind:key="p">
                                         <td>{{ customer.customer_code }}</td>
                                         <td>{{ customer.name }}</td>
+                                        <td>{{ customer.company ? customer.company.name : "" }}</td>
                                         <td v-if="customer.schedules.length  > 0">
                                             <button class="btn btn-sm btn-outline-success" @click="customerDetailsModal(customer)">{{ customer.schedules.length + ' visit(s)' }}</button>
                                         </td>
@@ -233,13 +256,27 @@
                 visitcurrentPage: 0,
                 visititemsPerPage: 10,
                 table_loading:false,
+                companyOptions:[],
+                companyIds:[],
 
             }     
         },
         created(){
-    
+            this.fetchCompany();
         },
         methods:{
+            fetchCompany(){
+                axios.get('/companies-filter-all')
+                .then(response => { 
+                    this.companyOptions = response.data;
+                })
+                .catch(error =>{
+                    this.errors = error.response.data.errors;
+                })
+            },
+            customLabelCompany (company) {
+                return `${company.name}`
+            },
             customerDetailsModal(customer_visit_details){
                 this.customervisitList = [];
                 var modal = document.getElementById('customer-details-modal');
@@ -253,12 +290,16 @@
             },
             fetchCustomers(){
                 let v = this;
-                this.customers = [];
-                this.table_loading = true;
+                v.customers = [];
+                v.errors = [];
+                v.table_loading = true;
+                v.countVisited = 0;
+                v.countNonVisited = 0;
                
                 axios.post('/sales-report-customer-data',{
                     startDate: this.startDate,
-                    endDate: this.endDate
+                    endDate: this.endDate,
+                    selectedCompanies: this.companyIds,
                 })
                 .then(response => {
 
@@ -277,6 +318,7 @@
                 })
                 .catch(error => { 
                     this.errors = error.response.data.errors;
+                    this.table_loading = false;
                 })
             },
             setPage(pageNumber) {

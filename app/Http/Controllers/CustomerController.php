@@ -111,6 +111,7 @@ class CustomerController extends Controller
                 'google_address' => 'required',
                 'town_city' => 'required',
                 'province' => 'required',
+                'telephone_1' => 'required',
             ]);
         }else{
             $request->validate([
@@ -121,9 +122,10 @@ class CustomerController extends Controller
                 'google_address' => 'required',
                 'town_city' => 'required',
                 'province' => 'required',
+                'telephone_1' => 'required',
             ]);
         }
-        // $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
+      
         
         $customers = new Customer;
 
@@ -135,18 +137,26 @@ class CustomerController extends Controller
         $customers->street = $request->street;
         $customers->town_city = $request->town_city;
         $customers->province_id = $request->province;
-        $customers->google_address = $request->google_address;
-        $customers->lat = $request->lat;
-        $customers->lng = $request->lng;
+        if($request->google_address){
+            $customers->google_address = $request->google_address;
+            $customers->lat = $request->lat;
+            $customers->lng = $request->lng;
+        }
+       
         $customers->telephone_1 = $request->telephone_1;
         $customers->telephone_2 = $request->telephone_2;
         $customers->fax_number = $request->fax_number;
         $customers->remarks = $request->remarks;
-        
-        // return $customers;
 
-        if($customers->save()){
-            
+        if($request->meet_up_location_address){
+            $customers->meet_up_location_address = $request->meet_up_location_address;
+            $customers->meet_up_lat = $request->meet_up_lat;
+            $customers->meet_up_lng = $request->meet_up_lng;
+        }
+
+        $customers->customer_dealer_id = $request->customerDealer ? $request->customerDealer['id'] : ""; 
+
+        if($customers->save()){    
              //generate prospect id 
             $prospect_id = '';
             if($request->status == 3){
@@ -216,6 +226,7 @@ class CustomerController extends Controller
             'town_city' => 'required',
             'province' => 'required',
             'google_address' => 'required',
+            'telephone_1' => 'required',
         ]);
 
         $customer->company_id = Auth::user()->companies->pluck('id')[0];
@@ -226,14 +237,29 @@ class CustomerController extends Controller
         $customer->street = $request->street;
         $customer->town_city = $request->town_city;
         $customer->province_id = $request->province;
+
         $customer->google_address = $request->google_address;
         $customer->lat = $request->lat;
         $customer->lng = $request->lng;
+
         $customer->telephone_1 = $request->telephone_1;
         $customer->telephone_2 = $request->telephone_2;
         $customer->fax_number = $request->fax_number;
         $customer->remarks = $request->remarks;
-
+        
+        if($request->meet_up_location_address){
+            $customer->meet_up_location_address = $request->meet_up_location_address;
+            $customer->meet_up_lat = $request->meet_up_lat;
+            $customer->meet_up_lng = $request->meet_up_lng;
+        }else{
+            $customer->meet_up_location_address = "";
+            $customer->meet_up_lat = "";
+            $customer->meet_up_lng = "";     
+        }
+        
+        
+        $customer->customer_dealer_id = $request->customerDealer ? $request->customerDealer['id'] : ""; 
+        
         // apply changes in schedule
         $date_now = Carbon::now();
         $date_now = date("Y-m-d", strtotime($date_now));
@@ -297,7 +323,6 @@ class CustomerController extends Controller
      */
     public function getGeocode($address){
         $geocode = Geocoder::getCoordinatesForAddress($address);
-
         return $geocode['lat'].','.$geocode['lng'];
     }
     
@@ -368,9 +393,17 @@ class CustomerController extends Controller
         $params = $request->all(); 
 
         $request->validate([
+            'selectedCompanies' => 'required',
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
+
+        $selected_company_ids = [];
+        if($request->selectedCompanies){
+            foreach ($request->selectedCompanies as $id){
+                array_push($selected_company_ids,$id['id']);
+             }
+        }
        
         return $customers = Customer::with(['schedules' => function ($query) use($params) {
                         $query->where('date', '>=', $params['startDate']);
@@ -380,8 +413,8 @@ class CustomerController extends Controller
                         $query->orderBy('date', 'DESC');
                         $query->with('attendances','user');
                     }])
-                    ->with('last_visited')
-                    ->where('company_id',$companyId)
+                    ->with('last_visited','company')
+                    ->whereIn('company_id',$selected_company_ids)
                     ->orderBy('id', 'DESC')
                     ->get();
 
@@ -721,5 +754,18 @@ class CustomerController extends Controller
         }
     }
 
+
+    public function customerDealers(){
+        return Customer::select(
+                'id',
+                'name',
+                'company_id'
+            )
+            ->with('company')
+            ->where('classification','=','16')
+            ->whereIn('company_id', Auth::user()->companies->pluck('id'))
+            ->orderBy('id', 'desc')
+            ->get();
+    }
 
 }

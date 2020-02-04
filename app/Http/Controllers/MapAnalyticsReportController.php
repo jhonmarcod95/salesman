@@ -113,25 +113,21 @@ class MapAnalyticsReportController extends Controller
 
     public function users(){
 
-        if(Auth::user()->roles[0]->slug == 'it'|| Auth::user()->roles[0]->slug == 'audit' || Auth::user()->roles[0]->slug == 'president'){
-            return User::with('roles','company')
-                    ->whereHas('roles', function ($query) {
-                        $query->where('slug', '=', 'tsr');
-                    })
-                    ->orderBy('name', 'ASC')
-                    ->get();
+        $user = User::with('companies')->where('id', Auth::user()->id)->first();
+        $company_ids = [];
+        if($user->companies){
+            foreach($user->companies as $company){
+                array_push($company_ids , $company->id);
+            }
         }
-        else{
-            return User::with('roles','company')
+        return User::with('roles','company')
                         ->whereHas('roles', function ($query) {
                             $query->where('slug', '=', 'tsr');
                         })
-                        ->whereHas('company', function ($query) {
-                            $query->where('id', '=', Auth::user()->company_id);
-                        })
+                        ->whereIn('company_id',$company_ids)
                         ->orderBy('name', 'ASC')
                         ->get();
-        }
+                        
     }
 
     public function scheduleTypes(){

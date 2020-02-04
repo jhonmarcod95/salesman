@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Auth;
 use App\{
     Message,
+    User,
     Company
 };
 use Illuminate\Http\Request;
@@ -41,6 +42,17 @@ class CompanyController extends Controller
 
     public function indexData(){
         return Company::orderBy('id', 'desc')->get();
+    }
+
+    public function companyFilterData(){
+        $user = User::with('companies')->where('id', Auth::user()->id)->first();
+        $company_ids = [];
+        if($user->companies){
+            foreach($user->companies as $company){
+                array_push($company_ids , $company->id);
+            }
+            return Company::whereIn('id',$company_ids)->orderBy('id', 'desc')->get();
+        }
     }
 
     /**

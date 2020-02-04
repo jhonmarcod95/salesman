@@ -307,7 +307,7 @@
                 return this.currentPage == (this.totalPages - 1) ? false : true;
             },
             fetchCompany(){
-                axios.get('/companies-all')
+                axios.get('/companies-filter-all')
                 .then(response => { 
                     this.companyOptions = response.data;
                 })

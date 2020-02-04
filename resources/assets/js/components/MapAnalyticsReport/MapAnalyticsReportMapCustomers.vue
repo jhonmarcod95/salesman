@@ -456,7 +456,7 @@
                 })
             },
             fetchCompany(){
-                axios.get('/companies-all')
+                axios.get('/companies-filter-all')
                 .then(response => { 
                     this.companyOptions = response.data;
                 })

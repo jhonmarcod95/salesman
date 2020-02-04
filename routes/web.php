@@ -41,6 +41,8 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/user/change-password', 'UserController@changePasswordIndex')->name('change_password');
     // Fetch all companies
     Route::get('/companies-all', 'CompanyController@indexData');
+
+    Route::get('/companies-filter-all', 'CompanyController@companyFilterData');
 });
 
 // Admin Routes
@@ -335,6 +337,9 @@ Route::post('/sales-activity-customer-all', 'CustomerController@salesActivityCus
 Route::get('/sales-customer-activities/{customer_code}', 'CustomerController@salesCustomerActivities');
 
 Route::post('/sales-activity-customer-report-data', 'CustomerController@salesActivityCustomerReportData');
+
+//Get Customer Dealers
+Route::get('/customer-dealers','CustomerController@customerDealers');
 
 //Get SAP Customer API
 Route::get('/sap-customers', 'CustomerController@get_sap_customer');

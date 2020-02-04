@@ -45,6 +45,7 @@
                                                 <span class="text-danger small" v-if="errors.classification">{{ errors.classification[0] }}</span>
                                             </div>
                                         </div>
+                                        
                                         <div class="col-lg-6">
                                            <div class="form-group">
                                                 <label class="form-control-label" for="classification">Status</label>
@@ -52,6 +53,24 @@
                                                     <option v-for="(status, c) in statuses" v-bind:key="c" :value="status.id">{{ status.description}}</option>
                                                 </select>
                                                 <span class="text-danger small" v-if="errors.status">{{ errors.status[0] }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12" v-if="customers.classification == '5' || customers.classification == '8' || customers.classification == '9'">
+                                           <div class="form-group">
+                                                <label class="form-control-label" for="classification">Select Customer Dealer</label>
+                                                <multiselect
+                                                        v-model="customerDealer"
+                                                        :options="customerDealerOptions"
+                                                        :multiple="false"
+                                                        track-by="id"
+                                                        :custom-label="customLabelCustomerDealer"
+                                                        placeholder="Customer Dealer"
+                                                        id="selected_customer_dealer"
+                                                >
+                                                </multiselect>
+
+                                                <span class="text-danger small" v-if="errors.customerDealer">{{ errors.customerDealer[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -97,7 +116,7 @@
                                                 <span class="text-danger small" v-if="errors.province">{{ errors.province[0] }}</span>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="google_address">Google Map Address</label>
                                                 <input id="google_address" class="form-control form-control-alternative" type="text" v-model="customers.google_address" placeholder="Enter a Location">
@@ -106,6 +125,17 @@
                                                 <button type="button" :disabled="showMap" class="btn btn-sm btn-primary mt-2" data-toggle="modal" data-target="#showMap">Show Map</button>
                                             </div>
                                         </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="meet_up_location_address">Add Meet Up Location</label>
+                                                <input id="meet_up_location_address" class="form-control form-control-alternative" type="text" v-model="customers.meet_up_location_address" placeholder="Enter a Location">
+                                                <span class="text-danger small" v-if="errors.meet_up_location_address">{{ errors.meet_up_location_address[0] }}</span>
+
+                                                <button type="button" :disabled="showMapMeetUpLocation" class="btn btn-sm btn-primary mt-2" data-toggle="modal" data-target="#showMapMeetUpLocation">Show Map </button>
+                                            </div>
+                                        </div>
+
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
@@ -190,23 +220,50 @@
                 </div>
             </div>
         </div>
+
+        <!-- Map Meet Up Modal -->
+        <div class="modal fade" id="showMapMeetUpLocation" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modal-title-default">Map</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="mapContainer" style="width:100%;height:300px;">
+                    <div id="map_meet_up"></div>
+                    <pre id='coordinates_meet_up' class='coordinates'></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link  ml-auto" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
+
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <script>
     import Mapbox from 'mapbox-gl-vue';
     import mapboxgl from 'mapbox-gl';
     import loader from '../Loader';
+    import Multiselect from 'vue-multiselect';
     export default {
-       components: {
-            Mapbox
-       },
+        components: {
+            Mapbox,Multiselect
+        },
        props: ['customerId'],
         data(){
             return{
                 customers: [],
                 provinces: [],
                 classifications:[],
+                customerDealerOptions:[],
+                customerDealer:[],
                 statuses:[],
                 regions:[],
                 errors: [],
@@ -216,10 +273,13 @@
                 pilili_code: '',
                 lat:'',
                 lng:'',
+                meet_up_lat: '',
+                meet_up_lng: '',
                 accessToken: 'pk.eyJ1IjoiamF5LWx1bWFnZG9uZzEyMyIsImEiOiJjazFxNm5wZGwxNG02M2dtaXF2dHE1YzluIn0.SHUJTfNTrhGoyacA8H7Tbw',
                 mapStyle: 'mapbox://styles/mapbox/streets-v11',
                 mapCenter: [121.035249, 14.675647],
                 showMap:true,
+                showMapMeetUpLocation:true,
                 loading: false,
                 disabledCustomerCode:true,
             }
@@ -228,9 +288,11 @@
             this.mapbox = Mapbox;
             this.fetchRegion();
             this.fetchProvince();
+            this.fetchCustomerDealers();
             this.fetchCustomer();
             this.fetchClassification();
             this.fetchStatus();
+            
         },
         mounted() {
             let vm  = this;
@@ -256,14 +318,69 @@
 
                 //Map
                 vm.customers.google_address = document.getElementById("google_address").value;
+                 
                 vm.getGeocodeCustomerEdit(vm.customers.google_address);
-                
-                
-
             });
+
+            //Meet Up location Address 
+            var input_meet_up = document.getElementById('meet_up_location_address');
+            var searchBoxMeetUp = new google.maps.places.Autocomplete(input_meet_up, {
+                 componentRestrictions: {country: 'ph'}
+            });
+
+            searchBoxMeetUp.addListener('place_changed', function() {
+                var place = searchBoxMeetUp.getPlace();
+
+                if (place.length == 0) {
+                    return;
+                }
+                if (!place.geometry) {
+                    return;
+                }
+                //Map
+                vm.customers.meet_up_location_address = document.getElementById("meet_up_location_address").value;
+                vm.getGeocodeCustomerMeetUp(vm.customers.meet_up_location_address);
+            });
+
         },
         methods:{
+            fetchCustomerDealers(){
+                axios.get('/customer-dealers')
+                .then(response => { 
+                    this.customerDealerOptions = response.data;
+                })
+                .catch(error => {
+                    this.errors = error.response.data.errors;
+                })
+            },
+            fetchCustomerDealer(customer_dealer_id){
+                let v = this;
+                 axios.get('/customer-dealers')
+                .then(response => { 
+                    var costumer_dealer = response.data;
+                    var customer_dealer_filtered = costumer_dealer.filter(customer => {
+                        if(customer.id == customer_dealer_id){
+                            return customer;
+                        }
+                    });
+                    this.customerDealer = customer_dealer_filtered ? customer_dealer_filtered[0] : []; 
+                })
+                .catch(error => {
+                    this.errors = error.response.data.errors;
+                })
+            },
+            customLabelCustomerDealer (customer) {
+                return `${ customer.name + ' (' + customer.company.name  + ')' }`
+            },
             updateCustomer(customers){  
+                let v = this;
+                
+                if(customers.classification == 5 || customers.classification == 8 || customers.classification == 9){
+                    v.customerDealer = v.customerDealer;
+                }else{
+                    v.customerDealer = [];
+                }
+             
                 axios.patch(`/customers/${customers.id}`,{
                     classification : customers.classification,
                     status : customers.status,
@@ -275,12 +392,16 @@
                     region: customers.region,
                     province: customers.province_id,
                     google_address: customers.google_address,
-                    lat: this.customers.lat,
-                    lng: this.customers.lng,
+                    lat: v.customers.lat,
+                    lng: v.customers.lng,
+                    meet_up_location_address: v.customers.meet_up_location_address,
+                    meet_up_lat: v.customers.meet_up_lat,
+                    meet_up_lng: v.customers.meet_up_lng,
                     telephone_1: customers.telephone_1,
                     telephone_2: customers.telephone_2,
                     fax_number: customers.fax_number,
-                    remarks: customers.remarks
+                    remarks: customers.remarks,
+                    customerDealer: v.customerDealer
                 })
                 .then(response => {
                     window.location.href = response.data.redirect;
@@ -304,13 +425,10 @@
                     this.customers = response.data;
                     this.default_code = this.customers.customer_code;
                     this.default_classification = this.customers.classification;
-                    // if(this.customers.classification != 1 && this.customers.classification != 2){
-                    //     document.getElementById("customer_code").disabled = true;
-                    // }else{
-                    //     document.getElementById("customer_code").disabled = false;
-                    // }
+                    this.fetchCustomerDealer(this.customers.customer_dealer_id);
                     this.disableCustomerCode();
                     this.showEditMap(this.customers.lat,this.customers.lng);
+                    this.showEditMapMeetUp(this.customers.meet_up_lat,this.customers.meet_up_lng);
                 })
                 .catch(error =>{
                     this.errors = error.response.data.errors;
@@ -412,8 +530,9 @@
 
                     if(response.data.lat && response.data.lng){
                         v.showMap = false;
-                        v.loading = false;
                     }
+                
+                    v.loading = false;
                     
                     var map = new mapboxgl.Map({
                         container: 'map',
@@ -492,6 +611,101 @@
                     v.showMap = false;
                 }
             },
+
+            getGeocodeCustomerMeetUp(address){
+                let v = this;
+                v.loading = true;
+                axios.get(`/customers-geocode-json/${address.replace(/[/#]/g, '')}`)
+                .then(response => { 
+                    const mapcontainer = document.getElementById("map_meet_up");
+                    mapcontainer.innerHTML = '';
+                    v.customers.meet_up_lat = response.data.lat;
+                    v.customers.meet_up_lng = response.data.lng;
+                    mapboxgl.accessToken = v.accessToken;
+
+                    if(v.customers.meet_up_lat && v.customers.meet_up_lng){
+                        v.showMapMeetUpLocation = false;
+                    }
+
+                    v.loading = false;
+                    
+                    var map = new mapboxgl.Map({
+                        container: 'map_meet_up',
+                        style: v.mapStyle,
+                        center: [v.customers.meet_up_lng,v.customers.meet_up_lat],
+                        minzoom:23,
+                        maxZoom:20,
+                        zoom: 17,
+                        maxBounds: [[110.446227,2.949317], [131.509814,21.637444 ]],
+                        height:100
+                    });
+                    
+                    map.addControl(new mapboxgl.NavigationControl());
+                    map.addControl(new mapboxgl.FullscreenControl());
+                
+                    var marker = new mapboxgl.Marker({
+                        draggable: true
+                    })
+                    .setLngLat([v.customers.meet_up_lng,v.customers.meet_up_lat])
+                    .addTo(map);
+                    coordinates_meet_up.style.display = 'none';
+                    function onDragEnd() {   
+                        var lngLat = marker.getLngLat();
+                        coordinates_meet_up.style.display = 'block';
+                        coordinates_meet_up.innerHTML = 'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
+                        v.customers.meet_up_lng = lngLat.lng;
+                        v.customers.meet_up_lat = lngLat.lat;
+
+                        // map.flyTo({center: [v.customers.lng,v.customers.lat], zoom: 17});
+                    }
+                    
+                    marker.on('dragend', onDragEnd)
+                })
+                .catch(error => {
+                    this.errors = error.response.data.errors;
+                })
+            },
+
+            showEditMapMeetUp(lat,lng){
+                if(lat && lng){
+                    let v = this;
+                    const mapcontainer = document.getElementById("map_meet_up");
+                    mapcontainer.innerHTML = '';
+                    mapboxgl.accessToken = v.accessToken;
+                    var map = new mapboxgl.Map({
+                        container: 'map_meet_up',
+                        style: v.mapStyle,
+                        center: [v.customers.meet_up_lng,v.customers.meet_up_lat],
+                        minzoom:23,
+                        maxZoom:20,
+                        zoom: 17,
+                        maxBounds: [[110.446227,2.949317], [131.509814,21.637444 ]],
+                        height:100
+                    });
+                    
+                    map.addControl(new mapboxgl.NavigationControl());
+                    map.addControl(new mapboxgl.FullscreenControl());
+                
+                    var marker = new mapboxgl.Marker({
+                        draggable: true
+                    })
+                    .setLngLat([v.customers.meet_up_lng,v.customers.meet_up_lat])
+                    .addTo(map);
+                    
+                    coordinates_meet_up.style.display = 'none';
+                    function onDragEnd() {   
+                        var lngLat = marker.getLngLat();
+                        coordinates_meet_up.style.display = 'block';
+                        coordinates_meet_up.innerHTML = 'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
+                        v.customers.meet_up_lng = lngLat.lng;
+                        v.customers.meet_up_lat = lngLat.lat;
+                    }
+                    
+                    marker.on('dragend', onDragEnd)
+                    v.showMapMeetUpLocation = false;
+                }
+            },
+
             disableCustomerCode(){
                 if(this.customers.status == 3){
                     this.disabledCustomerCode = true;
@@ -512,6 +726,12 @@
         background-color:#75CFF0!important;
     }
     /* #map { position:absolute; top:0; bottom:0; width:100%; } */
+    #map_meet_up{
+        position: relative;
+        height: 100%;
+        width: 100%;
+        background-color:#75CFF0!important;
+    }
 
     .building {
         background-image: url('/img/map/customer.png');
@@ -544,6 +764,28 @@
         line-height: 18px;
         border-radius: 3px;
         display: none;
+    }
+
+    .coordinates_meet_up {
+        background: rgba(0,0,0,0.5);
+        color: #fff;
+        position: absolute;
+        bottom: 40px;
+        left: 10px;
+        padding:5px 10px;
+        margin: 0;
+        font-size: 11px;
+        line-height: 18px;
+        border-radius: 3px;
+        display: none;
+    }
+
+    .multiselect__tags {
+        min-height: 45px!important;
+    }
+
+    .multiselect__single {
+        padding-top: 5px!important;
     }
 
 </style>
