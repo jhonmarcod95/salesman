@@ -211,9 +211,32 @@
                                         </div>
                                     </td>
                                     <td>{{ customer.visits ? customer.visits.length : '' }}</td>
+                                    
                                     <td>{{ customer.customer_code }}</td>
-                                    <td>{{ customer.name }}</td>
-                                    <td>{{ customer.classifications ? customer.classifications.description : '' }}</td>
+                                    <td>
+                                        <!-- Active -->
+                                        <h5 v-if="customer.status =='1'" style="color:#5e72e4">{{ customer.name }}</h5>
+                                        <!-- Inactive -->
+                                        <h5 v-else-if="customer.status =='2'" style="color:#fb6340">{{ customer.name }}</h5>
+                                        <!-- Prospect -->
+                                        <h5 v-else-if="customer.status =='3'" style="color:#2dce89">{{ customer.name }}</h5>
+                                        <!-- Blacklisted -->
+                                        <h5 v-else-if="customer.status =='4'" style="color:#f5365c">{{ customer.name }}</h5>
+                                        <!-- Unidentified -->
+                                        <h5 v-else style="color:#172b4d">{{ customer.name }}</h5>
+                                    </td>
+                                    <td>
+                                        <div v-if="customer.classifications.id =='1' || customer.classifications.id =='2' || customer.classifications.id =='3' || customer.classifications.id =='4'">
+                                            Unidentified Customer
+                                        </div>
+                                        <div v-else>
+                                            {{ customer.classifications.description }}
+                                            <br>
+                                            <small v-if="customer.classifications.id=='5' || customer.classifications.id=='8' || customer.classifications.id=='9'">
+                                                Customer Dealer: {{ customer.customer_dealer ? customer.customer_dealer.name : "N/A" }}
+                                            </small>
+                                        </div>
+                                    </td>
                                     <td>{{ customer.google_address }}</td>
                                     <td>{{ customer.town_city }}</td>
                                     <td>{{ customer.provinces ? customer.provinces.name : '' }}</td>

@@ -47,5 +47,9 @@ class Customer extends Model implements Auditable
     public function company(){
         return $this->belongsTo(Company::class);
     }
+
+    public function customer_dealer(){
+        return $this->belongsTo(Customer::class)->select('id','customer_code','name');
+    }
     
 }

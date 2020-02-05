@@ -221,7 +221,7 @@ class MapAnalyticsReportController extends Controller
             }
         }
 
-        $customers = Customer::with('classifications','statuses','provinces','visits')
+        $customers = Customer::with('classifications','statuses','provinces','visits','customer_dealer')
                     ->when(!empty($request->selectedClassifications), function($q) use($selected_classification_ids) {
                         $q->whereIn('classification',  $selected_classification_ids);
                     })
