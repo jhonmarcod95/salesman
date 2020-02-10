@@ -11,6 +11,7 @@ use App\Message;
 use App\CustomerActivity;
 use Illuminate\Http\Request;
 use Spatie\Geocoder\Facades\Geocoder;
+use Illuminate\Support\Facades\Input;
 
 use Config;
 
@@ -27,17 +28,36 @@ class CustomerController extends Controller
     public function index(){
         session(['header_text' => 'Customers']);
 
-        $message = Message::where('user_id', '!=', Auth::user()->id)->get();
-        $notification = 0;  
-        foreach($message as $notif){
+        $search  = Input::get('search');
 
-            $ids = collect(json_decode($notif->seen, true))->pluck('id');
-            if(!$ids->contains(Auth::user()->id)){
-                $notification++;
-            }
+        if($search){
+            $customers = Customer::with('provinces','classifications')
+                                ->when(!empty($search), function($q) use($search){
+                                    $q->where('customer_code', 'like', '%' . $search . '%');
+                                    $q->orWhere('name', 'like', '%' . $search . '%');
+                                })
+                                ->whereIn('company_id', Auth::user()->companies->pluck('id'))
+                                ->paginate(50);
+        }else{
+            $customers = Customer::with('provinces','classifications')
+                                ->whereIn('company_id', Auth::user()->companies->pluck('id'))
+                                ->paginate(50);
         }
 
-        return view('customer.index', compact('notification'));
+        return view('customer.index', compact('customers','search'));
+        
+
+        // $message = Message::where('user_id', '!=', Auth::user()->id)->get();
+        // $notification = 0;  
+        // foreach($message as $notif){
+
+        //     $ids = collect(json_decode($notif->seen, true))->pluck('id');
+        //     if(!$ids->contains(Auth::user()->id)){
+        //         $notification++;
+        //     }
+        // }
+
+        
     }
 
     /**
@@ -334,6 +354,7 @@ class CustomerController extends Controller
      */
     public function destroy(Request $request, Customer $customer)
     {
+        return 'Deleted';
         if($customer->delete()){
             return $customer;
         }

@@ -93,6 +93,7 @@ Vue.component('appointment-duration-report-index', require('./components/Appoint
 //Sale Activity Customer Report
 Vue.component('sales-activity-customer-report-index', require('./components/SalesActivityCustomerReport/SalesActivityCustomerReportIndex.vue'));
 
+Vue.component('delete-customer',require('./components/Customer/CustomerDelete.vue'));
 
 const app = new Vue({
     el: '#app',

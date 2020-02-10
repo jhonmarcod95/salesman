@@ -38,6 +38,7 @@
                                 </div>
                                 <div class="col-md-2">
                                     <button class="btn btn-sm btn-primary" @click="fetchExpenses"> Filter</button>
+                                    <button class="btn btn-sm btn-success" :disabled="exportExcel" @click="exportExpenses"> Export</button>
                                 </div>
                             </div>
                         </div>
@@ -50,6 +51,8 @@
                                     <th scope="col">Expense Submitted</th>
                                     <th scope="col">Date</th>
                                     <th scope="col">Total Expenses</th>
+                                    
+
                                 </tr>
                                 </thead>
                                 <tbody v-if="expenses.length">
@@ -61,12 +64,12 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</a>
+                                                    <!-- <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</a> -->
                                                 </div>
                                             </div>
                                         </td>
                                         <td v-else></td>
-                                        <td>{{ expense.user.name }}</td>
+                                        <td>{{ expense.user ? expense.user.name : "" }}</td>
                                         <td>{{ expense.expenses_model_count  }}</td>
                                         <td>{{ moment(expense.created_at).format('ll') }}</td>
                                         <td>PHP {{ countTotalExpenses(expense) }}</td>
@@ -128,7 +131,7 @@
                             <tbody>
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
                                     <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
-                                    <td>{{ expenseBy.expenses_type.name }}</td>
+                                    <td>{{ expenseBy.expenses_type ? expenseBy.expenses_type.name : "" }}</td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
                                 </tr>
@@ -147,6 +150,9 @@
 
 <script>
 import moment from 'moment';
+import Excel from 'exceljs';
+import FileSaver from 'file-saver';
+
 export default {
     props:['userLevel'],
     data(){
@@ -157,6 +163,7 @@ export default {
             endDate: '',
             tsrName: '',
             date: '',
+            exportExcel:true,  
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -178,6 +185,160 @@ export default {
             });
             return totalExpenses.toFixed(2);
         },
+        exportExpenses(){
+           let v = this;
+            var workbook = new Excel.Workbook();
+            var worksheet = workbook.addWorksheet('Expense Report');
+            
+            //Header 
+            worksheet.columns = [{ width: 20 },{ width: 20},{ width: 20},{ width: 20},{ width: 20},{ width: 20}];
+
+            worksheet.getCell("A1").value = 'Collector';
+            worksheet.getCell("A1" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+            worksheet.getCell("B1").value = 'EXPENSE SUBMITTED';
+            worksheet.getCell("B1" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+            worksheet.getCell("C1").value = 'DATE';
+            worksheet.getCell("C1" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+            worksheet.getCell("D1").value = 'TYPE OF EXPENSE';
+            worksheet.getCell("D1" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+            worksheet.getCell("E1").value = 'AMOUNT';
+            worksheet.getCell("E1" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+            worksheet.getCell("F1").value = 'TOTAL';
+            worksheet.getCell("F1" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+
+            let from = 2;
+            let to = 2;
+            let total_submitted = 0; 
+            let total_amount_expense = 0; 
+            let total_grand_amount = 0; 
+            let total_grand_amount_expense = 0; 
+            v.expenses.forEach(function(w){
+                if(from == 2){
+                    let count_expense = Number(w.expenses_model.length)
+                    
+                    to = count_expense + 1;
+                    if(count_expense > 0){
+                        //Collector
+                        worksheet.mergeCells("A" + from + ":" + "A" + to);
+                        worksheet.getCell("A" + from).value = w.user ? w.user.name : "";
+                        worksheet.getCell("A" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        //Submitted
+                        worksheet.mergeCells("B" + from + ":" + "B" + to);
+                        worksheet.getCell("B" + from).value = count_expense;
+                        worksheet.getCell("B" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        //Date
+                        worksheet.mergeCells("C" + from + ":" + "C" + to);
+                        worksheet.getCell("C" + from).value = moment(w.created_at).format('ll');
+                        worksheet.getCell("C" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        //Expense and Amount
+                        total_amount_expense = 0; 
+                        var expense = from;
+                        w.expenses_model.forEach(function(e){
+
+                            worksheet.getCell("D" + expense).value = e.expenses_type ? e.expenses_type.name : "";
+                            worksheet.getCell("D" + expense).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            worksheet.getCell("E" + expense).value = e.amount;
+                            worksheet.getCell("E" + expense).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            expense++;
+
+                            total_amount_expense += e.amount;
+                        });
+
+                        //Total
+                        worksheet.mergeCells("F" + from + ":" + "F" + to);
+                        worksheet.getCell("F" + from).value = total_amount_expense;
+                        worksheet.getCell("F" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+                        
+
+                        total_submitted += count_expense;
+                        total_grand_amount += total_amount_expense;
+                        total_grand_amount_expense += total_amount_expense;
+                        
+                    }
+                    from = to + 1;    
+                }else{
+                    let count_expense = Number(w.expenses_model.length);
+
+                    if(count_expense > 0){
+                        to += count_expense;
+                        //Collector
+                        worksheet.mergeCells("A" + from + ":" + "A" + to);
+                        worksheet.getCell("A" + from).value = w.user ? w.user.name : "";
+                        worksheet.getCell("A" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        //Submitted
+                        worksheet.mergeCells("B" + from + ":" + "B" + to);
+                        worksheet.getCell("B" + from).value = count_expense;
+                        worksheet.getCell("B" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        //Date
+                        worksheet.mergeCells("C" + from + ":" + "C" + to);
+                        worksheet.getCell("C" + from).value = moment(w.created_at).format('ll');
+                        worksheet.getCell("C" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        //Expense and Amount
+                        total_amount_expense = 0; 
+                        var expense = from;
+                        w.expenses_model.forEach(function(e){
+
+                            worksheet.getCell("D" + expense).value = e.expenses_type ? e.expenses_type.name : "";
+                            worksheet.getCell("D" + expense).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            worksheet.getCell("E" + expense).value = e.amount;
+                            worksheet.getCell("E" + expense).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            expense++;
+
+                            total_amount_expense += e.amount;
+                        });
+
+                        //Total
+                        worksheet.mergeCells("F" + from + ":" + "F" + to);
+                        worksheet.getCell("F" + from).value = total_amount_expense;
+                        worksheet.getCell("F" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        from = to + 1;
+
+                        total_submitted += count_expense;
+                        total_grand_amount += total_amount_expense;
+                        total_grand_amount_expense += total_amount_expense;
+                    }
+                }
+
+            });
+
+            from = to + 1;
+            to = from;
+
+            worksheet.getCell("A" + from).value = "Total";
+            worksheet.getCell("A" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+            worksheet.getCell("B" + from).value = total_submitted;
+            worksheet.getCell("B" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+            worksheet.getCell("C" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+            worksheet.getCell("D" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+            worksheet.getCell("E" + from).value = total_grand_amount;
+            worksheet.getCell("E" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+            worksheet.getCell("F" + from).value = total_grand_amount_expense;
+            worksheet.getCell("F" + from).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+                
+        
+            workbook.xlsx.writeBuffer()
+            .then(buffer => FileSaver.saveAs(new Blob([buffer]), `ExpenseReport.xlsx`))
+            .catch(err => console.log('Error writing excel export', err));
+                
+        },
+
+
         fetchExpenses(){
             axios.post('/expense-report-bydate', {
                 startDate: this.startDate,
@@ -185,6 +346,7 @@ export default {
             })
             .then(response => {
                 this.expenses = response.data;
+                this.exportExcel = false;
                 this.errors = []; 
             })
             .catch(error => {
@@ -223,7 +385,9 @@ export default {
         filteredExpenses(){
             let self = this;
             return self.expenses.filter(expense => {
-                return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+                if(expense.user){
+                    return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+                }
             });
         },
         totalPages() {
