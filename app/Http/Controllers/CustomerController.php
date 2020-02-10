@@ -354,9 +354,10 @@ class CustomerController extends Controller
      */
     public function destroy(Request $request, Customer $customer)
     {
-        return 'Deleted';
         if($customer->delete()){
             return $customer;
+        }else{
+            return 'Unable to delete Customer.';
         }
     }
 

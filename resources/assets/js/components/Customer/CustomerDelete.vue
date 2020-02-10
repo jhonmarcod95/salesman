@@ -10,7 +10,7 @@
         props: ['customerId'],
         methods: {
             deleteCustomer(){
-                if(confirm("Do you really want to delete this customer?")){
+                if(confirm("Are you sure you want to delete this customer?")){
                         axios.delete(`/customers/${this.customerId}`)
                         .then(response => {
                             alert('Customer successfully deleted');
