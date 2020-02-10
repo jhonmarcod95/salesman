@@ -54,16 +54,20 @@ class CustomerWeeklyStatusUpdate extends Command
     public function handle()
     {
   
-        $all_customers = Customer::select('id','customer_code','name')->where('company_id','4')->get();
+        $all_customers = Customer::select('id','customer_code','name','company_id')->where('company_id','1')->get();
         
         if($all_customers){
-                foreach($all_customers as $customer){
-                    $customer_sap = [];
-                    //Get Customer Info
-                    $get_sap_customer_lfug = $this->get_customer_lfug($customer);
-                    if(!$get_sap_customer_lfug){
-                        $get_sap_customer_pmfc = $this->get_customer_pfmc($customer);
-                    }
+            foreach($all_customers as $customer){
+                $customer_sap = [];
+                //Get Customer Info
+
+                if($customer['company_id'] == '1'){
+                    //PFMC
+                    $get_sap_customer_lfug = $this->get_customer_pfmc($customer);
+                }else{
+                    //LFUG
+                    $get_sap_customer_lfug = $this->get_customer_lfug($customer);  
+                }
             }
         }
     }
@@ -76,6 +80,8 @@ class CustomerWeeklyStatusUpdate extends Command
             //Active
             if($first_date){
                 $activities = [];
+                $check_status_exist = "";
+
                 $activities['customer_id'] = $customer['id'];        
                 $activities['activity_description'] = 'Active';        
                 $activities['activity_date'] = $first_date;
@@ -86,20 +92,20 @@ class CustomerWeeklyStatusUpdate extends Command
                                         ->where('activity_date',$first_date)
                                         ->first();
 
-                if(!$check_status_exist){
-                    //add
-                    CustomerActivity::create($activities);
-
+                if(!empty($check_status_exist)){
                     //Update Customer
                     $customer_data = [];
                     $customer_data['status'] = '1';
                     Customer::where('id', $customer['id'])->update($customer_data);
-                    
+                }else{
+                    //Add
+                    CustomerActivity::create($activities);
                 }
             }
             //Inactive Status
             $check_status_inactive = substr($customer_sap['name'], 0, 4);
             if($check_status_inactive == 'XXX_'){
+                $check_status_exist = "";
                 $activities = [];
                 $activities['customer_id'] = $customer['id'];        
                 $activities['activity_description'] = 'Inactive';        
@@ -138,6 +144,8 @@ class CustomerWeeklyStatusUpdate extends Command
         
             if($check_status_closed == 'X'){
                 $activities = [];
+                $check_status_exist = "";
+
                 $activities['customer_id'] = $customer['id'];        
                 $activities['activity_description'] = 'Closed';        
                 $activities['activity_date'] = date('Y-m-d');
@@ -237,11 +245,11 @@ class CustomerWeeklyStatusUpdate extends Command
     public function get_customer_pfmc($customer){
 
         $customer_code = $customer['customer_code'];
-
         $client = new Client();
         $connection = Config::get('constants.sap_api.connection_pfmc');
 
         try {
+
             $response = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
             ['query' => 
                 ['connection' => $connection,
@@ -253,27 +261,43 @@ class CustomerWeeklyStatusUpdate extends Command
                             'CASSD' => 'closed',
                             'ERDAT' => 'created_date',
                         ],
-                        'options' => [
-                            ['TEXT' => "KUNNR = '$customer_code'"]
-                        ],
+                        // 'options' => [
+                        //     ['TEXT' => "KUNNR = '$customer_code'"]
+                        // ],
                     ]
                 ]
             ],
             ['timeout' => 60],
             ['delay' => 10000]
             );
-            
+        
             $customers_sap= json_decode($response->getBody(), true);
 
+            $key = array_search($customer_code,array_column($customers_sap, 'customer_code'));
             $customer_data = [];
-            if($customers_sap){
-                $customer_data['customer_code'] =  $customers_sap[0]['customer_code'];
-                $customer_data['name'] =  $customers_sap[0]['name'];
-                $customer_data['closed'] =  $customers_sap[0]['closed'];
-                $customer_data['created_date'] =  $customers_sap[0]['created_date'] ? date('Y-m-d',strtotime($customers_sap[0]['created_date'])) : "";
+            $save_sap_request = '';
+            if($key){
+                if($customer_code == $customers_sap[$key]['customer_code']){
+                    $customer_data['customer_code'] =  $customers_sap[$key]['customer_code'];
+                    $customer_data['name'] =  $customers_sap[$key]['name'];
+                    $customer_data['closed'] =  $customers_sap[$key]['closed'];
+                    $customer_data['created_date'] =  $customers_sap[$key]['created_date'] ? date('Y-m-d',strtotime($customers_sap[$key]['created_date'])) : "";
+                    $save_sap_request = $this->save_sap_request($customer,$customer_data);
+                }
             }
 
-            $save_sap_request = $this->save_sap_request($customer,$customer_data);
+
+            // $customer_data = [];
+            // $save_sap_request = '';
+            // if($customers_sap){
+            //     $customer_data['customer_code'] =  $customers_sap[0]['customer_code'];
+            //     $customer_data['name'] =  $customers_sap[0]['name'];
+            //     $customer_data['closed'] =  $customers_sap[0]['closed'];
+            //     $customer_data['created_date'] =  $customers_sap[0]['created_date'] ? date('Y-m-d',strtotime($customers_sap[0]['created_date'])) : "";
+                
+            //     $save_sap_request = $this->save_sap_request($customer,$customer_data);
+            // }
+
 
             if($save_sap_request == 'saved'){
                 return $customer_data;

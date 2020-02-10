@@ -344,3 +344,8 @@ Route::get('/customer-dealers','CustomerController@customerDealers');
 //Get SAP Customer API
 Route::get('/sap-customers', 'CustomerController@get_sap_customer');
 Route::get('/sap-activites/{customer_code}', 'CustomerController@get_customer_pfmc_all');
+Route::get('/sap-activites-pfmc/{customer_code}', 'CustomerController@get_customer_acitivity_pfmc');
+
+//Count Customer Status 
+Route::get('/count-customer-status', 'CustomerController@get_count_customer_status');
+

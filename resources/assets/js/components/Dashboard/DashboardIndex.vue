@@ -130,70 +130,107 @@
                     </div>
                 </div>
                 <div class="col-xl-4">
-                    <div class="card shadow">
-                        <div class="card-header border-0">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <h3 class="mb-0">Performance Summary</h3>
-                                </div>
-                                <div class="col text-right">
-                                    <!-- <a href="#!" class="btn btn-sm btn-primary">See all</a> -->
+                    <div class="col">
+                        <!-- Count Customer Status -->
+                        <div class="card shadow">
+                            <div class="card-header border-0">
+                                <div class="row align-items-center">
+                                    <h3 class="mb-0">Customer Status</h3>
                                 </div>
                             </div>
-                        </div>
-                        <div class="table-responsive">
-                            <!-- Projects table -->
-                            <table class="table align-items-center table-flush">
-                                <thead class="thead-light">
-                                <tr>
-                                    <th scope="col">Type</th>
-                                    <th scope="col">Scheduled</th>
-                                    <th scope="col">Completed</th>
-                                    <th scope="col"> Percentage</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <th scope="row"> Customer </th>
-                                    <td> {{ customerCount.length }} </td>
-                                    <td> {{ customerCompletedCount.length }}</td>
-                                    <td v-if="customerPercentage"> {{ customerPercentage }}% </td>
-                                    <td v-else> 0% </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"> Mapping </th>
-                                    <td> {{ mappingCount.length }} </td>
-                                    <td> {{ mappingCompletedCount.length }}</td>
-                                    <td v-if="mappingPercentage"> {{ mappingPercentage }}% </td>
-                                    <td v-else> 0% </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"> Event </th>
-                                    <td> {{ eventCount.length }} </td>
-                                    <td> {{ eventCompletedCount.length }} </td>
-                                    <td v-if="eventPercentage"> {{ eventPercentage }}% </td>
-                                    <td v-else> 0% </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"> Travel </th>
-                                    <td> {{ travelCount.length }} </td>
-                                    <td> {{ travelCompletedCount.length }} </td>
-                                    <td v-if="travelPercentage"> {{ travelPercentage }}% </td>
-                                    <td v-else> 0% </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"> Office </th>
-                                    <td> {{ officeCount.length }} </td>
-                                    <td> {{ officeCompletedCount.length }} </td>
-                                    <td v-if="officePercentage"> {{ officePercentage }}% </td>
-                                    <td v-else> 0% </td>
-                                </tr>
+                            <div class="table-responsive">
+                                <!-- Projects table -->
+                                <table class="table align-items-center table-flush">
+                                    <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col" colspan="2" align="center">Year {{customerStatusCount ? customerStatusCount.year : ""}}</th>
+                                      
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Prospect</strong></td>
+                                            <td>{{ customerStatusCount ? customerStatusCount.prospect : 0 }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Active</strong></td>
+                                            <td>{{ customerStatusCount ? customerStatusCount.active : 0 }}</td>
+                                        </tr>
 
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="col mt-3">
+                        <div class="card shadow">
+                            <div class="card-header border-0">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h3 class="mb-0">Performance Summary</h3>
+                                    </div>
+                                    <div class="col text-right">
+                                        <!-- <a href="#!" class="btn btn-sm btn-primary">See all</a> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <!-- Projects table -->
+                                <table class="table align-items-center table-flush">
+                                    <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">Scheduled</th>
+                                        <th scope="col">Completed</th>
+                                        <th scope="col"> Percentage</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <th scope="row"> Customer </th>
+                                        <td> {{ customerCount.length }} </td>
+                                        <td> {{ customerCompletedCount.length }}</td>
+                                        <td v-if="customerPercentage"> {{ customerPercentage }}% </td>
+                                        <td v-else> 0% </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row"> Mapping </th>
+                                        <td> {{ mappingCount.length }} </td>
+                                        <td> {{ mappingCompletedCount.length }}</td>
+                                        <td v-if="mappingPercentage"> {{ mappingPercentage }}% </td>
+                                        <td v-else> 0% </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row"> Event </th>
+                                        <td> {{ eventCount.length }} </td>
+                                        <td> {{ eventCompletedCount.length }} </td>
+                                        <td v-if="eventPercentage"> {{ eventPercentage }}% </td>
+                                        <td v-else> 0% </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row"> Travel </th>
+                                        <td> {{ travelCount.length }} </td>
+                                        <td> {{ travelCompletedCount.length }} </td>
+                                        <td v-if="travelPercentage"> {{ travelPercentage }}% </td>
+                                        <td v-else> 0% </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row"> Office </th>
+                                        <td> {{ officeCount.length }} </td>
+                                        <td> {{ officeCompletedCount.length }} </td>
+                                        <td v-if="officePercentage"> {{ officePercentage }}% </td>
+                                        <td v-else> 0% </td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
+
             </div>
             <div class="row mt-5">
                 <div class="col-xl-8 mb-5 mb-xl-0">
@@ -464,6 +501,7 @@ export default {
             currentPage: 0,
             itemsPerPage: 10,
             keywords: '',
+            customerStatusCount : []
         }
     },
     created(){
@@ -471,9 +509,20 @@ export default {
         this.fetchCompletedTask();
         this.fetchTodaysSchedule();
         this.fetchTodaysAllSchedule();
+        this.fethCustomerStatusCount();
     },
     methods:{
         moment,
+        fethCustomerStatusCount(){
+            this.customerStatusCount = []; 
+            axios.get('/count-customer-status')
+            .then(response =>{
+                this.customerStatusCount = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
         scheduleType(type){
             switch(type) {
             case 1:
