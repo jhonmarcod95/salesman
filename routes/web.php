@@ -343,4 +343,4 @@ Route::get('/customer-dealers','CustomerController@customerDealers');
 
 //Get SAP Customer API
 Route::get('/sap-customers', 'CustomerController@get_sap_customer');
-Route::get('/sap-activites', 'CustomerController@get_customer_pfmc_all');
+Route::get('/sap-activites/{customer_code}', 'CustomerController@get_customer_pfmc_all');

@@ -42,6 +42,25 @@
                                     </div>
                                 </div>
 
+                               <div class="col-md-3 float-left">
+                                    <div class="form-group">
+
+                                        <label for="customerSelect" class="form-control-label">Select Status</label> 
+                                        <multiselect
+                                                v-model="statusIds"
+                                                :options="statusOptions"
+                                                :multiple="true"
+                                                track-by="id"
+                                                :custom-label="customLabelStatus"
+                                                placeholder="Status"
+                                                id="selected_status"
+                                        >
+                                        </multiselect>
+                                        <span class="text-danger small" v-if="errors.selectedStatuses">{{ errors.selectedStatuses[0] }}</span>
+
+                                    </div>
+                                </div>
+
                                 <div class="col-md-3">
                                     <button class="btn btn-sm btn-primary" @click="applyFilterCustomers"> Apply Filter</button>
                                 </div>
@@ -53,12 +72,9 @@
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
-                                    <th scope="col">Prospect Code</th>
                                     <th scope="col">Customer Code</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Status</th>
-                                    <th scope="col">View Activity</th>
-                                    
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -72,11 +88,27 @@
                                     </tr>
 
                                     <tr v-for="(customer, p) in filteredQueues" v-bind:key="p">
-                                        <td>{{ customer.prospect_id }}</td>
-                                        <td>{{ customer.customer_code }}</td>
-                                        <td>{{ customer.name }}</td>
-                                        <td>{{ customer.statuses ? customer.statuses.description : ""  }}</td>
-                                        <td><button class="btn btn-sm btn-outline-primary" @click="customerActivityModal(customer)">View Activity</button></td>
+                                        <td>
+                                            {{ customer.customer_code }}
+                                            <br>
+                                            <small>Prospect Code: {{ customer.prospect_id ? customer.prospect_id : 'N/A'  }}</small>
+                                        </td>
+                                        <td>
+                                            <h4>{{ customer.name }}<br>
+                                                <small>{{customer.google_address}}</small>
+                                            </h4>
+                                            <div v-if="customer.customer_activity.length > 0">
+                                                <div v-for="(activity, c) in customer.customer_activity" v-bind:key="c">
+                                                    <span v-if="activity.activity_description =='Prospect'" style="color:#5E72E4;"><strong><i class="fas fa-circle"></i> {{ activity.activity_description }}</strong> <small style="color:#848DA4">Date: {{ activity.activity_date }}</small></span>
+                                                    <span v-else-if="activity.activity_description =='Active'" style="color:#2DCE89;"><strong><i class="fas fa-circle"></i> {{ activity.activity_description }}</strong> <small style="color:#848DA4">Date: {{ activity.activity_date }}</small></span>
+                                                    <span v-else-if="activity.activity_description =='Inactive'" style="color:#FB6340;"><strong><i class="fas fa-circle"></i> {{ activity.activity_description }}</strong> <small style="color:#848DA4">As of: {{ activity.activity_date }}</small></span>
+                                                    <span v-else-if="activity.activity_description =='Closed'" style="color:#F5365C;"><strong><i class="fas fa-circle"></i> {{ activity.activity_description }}</strong> <small style="color:#848DA4">As of: {{ activity.activity_date }}</small></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {{ customer.statuses ? customer.statuses.description : "" }}
+                                        </td>
                                     </tr>
                                     
                                 </tbody>
@@ -111,55 +143,6 @@
 
         </div>
 
-        <div id="customer-activities-modal" tabindex="1" class="customer-activity-modal">
-            <div class="customer-modal-content">
-                <div class="customer-modal-header">
-                    <span class="customer-close" @click="closecustomerActivityModal">&times;</span>
-                    <h3 class="mt-3">{{ customer.name }}</h3>
-                    <small class="text-default">Customer code: {{ customer.customer_code }}</small>
-                </div>
-                <div class="customer-modal-body mt-3">
-                    <div class="table-responsive">
-                        <table class="table align-items-center table-flush">
-                            <thead class="thead-light">
-                            <tr>
-                                <th scope="col">Activity</th>
-                                <th scope="col">Date</th>
-                                <th scope="col">Duration</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-if="activities_loading">
-                                    <td colspan="15">
-                                        <content-placeholders>
-                                            <content-placeholders-heading :img="false" />
-                                            <content-placeholders-text :lines="3" />
-                                        </content-placeholders>
-                                    </td>
-                                </tr>
-                                <tr v-for="(customer_activity, e) in customerActivities" v-bind:key="e"> 
-                                    <td>
-                                         <span v-if="customer_activity.activity =='Prospect'" style="color:#5E72E4"><strong>{{ customer_activity.activity }}</strong></span>
-                                         <span v-else-if="customer_activity.activity =='Active'" style="color:#2DCE89"><strong>{{ customer_activity.activity }}</strong></span>
-                                         <span v-else-if="customer_activity.activity =='Inactive'" style="color:#FB6340"><strong>{{ customer_activity.activity }}</strong></span>
-                                         <span v-else-if="customer_activity.activity =='Closed'" style="color:#F5365C"><strong>{{ customer_activity.activity }}</strong></span>
-                                    </td>
-                                    <td>{{ customer_activity.date }}</td>
-                                    <td>{{ customer_activity.duration }}</td>
-                                 </tr>
-                                 <tr>
-                                    <td v-if="records_not_found" colspan="5" align="center"><strong>  No Records Found</strong></td>
-                                </tr>    
-                            </tbody>    
-                        </table>
-                    </div>
-                </div>
-                <div class="customer-modal-footer">
-            
-                </div>
-            </div>
-        </div>
-
 </div>
 </template>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
@@ -180,8 +163,9 @@
                 activities:[],
                 customersData:[],
                 companyIds:[],
-                companyIds:[],
                 companyOptions:[],
+                statusIds:[],
+                statusOptions:[],
                 errors: [],
                 error: [],
                 keywords: '',
@@ -194,14 +178,28 @@
         },
         created(){
             this.fetchCompany();
+            this.fetchStatus();
         },
         methods:{
+            customLabelStatus (status) {
+                return `${status.description}`
+            },
+            fetchStatus(){
+                axios.get('/customers-status-options')
+                .then(response => { 
+                    this.statusOptions = response.data;
+                })
+                .catch(error =>{
+                    this.errors = error.response.data.errors;
+                })
+            },
             applyFilterCustomers(){
                 this.table_loading = true;
                 this.errors = [];
                 this.customers = [];
                 axios.post('/sales-activity-customer-all', {
                     selectedCompany: this.companyIds,
+                    selectedStatuses: this.statusIds,
                 })
                 .then(response =>{
                     this.customers = response.data;
@@ -223,64 +221,6 @@
             closecustomerActivityModal(){
                 var modal = document.getElementById('customer-activities-modal');
                 modal.style.display = "none";
-            },
-            fetchCustomerActivities(){
-                let v = this;
-                v.activities_loading = true;
-                v.records_not_found = false;
-                v.customerActivities = [];
-                v.activities = [];
-                axios.get('/sales-customer-activities/' + v.customer.customer_code)
-                .then(response => {
-                    v.activities = response.data;
-                    
-                    if(v.activities.length > 0){
-
-                        let last_activity_date = '';
-                        let is_first = true;
-                        let duration = '';
-                        
-                          v.activities.forEach((activity,key) => {
-                             var color='';
-                              if(activity.activity== "Prospect"){
-                                  color = '';
-                              }
-                              let customer_code = '';
-                                if(is_first){
-                                    last_activity_date = activity.activity_date;
-                                    duration = '';
-                                    is_first = false;
-                                }else{
-                                    if(last_activity_date){
-                                        duration = v.rendered(activity.activity_date,last_activity_date);
-                                        last_activity_date = activity.activity_date;
-
-                                    }else{
-                                        duration = '';
-                                        last_activity_date = activity.activity_date;
-                                    }
-                                }
-
-                                v.customerActivities.push({
-                                    'activity' : activity.activity,
-                                    'date' : activity.activity_date,
-                                    'duration' : duration,
-                                    'color' : color
-                                });
-
-                          });
-
-                        v.activities_loading = false;
-                        v.records_not_found = false;
-                    }else{
-                         v.activities_loading = false;
-                         v.records_not_found = true;
-                    }
-                })
-                .catch(error => { 
-                    this.errors = error.response.data.errors;
-                })
-
             },
             rendered(endTime, startTime){ 
                 if(endTime && startTime){
