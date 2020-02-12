@@ -190,7 +190,7 @@ class CustomerController extends Controller
                 $customer_activity = [];
                 $customer_activity['customer_id'] = $customers->id;
                 $customer_activity['activity_description'] = 'Prospect';
-                $customer_activity['activity_date'] = Carbon::now();
+                $customer_activity['activity_date'] = date('Y-m-d');
                 CustomerActivity::create($customer_activity);
             }
 
