@@ -29,6 +29,9 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('customer:weekly_status_update')
                  ->weekly()->saturdays()->at('00:01');
+
+        $schedule->command('customer:weekly_status_update')
+        ->weekly()->saturdays()->at('18:01');
     }
 
     /**

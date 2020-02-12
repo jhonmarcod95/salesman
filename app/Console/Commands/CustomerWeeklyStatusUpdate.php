@@ -54,7 +54,9 @@ class CustomerWeeklyStatusUpdate extends Command
     public function handle()
     {
   
-        $all_customers = Customer::select('id','customer_code','name','company_id')->where('company_id','1')->get();
+        $all_customers = Customer::select('id','customer_code','name','company_id')
+                                    // ->where('company_id','1')
+                                    ->get();
         
         if($all_customers){
             foreach($all_customers as $customer){
