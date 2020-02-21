@@ -45,7 +45,7 @@ class PaymentAutoCv extends Command
         $thisMonday = date("Y-m-d", strtotime("last monday"));
         $thisSunday = date("Y-m-d", strtotime("this sunday"));
 
-        $payment_headers = PaymentHeader::with('company.sapServers')
+        $payment_headers = PaymentHeader::with('company.sapServers', 'company.bankGls')
             ->whereBetween('created_at', [$thisMonday, $thisSunday])
             ->whereDoesntHave('checkVoucher') // payment header without CV
             ->get();
@@ -66,7 +66,7 @@ class PaymentAutoCv extends Command
             $date_today = Carbon::now()->format('Ymd');
             $reference = $payment_header->reference_number;
             $header_text = $payment_header->header_text;
-            $bank_account = '10112011'; //revise
+            $bank_account = $payment_header->company->bankGls->where('id', '1')->first()->gl_account; //revise bank id 1 = BPI
             $amount = $payment_header->payable->amount * -1;
             $business_area = $payment_header->payable->business_area;
             $vendor_code = $payment_header->vendor_code;

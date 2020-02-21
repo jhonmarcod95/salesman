@@ -16,7 +16,7 @@ class APIController extends Controller
 
     public static function executeSapFunction($connection, $function, $parameters, $return){
         $client = new \GuzzleHttp\Client();
-        $response = $client->request('POST', 'http://10.96.4.39:8012/api/execute-fm', [
+        $response = $client->request('POST',  env('SAP_API') . '/execute-fm', [
             'form_params' => [
                 'connection' => $connection,
                 'function' => $function,

@@ -15,7 +15,16 @@ class CreateCheckVouchersTable extends Migration
     {
         Schema::create('check_vouchers', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('doc_number');
+            $table->string('company_code');
+            $table->date('document_date');
+            $table->date('posting_date');
+            $table->string('reference_number');
+            $table->string('header_text');
+            $table->string('bank_account');
+            $table->double('amount', 8, 2);
+            $table->string('business_area');
+            $table->string('vendor_code');
+            $table->string('document_code');
             $table->timestamps();
         });
     }

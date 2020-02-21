@@ -34,14 +34,14 @@
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label for="start_date" class="form-control-label">Start Date</label> 
+                                        <label for="start_date" class="form-control-label">Posting From</label>
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label for="end_date" class="form-control-label">End Date</label> 
+                                        <label for="end_date" class="form-control-label">Posting To</label>
                                         <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
                                         <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
                                     </div>
@@ -64,6 +64,7 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col">Document Code</th>
+                                    <th scope="col">Check Voucher</th>
                                     <th scope="col">Amount(PHP)</th>
                                     <th scope="col">Company Code</th>
                                     <th scope="col">Company Name</th>
@@ -93,6 +94,7 @@
                                             </div>
                                         </td>
                                         <td>{{ paymentHeader.document_code }}</td>
+                                        <td v-if="paymentHeader.check_voucher">{{ paymentHeader.check_voucher.document_code }}</td><td v-else></td>
                                         <td>{{ paymentHeader.payment_detail[0].amount.toString().slice(1)+ '.00' }}</td>
                                         <td>{{ paymentHeader.company_code }}</td>
                                         <td>{{ paymentHeader.company_name }}</td>
@@ -313,6 +315,7 @@ export default {
             loading: false,
             json_fields: {
                 'DOCUMENT CODE': 'document_code',
+                'CHECK VOUCHER': 'check_voucher.document_code',
                 'AMOUNT(PHP)': {
                     callback: (value) => {
                         return value.payment_detail[0].amount.toString().slice(1) + '.00';

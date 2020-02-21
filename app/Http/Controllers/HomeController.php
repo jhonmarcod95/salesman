@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\PaymentHeader;
 use Auth;
 use Illuminate\Http\Request;
 
@@ -26,6 +27,11 @@ class HomeController extends Controller
      */
     public function index()
     {
+         $pay = PaymentHeader::with('company.sapServers', 'company.bankGls')
+            ->whereDoesntHave('checkVoucher') // payment header without CV
+            ->get();
+         return $pay[0]->company->bankGls->where('id', '1')->first()->gl_account;
+
         if(!Auth::user()->hasRole(['hr','ap','tax','audit'])){
             session(['header_text' => 'Dashboard']);
 

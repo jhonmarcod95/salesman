@@ -21,4 +21,8 @@ class Company extends Model
     public function sapServers() {
         return $this->belongsToMany(SapServer::class);
     }
+
+    public function bankGls(){
+        return $this->hasMany(BankCompanyGl::class);
+    }
 }
