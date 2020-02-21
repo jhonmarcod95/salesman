@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
+use function foo\func;
 
 class PaymentHeader extends Model implements Auditable
 {
@@ -32,5 +33,17 @@ class PaymentHeader extends Model implements Auditable
 
     public function payments(){
         return $this->hasMany(Payment::class, 'document_code', 'document_code');
+    }
+
+    public function company(){
+        return $this->hasOne(Company::class, 'code', 'company_code');
+    }
+
+    public function payable(){
+        return $this->hasOne(PaymentDetail::class)->where('item', '1');
+    }
+
+    public function checkVoucher(){
+        return $this->hasOne(CheckVoucher::class, 'reference_number', 'reference_number');
     }
 }
