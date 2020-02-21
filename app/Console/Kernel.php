@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\PaymentAutoPosting::class,
+        Commands\PaymentAutoCv::class,
     ];
 
     /**
@@ -24,8 +25,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        //auto posting
         $schedule->command('payment:autoposting')
                  ->weekly()->tuesdays()->at('00:01');
+
+        //auto cv
+        $schedule->command('payment:autocv')
+            ->weekly()->tuesdays()->at('00:30');
     }
 
     /**
