@@ -106,25 +106,8 @@ class PaymentAutoPosting extends Command
                     $posting_date = !$samePostingDate ? Carbon::parse($lastWeekSunday)->endOfMonth() : Carbon::now();
                 }
 
-                $acc_item_no = [];
-                $acc_item_text = [];
-                $acc_gl_account = [];
-                $acc_gl_description = [];
-                $acc_assignment = [];
-                $acc_input_tax_code = [];
-                $acc_internal_order = [];
-                $acc_amount = [];
-                $acc_charge_type = [];
-                $acc_business_area = [];
-                $acc_or_number = [];
-                $acc_supplier_name =[];
-                $acc_address = [];
-                $acc_tin_number = [];
-                // $acc_tax_amountI3 = [];
-                // $acc_tax_amountI7 = [];
-                $gl_account_i7 = '';
-                $gl_account_i3 = '';
                 $expense_ids = [];
+                $items = [];
                 
                 $filteredBusinessArea = $groupedExpenses[0]->user->companies[0]->businessArea
                     ->where('location_id',$groupedExpenses[0]->user->location[0]->id)->first(); //Loop to get the correct business area base on the and user's location
@@ -136,21 +119,22 @@ class PaymentAutoPosting extends Command
                 $acc_amount_first_index = 0;
 
                 // Generate the line 1
-                array_push($acc_item_no, 1);
-                array_push($acc_item_text, 'SALESFORCE REIMBURSEMENT; '. $coveredWeek);
-                array_push($acc_gl_account, $groupedExpenses[0]->user->vendor->vendor_code);
-                array_push($acc_gl_description, $groupedExpenses[0]->user->name);
-                array_push($acc_assignment, '~');
-                array_push($acc_input_tax_code, '~');
-                array_push($acc_internal_order, '~');
-                array_push($acc_charge_type, '~');
-                array_push($acc_business_area, $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~');
-                array_push($acc_or_number, '~');
-                array_push($acc_supplier_name, '~');
-                array_push($acc_address, '~');
-                array_push($acc_tin_number, '~');
-                // array_push($acc_tax_amountI3, '~');
-                // array_push($acc_tax_amountI7, '~');
+                array_push($items, [
+                    'acc_item_no' => 1,
+                    'acc_item_text' => 'SALESFORCE REIMBURSEMENT; '. $coveredWeek,
+                    'acc_gl_account' => $groupedExpenses[0]->user->vendor->vendor_code,
+                    'acc_gl_description' => $groupedExpenses[0]->user->name,
+                    'acc_assignment' => '~',
+                    'acc_input_tax_code' => '~',
+                    'acc_internal_order' => '~',
+                    'acc_amount' => '~',
+                    'acc_charge_type' => '~',
+                    'acc_business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~',
+                    'acc_or_number' => '~',
+                    'acc_supplier_name' => '~',
+                    'acc_address' => '~',
+                    'acc_tin_number' => '~'
+                ]);
 
                 foreach($groupedExpenses as $expense){ // Loop entry per month. This will generate line 2 to the nth line
                     array_push($expense_ids,$expense->id);
@@ -189,22 +173,22 @@ class PaymentAutoPosting extends Command
 
                     $internal_order = $filteredInternalOrders ? $filteredInternalOrders->internal_order : '~';
 
-                    array_push($acc_item_no, $item = $item + 1);
-                    array_push($acc_item_text, 'SALESFORCE ' . strtoupper($expense->expensesType->name. ' ' .$expense->created_at->format('m/d/Y')));
-                    array_push($acc_gl_account,  $filteredGL->gl_account);
-                    array_push($acc_gl_description, $filteredGL->gl_description);
-                    array_push($acc_assignment, '~');
-                    array_push($acc_input_tax_code, $tax_code);
-                    array_push($acc_internal_order, $internal_order);
-                    array_push($acc_amount, $amount);
-                    array_push($acc_charge_type, $expense->expensesType->expenseChargeType->chargeType->name);
-                    array_push($acc_business_area, $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~');
-                    array_push($acc_or_number, $expense->receiptExpenses && $expense->receiptExpenses->receipt_number ? $expense->receiptExpenses->receipt_number : '~');
-                    array_push($acc_supplier_name, $expense->receiptExpenses && $expense->receiptExpenses->vendor_name ? $expense->receiptExpenses->vendor_name : '~');
-                    array_push($acc_address, $expense->receiptExpenses && $expense->receiptExpenses->vendor_address ? $expense->receiptExpenses->vendor_address : '~');
-                    array_push($acc_tin_number, $expense->receiptExpenses && $expense->receiptExpenses->tin_number ? $expense->receiptExpenses->tin_number : '~');
-                    // array_push($acc_tax_amountI3, '~');
-                    // array_push($acc_tax_amountI7, '~');
+                    array_push($items, [
+                        'acc_item_no' =>  $item = $item + 1,
+                        'acc_item_text' => 'SALESFORCE ' . strtoupper($expense->expensesType->name. ' ' .$expense->created_at->format('m/d/Y')),
+                        'acc_gl_account' => $filteredGL->gl_account,
+                        'acc_gl_description' => $filteredGL->gl_description,
+                        'acc_assignment' => '~',
+                        'acc_input_tax_code' => $tax_code,
+                        'acc_internal_order' =>  $internal_order,
+                        'acc_amount' => $amount,
+                        'acc_charge_type' => $expense->expensesType->expenseChargeType->chargeType->name,
+                        'acc_business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~',
+                        'acc_or_number' => $expense->receiptExpenses && $expense->receiptExpenses->receipt_number ? $expense->receiptExpenses->receipt_number : '~',
+                        'acc_supplier_name' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_name ? $expense->receiptExpenses->vendor_name : '~',
+                        'acc_address' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_address ? $expense->receiptExpenses->vendor_address : '~',
+                        'acc_tin_number' => $expense->receiptExpenses && $expense->receiptExpenses->tin_number ? $expense->receiptExpenses->tin_number : '~'
+                    ]);
 
                     if($bol_tax_amount && $expense->receiptExpenses->receiptType->tax_code == 'I3'){
                         $tax_amountI3 = number_format($tax_amountI3 + $tax_amount, 2, '.', "");
@@ -212,60 +196,62 @@ class PaymentAutoPosting extends Command
                         $tax_amountI7 = number_format($tax_amountI7 + $tax_amount, 2, '.', "");
                     }else{}
                 }
-
+                
                 // Generate last line of the entry for I7 or I3
                 $gl_account_i7 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I7')->first();
 
                 if($tax_amountI7){
-                    array_push($acc_item_no, $item = $item + 1);
-                    array_push($acc_item_text, '~');
-                    array_push($acc_gl_account,  $gl_account_i7->gl_account);
-                    array_push($acc_gl_description, $gl_account_i7->gl_description);
-                    array_push($acc_assignment, '~');
-                    array_push($acc_input_tax_code, 'I7');
-                    array_push($acc_internal_order, '~');
-                    array_push($acc_amount, $tax_amountI7);
-                    array_push($acc_charge_type, '~');
-                    array_push($acc_business_area, $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~');
-                    array_push($acc_or_number, '~');
-                    array_push($acc_supplier_name, '~');
-                    array_push($acc_address, '~');
-                    array_push($acc_tin_number, '~');
+                    array_push($items, [
+                        'acc_item_no' =>  $item = $item + 1,
+                        'acc_item_text' => '~ ',
+                        'acc_gl_account' => $gl_account_i7->gl_account,
+                        'acc_gl_description' => $gl_account_i7->gl_description,
+                        'acc_assignment' => '~',
+                        'acc_input_tax_code' => 'I7',
+                        'acc_internal_order' => '~',
+                        'acc_amount' => $tax_amountI7,
+                        'acc_charge_type' => '~',
+                        'acc_business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~',
+                        'acc_or_number' => '~',
+                        'acc_supplier_name' => '~',
+                        'acc_address' => '~',
+                        'acc_tin_number' => '~'
+                    ]);
                     $acc_amount_first_index = $acc_amount_first_index + $tax_amountI7;
                 }
 
                 $gl_account_i3 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I3')->first();
                 if($tax_amountI3){
-                    array_push($acc_item_no, $item = $item + 1);
-                    array_push($acc_item_text, '~');
-                    array_push($acc_gl_account,  $gl_account_i3->gl_account);
-                    array_push($acc_gl_description, $gl_account_i3->gl_description);
-                    array_push($acc_assignment, '~');
-                    array_push($acc_input_tax_code, 'I3');
-                    array_push($acc_internal_order, '~');
-                    array_push($acc_amount, $tax_amountI3);
-                    array_push($acc_charge_type, '~');
-                    array_push($acc_business_area, $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~');
-                    array_push($acc_or_number, '~');
-                    array_push($acc_supplier_name, '~');
-                    array_push($acc_address, '~');
-                    array_push($acc_tin_number, '~');
+                    array_push($items, [
+                        'acc_item_no' =>  $item = $item + 1,
+                        'acc_item_text' => '~ ',
+                        'acc_gl_account' => $gl_account_i3->gl_account,
+                        'acc_gl_description' => $gl_account_i3->gl_description,
+                        'acc_assignment' => '~',
+                        'acc_input_tax_code' => 'I3',
+                        'acc_internal_order' => '~',
+                        'acc_amount' => $tax_amountI3,
+                        'acc_charge_type' => '~',
+                        'acc_business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '~',
+                        'acc_or_number' => '~',
+                        'acc_supplier_name' => '~',
+                        'acc_address' => '~',
+                        'acc_tin_number' => '~'
+                    ]);
                     $acc_amount_first_index = $acc_amount_first_index + $tax_amountI3;
                 }
 
                 //Place total amount to be reimburse in the first index of @acc_amount
-                array_unshift($acc_amount, number_format($acc_amount_first_index * -1, 2, '.', "")); 
+                $items[0]['acc_amount'] = number_format($acc_amount_first_index * -1, 2, '.', "");
                 // Get SAP server
                 $sapCredential = $this->simulateExpenseSubmitted($groupedExpenses[0]->expenses_entry_id);
-                // Post Simulated Expeses to SAP                
-                $this->postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date);
-
-
+                // Post Simulated Expeses to SAP
+                $this->postSimulatedExpenses($items,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date);
             }
         }
     }
 
-    public function postSimulatedExpenses($acc_item_no,$acc_item_text,$acc_gl_account,$acc_gl_description,$acc_assignment,$acc_input_tax_code,$acc_internal_order,$acc_amount,$acc_charge_type,$acc_business_area,$acc_or_number,$acc_supplier_name,$acc_address,$acc_tin_number,$user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date){
+    public function postSimulatedExpenses($items,$user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date){
         $posting_type = 'POST';
         $array = [
             'posting_type' => $posting_type,
@@ -287,22 +273,9 @@ class PaymentAutoPosting extends Command
             'payment_terms' => 'NCOD',
             'gl_account_i7' => $gl_account_i7->gl_account,
             'gl_account_i3' => $gl_account_i3->gl_account,
-            'acc_item_no' => $acc_item_no,
-            'acc_item_text' => $acc_item_text,
-            'acc_gl_account' => $acc_gl_account,
-            'acc_gl_description' => $acc_gl_description,
-            'acc_assignment' => $acc_assignment,
-            'acc_input_tax_code' => $acc_input_tax_code,
-            'acc_internal_order' => $acc_internal_order,
-            'acc_amount' => $acc_amount,
-            'acc_charge_type' => $acc_charge_type,
-            'acc_business_area' => $acc_business_area,
-            'acc_or_number' => $acc_or_number,
-            'acc_supplier_name' => $acc_supplier_name,
-            'acc_address' => $acc_address,
-            'acc_tin_number' => $acc_tin_number
+            'items' => $items
         ];
-        
+
         $params = http_build_query($array) . "\n";
         $decode_params = urldecode($params);
         $trimmed_params = preg_replace('/\[[^\]]*\]/' , '', $decode_params);
@@ -370,42 +343,42 @@ class PaymentAutoPosting extends Command
                             'document_code' => json_decode($response, true)[0]['return_message_description'],
                         ];
                         if($payment_header = PaymentHeader::create($array_header)){ //Save transaction header to payment header table
-                            foreach($array['acc_item_no'] as $key => $item){
+                            foreach($array['items'] as $item){
                                 $array_details = [
-                                    'item' => $item,
-                                    'item_text' => $array['acc_item_text'][$key],
-                                    'gl_account' => $array['acc_gl_account'][$key],
-                                    'description' => $array['acc_gl_description'][$key],
-                                    'assignment' => $array['acc_assignment'][$key],
-                                    'input_tax_code' => $array['acc_input_tax_code'][$key],
-                                    'internal_order' => $array['acc_internal_order'][$key],
-                                    'amount' => $array['acc_amount'][$key],
-                                    'charge_type' => $array['acc_charge_type'][$key],
-                                    'business_area' => $array['acc_business_area'][$key],
-                                    'or_number' => $array['acc_or_number'][$key],
-                                    'supplier_name' => $array['acc_supplier_name'][$key],
-                                    'supplier_address' => $array['acc_address'][$key],
-                                    'supplier_tin_number' => $array['acc_tin_number'][$key],
+                                    'item' => $item['acc_item_no'],
+                                    'item_text' => $item['acc_item_text'],
+                                    'gl_account' => $item['acc_gl_account'],
+                                    'description' => $item['acc_gl_description'],
+                                    'assignment' => $item['acc_assignment'],
+                                    'input_tax_code' => $item['acc_input_tax_code'],
+                                    'internal_order' => $item['acc_internal_order'],
+                                    'amount' => $item['acc_amount'],
+                                    'charge_type' => $item['acc_charge_type'],
+                                    'business_area' => $item['acc_business_area'],
+                                    'or_number' => $item['acc_or_number'],
+                                    'supplier_name' => $item['acc_supplier_name'],
+                                    'supplier_address' => $item['acc_address'],
+                                    'supplier_tin_number' => $item['acc_tin_number'],
                                 ];
                                 if($paymentDetail = $payment_header->paymentDetail()->create($array_details)){ //Save posted expenses per line to Payment Detail table
-                                    if($array['acc_internal_order'][$key] !== '~'){
-
-                                        preg_match('/\d{2}\/\d{2}\/\d{4}/',$array['acc_item_text'][$key],$match);
-
+                                    if($item['acc_internal_order'] !== '~'){
+                    
+                                        preg_match('/\d{2}\/\d{2}\/\d{4}/',$item['acc_item_text'],$match);
+                    
                                         $url = "http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking";
-                                        $fields = "budget_line=". $array['acc_internal_order'][$key] ."&posting_date=". Carbon::parse($match[0])->format('Y-m-d') ."&company_server=".$sapCredential[0]['sap_server']->sap_server;
+                                        $fields = "budget_line=". $item['acc_internal_order'] ."&posting_date=". Carbon::parse($match[0])->format('Y-m-d') ."&company_server=".$sapCredential[0]['sap_server']->sap_server;
                                         $header = array(
                                             "Content-Type: application/x-www-form-urlencoded",
                                             "Postman-Token: bce74f1d-8de3-41e6-9384-5f8b39f75e71",
                                             "cache-control: no-cache"
                                         );
-
+                    
                                         $array_balance = [
-                                            'internal_order' => $array['acc_internal_order'][$key],
+                                            'internal_order' => $item['acc_internal_order'],
                                             'date' => Carbon::parse($match[0])->format('Y-m-d'),
                                             'to' => json_decode($this->APIconnection($url,$fields,$header), true)[0]['balance_amount']
                                         ];
-
+                    
                                         $paymentDetail->balanceHistory()->create($array_balance);
                                     }
                                 }
@@ -429,7 +402,7 @@ class PaymentAutoPosting extends Command
                     $data = [
                         'user_id' => $user->id,
                         'ap_id' => 175,
-                        'cover_week' => $array['acc_item_text'][0],
+                        'cover_week' => $array['items'][0]['acc_item_text'],
                         'posting_type' => $posting_type
 
                     ];
