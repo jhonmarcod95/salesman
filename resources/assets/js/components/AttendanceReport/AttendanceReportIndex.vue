@@ -190,8 +190,16 @@ export default {
                             return 'Customer';
                         }else if(value.type == 2){
                            return 'Mapping';
+                        }else if(value.type == 3){
+                           return 'Event';
+                        }else if(value.type == 4){
+                           return 'Travel';
+                        }else if(value.type == 5){
+                           return 'Office';
+                        }else if(value.type == 6){
+                           return 'Activity';
                         }else{
-                            return 'Event';
+                            return '';
                         }
                     }
                 },
