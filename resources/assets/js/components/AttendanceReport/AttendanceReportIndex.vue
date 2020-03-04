@@ -208,6 +208,7 @@ export default {
                 'DATE': 'date',
                 'START TIME': 'start_time',
                 'END TIME': 'end_time',
+                'SCHEDULE REMARKS': 'remarks',
                 'STATUS': {
                     callback: (value) => {
                         if(value.status == 1){
@@ -216,15 +217,6 @@ export default {
                            return 'Pending';
                         }else{
                             return 'Absent';
-                        }
-                    }
-                },
-                'REMARKS': {
-                    callback: (value) => {
-                        if(value.attendances){
-                            return value.attendances.remarks;
-                        }else{
-                            return '';
                         }
                     }
                 },
@@ -264,6 +256,15 @@ export default {
                             }else{
                                 return '';
                             }
+                        }else{
+                            return '';
+                        }
+                    }
+                },
+                'ATTENDANCE REMARKS': {
+                    callback: (value) => {
+                        if(value.attendances){
+                            return value.attendances.remarks;
                         }else{
                             return '';
                         }
