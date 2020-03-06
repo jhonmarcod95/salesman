@@ -174,7 +174,7 @@ class PaymentAutoPosting extends Command
 
                     array_push($items, [
                         'item_no' =>  $item = $item + 1,
-                        'item_text' => 'SALESFORCE ' . strtoupper($expense->expensesType->name. ' ' .$expense->created_at->format('m/d/Y')),
+                        'item_text' => 'SALESFORCE ' . strtoupper($expense->expensesType->name . ' ' . $expense->created_at->format('m/d/Y')),
                         'gl_account' => $filteredGL->gl_account,
                         'gl_description' => $filteredGL->gl_description,
                         'assignment' => '',
@@ -187,6 +187,7 @@ class PaymentAutoPosting extends Command
                         'supplier_name' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_name ? $expense->receiptExpenses->vendor_name : '',
                         'address' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_address ? $expense->receiptExpenses->vendor_address : '',
                         'tin_number' => $expense->receiptExpenses && $expense->receiptExpenses->tin_number ? $expense->receiptExpenses->tin_number : '',
+                        'expense_date' => $expense->created_at->format('Y-m-d'),
                         'tag' => 'gl'
                     ]);
 
@@ -287,6 +288,70 @@ class PaymentAutoPosting extends Command
 
         $items = $accounting_entry['items'];
 
+        $last_io_balances = [];
+
+        /* ref key logic **********************************************************************************************/
+        $io_ref_keys = [];
+        $ioTotalExpenses = collect($items)
+            ->where('tag', 'gl')
+            ->groupBy('internal_order')
+            ->map(function ($row) {
+                return $row->sum('amount');
+            });
+
+        foreach ($ioTotalExpenses as $io => $ioTotalExpense){
+            $ioBalances = APIController::executeSapFunction($sapConnection, 'ZFI_BUDGET_CHK_INTEG', [
+                'P_AUFNR' => $io,
+                'P_BUDAT' => $posting_date->format('Ymd'),
+            ], [
+                'GV_OUTPUT' => 'total_amount',
+                [
+                    'TABLE' => ['VERSIONS' => 'versions'],
+                    'FIELDS' => [
+                        'VERSN' => 'version',
+                        'AMOUNT' => 'amount',
+                    ]
+                ]
+            ]);
+
+            //for balance history table
+            $last_io_balances[] = [
+                'internal_order' => $io,
+                'amount' => $ioBalances['total_amount']
+            ];
+
+            $versionCount = count($ioBalances['versions']) - 1; // (-1) not include version zero
+            $keyCount = 3; // ref keys in SAP
+            $refKeys = [];
+
+            if ($keyCount > $versionCount) $keyCount = $versionCount;
+
+            for ($i = 1; $i <= $versionCount; $i++){
+                $keys = [];
+                for ($j = 0; $j < $keyCount; $j++){
+                    $keys['REF_KEY_' . ($j + 1)] = $i + $j;
+                }
+                $refKeys[] = $keys;
+                if ($keys['REF_KEY_' . $keyCount] >= $versionCount) break;
+            }
+
+            foreach ($refKeys as $versions){
+                $ioTotalBalance = 0;
+                foreach ($versions as $version){
+                    $ioTotalBalance += $ioBalances['versions'][$version]->amount;
+                }
+                if ($ioTotalBalance > $ioTotalExpense){
+                    $io_ref_keys[] = array_merge([
+                        'internal_order' => $io,
+                    ], $versions);
+                    break;
+                }
+            }
+        }
+        $io_ref_keys = collect($io_ref_keys);
+        /* ************************************************************************************************************/
+
+
         /* SAP payment posting setup **********************************************************************************/
         $documentHeader = [
             'DOCUMENTHEADER' => [
@@ -335,7 +400,12 @@ class PaymentAutoPosting extends Command
             }
             // GL
             elseif ($item['tag'] == 'gl'){
-                $values = [
+
+                $ref_keys = $io_ref_keys->where('internal_order', $item['internal_order'])->first();
+                if (is_null($ref_keys)) $ref_keys = [];
+                unset($ref_keys['internal_order']);
+
+                $values = array_merge([
                     'ITEMNO_ACC' => $item['item_no'],
                     'GL_ACCOUNT' => $item['gl_account'],
                     'COMP_CODE' => $company_code,
@@ -343,14 +413,15 @@ class PaymentAutoPosting extends Command
                     'ORDERID' => $item['internal_order'],
                     'ITEM_TEXT' => $item['item_text'],
                     'ALLOC_NMBR' => $item['assignment'],
-                ];
+                ], $ref_keys);
+
                 if ($company_code == 'PFMC') $values['BUS_AREA'] = $item['business_area'];
                 if (($company_code == '1100' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == '1200' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006'))
                 ){
-                    $values['QUANTITY'] = '1';
+                    $values['QUANTITY:int'] = '1';
                     $values['BASE_UOM'] = '10';
                 }
                 $accountGL[] = $values;
@@ -472,27 +543,24 @@ class PaymentAutoPosting extends Command
                                         'supplier_name' => $item['supplier_name'],
                                         'supplier_address' => $item['address'],
                                         'supplier_tin_number' => $item['tin_number']])){ //Save posted expenses per line to Payment Detail table
-//
-//                                        if($item['acc_internal_order'] !== ''){
-//
-//                                            preg_match('/\d{2}\/\d{2}\/\d{4}/',$item['acc_item_text'],$match);
-//
-//                                            $url = "http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking";
-//                                            $fields = "budget_line=". $item['acc_internal_order'] ."&posting_date=". Carbon::parse($match[0])->format('Y-m-d') ."&company_server=".$sapCredential[0]['sap_server']->sap_server;
-//                                            $header = array(
-//                                                "Content-Type: application/x-www-form-urlencoded",
-//                                                "Postman-Token: bce74f1d-8de3-41e6-9384-5f8b39f75e71",
-//                                                "cache-control: no-cache"
-//                                            );
-//
-//                                            $array_balance = [
-//                                                'internal_order' => $item['acc_internal_order'],
-//                                                'date' => Carbon::parse($match[0])->format('Y-m-d'),
-//                                                'to' => json_decode($this->APIconnection($url,$fields,$header), true)[0]['balance_amount']
-//                                            ];
-//
-//                                            $paymentDetail->balanceHistory()->create($array_balance);
-//                                        }
+
+                                        if ($item['tag'] == 'gl'){
+                                            $last_io_balance = collect($last_io_balances)->where('internal_order', $item['internal_order'])->first()['amount'];
+
+                                            $curr_io_balance = APIController::executeSapFunction($sapConnection, 'ZFI_BUDGET_CHK_INTEG', [
+                                                'P_AUFNR' => $item['internal_order'],
+                                                'P_BUDAT' => $posting_date->format('Ymd'),
+                                            ], ['GV_OUTPUT' => 'total_amount'])['total_amount'];
+
+                                            $array_balance = [
+                                                'internal_order' => $item['internal_order'],
+                                                'date' => $item['expense_date'],
+                                                'from' => $last_io_balance,
+                                                'to' => $curr_io_balance
+                                            ];
+
+                                            $paymentDetail->balanceHistory()->create($array_balance);
+                                        }
                                     }
                                 }
                             }
@@ -590,6 +658,7 @@ class PaymentAutoPosting extends Command
                         'posting_type' => $posting_type])){
 
                         foreach( $postingErrors as $postingError){
+                            if ($postingError['return_message_id'] != 'RW')
                             $paymentHeaderError->paymentHeaderDetailError()->create($postingError);
                         }
                         DB::commit();
