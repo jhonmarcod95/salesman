@@ -30,7 +30,7 @@
                                 </thead>
                                 <tbody v-if="expenseByTsr.length">
                                     <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">  
-                                        <td v-if='(!expenseBy.payments && expenseBy.receipt_expenses && !expenseBy.route_transportation) || (expenseBy.route_transportation && !expenseBy.payments && !expenseBy.receipt_expenses)'> <input type="checkbox" name="expenses_id" :value="expenseBy.id" checked="checked"></td>
+                                        <td v-if='(!expenseBy.payments && expenseBy.receipt_expenses && !expenseBy.route_transportation) || (!expenseBy.payments && expenseBy.receipt_expenses && expenseBy.route_transportation) || (expenseBy.route_transportation && !expenseBy.payments && !expenseBy.receipt_expenses)'> <input type="checkbox" name="expenses_id" :value="expenseBy.id" checked="checked"></td>
                                         <td v-else-if="!expenseBy.payments && !expenseBy.receipt_expenses && !expenseBy.route_transportation" class="text-danger">Receipt unverified</td>
                                         <td v-else class="text-primary">{{ expenseBy.payments.document_code}}</td>
                                         <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
