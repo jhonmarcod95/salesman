@@ -57,9 +57,11 @@ class PaymentAutoPosting extends Command
         foreach($companies as $company){
             $expenses = Expense::doesntHave('payments')->with('user', 'user.companies', 'user.location','user.vendor', 'user.internalOrders', 'user.companies.businessArea', 'user.companies.glTaxcode','expensesType','expensesType.expenseChargeType.chargeType.expenseGl', 'receiptExpenses','receiptExpenses.receiptType')
                 ->whereHas('user' , function($q) use($company){
-                    $q->whereHas('companies', function ($q) use($company){
-                        $q->where('company_id', $company->id);
-                    });
+                    $q->where('id', 152);
+                    //292 mtpci
+//                    $q->whereHas('companies', function ($q) use($company){
+//                        $q->where('company_id', $company->id);
+//                    });
                 })->whereDate('created_at', '>=',  $lastWeekMonday)
                 ->whereDate('created_at' ,'<=', $lastWeekSunday)
                 ->where('expenses_entry_id', '!=', 0)
@@ -322,8 +324,9 @@ class PaymentAutoPosting extends Command
 
             $versionCount = count($ioBalances['versions']) - 1; // (-1) not include version zero
             $keyCount = 3; // ref keys in SAP
-            $refKeys = [];
+            $refKeyCombinations = [];
 
+            //key combination [[1,2,3],[2,3,4]]
             if ($keyCount > $versionCount) $keyCount = $versionCount;
 
             for ($i = 1; $i <= $versionCount; $i++){
@@ -331,26 +334,56 @@ class PaymentAutoPosting extends Command
                 for ($j = 0; $j < $keyCount; $j++){
                     $keys['REF_KEY_' . ($j + 1)] = $i + $j;
                 }
-                $refKeys[] = $keys;
+                $refKeyCombinations[] = $keys;
                 if ($keys['REF_KEY_' . $keyCount] >= $versionCount) break;
             }
 
-            foreach ($refKeys as $versions){
-                $ioTotalBalance = 0;
-                foreach ($versions as $version){
-                    $ioTotalBalance += $ioBalances['versions'][$version]->amount;
+//            //key to be used
+//            foreach ($refKeyCombinations as $refKeyCombination){
+//                $ioTotalBalance = $ioBalances['versions'][0]->amount;
+//                $keyToUsed = [];
+//                $isSatisfied = false;
+//
+//                if ($ioTotalBalance > $ioTotalExpense) break; // if version zero is enough, no ref keys needed
+//
+//                foreach ($refKeyCombination as $k => $v){
+//                    $ioTotalBalance += $ioBalances['versions'][$v]->amount;
+//
+//                    $keyToUsed[$k] = $v;
+//                    if ($ioTotalBalance > $ioTotalExpense) {
+//                        $isSatisfied = true;
+//                        break;
+//                    };
+//                }
+//
+//                if ($isSatisfied){
+//                    $io_ref_keys[] = array_merge([
+//                        'internal_order' => $io,
+//                    ], $keyToUsed);
+//                }
+//
+//                $ioTotalBalance = 0; //set to reset for next combination
+//            }
+
+            //keys to be used
+            foreach ($refKeyCombinations as $refKeyCombination){
+                $ioTotalBalance = $ioBalances['versions'][0]->amount;
+
+                foreach ($refKeyCombination as $k => $v){
+                    $ioTotalBalance += $ioBalances['versions'][$v]->amount;
                 }
+
                 if ($ioTotalBalance > $ioTotalExpense){
                     $io_ref_keys[] = array_merge([
                         'internal_order' => $io,
-                    ], $versions);
+                    ], $refKeyCombination);
                     break;
                 }
             }
+
         }
         $io_ref_keys = collect($io_ref_keys);
         /* ************************************************************************************************************/
-
 
         /* SAP payment posting setup **********************************************************************************/
         $documentHeader = [
@@ -487,7 +520,7 @@ class PaymentAutoPosting extends Command
 
         //final parameter for posting
         $payment = array_merge($documentHeader, $accountPayable, $accountGL, $currencyAmount, $accountTax);
-
+//dd($payment);
         try{
             //sap posting
             $paymentPosting = APIController::executeSapFunction($sapConnection, 'BAPI_ACC_DOCUMENT_POST', $payment, null);
@@ -499,7 +532,7 @@ class PaymentAutoPosting extends Command
                     $document_code = substr($paymentPosting['OBJ_KEY'], 0, 10);
 
                     //store posted payments to DB
-                    DB::beginTransaction();
+//                    DB::beginTransaction();
                     try {
                         $ids = [];
                         foreach($expense_ids as $expense_id){
@@ -564,10 +597,10 @@ class PaymentAutoPosting extends Command
                                     }
                                 }
                             }
-                            DB::commit();
+//                            DB::commit();
                         }
                     } catch (Exception $e) {
-                        DB::rollBack();
+//                        DB::rollBack();
                     }
 
                     /* long text posting ******************************************************************************/
