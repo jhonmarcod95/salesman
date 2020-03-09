@@ -49,7 +49,7 @@ class PaymentAutoPosting extends Command
      */
     public function handle()
     {
-        $companies = Company::where('hasSAP',1)->orderBy('id', 'desc')->get();
+        $companies = Company::where('hasSAP', 1)->orderBy('id', 'desc')->get();
         $lastWeekMonday = date("Y-m-d", strtotime("last week monday"));
         $lastWeekSunday = date("Y-m-d", strtotime("last sunday"));
         $coveredWeek = Carbon::parse($lastWeekMonday)->format('m/d/Y') . ' to ' .Carbon::parse($lastWeekSunday)->format('m/d/Y');
@@ -57,11 +57,9 @@ class PaymentAutoPosting extends Command
         foreach($companies as $company){
             $expenses = Expense::doesntHave('payments')->with('user', 'user.companies', 'user.location','user.vendor', 'user.internalOrders', 'user.companies.businessArea', 'user.companies.glTaxcode','expensesType','expensesType.expenseChargeType.chargeType.expenseGl', 'receiptExpenses','receiptExpenses.receiptType')
                 ->whereHas('user' , function($q) use($company){
-                    $q->where('id', 152);
-                    //292 mtpci
-//                    $q->whereHas('companies', function ($q) use($company){
-//                        $q->where('company_id', $company->id);
-//                    });
+                    $q->whereHas('companies', function ($q) use($company){
+                        $q->where('company_id', $company->id);
+                    });
                 })->whereDate('created_at', '>=',  $lastWeekMonday)
                 ->whereDate('created_at' ,'<=', $lastWeekSunday)
                 ->where('expenses_entry_id', '!=', 0)
@@ -520,7 +518,7 @@ class PaymentAutoPosting extends Command
 
         //final parameter for posting
         $payment = array_merge($documentHeader, $accountPayable, $accountGL, $currencyAmount, $accountTax);
-//dd($payment);
+
         try{
             //sap posting
             $paymentPosting = APIController::executeSapFunction($sapConnection, 'BAPI_ACC_DOCUMENT_POST', $payment, null);
