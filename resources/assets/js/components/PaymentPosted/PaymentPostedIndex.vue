@@ -354,8 +354,9 @@ export default {
             })
         },
         fetchPaymentHeaders(){
+            this.errors = [];
             axios.post('/expense-posteds',{
-                company: this.company,
+                company: this.company ? this.company : "",
                 startDate: this.startDate,
                 endDate: this.endDate
             })
