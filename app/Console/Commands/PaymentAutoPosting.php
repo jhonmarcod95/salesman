@@ -320,7 +320,14 @@ class PaymentAutoPosting extends Command
                 'amount' => $ioBalances['total_amount']
             ];
 
-            $versionCount = count($ioBalances['versions']) - 1; // (-1) not include version zero
+            $ioBalanceVersions = $ioBalances['versions'];
+
+            // IO has no version zero (*rare, problem in SAP)
+            if (collect($ioBalanceVersions)->contains('version', '!=', '0')){ // has no version zero, will add version zero
+                array_unshift($ioBalanceVersions, (object) ['version' => '000', 'amount' => '0']);
+            }
+
+            $versionCount = count($ioBalanceVersions) - 1; // (-1) not include version zero
             $keyCount = 3; // ref keys in SAP
             $refKeyCombinations = [];
 
@@ -365,10 +372,10 @@ class PaymentAutoPosting extends Command
 
             //keys to be used
             foreach ($refKeyCombinations as $refKeyCombination){
-                $ioTotalBalance = $ioBalances['versions'][0]->amount;
+                $ioTotalBalance = $ioBalanceVersions[0]->amount;
 
                 foreach ($refKeyCombination as $k => $v){
-                    $ioTotalBalance += $ioBalances['versions'][$v]->amount;
+                    $ioTotalBalance += $ioBalanceVersions[$v]->amount;
                 }
 
                 if ($ioTotalBalance > $ioTotalExpense){
