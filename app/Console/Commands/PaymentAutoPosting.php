@@ -450,7 +450,9 @@ class PaymentAutoPosting extends Command
                 if (($company_code == '1100' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == '1200' &&
-                        ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006'))
+                        ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
+                    ($company_code == 'PFMC' &&
+                        ($item['gl_account'] == '0060082001'))
                 ){
                     $values['QUANTITY:int'] = '1';
                     $values['BASE_UOM'] = '10';
