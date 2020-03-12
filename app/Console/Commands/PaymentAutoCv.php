@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\CheckVoucher;
+use App\CheckVoucherError;
 use App\Http\Controllers\APIController;
 use App\PaymentHeader;
 use App\SapUser;
@@ -66,7 +67,7 @@ class PaymentAutoCv extends Command
             $date_today = Carbon::now()->format('Ymd');
             $reference = $payment_header->reference_number;
             $header_text = $payment_header->header_text;
-            $bank_account = $payment_header->company->bankGls->where('id', '1')->first()->gl_account; //revise bank id 1 = BPI
+            $bank_account = $payment_header->company->bankGls->where('bank_id', '1')->first()->gl_account; //revise bank id 1 = BPI
             $amount = $payment_header->payable->amount * -1;
             $business_area = $payment_header->payable->business_area;
             $vendor_code = $payment_header->vendor_code;
@@ -104,6 +105,13 @@ class PaymentAutoCv extends Command
                 $check_voucher->vendor_code = $vendor_code;
                 $check_voucher->document_code = $posted_cv['document_number'];
                 $check_voucher->save();
+            }
+            else{
+                $errDescription = json_encode($posted_cv['return']);
+                 CheckVoucherError::create([
+                     'payment_header_id' => $payment_header->id,
+                     'description' => $errDescription,
+                 ]);
             }
         }
         return;

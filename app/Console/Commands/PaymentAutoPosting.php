@@ -674,6 +674,7 @@ class PaymentAutoPosting extends Command
                         APIController::executeSapFunction($sapConnection, 'RFC_SAVE_TEXT', $textLines, null);
                     }
                     /* ************************************************************************************************/
+                    break;
                 }
                 //error posting
                 elseif ($postingResult->TYPE == 'E'){
