@@ -25,6 +25,8 @@ class PaymentHeader extends Model implements Auditable
         'posting_date',
         'baseline_date',
         'document_code',
+        'expense_from',
+        'expense_to',
     ];
 
     public function paymentDetail() {

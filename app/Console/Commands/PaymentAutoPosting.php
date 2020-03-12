@@ -249,12 +249,12 @@ class PaymentAutoPosting extends Command
                 // Get SAP server
                 $sapCredential = $this->simulateExpenseSubmitted($groupedExpenses[0]->expenses_entry_id);
                 // Post Simulated Expeses to SAP
-                $this->postSimulatedExpenses($items,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date);
+                $this->postSimulatedExpenses($items,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date, $lastWeekMonday, $lastWeekSunday);
             }
         }
     }
 
-    public function postSimulatedExpenses($items,$user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date, $baseline_date){
+    public function postSimulatedExpenses($items,$user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date, $baseline_date, $lastWeekMonday, $lastWeekSunday){
         $posting_type = 'POST';
         $payment_terms = 'NCOD';
         $document_type = 'KR';
@@ -565,7 +565,10 @@ class PaymentAutoPosting extends Command
                                 'document_date' => Carbon::now()->format('Y-m-d'),
                                 'posting_date' => $posting_date->format('Y-m-d'),
                                 'baseline_date' => $baseline_date->format('Y-m-d'),
-                                'document_code' => $document_code,])){ //Save transaction header to payment header table
+                                'document_code' => $document_code,
+                                'expense_from' => $lastWeekMonday,
+                                'expense_to' => $lastWeekSunday,
+                                ])){ //Save transaction header to payment header table
 
                                 foreach($items as $item){
                                     if($paymentDetail = $payment_header->paymentDetail()->create([
