@@ -16,6 +16,7 @@
                             </div>
                         </div>
                         <div class="mb-3">
+                            <!------------------------- search filters ------------------------->
                             <div class="row ml-2">
                                 <div class="col-md-4 float-left">
                                     <div class="form-group">
@@ -32,18 +33,33 @@
                                         <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-1">
                                     <div class="form-group">
-                                        <label for="start_date" class="form-control-label">Posting From</label>
-                                        <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
-                                        <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
+                                        <label class="form-control-label">Year</label>
+                                        <input  v-model="year"
+                                                @change="populateWeeks"
+                                                class="form-control"
+                                                type="number"
+                                                min="2018"
+                                                max="2099">
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label for="end_date" class="form-control-label">Posting To</label>
-                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
-                                        <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
+                                        <label class="form-control-label">Week Cover</label>
+                                        <select class="form-control" v-model="week">
+                                            <option v-for="(week, w) in weeks" v-bind:key="w">{{ week }} </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Date Filter</label>
+                                        <select class="form-control" v-model="week_filter">
+                                            <option value="1">Posting</option>
+                                            <option value="2">Expense</option>
+                                        </select>
+                                        <span class="text-danger" v-if="errors.weekFilter  ">{{ errors.weekFilter[0] }}</span>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -119,12 +135,15 @@
                         </div>
                         <div class="card-footer py-4">
                             <nav aria-label="...">
+                                <ul class="pagination justify-content-start mb-0">
+                                    <li class="page-item">Total Amount : {{ totalAmount }}</li>
+                                </ul>
                                 <ul class="pagination justify-content-end mb-0">
                                     <li class="page-item">
                                         <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
                                     </li>
-                                    <li class="page-item">  
-                                        Page {{ currentPage + 1 }} of {{ totalPages }}  
+                                    <li class="page-item">
+                                        Page {{ currentPage + 1 }} of {{ totalPages }}
                                     </li>
                                     <li class="page-item">
                                         <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
@@ -297,6 +316,7 @@
 import moment from 'moment';
 import loader from '../Loader';
 import JsonExcel from 'vue-json-excel';
+import computation from '../../artisans';
 
 export default {
     components: { loader, 'downloadExcel': JsonExcel },
@@ -305,11 +325,14 @@ export default {
             paymentHeaders: [],
             companies: [],
             company: '',
-            startDate: '',
-            endDate: '',
+            year: moment().format('YYYY'),
+            weeks: [],
+            week: '',
+            week_filter: '2',
             copiedObject: [],
             errors: [],
             keywords: '',
+            totalAmount: 0,
             currentPage: 0,
             itemsPerPage: 10,
             loading: false,
@@ -338,6 +361,7 @@ export default {
     },
     created(){
         this.fetchCompanies();
+        this.populateWeeks();
     },
     methods:{
         moment,
@@ -357,13 +381,19 @@ export default {
             })
         },
         fetchPaymentHeaders(){
+            var dates = this.week.split('-');
+            var start_date  = moment(dates[0]).format('YYYY-MM-DD');
+            var end_date = moment(dates[1]).format('YYYY-MM-DD');
+
             axios.post('/expense-posteds',{
                 company: this.company,
-                startDate: this.startDate,
-                endDate: this.endDate
+                startDate: start_date,
+                endDate: end_date,
+                weekFilter: this.week_filter
             })
             .then(response => { 
                 this.paymentHeaders = response.data;
+                this.getPaymentHeadersTotalAmount();
             })
             .catch(error => { 
                 this.errors = error.response.data.errors;
@@ -382,6 +412,30 @@ export default {
 
         showNextLink() {
             return this.currentPage == (this.totalPages - 1) ? false : true;
+        },
+        populateWeeks(){
+            this.weeks = [];
+
+            var start = moment(this.year).day('Monday');
+            var end   = moment();
+            var day   = 1;
+
+            var result = [];
+            var current = start.clone();
+            result.push(moment(start).format('ll') +' - ' + moment(start.add(6, 'days')).format('ll'));
+            while (current.day(7 + day).isBefore(end)) {
+                result.push(moment(current.clone()).format('ll') +' - ' + moment(current.clone().add(6, 'days')).format('ll'));
+            }
+            this.weeks = result;
+            this.week = this.weeks[this.weeks.length - 1];
+
+        },
+        getPaymentHeadersTotalAmount(){
+            let total_amount = 0;
+            for (let paymentHeader of this.paymentHeaders){
+                total_amount += paymentHeader.payment_detail[0].amount;
+            }
+            this.totalAmount = (total_amount * -1).toFixed(2);
         }
     },
     computed:{

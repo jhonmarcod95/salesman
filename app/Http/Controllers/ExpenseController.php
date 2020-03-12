@@ -314,13 +314,23 @@ class ExpenseController extends Controller
         $request->validate([
             'company' => 'required',
             'startDate' => 'required',
-            'endDate' => 'required'
+            'endDate' => 'required',
+            'weekFilter' => 'required'
         ]);
 
         return PaymentHeader::with('paymentDetail', 'payments.expense', 'checkVoucher')
             ->where('company_name', $request->company)
-            ->whereDate('created_at', '>=',  $request->startDate)
-            ->whereDate('created_at' ,'<=', $request->endDate)
+            ->where(function ($q) use ($request){
+                if ($request->weekFilter == '1'){ //posting date
+                    $q->whereDate('created_at', '>=',  $request->startDate)
+                        ->whereDate('created_at' ,'<=', $request->endDate);
+                }
+                else{ //expense date
+                    $q->whereDate('expense_from', '>=',  $request->startDate)
+                        ->whereDate('expense_to' ,'<=', $request->endDate);
+                }
+
+            })
             ->orderBy('id', 'desc')->get();
     }
 

@@ -49,10 +49,14 @@ class PaymentAutoPosting extends Command
      */
     public function handle()
     {
-        $companies = Company::where('hasSAP', 1)->orderBy('id', 'desc')->get();
         $lastWeekMonday = date("Y-m-d", strtotime("last week monday"));
         $lastWeekSunday = date("Y-m-d", strtotime("last sunday"));
-        $coveredWeek = Carbon::parse($lastWeekMonday)->format('m/d/Y') . ' to ' .Carbon::parse($lastWeekSunday)->format('m/d/Y');
+        $this->generateExpense($lastWeekMonday, $lastWeekSunday);
+    }
+
+    public function generateExpense($dateFrom, $dateTo){
+        $companies = Company::where('hasSAP', 1)->orderBy('id', 'desc')->get();
+        $coveredWeek = Carbon::parse($dateFrom)->format('m/d/Y') . ' to ' .Carbon::parse($dateTo)->format('m/d/Y');
 
         foreach($companies as $company){
             $expenses = Expense::doesntHave('payments')->with('user', 'user.companies', 'user.location','user.vendor', 'user.internalOrders', 'user.companies.businessArea', 'user.companies.glTaxcode','expensesType','expensesType.expenseChargeType.chargeType.expenseGl', 'receiptExpenses','receiptExpenses.receiptType')
@@ -60,12 +64,12 @@ class PaymentAutoPosting extends Command
                     $q->whereHas('companies', function ($q) use($company){
                         $q->where('company_id', $company->id);
                     });
-                })->whereDate('created_at', '>=',  $lastWeekMonday)
-                ->whereDate('created_at' ,'<=', $lastWeekSunday)
+                })->whereDate('created_at', '>=',  $dateFrom)
+                ->whereDate('created_at' ,'<=', $dateTo)
                 ->where('expenses_entry_id', '!=', 0)
                 ->get()
                 ->groupBy('user.id');
-            $this->simulateExpense($expenses,$coveredWeek, $lastWeekMonday, $lastWeekSunday);
+            $this->simulateExpense($expenses,$coveredWeek, $dateFrom, $dateTo);
         }
     }
 
