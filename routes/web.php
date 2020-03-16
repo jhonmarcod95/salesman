@@ -308,6 +308,46 @@ Route::group(['middleware' => ['auth', 'role:it']], function () {
     Route::get('/internal-orders', 'SalesmanInternalOrderController@indexData')->name('internal-order');
 });
 
+//Customer Master Role
+Route::group(['middleware' => ['auth', 'role:customer-master']], function () {
+    //Customer
+    // show customer page
+    Route::get('/customers', 'CustomerController@index')->name('customers_list');
+    // fetch all customer
+    Route::get('/customers-all', 'CustomerController@indexData');
+    //show add customer page
+    Route::get('/customers/create', 'CustomerController@create');
+    //save new customer
+    Route::post('/customers', 'CustomerController@store');
+    // show customer edit page
+    Route::get('/customers-edit/{id}','CustomerController@edit');
+    // show details of specific customer
+    Route::get('/customers/show/{id}', 'CustomerController@show');
+    // update customer
+    Route::patch('/customers/{customer}', 'CustomerController@update');
+    // check customer code of prospect
+    Route::post('/check-customer-code', 'CustomerController@checkCustomerCode');
+    // Delete Customer
+    Route::delete('/customers/{customer}', 'CustomerController@destroy');
+    // Get customers address geocode
+    Route::get('/customers-geocode/{address}', 'CustomerController@getGeocode');
+
+    Route::get('/customers-geocode-json/{address}', 'CustomerController@getGeocodeCustomer');
+
+    Route::get('/customer-details/{customer}', 'CustomerController@getCustomerDetails');
+
+    //Customer Classfication
+    // show customer classfication page
+    Route::get('/customers-classification', 'CustomerClassificationController@index')->name('classification_list');
+
+    // fetch all customer classfication
+    Route::get('/customers-classification-all', 'CustomerClassificationController@indexData');
+
+    Route::get('/customers-status-options', 'CustomerClassificationController@statusData');
+    Route::get('/customers-classification-options', 'CustomerClassificationController@classificationData');
+});
+
+
 
 // Fetch all sap servers
 Route::get('/sap/server', 'SapServerController@index');
@@ -327,3 +367,5 @@ Route::post('/sales-report-customer-visit-data', 'CustomerController@customersSa
 Route::get('/appointment-duration-report', 'CustomerController@customerAppointmentDurationReport');
 
 Route::post('/appointment-duration-report-data', 'CustomerController@customerAppointmentDurationReportData');
+
+
