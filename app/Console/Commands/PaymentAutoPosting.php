@@ -736,7 +736,8 @@ class PaymentAutoPosting extends Command
             $data = [
                 'sap_user' => $sap_user,
                 'sap_server' => $sap_server,
-                'reference_number' => 175 . $reference_number + 1
+                'reference_number' => (175 . $reference_number) + 1
+                // 'reference_number' => 175 . $reference_number + 1
             ];
 
             return array ($data);

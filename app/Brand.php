@@ -15,4 +15,9 @@ class Brand extends Model
     {
         return $this->belongsToMany(Survey::class);
     }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 }
