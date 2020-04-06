@@ -10,7 +10,7 @@ class APIController extends Controller
     public static function readSapTableApi($connection, $table)
     {
         $client = new \GuzzleHttp\Client();
-        $response = $client->request('GET', 'http://10.96.4.39:8012/api/read-table', ['query' => ['connection' => $connection, 'table' => $table]]);
+        $response = $client->request('GET', env('SAP_API') . '/read-table', ['query' => ['connection' => $connection, 'table' => $table]]);
         return collect(json_decode($response->getBody()));
     }
 
