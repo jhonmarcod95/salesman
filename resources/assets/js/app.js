@@ -90,6 +90,9 @@ Vue.component('sales-report-index', require('./components/SalesReport/SalesRepor
 //Appointment Duration Report
 Vue.component('appointment-duration-report-index', require('./components/AppointmentDurationReport/AppointmentDurationReportIndex.vue'));
 
+// Survey Report Component
+Vue.component('survey-index', require('./components/Survey/SurveyIndex.vue'));
+
 
 const app = new Vue({
     el: '#app',

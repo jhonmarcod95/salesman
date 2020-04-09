@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\BrandResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\SurveyResource;
+use App\Http\Resources\SurveyReportResource;
 use App\Http\Resources\SurveyHeaderResource;
 use App\SurveyHeader;
 use App\Brand;
@@ -15,6 +16,29 @@ use App\Survey;
 class SurveyControllerApi extends Controller
 {
 
+    public function surveyCompany(Request $request)
+    {
+
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate'
+        ]);
+
+        $company = $request->company;
+
+        $surveys = Survey::whereHas('user.company', function($query) use ($company) {
+            $query->where('id',$company);
+        })
+        ->whereDate('created_at', '>=',  $request->startDate)
+        ->whereDate('created_at' ,'<=', $request->endDate)
+        ->orderBy('created_at', 'desc')->get();
+
+        return SurveyReportResource::collection($surveys);
+    }
+
+    /**
+     * Survey Questionnaires
+     */
     public function surveyQuestionnaires()
     {
 
@@ -33,6 +57,9 @@ class SurveyControllerApi extends Controller
 
     }
 
+    /**
+     * Show all brand based on auth
+     */
     public function brands()
     {
         // $brands = Brand::all();
