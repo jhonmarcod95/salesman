@@ -16,13 +16,8 @@
                         </div>
                         <div class="mb-3">
                             <div class="row ml-2">
-                                <div class="col-md-4 float-left">
-                                    <div class="form-group">
-                                        <label for="name" class="form-control-label">Search</label> 
-                                        <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
-                                    </div>
-                                </div>
-                                <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
+                             
+                                <div class="col-md-3" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
                                     <div class="form-group">
                                         <label class="form-control-label" for="role">Company</label>
                                         <select class="form-control" v-model="company">
@@ -31,29 +26,29 @@
                                         <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="start_date" class="form-control-label">Start Date</label> 
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">End Date</label> 
                                         <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
                                         <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
-                                    <download-excel
+                                    <!-- <download-excel
                                         :data   = "schedules"
                                         :fields = "json_fields"
                                         class   = "btn btn-sm btn-default"
                                         name    = "Salesforce Attendance report.xls">
                                             Export to excel
-                                    </download-excel>
+                                    </download-excel> -->
                                 </div>
                             </div>
                         </div>
@@ -70,11 +65,12 @@
                                     <th scope="col">Question</th>
                                     <th scope="col">Rating</th>
                                     <th scope="col">Remarks</th>
-                                    <th scope="col">Status</th>
+                                    <th scope="col">Survey Date</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                    <tr v-for="(schedule, s) in filteredQueues" v-bind:key="s">
+                                <tbody v-for="(schedule, s) in filteredQueues" :key="s"  class="list">
+
+                                    <tr v-for="(item, m) in schedule" v-bind:key="m">
                                     <td class="text-right">
                                             <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
@@ -82,29 +78,52 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a v-if="schedule.attendances && schedule.attendances.sign_in !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#singInphotoModal" @click="getSingInImage(schedule)">Sign In Photo</a>
-                                                    <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule)">Sign out Photo</a>
+                                                    <a v-if="item.customer_photo !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#singInphotoModal" @click="getCustomerImage(item.customer_photo, item.user.name)">Customer Photo</a>
+                                                    <!-- <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule)">Sign out Photo</a> -->
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ schedule.user.name }}</td>
+                                        <td>{{ item.user.name }}</td>
                                         <td>
-                                            Customer: {{ schedule.name }} <br>
-                                            Date: {{ moment(schedule.date).format('ll') }} <br>
-                                            Schedule: {{  moment(schedule.start_time, "HH:mm:ss").format("hh:mm A")  }} - {{ moment(schedule.end_time, "HH:mm:ss").format("hh:mm A") }}
+                                            Customer: {{ item.customer.name }} <br>
+                                            Address: {{ item.customer.area }} <br>
                                         </td>
                                         <td>
-                                            <span v-if="schedule.attendances"> IN: {{ moment(schedule.attendances.sign_in ).format('lll') }}</span> <br>
-                                            <span v-if="schedule.attendances && schedule.attendances.sign_out !== null"> OUT: {{ moment(schedule.attendances.sign_out).format('lll') }} </span>
-                                        </td>
-                                        <td>
-                                            <span v-if="schedule.attendances && schedule.attendances.sign_out !== null">
-                                                {{ rendered(schedule.attendances.sign_out, schedule.attendances.sign_in) }}
+                                            <span v-for="(brand, b) in item.brands" :key="b">
+                                                <span>{{ brand.name }}</span> <br/>
                                             </span>
                                         </td>
-                                        <td></td>
-                                        <td></td>
+                                        <td>
+                                            <span v-for="(rank, r) in item.ranks" :key="r">
+                                                <span v-for="(questionnaire, q) in rank.questions" :key="q">
+                                                    <span>{{ questionnaire.question }}</span> <span class="text-danger">({{ questionnaire.rating }})</span>
+                                                    <br/>
+                                                </span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {{ questionnaireTotal(item.ranks[0].questions.map(item => item.rating)) }} Points
+                                        </td>
+                                         <td scope="row">
+                                            <div class="media align-items-center">
+                                                <div style="width: 300px; white-space: normal;" class="media-body">
+                                                   {{ item.remarks }}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td> {{ item.created_at }}</td>
                                     </tr>
+
+                                     <tr class="table-success">
+                                        <td colSpan="5"></td>
+                                        <td>
+                                        <span class="font-weight-bold text-danger">
+                                            {{ aveScheduleRanks(schedule) }} (Average)
+                                        </span>
+                                        <td colSpan="3"></td>
+                                    </tr>
+
+
                                 </tbody>
                             </table>
                         </div>
@@ -281,18 +300,30 @@ export default {
             })
         },
         fetchSchedules(){
-            axios.post('/attendance-report-bydate', {
+            axios.post('/api/surveys/company', {
                 startDate: this.startDate,
                 endDate: this.endDate,
                 company: this.company
             })
             .then(response => {
+                // console.log('check result: ', response.data)
                 this.schedules = response.data;
                 this.errors = []; 
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
             })
+        },
+        questionnaireTotal(array){
+            return array.reduce((prev, curr) => prev + curr, 0 );
+        },
+        aveScheduleRanks(array) {
+            let ranks = array.map(item => item.ranks.map(rank => rank.questions.map(item => item.rating )));
+            let getTotalRating = this.questionnaireTotal(ranks.flat(2)); 
+            let getTotallength = ranks.flat(2).length / 2; 
+            let ave = getTotalRating / getTotallength;
+
+            return ave.toFixed(2);
         },
         // fetchTsrs(){
         //     axios.get('/attendance-report-all')
@@ -323,6 +354,11 @@ export default {
             this.tsrName = schedule.user.name;
             this.signInLink = 'https://www.google.com/maps/place/'+schedule.attendances.sign_in_latitude+','+schedule.attendances.sign_in_longitude;
         },
+        getCustomerImage(photo, tsr){
+            this.signImage = window.location.origin+'/storage/'+photo;
+            this.tsrName = tsr;
+            // this.signInLink = 'https://www.google.com/maps/place/'+schedule.attendances.sign_in_latitude+','+schedule.attendances.sign_in_longitude;
+        },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
         },
@@ -340,18 +376,18 @@ export default {
         }
     },
     computed:{
-        filteredSchedules(){
-            let self = this;
-            return self.schedules.filter(schedule => {
-                return schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())
-            });
-        },
+        // filteredSchedules(){
+        //     let self = this;
+        //     return self.schedules.filter(schedule => {
+        //         return schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+        //     });
+        // },
         totalPages() {
-            return Math.ceil(this.filteredSchedules.length / this.itemsPerPage)
+            return Math.ceil(this.schedules.length / this.itemsPerPage)
         },
         filteredQueues() {
             var index = this.currentPage * this.itemsPerPage;
-            var queues_array = this.filteredSchedules.slice(index, index + this.itemsPerPage);
+            var queues_array = this.schedules.slice(index, index + this.itemsPerPage);
 
             if(this.currentPage >= this.totalPages) {
                 this.currentPage = this.totalPages - 1

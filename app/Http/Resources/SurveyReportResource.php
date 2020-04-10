@@ -20,6 +20,8 @@ class SurveyReportResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'user_id' => $this->user_id,
+            'user' => $this->user,
             'customer' => $this->customer,
             'customer_photo' => $this->customer_photo,
             'brands' =>  $brands,

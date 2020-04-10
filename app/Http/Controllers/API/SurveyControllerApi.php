@@ -29,11 +29,13 @@ class SurveyControllerApi extends Controller
         $surveys = Survey::whereHas('user.company', function($query) use ($company) {
             $query->where('id',$company);
         })
+        ->where('ranks', '!=' ,'"\"[]\""')
         ->whereDate('created_at', '>=',  $request->startDate)
         ->whereDate('created_at' ,'<=', $request->endDate)
-        ->orderBy('created_at', 'desc')->get();
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-        return SurveyReportResource::collection($surveys);
+        return collect(SurveyReportResource::collection($surveys))->groupBy('user_id')->values();
     }
 
     /**
