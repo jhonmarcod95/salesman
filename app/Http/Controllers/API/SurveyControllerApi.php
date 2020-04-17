@@ -12,6 +12,7 @@ use App\Http\Resources\SurveyHeaderResource;
 use App\SurveyHeader;
 use App\Brand;
 use App\Survey;
+use Carbon\Carbon;
 
 class SurveyControllerApi extends Controller
 {
@@ -21,7 +22,8 @@ class SurveyControllerApi extends Controller
 
         $request->validate([
             'startDate' => 'required',
-            'endDate' => 'required|after_or_equal:startDate'
+            'endDate' => 'required|after_or_equal:startDate',
+            'company' => 'required'
         ]);
 
         $company = $request->company;
@@ -36,6 +38,27 @@ class SurveyControllerApi extends Controller
         ->get();
 
         return collect(SurveyReportResource::collection($surveys))->groupBy('user_id')->values();
+    }
+
+    public function surveyQuestionnairesSearch(Request $request)
+    {
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate',
+            'company' => 'required'
+        ]);
+
+        $givenMonth = Carbon::parse($request->startDate);
+        
+        $questionnaires = SurveyHeader::where('company_id', $request->company)
+                        ->whereMonth('created_at', '=', $givenMonth->month)
+                        ->with('surveyQuestionnaires')
+                        // ->whereHas('surveyQuestionnaires', function($q) {
+                        //     $q->where('status',1);
+                        // })
+                        ->first();
+
+        return $questionnaires;
     }
 
     /**

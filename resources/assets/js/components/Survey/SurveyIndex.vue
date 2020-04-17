@@ -12,10 +12,13 @@
                                 <div class="col">
                                     <h3 class="mb-0">Survey Report</h3>
                                 </div>
+                                 <div class="col-4 text-right">
+                                    <button type="submit" @click="switchView = !switchView" class="btn btn-outline-primary mb-2">{{ switchView === false ? 'Switch to Graph' : 'Switch to Table' }}</button>
+                                </div>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <div class="row ml-2">
+                            <div class="row pl-2 pr-2">
                              
                                 <div class="col-md-3" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
                                     <div class="form-group">
@@ -41,18 +44,23 @@
                                     </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
-                                    <!-- <download-excel
-                                        :data   = "schedules"
-                                        :fields = "json_fields"
-                                        class   = "btn btn-sm btn-default"
-                                        name    = "Salesforce Attendance report.xls">
-                                            Export to excel
-                                    </download-excel> -->
+                                    <div class="form-group">
+                                         <label for="end_date" class="form-control-label">&nbsp;</label> 
+                                         <button type="button" class="btn btn-primary btn-lg btn-block" :class="{ ' disabled' : loading === true }" :disabled="loading === true"  @click="fetchSchedules">Filter</button>                                    
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="table-responsive">
+
+
+                        <graph-survey :surveys="filteredSurveys" 
+                                      :startDate="startDate"
+                                      :endDate="endDate"
+                                      :company="company"
+                                      v-show="switchView === true">
+                       </graph-survey>
+
+                        <div v-show="switchView === false" class="table-responsive">
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
@@ -68,7 +76,22 @@
                                     <th scope="col">Survey Date</th>
                                 </tr>
                                 </thead>
-                                <tbody v-for="(schedule, s) in filteredQueues" :key="s"  class="list">
+
+                                <tbody v-if="loading" class="list">
+                                    <tr>
+                                        <td colspan="8">
+
+                                            <div class="center-align py-3" style="display: flex; align-items: center; justify-content: center;">
+                                                <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+                                                </svg>	
+                                            </div>
+
+                                        </td>
+                                    </tr>   
+                                </tbody>
+
+                                <tbody v-else v-for="(schedule, s) in filteredSurveys" :key="s"  class="list">
 
                                     <tr v-for="(item, m) in schedule" v-bind:key="m">
                                     <td class="text-right">
@@ -125,6 +148,7 @@
 
 
                                 </tbody>
+
                             </table>
                         </div>
                        <div class="card-footer py-4">
@@ -182,12 +206,19 @@
 <script>
 import moment from 'moment';
 import JsonExcel from 'vue-json-excel'
+import GraphSurvey from './GraphSurvey';
 
 export default {
-    components: { 'downloadExcel': JsonExcel },
+    components: 
+    { 
+        'downloadExcel': JsonExcel,
+        GraphSurvey
+    },
     props: ['userRole'],
     data(){
         return{
+            loading: false,
+            switchView: false,
             tsrs: [],
             schedules: [],
             startDate: '',
@@ -300,15 +331,19 @@ export default {
             })
         },
         fetchSchedules(){
+            this.loading = true
             axios.post('/api/surveys/company', {
                 startDate: this.startDate,
                 endDate: this.endDate,
                 company: this.company
             })
             .then(response => {
-                // console.log('check result: ', response.data)
-                this.schedules = response.data;
-                this.errors = []; 
+                console.log('check result: ', response.status)
+                if(response.status === 200) {
+                    this.schedules = response.data;
+                    this.errors = []; 
+                    this.loading = false
+                }
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -385,7 +420,7 @@ export default {
         totalPages() {
             return Math.ceil(this.schedules.length / this.itemsPerPage)
         },
-        filteredQueues() {
+        filteredSurveys() {
             var index = this.currentPage * this.itemsPerPage;
             var queues_array = this.schedules.slice(index, index + this.itemsPerPage);
 
@@ -404,6 +439,9 @@ export default {
 </script>
 
 <style>
+    .disabled {
+        cursor: not-allowed;
+    }
     .modal{
         background-color: rgba(0,0,0,0.9);
     }

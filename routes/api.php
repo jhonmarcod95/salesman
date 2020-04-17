@@ -116,6 +116,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     //Survey API
     Route::post('surveys/company','API\SurveyControllerApi@surveyCompany');
     Route::get('surveys/questionnaires','API\SurveyControllerApi@surveyQuestionnaires');
+    Route::post('surveys/montly-questions','API\SurveyControllerApi@surveyQuestionnairesSearch');
     Route::get('brands','API\SurveyControllerApi@brands');
     Route::get('surveys','API\SurveyControllerApi@index');
     Route::post('surveys','API\SurveyControllerApi@store');
