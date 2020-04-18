@@ -2,8 +2,8 @@
     <div>
 
         <div class="row">
-            <div v-for="(questinnare, q) in surveyQuestions" :key="q" class="col">
-                <highcharts class="chart" :options="questionOption(questinnare, q)" :updateArgs="updateArgs"></highcharts>
+            <div v-for="(questionnaire, q) in surveyQuestions" :key="q" class="col">
+                <highcharts class="chart" :options="questionOption(questionnaire, q)" :updateArgs="updateArgs"></highcharts>
             </div>
         </div>
 
@@ -90,7 +90,7 @@ export default {
             text: 'Survey Ranking'
         },
         xAxis: {
-            categories: ['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
+            categories: this.tsrDistinctNames
         },
         yAxis: {
             min: 0,
@@ -152,7 +152,12 @@ export default {
 
       surveyQuestions() {
           return this.questionnares.survey_questionnaires
-      }
+      },
+
+      tsrDistinctNames() {
+          let userFiltered =  this.surveys.flat().map(item => item.user)
+          return [...new Set(userFiltered.map(item => item.name))]
+      },
 
 
   },
@@ -163,11 +168,9 @@ export default {
         return this.ratings.filter((item, index) => { return (index % 2 === key)})
       },
 
-      questionOption(questinnare, key) {
+      questionOption(questionnaire, key) {
 
         let questionSet = this.splitQuestion(key)
-
-
 
         return {
             chart: {
@@ -183,7 +186,7 @@ export default {
             text: `Question ${key + 1}`
             },
             subtitle: {
-                text: questinnare.question
+                text: questionnaire.question
             },
             accessibility: {
                 point: {
