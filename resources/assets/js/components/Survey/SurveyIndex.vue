@@ -56,7 +56,7 @@
                         <graph-survey :surveys="filteredSurveys" 
                                       :startDate="startDate"
                                       :endDate="endDate"
-                                      :company="company"
+                                      :company="company.toString()"
                                       v-show="switchView === true">
                        </graph-survey>
 

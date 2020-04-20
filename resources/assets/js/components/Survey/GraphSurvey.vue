@@ -21,7 +21,7 @@
                         <tr>
                             <td>{{ customers.length }}</td>
                             <td>{{ totalTsr.length }}</td>
-                            <td>{{ surveyQuestions.length }}</td>
+                            <td>{{ surveyQuestions ? surveyQuestions.length : 0 }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -70,8 +70,8 @@ export default {
       startDate: String,
       endDate: String,
       company: {
-          type: Number,
-          default: 0
+          type: String,
+          default: ''
       },
   },
 
@@ -81,52 +81,8 @@ export default {
       colorInputIsSupported: null,
       animationDuration: 1000,
       updateArgs: [true, true, {duration: 1000}],
-      filteredSurveys: [],
-      barOptions: {
-          chart: {
-            type: 'bar'
-        },
-        title: {
-            text: 'Survey Ranking'
-        },
-        xAxis: {
-            categories: this.tsrDistinctNames
-        },
-        yAxis: {
-            min: 0,
-            title: {
-                text: 'Rank Ratings'
-            }
-        },
-        legend: {
-            reversed: true
-        },
-        plotOptions: {
-            series: {
-                stacking: 'normal'
-            }
-        },
-        series: [{
-            name: '1',
-            data: [5, 3, 4, 7, 2]
-        }, {
-            name: '2',
-            data: [2, 2, 3, 2, 1]
-        }, {
-            name: '3',
-            data: [2, 2, 3, 2, 1]
-        }, {
-            name: '4',
-            data: [2, 2, 3, 2, 1]
-        }, {
-            name: '5',
-            data: [3, 4, 4, 2, 5]
-        }]
-      },
-
-      
-
- 
+      filteredSurveys: [],   
+      ratingsFiltered: [],   
     }
   },
   created () {
@@ -155,10 +111,71 @@ export default {
       },
 
       tsrDistinctNames() {
-          let userFiltered =  this.surveys.flat().map(item => item.user)
+          let userFiltered =  this.filteredSurveys.flat().map(item => item.user)
           return [...new Set(userFiltered.map(item => item.name))]
       },
 
+      tsrDistinctRatings() {
+
+        let ratingsFiltered = [];
+
+        for(let i = 1; i <= 5; i++) {
+
+            let arrayRating = []
+            let rating = this.filteredSurveys.forEach((item, index) => {
+                arrayRating.push(item.flat()
+                                    .map(x => x.ranks.map(y => y.questions))
+                                    .flat(2)
+                                    .reduce((a,b) => { 
+                                        return a + (b.rating === i) 
+                                    },0));
+            })
+
+            ratingsFiltered.push({
+                name: i,
+                data: arrayRating
+            })
+            
+        }
+
+        return ratingsFiltered;
+
+      },
+
+        barOptions() {
+        
+        return {
+            chart: {
+                type: 'bar'
+            },
+            title: {
+                text: 'Survey Ranking'
+            },
+            credits: {
+                enabled: false
+            },
+            xAxis: {
+                categories: this.tsrDistinctNames
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Rank Ratings'
+                }
+            },
+            legend: {
+                reversed: true
+            },
+            plotOptions: {
+                series: {
+                    stacking: 'normal'
+                }
+            },
+            series: this.tsrDistinctRatings
+
+        }
+
+      },
 
   },
 
@@ -231,7 +248,6 @@ export default {
       },
 
       getQuestionnaires() {
-
 
           axios.post(`/api/surveys/montly-questions`,{
               startDate: this.startDate,
