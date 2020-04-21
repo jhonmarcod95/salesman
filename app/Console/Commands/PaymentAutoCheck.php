@@ -43,10 +43,26 @@ class PaymentAutoCheck extends Command
      */
     public function handle()
     {
-        $thisMonday = '2020-03-09';
-        $thisSunday = '2020-03-15';
-//        $thisMonday = date("Y-m-d", strtotime("last monday"));
-//        $thisSunday = date("Y-m-d", strtotime("this sunday"));
+
+//        $connection = [
+//            'ashost' => '172.17.2.37',
+//            'sysnr' => '00',
+//            'client' => '100',
+//            'user' => 'payproject',
+//            'passwd' => 'welcome69+'
+//        ];
+//
+//        $check_number = APIController::executeSapFunction($connection, 'ZFI_LASTCHECKINFO', [
+//            'COMP_CODE' => '1100',
+//            'HOUSE_BANK' => 'BPI02',
+//            'ACCT_ID' => '11021',
+//            'CHECK_FR' => '1000015001',
+//            'CHECK_TO' => '1000020000',
+//        ], ['LATEST_CHECK' => 'check_number'])->first();
+//        dd($check_number);
+
+        $thisMonday = date("Y-m-d", strtotime("last monday"));
+        $thisSunday = date("Y-m-d", strtotime("this sunday"));
 
         $check_vouchers = CheckVoucher::with('company.sapServers', 'company.bankChecks')
             ->whereBetween('created_at', [$thisMonday, $thisSunday])
@@ -90,6 +106,7 @@ class PaymentAutoCheck extends Command
             //result
             if ($posted_check['result'] == 'S'){
                 CheckInfo::create([
+                    'check_voucher_id' => $check_voucher->id,
                     'document_code' => $document_code,
                     'company_code' => $company_code,
                     'fiscal_year' => $fiscal_year,
@@ -99,7 +116,14 @@ class PaymentAutoCheck extends Command
                 ]);
             }
             else{
-                $errDescription = json_encode($posted_check['return']);
+                $errDescription = json_encode(['param' => [
+                    'DOC_NUM' => $document_code,
+                    'COMP_CODE' => $company_code,
+                    'FISCAL_YEAR' => $fiscal_year,
+                    'HOUSE_BANK' => $house_bank,
+                    'ACCT_ID' => $account_id,
+                    'CHECK_NUM' => $check_number,
+                ], 'result' => $posted_check['return']]);
                 CheckInfoError::create([
                     'check_voucher_id' => $check_voucher->id,
                     'description' => $errDescription,
@@ -110,10 +134,12 @@ class PaymentAutoCheck extends Command
     }
 
     private function checkNumber($sap_connection, $company_code, $bankCheck){
+
         $check_info = APIController::readSapTableApi($sap_connection, [
             'table' => ['PCEC' => 'check_info'],
             'fields' => [
                 'CHECF' => 'check_number_from',
+                'CHECT' => 'check_number_to',
                 'CHECL' => 'check_number_status',
             ],
             'options' => [
@@ -128,7 +154,19 @@ class PaymentAutoCheck extends Command
             return $check_info->check_number_from;
         }
         else{
-            return $check_info->check_number_status + 1;
+            if (is_numeric($check_info->check_number_status)){ // numeric
+                return $check_info->check_number_status + 1;
+            }
+            else{
+                return $check_number = APIController::executeSapFunction($sap_connection, 'ZFI_LASTCHECKINFO', [
+                    'COMP_CODE' => $company_code,
+                    'HOUSE_BANK' => $bankCheck->house_bank,
+                    'ACCT_ID' => $bankCheck->account_id,
+                    'CHECK_FR' => $check_info->check_number_from,
+                    'CHECK_TO' => $check_info->check_number_to,
+                ], ['LATEST_CHECK' => 'check_number'])->first();
+            }
+
         }
     }
 

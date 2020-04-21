@@ -81,6 +81,7 @@
                                     <th scope="col"></th>
                                     <th scope="col">Document Code</th>
                                     <th scope="col">Check Voucher</th>
+                                    <th scope="col">Check Number</th>
                                     <th scope="col">Amount(PHP)</th>
                                     <th scope="col">Company Code</th>
                                     <th scope="col">Company Name</th>
@@ -111,6 +112,7 @@
                                         </td>
                                         <td>{{ paymentHeader.document_code }}</td>
                                         <td v-if="paymentHeader.check_voucher">{{ paymentHeader.check_voucher.document_code }}</td><td v-else></td>
+                                        <td v-if="paymentHeader.check_voucher.check_number">{{ paymentHeader.check_voucher.check_info.check_number }}</td><td v-else></td>
                                         <td>{{ paymentHeader.payment_detail[0].amount.toString().slice(1)+ '.00' }}</td>
                                         <td>{{ paymentHeader.company_code }}</td>
                                         <td>{{ paymentHeader.company_name }}</td>
@@ -339,6 +341,7 @@ export default {
             json_fields: {
                 'DOCUMENT CODE': 'document_code',
                 'CHECK VOUCHER': 'check_voucher.document_code',
+                'CHECK NUMBER': 'check_voucher.check_info.check_number',
                 'AMOUNT(PHP)': {
                     callback: (value) => {
                         return value.payment_detail[0].amount.toString().slice(1) + '.00';

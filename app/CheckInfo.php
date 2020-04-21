@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CheckInfo extends Model
 {
     protected $fillable = [
+        'check_voucher_id',
         'document_code',
         'company_code',
         'fiscal_year',
