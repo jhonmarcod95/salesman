@@ -112,7 +112,7 @@
                                         </td>
                                         <td>{{ paymentHeader.document_code }}</td>
                                         <td v-if="paymentHeader.check_voucher">{{ paymentHeader.check_voucher.document_code }}</td><td v-else></td>
-                                        <td v-if="paymentHeader.check_voucher.check_info.check_number">{{ paymentHeader.check_voucher.check_info.check_number }}</td><td v-else></td>
+                                        <td v-if="paymentHeader.check_voucher && paymentHeader.check_voucher.check_info">{{ paymentHeader.check_voucher.check_info.check_number }}</td><td v-else></td>
                                         <td>{{ paymentHeader.payment_detail[0].amount.toString().slice(1)+ '.00' }}</td>
                                         <td>{{ paymentHeader.company_code }}</td>
                                         <td>{{ paymentHeader.company_name }}</td>
