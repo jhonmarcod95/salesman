@@ -27,11 +27,16 @@ class Kernel extends ConsoleKernel
     {
         //auto posting
         $schedule->command('payment:autoposting')
-                 ->weekly()->tuesdays()->at('00:01');
+            ->weekly()->tuesdays()->at('00:01');
 
-//        //auto cv
-//        $schedule->command('payment:autocv')
-//            ->weekly()->tuesdays()->at('00:30');
+        //auto cv
+        $schedule->command('payment:autocv')
+            ->weekly()->tuesdays()->at('00:21');
+
+        //auto cv
+        $schedule->command('payment:autocheck')
+            ->weekly()->tuesdays()->at('00:31');
+
     }
 
     /**

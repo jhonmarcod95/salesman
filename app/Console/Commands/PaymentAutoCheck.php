@@ -43,24 +43,6 @@ class PaymentAutoCheck extends Command
      */
     public function handle()
     {
-
-//        $connection = [
-//            'ashost' => '172.17.2.37',
-//            'sysnr' => '00',
-//            'client' => '100',
-//            'user' => 'payproject',
-//            'passwd' => 'welcome69+'
-//        ];
-//
-//        $check_number = APIController::executeSapFunction($connection, 'ZFI_LASTCHECKINFO', [
-//            'COMP_CODE' => '1100',
-//            'HOUSE_BANK' => 'BPI02',
-//            'ACCT_ID' => '11021',
-//            'CHECK_FR' => '1000015001',
-//            'CHECK_TO' => '1000020000',
-//        ], ['LATEST_CHECK' => 'check_number'])->first();
-//        dd($check_number);
-
         $thisMonday = date("Y-m-d", strtotime("last monday"));
         $thisSunday = date("Y-m-d", strtotime("this sunday"));
 
@@ -116,14 +98,7 @@ class PaymentAutoCheck extends Command
                 ]);
             }
             else{
-                $errDescription = json_encode(['param' => [
-                    'DOC_NUM' => $document_code,
-                    'COMP_CODE' => $company_code,
-                    'FISCAL_YEAR' => $fiscal_year,
-                    'HOUSE_BANK' => $house_bank,
-                    'ACCT_ID' => $account_id,
-                    'CHECK_NUM' => $check_number,
-                ], 'result' => $posted_check['return']]);
+                $errDescription = json_encode($posted_check['return']);
                 CheckInfoError::create([
                     'check_voucher_id' => $check_voucher->id,
                     'description' => $errDescription,
@@ -164,7 +139,7 @@ class PaymentAutoCheck extends Command
                     'ACCT_ID' => $bankCheck->account_id,
                     'CHECK_FR' => $check_info->check_number_from,
                     'CHECK_TO' => $check_info->check_number_to,
-                ], ['LATEST_CHECK' => 'check_number'])->first();
+                ], ['LATEST_CHECK' => 'check_number'])->first() + 1;
             }
 
         }
