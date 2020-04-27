@@ -35,7 +35,11 @@ class SurveyControllerApi extends Controller
 
     public function brands()
     {
-        $brands = Brand::all();
+        // $brands = Brand::all();
+
+        $brands = Brand::where('company_id', Auth::user()->company->id)
+                        ->get();
+
         return BrandResource::collection($brands);
     }
 
