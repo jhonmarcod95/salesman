@@ -25,4 +25,8 @@ class Company extends Model
     public function bankGls(){
         return $this->hasMany(BankCompanyGl::class);
     }
+
+    public function bankChecks(){
+        return $this->hasMany(BankCheckSeries::class);
+    }
 }

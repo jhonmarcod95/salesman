@@ -318,7 +318,7 @@ class ExpenseController extends Controller
             'weekFilter' => 'required'
         ]);
 
-        return PaymentHeader::with('paymentDetail', 'payments.expense', 'checkVoucher')
+        return PaymentHeader::with('paymentDetail', 'payments.expense', 'checkVoucher.checkInfo')
             ->where('company_name', $request->company)
             ->where(function ($q) use ($request){
                 if ($request->weekFilter == '1'){ //posting date
