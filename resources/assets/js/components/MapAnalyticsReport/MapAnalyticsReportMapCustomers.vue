@@ -162,6 +162,8 @@
                         <label for="name" class="form-control-label">Search</label> 
                         <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                     </div>
+
+                    <json-excel class = "btn btn-sm btn-default" :data= "customersList" :fields = "json_fields" name= "appointment_duration_report.xls">Export to Excel</json-excel> 
                 </div>
                 <div class="table-responsive">
                     <table class="table align-items-center table-flush">
@@ -327,10 +329,16 @@
     import Multiselect from 'vue-multiselect';
     import Mapbox from 'mapbox-gl-vue';
     import mapboxgl from 'mapbox-gl';
+
+    import JsonExcel from 'vue-json-excel'
+
+    import XLSX from 'xlsx'; 
+
     export default {
         components: {
             Mapbox,
-            Multiselect
+            Multiselect,
+            JsonExcel
         },
         data() {
             return {
@@ -367,6 +375,15 @@
                 countBlocklist: 0,
                 countDefault: 0,
                 loading: false,
+                json_fields : {
+                    'NO. OF VISITS' : {
+                        callback: (value) => {
+                            return value.visits.length;
+                        }
+                    },
+                    // 'CUSTOMER CODE' : '',
+                    // 'NAME' : ''
+                }
             };
         },
         created(){
@@ -377,6 +394,10 @@
              this.fetchProvince();
         },
         methods:{
+            exportxlsx(){
+                var tbl = document.getElementById('table-0');
+                var wb = XLSX.utils.table_to_book(tbl);
+            },
             customerDetailsModal(customer_details){
                 this.customervisitList = [];
                 var modal = document.getElementById('customer-details-modal');

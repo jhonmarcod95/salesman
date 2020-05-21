@@ -50,11 +50,11 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-2">
-                                    <button class="btn btn-sm btn-primary" @click="getUserAppointments"> Apply Filter</button>                                
+                                <div class="col-md-6">
+                                    <button class="btn btn-sm btn-primary" @click="getUserAppointments"> Apply Filter</button>  
+                                    <button class="btn btn-sm btn-success" @click="exportxlsx"> Export XLSX</button>                              
                                 </div>
 
-                                
                             </div>
                             
                             <div v-for="(user, e) in userAppointmentScheduleData" v-bind:key="e" class="mt-3">
@@ -65,7 +65,7 @@
                                         <span style="font-size:0.9rem;font-weight:bold" class="ml-1"><strong style="color:#FFA809">Incomplete Attendance:</strong> {{user.user_count_incomplete_attendance}}</span>
                                     </div>
                                     <div class="table-responsive">
-                                        <table class="table align-items-center table-flush">
+                                        <table class="table align-items-center table-flush" :id="'table-' + e">
                                             <thead class="thead-light">
                                             <tr>
                                                 <th scope="col">Customer</th>
@@ -120,9 +120,13 @@
 <script>
     import Multiselect from 'vue-multiselect';
     import moment from 'moment';
+    import JsonExcel from 'vue-json-excel'
+    import Excel from 'exceljs';
+    import FileSaver from 'file-saver';
+
     export default {
         components: {
-            Multiselect
+            Multiselect, JsonExcel
         },
        data(){
            return {
@@ -138,13 +142,147 @@
                 last_total_travel_time : 0,
                 countVisited : 0,
                 countNonVisited : 0,
-                loading:false
+                loading:false,
+                json_fields : {
+                    'NAME': 'name',
+                    'VISITED': 'user_count_visited',
+                    'NON VISITED': 'user_count_non_visited',
+                    'INCOMPLETE ATTENDANCE': 'user_count_incomplete_attendance',
+                    'TOTAL DURATION': 'last_total_duration',
+                    'TOTAL TRAVEL TIME': 'last_total_travel_time',
+                }
            }
        },
        created(){
            this.fetchUsers();
        },
        methods:{
+           exportxlsx(){
+               let v = this;
+                var workbook = new Excel.Workbook();
+                var worksheet = workbook.addWorksheet('Expense Report');
+
+                //Header 
+                worksheet.columns = [{ width: 20 },{ width: 20},{ width: 20},{ width: 20},{ width: 20},{ width: 20}];
+
+                var sheet_length = v.userAppointmentScheduleData.length;
+
+                console.log(sheet_length);
+
+                let worksheet_ctr = 1;
+
+                v.userAppointmentScheduleData.forEach(function(w){
+
+                    worksheet.getCell("A" + worksheet_ctr).value = w.name;
+                    worksheet.getCell("A" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                    worksheet.getCell("B" + worksheet_ctr).value = 'Visited : ' + w.user_count_visited;
+                    worksheet.getCell("B" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+                    
+                    worksheet.getCell("C" + worksheet_ctr).value = 'Non Visited : ' + w.user_count_non_visited;
+                    worksheet.getCell("C" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                    worksheet.getCell("D" + worksheet_ctr).value = 'Incomplete Attendance : ' + w.user_count_incomplete_attendance;
+                    worksheet.getCell("D" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+                    
+                    worksheet.getCell("E" + worksheet_ctr).value = "From Date : " + v.startDate;
+                    worksheet.getCell("E" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+                    
+                    worksheet.getCell("F" + worksheet_ctr).value = "End Date : " + v.endDate;
+                    worksheet.getCell("F" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+
+                    worksheet_ctr += 1;
+
+                    worksheet.getCell("A" + worksheet_ctr).value = 'CUSTOMER';
+                    worksheet.getCell("A" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                    worksheet.getCell("B" + worksheet_ctr).value = 'ADDRESS';
+                    worksheet.getCell("B" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                    worksheet.getCell("C" + worksheet_ctr).value = 'SCHEDULE';
+                    worksheet.getCell("C" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                    worksheet.getCell("D" + worksheet_ctr).value = 'ATTENDANCE';
+                    worksheet.getCell("D" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                    worksheet.getCell("E" + worksheet_ctr).value = 'DURATION';
+                    worksheet.getCell("E" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                    worksheet.getCell("F" + worksheet_ctr).value = 'TRAVEL TIME';
+                    worksheet.getCell("F" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+                    
+                    if(w.schedule_data.length > 0){
+                        worksheet_ctr += 1;
+                        w.schedule_data.forEach(function(e){
+                           
+                            worksheet.getCell("A" + worksheet_ctr).value = e.name;
+                            worksheet.getCell("A" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            worksheet.getCell("B" + worksheet_ctr).value = e.address;
+                            worksheet.getCell("B" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            worksheet.getCell("C" + worksheet_ctr).value = e.schedule;
+                            worksheet.getCell("C" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            if(e.sub_total){
+                                worksheet.getCell("D" + worksheet_ctr).value = "Visit Duration/Travel Time Total:";
+                            }else{
+                                 worksheet.getCell("D" + worksheet_ctr).value = e.datetime;
+                            }
+                            worksheet.getCell("D" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            if(e.sub_total){
+                                worksheet.getCell("E" + worksheet_ctr).value = e.sub_total_duration;
+                            }else{
+                                 worksheet.getCell("E" + worksheet_ctr).value = e.duration;
+                            }
+                            worksheet.getCell("E" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            if(e.sub_total){
+                                worksheet.getCell("F" + worksheet_ctr).value = e.sub_total_time_travel;
+                            }else{
+                                 worksheet.getCell("F" + worksheet_ctr).value = e.travel_time;
+                            }
+                            worksheet.getCell("F" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                            worksheet_ctr += 1;
+
+                        });
+
+                        worksheet.getCell("A" + worksheet_ctr).value = '';
+                        worksheet.getCell("A" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        worksheet.getCell("B" + worksheet_ctr).value = '';
+                        worksheet.getCell("B" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        worksheet.getCell("C" + worksheet_ctr).value = '';
+                        worksheet.getCell("C" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        worksheet.getCell("D" + worksheet_ctr).value = 'Visit Duration/Travel Time Total:';
+                        worksheet.getCell("D" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        worksheet.getCell("E" + worksheet_ctr).value = w.last_total_duration;
+                        worksheet.getCell("E" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+
+                        worksheet.getCell("F" + worksheet_ctr).value =  w.last_total_travel_time;
+                        worksheet.getCell("F" + worksheet_ctr).border = {top: {style:'thin'},left: {style:'thin'},bottom: {style:'thin'},right: {style:'thin'}};
+                        
+                        worksheet_ctr += 1;
+
+                    }
+
+                    worksheet_ctr += 1;
+
+                });
+
+                //Footer
+                workbook.xlsx.writeBuffer()
+                .then(buffer => FileSaver.saveAs(new Blob([buffer]), `AppointmentDurationreport.xlsx`))
+                .catch(err => console.log('Error writing excel export', err));
+
+
+            },
            fetchUsers(){
                axios.get('/map-users-all')
                 .then(response => { 

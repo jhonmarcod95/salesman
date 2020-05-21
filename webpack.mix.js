@@ -21,7 +21,7 @@ mix.styles([
 ], 'public/css/all.css')
 .js([
 	'resources/assets/js/app.js',
-    'node_modules/popper.js/dist/popper.js',
+    // 'node_modules/popper.js/dist/popper.js.map',
     'node_modules/bootstrap/dist/js/bootstrap.min.js',
     'public/vendor/chart.js/dist/Chart.min.js',
     'public/vendor/chart.js/dist/Chart.extension.js',
