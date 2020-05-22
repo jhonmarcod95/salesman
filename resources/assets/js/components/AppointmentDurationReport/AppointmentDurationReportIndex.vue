@@ -293,7 +293,14 @@
                 })
             },
             customLabelUser (user) {
-                return `${ user.name + ' (' + user.company.name  + ')' }`
+                var company = "";
+                if(user.company.name && user.name){
+                    company = user.company.name;
+                    return `${ user.name + ' (' + company  + ')' }`
+                }else{
+                   return '';
+                }
+                
             },
             getUserAppointments(){
                 let v = this;
