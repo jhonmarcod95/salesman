@@ -183,6 +183,9 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     //Customer Visits
     Route::get('/customer-visits/{customer_code}', 'MapAnalyticsReportController@customerVisits');
 
+    //Survey Route Setup
+    Route::get('/surveys','SurveysController@index');
+
 });
 
 // AP Routes

@@ -146,7 +146,13 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ url('/appointment-duration-report') }}">
-                                        <i class="ni ni-watch-time text-warning"></i> Appointment Duration Report
+                                        <i class="ni ni-watch-time text-primary"></i> Appointment Duration Report
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/surveys') }}">
+                                        <i class="ni ni-chart-bar-32  text-warning"></i> Survey Report
                                     </a>
                                 </li>
 

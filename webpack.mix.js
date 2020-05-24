@@ -16,8 +16,8 @@ let mix = require('laravel-mix');
 
 
 mix.styles([
-	'public/css/argon.css'
-	
+    'public/css/argon.css',
+    'resources/assets/css/style.css'
 ], 'public/css/all.css')
 .js([
 	'resources/assets/js/app.js',

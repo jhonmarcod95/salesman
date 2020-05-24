@@ -10,6 +10,9 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
+import HighchartsVue from 'highcharts-vue'
+Vue.use(HighchartsVue)
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -89,6 +92,9 @@ Vue.component('sales-report-index', require('./components/SalesReport/SalesRepor
 
 //Appointment Duration Report
 Vue.component('appointment-duration-report-index', require('./components/AppointmentDurationReport/AppointmentDurationReportIndex.vue'));
+
+// Survey Report Component
+Vue.component('survey-index', require('./components/Survey/SurveyIndex.vue'));
 
 
 const app = new Vue({

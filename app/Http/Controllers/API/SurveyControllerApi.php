@@ -7,14 +7,63 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\BrandResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\SurveyResource;
+use App\Http\Resources\SurveyReportResource;
 use App\Http\Resources\SurveyHeaderResource;
 use App\SurveyHeader;
 use App\Brand;
 use App\Survey;
+use Carbon\Carbon;
 
 class SurveyControllerApi extends Controller
 {
 
+    public function surveyCompany(Request $request)
+    {
+
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate',
+            'company' => 'required'
+        ]);
+
+        $company = $request->company;
+
+        $surveys = Survey::whereHas('user.company', function($query) use ($company) {
+            $query->where('id',$company);
+        })
+        ->where('ranks', '!=' ,'"\"[]\""')
+        ->whereDate('created_at', '>=',  $request->startDate)
+        ->whereDate('created_at' ,'<=', $request->endDate)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        return collect(SurveyReportResource::collection($surveys))->groupBy('user_id')->values();
+    }
+
+    public function surveyQuestionnairesSearch(Request $request)
+    {
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate',
+            'company' => 'required'
+        ]);
+
+        $givenMonth = Carbon::parse($request->startDate);
+        
+        $questionnaires = SurveyHeader::where('company_id', $request->company)
+                        ->whereMonth('created_at', '=', $givenMonth->month)
+                        ->with('surveyQuestionnaires')
+                        // ->whereHas('surveyQuestionnaires', function($q) {
+                        //     $q->where('status',1);
+                        // })
+                        ->first();
+
+        return $questionnaires;
+    }
+
+    /**
+     * Survey Questionnaires
+     */
     public function surveyQuestionnaires()
     {
 
@@ -33,6 +82,9 @@ class SurveyControllerApi extends Controller
 
     }
 
+    /**
+     * Show all brand based on auth
+     */
     public function brands()
     {
         // $brands = Brand::all();
