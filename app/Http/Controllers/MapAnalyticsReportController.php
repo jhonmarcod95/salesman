@@ -113,7 +113,7 @@ class MapAnalyticsReportController extends Controller
         if(Auth::user()->roles[0]->slug == 'it'|| Auth::user()->roles[0]->slug == 'audit' || Auth::user()->roles[0]->slug == 'president'){
             return User::with('roles','company')
                     ->whereHas('roles', function ($query) {
-                        $query->whereIn('slug', ['tsr','vp']);
+                        $query->whereIn('slug', ['unverified','user','admin','audit','hr','tax','approver','tsr','ap','manager','coordinator','avp','vp','evp','president','it']);
                     })
                     ->whereHas('company', function ($query) {
                         $query->where('id', '=', Auth::user()->company_id);
@@ -124,7 +124,7 @@ class MapAnalyticsReportController extends Controller
         else{
             return User::with('roles','company')
                         ->whereHas('roles', function ($query) {
-                            $query->whereIn('slug', ['tsr','vp']);
+                            $query->whereIn('slug', ['unverified','user','admin','audit','hr','tax','approver','tsr','ap','manager','coordinator','avp','vp','evp','president','it']);
                         })
                         ->whereHas('company', function ($query) {
                             $query->where('id', '=', Auth::user()->company_id);
