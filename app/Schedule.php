@@ -72,7 +72,7 @@ class Schedule extends Model implements Auditable
     }
 
     public function attendances(){
-        return $this->hasOne(Attendance::class, 'schedule_id', 'id');
+        return $this->hasOne(Attendance::class, 'schedule_id', 'id')->whereNotNull('sign_out')->orderBy('created_at','DESC');
     }
 
     public function schedule_type(){
