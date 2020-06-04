@@ -15,6 +15,15 @@
                                 </div>
                                 <div class="col text-right">
                                     <a :href="addLink" class="btn btn-sm btn-primary">Add New</a>
+
+                                    <download-excel
+                                        :data   = "customers"
+                                        :fields = "json_fields"
+                                        class   = "btn btn-sm btn-default"
+                                        name    = "Customers.xls">
+                                            Export to excel
+                                    </download-excel>
+
                                 </div>
                             </div>
                         </div>
@@ -120,7 +129,9 @@
 </template>
 
 <script>
+import JsonExcel from 'vue-json-excel'
 export default {
+    components: { 'downloadExcel': JsonExcel },
     data(){
         return{
             customers: [],
@@ -129,6 +140,21 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            json_fields: {
+                'CUSTOMER NAME': 'name',
+                'ADDRESS': 'google_address',
+                'CLASSIFICATION': {
+                    callback: (value) => {
+                        if(value.classification == 10 || value.classification == 16){
+                            return 'DIRECT';
+                        }else if(value.classification == 8 || value.classification == 9){
+                           return 'INDIRECT';
+                        }else{
+                            return '';
+                        }
+                    }
+                },
+            }
         }
     },
     created(){
