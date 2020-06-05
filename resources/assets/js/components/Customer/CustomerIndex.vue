@@ -143,6 +143,7 @@ export default {
             json_fields: {
                 'CUSTOMER NAME': 'name',
                 'ADDRESS': 'google_address',
+                'PROVINCE' : 'province',
                 'CLASSIFICATION': {
                     callback: (value) => {
                         if(value.classification == 10 || value.classification == 16){
