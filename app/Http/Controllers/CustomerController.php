@@ -52,6 +52,7 @@ class CustomerController extends Controller
                 'customers.area',
                 'customers.classification',
                 'customers.customer_code',
+                'customers.status',
                 'customers.name',
                 'customers.deleted_at',
                 'customers.street',
