@@ -141,6 +141,7 @@ export default {
             currentPage: 0,
             itemsPerPage: 10,
             json_fields: {
+                'CUSTOMER CODE' : 'customer_code',
                 'CUSTOMER NAME': 'name',
                 'ADDRESS': 'google_address',
                 'PROVINCE' : 'province',
@@ -155,6 +156,22 @@ export default {
                         }
                     }
                 },
+                'STATUS' : {
+                    callback: (value) => {
+                        if(value.status == 1){
+                            return 'Active';
+                        }else if(value.status == 2){
+                           return 'Inactive';
+                        }else if(value.status == 3){
+                           return 'Prospect';
+                        }else if(value.status == 4){
+                           return 'Closed';
+                        }
+                        else{
+                            return '';
+                        }
+                    }
+                }
             }
         }
     },
