@@ -92,8 +92,15 @@
                                             Schedule: {{  moment(schedule.start_time, "HH:mm:ss").format("hh:mm A")  }} - {{ moment(schedule.end_time, "HH:mm:ss").format("hh:mm A") }}
                                         </td>
                                         <td>
-                                            <span v-if="schedule.attendances"> IN: {{ moment(schedule.attendances.sign_in ).format('lll') }}</span> <br>
-                                            <span v-if="schedule.attendances && schedule.attendances.sign_out !== null"> OUT: {{ moment(schedule.attendances.sign_out).format('lll') }} </span>
+                                            <div v-if="schedule.attendances">
+                                                <span v-if="schedule.attendances"> IN: {{ moment(schedule.attendances.sign_in ).format('lll') }}</span> <br>
+                                                <span v-if="schedule.attendances && schedule.attendances.sign_out !== null"> OUT: {{ moment(schedule.attendances.sign_out).format('lll') }} </span>   
+                                            </div>
+                                            <div v-else>
+                                                <span v-if="schedule.signinwithoutout"> IN: {{ moment(schedule.signinwithoutout.sign_in ).format('lll') }}</span> <br>
+                                                <span v-if="schedule.signinwithoutout"> OUT: </span>  
+                                            </div>
+                                            
                                         </td>
                                         <td>
                                             <span v-if="schedule.attendances && schedule.attendances.sign_out !== null">
