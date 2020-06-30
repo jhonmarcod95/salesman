@@ -47,6 +47,7 @@ class CustomerController extends Controller
             })
             ->leftJoin('provinces', 'provinces.id', '=', 'customers.province_id')
             ->leftJoin('customer_classifications', 'customer_classifications.id', '=', 'customers.classification')
+            ->where('verified_status',1)
             ->get([
                 'customers.id',
                 'customers.area',
@@ -67,9 +68,60 @@ class CustomerController extends Controller
                 'customers.updated_at',
                 'provinces.name AS province',
                 'customer_classifications.description AS customer_classification',
+                'customers.verified_status',
+            ]);
+    }
+
+    public function indexDataFilter(Request $request){
+        $verified_status = $request->verified_status;
+        if($verified_status == "Verified"){
+            $verified_status = [1];
+        }else if($verified_status == "All"){
+            $verified_status = [0,1];
+        }else{
+            $verified_status = [1];
+        }       
+        return  Customer::orderBy('customers.id', 'desc')
+            ->when(Auth::user()->level() < 8, function($q){
+                $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+            })
+            ->leftJoin('provinces', 'provinces.id', '=', 'customers.province_id')
+            ->leftJoin('customer_classifications', 'customer_classifications.id', '=', 'customers.classification')
+            ->whereIn('verified_status', $verified_status)
+            ->get([
+                'customers.id',
+                'customers.area',
+                'customers.classification',
+                'customers.customer_code',
+                'customers.status',
+                'customers.name',
+                'customers.deleted_at',
+                'customers.street',
+                'customers.town_city',
+                'customers.province_id',
+                'customers.google_address',
+                'customers.telephone_1',
+                'customers.telephone_2',
+                'customers.fax_number',
+                'customers.remarks',
+                'customers.created_at',
+                'customers.updated_at',
+                'provinces.name AS province',
+                'customer_classifications.description AS customer_classification',
+                'customers.verified_status',
             ]);
     }
     
+    public function changeVerifiedStatus(Request $request, Customer $customer){
+       $customer->verified_status = $request->verified_status;
+        if($customer->save()){
+            return Customer::where('id',$customer->id)->first();
+        }else{
+            return $customer;
+        }   
+       
+    }
+
     /**
      * Display adding customer  page
      *
