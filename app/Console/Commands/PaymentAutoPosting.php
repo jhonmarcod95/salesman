@@ -460,6 +460,8 @@ class PaymentAutoPosting extends Command
                 if ($company_code == 'PFMC') $values['BUS_AREA'] = $item['business_area'];
                 if (($company_code == '1100' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
+                    ($company_code == '1500' &&
+                        ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == '1200' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == 'PFMC' &&
@@ -531,7 +533,7 @@ class PaymentAutoPosting extends Command
 
         //final parameter for posting
         $payment = array_merge($documentHeader, $accountPayable, $accountGL, $currencyAmount, $accountTax);
-
+//        dd($payment);
         try{
             //sap posting
             $paymentPosting = APIController::executeSapFunction($sapConnection, 'BAPI_ACC_DOCUMENT_POST', $payment, null);
