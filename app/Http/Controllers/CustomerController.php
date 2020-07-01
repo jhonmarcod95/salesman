@@ -47,7 +47,7 @@ class CustomerController extends Controller
             })
             ->leftJoin('provinces', 'provinces.id', '=', 'customers.province_id')
             ->leftJoin('customer_classifications', 'customer_classifications.id', '=', 'customers.classification')
-            ->where('verified_status',1)
+            // ->where('verified_status',1)
             ->get([
                 'customers.id',
                 'customers.area',
