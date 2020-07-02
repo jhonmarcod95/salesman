@@ -46,6 +46,7 @@ class CustomerController extends Controller
                 $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
             })
             ->leftJoin('provinces', 'provinces.id', '=', 'customers.province_id')
+            ->leftJoin('regions', 'regions.id', '=', 'provinces.region_id')
             ->leftJoin('customer_classifications', 'customer_classifications.id', '=', 'customers.classification')
             // ->where('verified_status',1)
             ->get([
@@ -69,6 +70,8 @@ class CustomerController extends Controller
                 'provinces.name AS province',
                 'customer_classifications.description AS customer_classification',
                 'customers.verified_status',
+                'regions.code AS region_code',
+                'regions.name AS region',
             ]);
     }
 

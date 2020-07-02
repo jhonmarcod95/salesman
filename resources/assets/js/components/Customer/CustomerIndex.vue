@@ -179,6 +179,8 @@ export default {
                 'CUSTOMER NAME': 'name',
                 'ADDRESS': 'google_address',
                 'PROVINCE' : 'province',
+                'REGION CODE' : 'region_code',
+                'REGION' : 'region',
                 'CLASSIFICATION': {
                     callback: (value) => {
                         if(value.classification == 10 || value.classification == 16){
@@ -205,7 +207,8 @@ export default {
                             return '';
                         }
                     }
-                }
+                },
+                'CREATION DATE': 'created_at',
             }
         }
     },
