@@ -301,7 +301,7 @@ export default {
         }
     },
     created(){
-
+        this.fetchCustomerVisitToday();
     },
     methods:{
         moment,
@@ -310,6 +310,15 @@ export default {
         },
         copyObject(paymentHeader){
             this.copiedObject = Object.assign({}, paymentHeader)
+        },
+        fetchCustomerVisitToday(){
+            axios.get('/visited-customer-today')
+            .then(response => { 
+                this.customerVisiteds = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
         },
         fetchCustomerVisit(){
             axios.post('/visited-customer-all',{

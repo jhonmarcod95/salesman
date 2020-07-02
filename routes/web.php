@@ -234,6 +234,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/attendance-report-all', 'AttendanceReportController@indexData');
     // fetch attendance report by date
     Route::post('/attendance-report-bydate', 'AttendanceReportController@generateBydate');
+    Route::get('/attendance-report-today', 'AttendanceReportController@generateByToday');
 
     // Companies
     Route::get('/companies', 'CompanyController@index');
@@ -336,6 +337,7 @@ Route::get('/sap/server', 'SapServerController@index');
 Route::get('/auth-role', 'UserController@getRole');
 
 Route::get('/visited-customer', 'CustomerController@customerVisitedIndex');
+Route::get('/visited-customer-today', 'CustomerController@customerVisitedToday');
 Route::post('/visited-customer-all', 'CustomerController@customerVisitedIndexData');
 
 Route::get('/sales-report', 'CustomerController@customerSalesReport');

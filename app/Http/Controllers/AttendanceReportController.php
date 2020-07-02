@@ -56,6 +56,7 @@ class AttendanceReportController extends Controller
     public function generateBydate(Request $request){
 
         $request->validate([
+            'company' => 'required',
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
@@ -104,6 +105,42 @@ class AttendanceReportController extends Controller
                 }
             }
         }else {  $new_schedule = $schedule; }
+        return $new_schedule;
+    }
+
+    public function generateByToday(){
+        $today = date('Y-m-d');
+        $schedule = Schedule::with('user', 'attendances','signinwithoutout')
+            ->whereHas('user' , function($q){
+                $q->whereHas('companies', function ($q){
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                });
+            })
+            ->whereDate('date', '=', $today)
+            ->orderBy('date', 'desc')->get();
+
+        $new_schedule = [];
+
+        if(!Auth::user()->hasRole('hr')){
+            // Executive and VP Roles
+            if(Auth::user()->level() >= 6){
+                $new_schedule = $schedule; 
+            }else{
+                foreach($schedule->pluck('user') as $key => $value){
+                    // AVP and Coordinator  roles
+                    if(Auth::user()->level() < 6){
+                        if($value->roles[0]['level'] < 6){
+                            $new_schedule[] = $schedule[$key]; 
+                        }
+                    }else{
+                        $new_schedule = []; 
+                    }
+                }
+            }
+        }else {  
+            $new_schedule = $schedule; 
+        }
+
         return $new_schedule;
     }
 

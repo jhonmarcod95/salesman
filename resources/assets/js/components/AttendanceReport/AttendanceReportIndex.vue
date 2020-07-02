@@ -18,8 +18,8 @@
                             <div class="row ml-2">
                                 <div class="col-md-4 float-left">
                                     <div class="form-group">
-                                        <label for="name" class="form-control-label">Search</label> 
-                                        <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                                        <label for="name" class="form-control-label">Search TSR</label> 
+                                        <input type="text" class="form-control" placeholder="Search TSR" v-model="keywords" id="name">
                                     </div>
                                 </div>
                                 <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
@@ -89,7 +89,8 @@
                                         <td>
                                             Customer: {{ schedule.name }} <br>
                                             Date: {{ moment(schedule.date).format('ll') }} <br>
-                                            Schedule: {{  moment(schedule.start_time, "HH:mm:ss").format("hh:mm A")  }} - {{ moment(schedule.end_time, "HH:mm:ss").format("hh:mm A") }}
+                                            Schedule: {{  moment(schedule.start_time, "HH:mm:ss").format("hh:mm A")  }} - {{ moment(schedule.end_time, "HH:mm:ss").format("hh:mm A") }}<br>
+                                            Location: {{  schedule.address  }} 
                                         </td>
                                         <td>
                                             <div v-if="schedule.attendances">
@@ -273,6 +274,7 @@ export default {
     },
     created(){
         this.fetchCompanies();
+        this.fetchTodaySchedules();
     },
     methods:{
         moment,
@@ -282,6 +284,16 @@ export default {
                 this.companies = response.data;
             })
             .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
+        fetchTodaySchedules(){
+            axios.get('/attendance-report-today')
+            .then(response => {
+                this.schedules = response.data;
+                this.errors = []; 
+            })
+            .catch(error => {
                 this.errors = error.response.data.errors;
             })
         },
