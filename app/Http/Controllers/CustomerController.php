@@ -364,37 +364,63 @@ class CustomerController extends Controller
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
-        
+    
+        $startDate = $request->startDate;
+        $endDate = $request->endDate;
+
         $companyId = Auth::user()->companies[0]->id;
 
-        return DB::select("call p_customer_visited('$request->startDate','$request->endDate' , '$companyId')");
+        $users = User::select('id')->where('company_id',$companyId)->get();
+
+        $selected_user = [];
+        foreach($users as $user){
+            array_push($selected_user , $user['id']);
+        }
+
+        $customers = Customer::
+                with([
+                    'schedules' => function($query) use($startDate,$endDate) {
+                        $query->where('date', '>=',  $startDate);
+                        $query->whereDate('date', '<=',  $endDate);
+                    },
+                    'schedules.attendances'
+                ])
+                ->whereHas('schedules', function ($q) use($selected_user,$startDate,$endDate){
+                    $q->whereIn('user_id', $selected_user);
+                    $q->where('date', '>=',  $startDate);
+                    $q->whereDate('date', '<=', $endDate);
+                    $q->where('type','1');
+                    $q->where('status','1');
+                })->get();
+        return $customers;
     }
 
     public function customerVisitedToday(){
         $startDate = date('Y-m-d');
         $endDate = date('Y-m-d');
+        
         $companyId = Auth::user()->companies[0]->id;
-        $customers =  DB::select("call p_customer_visited('$startDate','$endDate' , '$companyId')");
-
-        // foreach($customers as $k => $customer){
-        //     $customers[$k] = $customer;
-        //     $customers[$k]['schedules'] = Schedule::whereDate('date', $startDate)->where('code',$customer['customer_code'])->get();
-        // }
         $users = User::select('id')->where('company_id',$companyId)->get();
         $selected_user = [];
         foreach($users as $user){
             array_push($selected_user , $user['id']);
         }
 
-        $callback = function($query) use($selected_user, $startDate, $endDate){
-            $query->whereIn('user_id', $selected_user);
-            $query->where('date', '>=',  $startDate);
-            $query->whereDate('date' ,'<=', $endDate);
-            $query->where('type', '1');
-            $query->where('status', '1');
-        };
-
-        $customers = Customer::with('schedules')->whereHas('schedules',$callback)->get();
+        $customers = Customer::
+                with([
+                    'schedules' => function($query) use($startDate,$endDate) {
+                        $query->where('date', '>=',  $startDate);
+                        $query->whereDate('date', '<=',  $endDate);
+                    },
+                    'schedules.attendances'
+                ])
+                ->whereHas('schedules', function ($q) use($selected_user,$startDate,$endDate){
+                    $q->whereIn('user_id', $selected_user);
+                    $q->where('date', '>=',  $startDate);
+                    $q->whereDate('date', '<=', $endDate);
+                    $q->where('type','1');
+                    $q->where('status','1');
+                })->get();
         return $customers;
     
     }

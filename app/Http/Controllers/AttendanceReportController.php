@@ -62,23 +62,44 @@ class AttendanceReportController extends Controller
         ]);
 
         $company = $request->company;
-        
+
+        $regions = [];
+        if($request->selectedRegion){
+            foreach($request->selectedRegion as $region_data){
+                array_push($regions, $region_data['id']);
+            }
+        }
+
         if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
-            $schedule = Schedule::with('user', 'attendances','signinwithoutout')
+            $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                });
+            })
+            ->when(!empty($regions), function($q) use ($regions) {
+                $q->whereHas('customer' , function($q) use ($regions) {
+                    $q->whereHas('provinces', function ($q) use ($regions){
+                        $q->whereIn('region_id', $regions);
+                    });
                 });
             })
             ->whereDate('date', '>=',  $request->startDate)
             ->whereDate('date' ,'<=', $request->endDate)
             ->orderBy('date', 'desc')->get();
         }else{
-            $schedule = Schedule::with('user', 'attendances','signinwithoutout')
+            $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout')
             ->when($company, function ($query) use ($company) {
                 $query->whereHas('user', function($q) use ($company){
                     $q->whereHas('companies', function ($q) use ($company){
                         $q->where('company_id', $company);   
+                    });
+                });
+            })
+            ->when(!empty($regions), function($q) use ($regions) {
+                $q->whereHas('customer' , function($q) use ($regions) {
+                    $q->whereHas('provinces', function ($q) use ($regions){
+                        $q->whereIn('region_id', $regions);
                     });
                 });
             })
@@ -110,7 +131,9 @@ class AttendanceReportController extends Controller
 
     public function generateByToday(){
         $today = date('Y-m-d');
-        $schedule = Schedule::with('user', 'attendances','signinwithoutout')
+
+        
+        $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));

@@ -6,6 +6,9 @@ use Auth;
 use Illuminate\Http\Request;
 
 use App\Message;
+use App\Schedule;
+use App\Customer;
+use App\User;
 
 class HomeController extends Controller
 {
@@ -58,6 +61,28 @@ class HomeController extends Controller
     }
 
     public function dashboard(){
+        session(['header_text' => 'Dashboard']);
         return view('dashboard');
     }
+
+    public function scheduleForVisit(){
+        $date_today = date('Y-m-d');
+
+        $companyId = Auth::user()->companies[0]->id;
+
+        $users = User::select('id')->where('company_id',$companyId)->get();
+
+        $selected_user = [];
+        foreach($users as $user){
+            array_push($selected_user , $user['id']);
+        }
+
+        return $schedule_for_visit = Schedule::with('attendances','user','user.companies','customer.provinces.regions')
+                                                ->whereIn('user_id', $selected_user)
+                                                ->where('date', '=' , $date_today)
+                                                ->where('type','1')
+                                                ->orderBY('name','ASC')
+                                                ->get();
+    }
+
 }

@@ -351,3 +351,7 @@ Route::get('/appointment-duration-report', 'CustomerController@customerAppointme
 Route::post('/appointment-duration-report-data', 'CustomerController@customerAppointmentDurationReportData');
 
 
+//Dashboard
+Route::get('/schedule-for-visit', 'HomeController@scheduleForVisit');
+
+
