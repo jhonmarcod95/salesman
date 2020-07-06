@@ -163,7 +163,7 @@
                         <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                     </div>
 
-                    <json-excel class = "btn btn-sm btn-default" :data= "customersList" :fields = "json_fields" name= "appointment_duration_report.xls">Export to Excel</json-excel> 
+                    <json-excel class = "btn btn-sm btn-default mb-3" :data= "customers" :fields = "json_fields" name= "Map Customers List.xls">Export to Excel</json-excel> 
                 </div>
                 <div class="table-responsive">
                     <table class="table align-items-center table-flush">
@@ -198,7 +198,15 @@
                                     <td>{{ customer.visits ? customer.visits.length : '' }}</td>
                                     <td>{{ customer.customer_code }}</td>
                                     <td>{{ customer.name }}</td>
-                                    <td>{{ customer.classifications ? customer.classifications.description : '' }}</td>
+                                    <td>
+                                        <div v-if="customer.classifications">
+                                            <div v-if="customer.classifications.id !='1' || customer.classifications.id !='2' || customer.classifications.id !='3' || customer.classifications.id !='4'">
+                                                {{ customer.classifications ? customer.classifications.description : '' }}
+                                            </div>
+                                            <div v-else></div>
+                                        </div>
+                                            
+                                    </td>
                                     <td>{{ customer.google_address }}</td>
                                     <td>{{ customer.town_city }}</td>
                                     <td>{{ customer.provinces ? customer.provinces.name : '' }}</td>
@@ -381,8 +389,43 @@
                             return value.visits.length;
                         }
                     },
-                    // 'CUSTOMER CODE' : '',
-                    // 'NAME' : ''
+                    'CUSTOMER CODE' : 'customer_code',
+                    'NAME' : 'name',
+                    'CLASSIFICATION': {
+                        callback: (value) => {
+                            if(value.classifications){
+                                if(value.classification_id != '1' || value.classification_id != '2' || value.classification_id != '3' || value.classification_id != '4'){
+                                     return value.classifications.description;
+                                }else{
+                                    return "";
+                                }
+                            }else{
+                                return "";
+                            }
+                        }
+                    },
+                    'ADDRESS' : 'google_address',
+                    'TOWN OR CITY' : 'town_city',
+                    'PROVINCE' : {
+                        callback: (value) => {
+                            if(value.provinces){
+                                return value.provinces.name;
+                            }else{
+                                return '';
+                            }
+                        }
+                    },
+                    'TELEPHONE 1' : 'telephone_1',
+                    'TELEPHONE 2' : 'telephone_2',
+                    'STATUS' : {
+                        callback: (value) => {
+                            if(value.statuses){
+                                return value.statuses.description;
+                            }else{
+                                return '';
+                            }
+                        }
+                    },
                 }
             };
         },
