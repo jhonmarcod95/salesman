@@ -56,8 +56,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'salesforce.portal@lafilgroup.com'),
+        'name' => env('MAIL_FROM_NAME', 'Salesforce Portal'),
     ],
 
     /*

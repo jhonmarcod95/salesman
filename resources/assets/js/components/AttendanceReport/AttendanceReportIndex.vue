@@ -112,7 +112,9 @@
                                             Date: {{ moment(schedule.date).format('ll') }} <br>
                                             Schedule: {{  moment(schedule.start_time, "HH:mm:ss").format("hh:mm A")  }} - {{ moment(schedule.end_time, "HH:mm:ss").format("hh:mm A") }}<br>
                                             Location: {{  schedule.address  }} <br>
-                                            Region: {{  schedule.customer.provinces ? schedule.customer.provinces.regions.name : ""  }} 
+                                            <div v-if="schedule.customer">
+                                                Region: {{  schedule.customer.provinces ? schedule.customer.provinces.regions.name : ""  }} 
+                                            </div>
                                         </td>
                                         <td>
                                             <div v-if="schedule.attendances">

@@ -145,6 +145,15 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/expenses-all', 'ExpenseController@indexExpenseData');
     // Show Expense Report page
     Route::get('/expenses-report', 'ExpenseController@index');
+
+    Route::get('/historical-expenses-report', 'ExpenseController@historicalExpenseReport');
+    Route::get('/historical-expenses-report-data', 'ExpenseController@historicalExpenseReportData');
+
+    Route::get('/expenses-top-spender-report', 'ExpenseController@expenseTopSpender');
+    Route::post('/expenses-top-spender-data', 'ExpenseController@expenseTopSpenderData');
+    Route::get('/expenses-current-top-spender-data', 'ExpenseController@expenseCurrentTopSpenderData');
+
+
     // Fetch expense report by date
     Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
     // Fetch expense report by date per user
@@ -353,5 +362,26 @@ Route::post('/appointment-duration-report-data', 'CustomerController@customerApp
 
 //Dashboard
 Route::get('/schedule-for-visit', 'HomeController@scheduleForVisit');
+
+Route::get('/monthly-actual-visited', 'HomeController@monthlyActualVisited');
+
+Route::get('/most-customer-visit', 'HomeController@mostCustomerVisits');
+
+Route::get('/work-start-time', 'HomeController@workStartEndTime');
+
+Route::get('/total-travel-time', 'HomeController@totalTimeTravel');
+
+Route::get('/monthly-total-travel-time', 'HomeController@monthlyTotalTimeTravel');
+
+
+Route::post('/save-dashboard-filter', 'HomeController@saveDashboardFilter');
+
+Route::get('/get-dashboard-filter', 'HomeController@getDashboardFilter');
+
+Route::get('/get-sap-tsr', 'HomeController@getSapTsr');
+Route::get('/get-sap-tsr-actual-expense', 'HomeController@getSapTsrActualExpense');
+
+Route::get('/customer-visited-per-area', 'HomeController@customerVisiterPerArea');
+
 
 

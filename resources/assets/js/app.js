@@ -43,6 +43,10 @@ Vue.component('expense-index', require('./components/Expense/ExpenseIndex.vue'))
 Vue.component('expense-report-index', require('./components/Expense/ExpenseReportIndex.vue'));
 Vue.component('expense-submitted-index', require('./components/Expense/ExpenseSubmittedIndex.vue'));
 
+Vue.component('historical-expense-index', require('./components/Expense/HistoricalExpense.vue'));
+
+Vue.component('expense-top-spender', require('./components/Expense/ExpenseTopSpender.vue'));
+
 // Announcement
 Vue.component('announcement-index', require('./components/Announcement/AnnouncementIndex.vue'));
 

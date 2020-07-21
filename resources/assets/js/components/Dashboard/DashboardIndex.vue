@@ -4,6 +4,13 @@
         <div class="header bg-green pb-8 pt-5 pt-md-8">
             <div class="container-fluid">
                 <div class="header-body">
+
+                    <div class="row align-items-center py-4">
+                        <div class="col-lg-12 col-5 text-right">
+                            <a class="btn btn-sm btn-primary" href="/dashboard" ><i class="fas fa-sync"></i> Switch Dashboard</a>
+                        </div>
+                    </div>
+
                     <!-- Card stats -->
                     <div class="row">
                         <div class="col-xl-3 col-lg-6" @click="openCurrentVisiting" style="cursor:pointer">
