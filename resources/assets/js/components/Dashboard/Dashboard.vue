@@ -170,6 +170,11 @@
                                         <span v-if="mostCustomerAverageVisitSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
                                         <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
                                     </th>
+                                    <th scope="col" @click="mostCustomerAverageExpenseSort" style="cursor:pointer">
+                                        Average Expense per Day
+                                        <span v-if="mostCustomerAverageExpenseSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
+                                        <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
+                                    </th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -192,6 +197,9 @@
                                         </td>
                                         <td>
                                             <h5>{{customer.average_visit_per_day}}</h5>
+                                        </td>
+                                        <td>
+                                            <h5>{{customer.average_expense_per_day}}</h5>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -226,7 +234,7 @@
                                 <div class="row align-items-center">
                                     <div class="col">
                                         <h4>Customer Visited per Area</h4>
-                                        <small>Today</small>
+                                        <small>Current Month</small>
                                     </div>
                                 </div>
                             </div>
@@ -600,6 +608,8 @@ export default {
             mostCustomerAverageTimeSortSortby:'ASC',
 
             mostCustomerAverageVisitSortby:'ASC',
+
+            mostCustomerAverageExpenseSortby:'ASC',
 
             wokStartEndTime: [],
             
@@ -1290,6 +1300,7 @@ export default {
                         'average_time_per_visit_min' : user.average_time_per_visit,
                         'average_time_per_visit' : average_time_per_visit,
                         'average_visit_per_day' : user.average_visit_per_day,
+                        'average_expense_per_day' : user.average_expense_per_day,
                     });
 
                 });
@@ -1433,6 +1444,31 @@ export default {
                             return 1;
                     });
                 v.mostCustomerAverageVisitSortby = 'ASC';
+            }
+        },
+
+        mostCustomerAverageExpenseSort(){
+            let v = this;
+            if(v.mostCustomerAverageExpenseSortby == 'ASC'){
+                v.mostCustomerVisited.sort(function(a,b){
+                        if (a.average_expense_per_day < b.average_expense_per_day)
+                            return -1;
+                        else if (a.average_expense_per_day == b.average_expense_per_day)
+                            return 0;
+                        else
+                            return 1;
+                    });
+                v.mostCustomerAverageExpenseSortby = 'DESC';
+            }else{
+                v.mostCustomerVisited.sort(function(a,b){
+                        if (a.average_expense_per_day > b.average_expense_per_day)
+                            return -1;
+                        else if (a.average_expense_per_day == b.average_expense_per_day)
+                            return 0;
+                        else
+                            return 1;
+                    });
+                v.mostCustomerAverageExpenseSortby = 'ASC';
             }
         },
 

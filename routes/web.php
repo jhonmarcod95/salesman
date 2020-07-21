@@ -383,5 +383,9 @@ Route::get('/get-sap-tsr-actual-expense', 'HomeController@getSapTsrActualExpense
 
 Route::get('/customer-visited-per-area', 'HomeController@customerVisiterPerArea');
 
+Route::get('/individual_performance', 'IndividualPerformanceController@index');
+
+Route::get('/individual-performance-data', 'IndividualPerformanceController@indexData');
+
 
 

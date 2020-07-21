@@ -102,6 +102,8 @@ Vue.component('appointment-duration-report-index', require('./components/Appoint
 // Survey Report Component
 Vue.component('survey-index', require('./components/Survey/SurveyIndex.vue'));
 
+// Individual Performance
+Vue.component('individual-performance', require('./components/IndividualPerformance/IndividualPerformance.vue'));
 
 const app = new Vue({
     el: '#app',

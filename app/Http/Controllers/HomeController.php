@@ -237,7 +237,11 @@ class HomeController extends Controller
                         $query->orderBy('date','ASC');
                     },
                     'schedules.attendances',
-                    'company'
+                    'company',
+                    'expenses' => function($q) use($startDate,$endDate) {
+                        $q->where('created_at', '>=',  $startDate);
+                        $q->whereDate('created_at', '<=',  $endDate);
+                    }
                 ])
                 ->whereHas('schedules', function ($q) use($startDate,$endDate){
                     $q->where('date', '>=',  $startDate);
@@ -251,9 +255,11 @@ class HomeController extends Controller
 
         if($users){
             foreach($users as $k => $user){
+                $user_arr[$k]['id'] =   $user['id'];
                 $user_arr[$k]['name'] =   $user['name'];
                 $user_arr[$k]['company'] = $user['company']['name'];
 
+                //Schedules
                 if($user['schedules']){
                     
                     $total_minutes = 0;
@@ -325,8 +331,33 @@ class HomeController extends Controller
                     $user_arr[$k]['average_time_per_visit'] =  0;
                     $user_arr[$k]['average_visit_per_day'] =  0;
                 }
-               
-                
+
+                //Expenses
+                if($user['expenses']){
+                    $total_expenses = 0;
+                    $first = true;
+                    $last_schedule_date = '';
+
+                    $expenses_data = [];
+                    $x = 1;
+                    foreach($user['expenses'] as $z => $expenses){
+                        if($first){
+                            $last_schedule_date = $expenses['created_at'];
+                            $first = false;
+                        }else{
+                            if($last_schedule_date != $expenses['created_at']){
+                                $x++;
+                                $last_schedule_date = $expenses['created_at'];
+                            }
+                        }
+                        $total_expenses += $expenses['amount'];
+                    }
+
+                    $user_arr[$k]['average_expense_per_day'] =  round(abs($total_expenses / $x),0);
+
+                }else{
+                    $user_arr[$k]['average_expense_per_day'] =  0;
+                }
             }
 
             array_multisort(array_column($user_arr, 'total_count_visit'), SORT_DESC, $user_arr);
@@ -535,7 +566,7 @@ class HomeController extends Controller
     public function customerVisiterPerArea(){
 
         $date_today = date('Y-m-d');
-        $params['startDate'] = $date_today;
+        $params['startDate'] = date('Y-m-01');
         $params['endDate'] = $date_today;
 
         $user_id = Auth::user()->id;
