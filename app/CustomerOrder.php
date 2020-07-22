@@ -9,6 +9,7 @@ class CustomerOrder extends Model
     protected $fillable = [
         'customer_code',
         'do_number',
-        'created_date'
+        'purchase_date',
+        'server'
     ];
 }

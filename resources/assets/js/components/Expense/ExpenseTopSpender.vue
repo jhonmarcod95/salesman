@@ -172,24 +172,7 @@
                         "name": "December",
                     },
                 ],
-                years : [
-                    {
-                        'id':'2020',
-                        'name':'2020',
-                    },
-                    {
-                        'id':'2019',
-                        'name':'2019',
-                    },
-                    {
-                        'id':'2018',
-                        'name':'2018',
-                    },
-                    {
-                        'id':'2017',
-                        'name':'2017',
-                    },
-                ],
+                years : [],
                 keywords : '',
                 month: '',
                 year: '',
@@ -219,8 +202,18 @@
         created(){
             this.fetchCompanies();
             this.currentTopSpender();
+            this.fetchYears();
         },
         methods: {
+            fetchYears(){
+                axios.get('/year-options')
+                .then(response => {
+                    this.years = response.data;
+                })
+                .catch(error => { 
+                    this.errors = error.response.data.errors;
+                })
+            },
             fetchCompanies(){
                 axios.get('/companies-all')
                 .then(response => {

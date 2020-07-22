@@ -629,4 +629,23 @@ class HomeController extends Controller
         return $data = [$luzon,$visayas,$mindanao];
     }
 
+    public function yearOptions(){
+        $start_year = 2017;
+        $current_year = date('Y');
+
+        $year_data = [];
+        $x = 0;
+        for($start_year;$start_year <= $current_year;$start_year++){
+            $year_data[$x]['id'] = $start_year;
+            $year_data[$x]['name'] = $start_year;
+            $x++;
+        }
+
+        array_multisort(array_map(function($year_data) {
+            return $year_data['id'];
+        }, $year_data), SORT_DESC, $year_data);
+
+        return $year_data;
+    }
+
 }

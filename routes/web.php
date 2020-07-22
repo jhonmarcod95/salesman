@@ -387,5 +387,9 @@ Route::get('/individual_performance', 'IndividualPerformanceController@index');
 
 Route::get('/individual-performance-data', 'IndividualPerformanceController@indexData');
 
+Route::post('/individual-performance-filter-data', 'IndividualPerformanceController@indexFilterData');
+
+
+Route::get('/year-options', 'HomeController@yearOptions');
 
 
