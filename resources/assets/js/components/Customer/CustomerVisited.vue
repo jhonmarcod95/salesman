@@ -81,6 +81,8 @@
                                                 <th>SCHEDULE</th>
                                                 <th>ATTENDANCE</th>
                                                 <th>DWELL TIME</th>
+                                                <th>TRAVEL TIME</th>
+                                                <th>TSR</th>
                                             </tr>
                                             <tr v-for="(schedule, c) in customerVisited.schedules" v-bind:key="c">
                                                 <td>Date : {{ schedule.date }} Time: ({{ schedule.start_time + '-' + schedule.end_time}})</td>
@@ -92,6 +94,16 @@
                                                 <td>
                                                     <div v-if="schedule.attendances">
                                                         {{ rendered(schedule.attendances.sign_out ? schedule.attendances.sign_out : "", schedule.attendances.sign_in ? schedule.attendances.sign_in : "") }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div v-if="schedule.attendances">
+                                                       <button class="btn btn-outline-success btn-sm" @click="checkTravelTime(schedule.attendances.id,schedule.user_id)">View Total Time Travel</button>
+                                                    </div>
+                                                </td>
+                                                <td style="width:300px!important;">
+                                                    <div v-if="schedule.user">
+                                                        {{ schedule.user.name ? schedule.user.name : "" }}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -280,6 +292,28 @@
                 </div>
             </div>
         </div>
+
+
+        <div class="modal fade" id="timeTravelModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+            <span class="closed" data-dismiss="modal">&times;</span>
+            <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCompanyLabel">Time Travel</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center" >
+                    <h2 v-if="timeTravel=='Getting Time Travel..' || timeTravel=='No Time Travel'" class="text-danger">{{timeTravel}}</h2>
+                    <h2 v-else class="text-success">{{timeTravel}}</h2>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -320,7 +354,8 @@ export default {
                 'DOCUMENT DATE': 'document_date',
                 'POSTING DATE': 'posting_date',
                 'BASELINE DATE': 'baseline_date',
-            }
+            },
+            timeTravel : ''
         }
     },
     created(){
@@ -347,6 +382,24 @@ export default {
                 }else{
                     return 0;
                 }                                  
+        },
+        checkTravelTime(attendance_id,user_id){
+            let v = this;
+            v.timeTravel = "Getting Time Travel..";
+            $('#timeTravelModal').modal('show');
+            axios.get('/tsr-get-last-visited/' + attendance_id + '/' + user_id)
+            .then(response => {
+                v.timeTravel = "Getting Time Travel.."; 
+                if(response.data){
+                    var get_time = response.data;
+                    v.timeTravel = this.rendered(get_time[0],get_time[1]);
+                }else{
+                     v.timeTravel="No Time Travel";
+                }
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
         },
         noImage(event){
             event.target.src = window.location.origin+'/img/brand/no-image.png';

@@ -238,7 +238,7 @@ class HomeController extends Controller
                     },
                     'schedules.attendances',
                     'company',
-                    'expenses' => function($q) use($startDate,$endDate) {
+                    'payments.expense' => function($q) use($startDate,$endDate) {
                         $q->where('created_at', '>=',  $startDate);
                         $q->whereDate('created_at', '<=',  $endDate);
                     }
@@ -247,6 +247,9 @@ class HomeController extends Controller
                     $q->where('date', '>=',  $startDate);
                     $q->whereDate('date', '<=', $endDate);
                     $q->where('type','1');
+                })
+                ->whereHas('payments', function ($q){
+                    $q->whereNotNull('document_code');
                 })
                 ->whereIn('id',$selected_user)
                 ->get();
@@ -333,24 +336,24 @@ class HomeController extends Controller
                 }
 
                 //Expenses
-                if($user['expenses']){
+                if($user['payments']){
                     $total_expenses = 0;
                     $first = true;
                     $last_schedule_date = '';
 
                     $expenses_data = [];
                     $x = 1;
-                    foreach($user['expenses'] as $z => $expenses){
+                    foreach($user['payments'] as $z => $expenses){
                         if($first){
-                            $last_schedule_date = $expenses['created_at'];
+                            $last_schedule_date = $expenses['expense']['created_at'];
                             $first = false;
                         }else{
-                            if($last_schedule_date != $expenses['created_at']){
+                            if($last_schedule_date != $expenses['expense']['created_at']){
                                 $x++;
-                                $last_schedule_date = $expenses['created_at'];
+                                $last_schedule_date = $expenses['expense']['created_at'];
                             }
                         }
-                        $total_expenses += $expenses['amount'];
+                        $total_expenses += $expenses['expense']['amount'];
                     }
 
                     $user_arr[$k]['average_expense_per_day'] =  round(abs($total_expenses / $x),0);
@@ -622,6 +625,69 @@ class HomeController extends Controller
                                                     $q->whereIn('id',$mindanao_regions);
                                                 })
                                                 ->has('attendances')
+                                                ->where('type','1')
+                                                ->orderBY('name','ASC')
+                                                ->count();                                        
+
+        return $data = [$luzon,$visayas,$mindanao];
+    }
+
+    public function customerSchedulePerArea(){
+
+        $date_today = date('Y-m-d');
+        $params['startDate'] = date('Y-m-01');
+        $params['endDate'] = $date_today;
+
+        $user_id = Auth::user()->id;
+        $dashboard_filter = DashboardFilter::where('user_id', $user_id)->first();
+        if($dashboard_filter){
+            $companyId = $dashboard_filter['company'] ? $dashboard_filter['company'] : Auth::user()->companies[0]->id;
+        }else{
+            $companyId = Auth::user()->companies[0]->id;
+        }
+
+        $users = User::select('id')->where('company_id',$companyId)->get();
+
+        $selected_user = [];
+        foreach($users as $user){
+            array_push($selected_user , $user['id']);
+        }
+
+        //Luzon Regions
+        $luzon_regions = [1,2,3,4,5,6,16,17];
+        $luzon = Schedule::with('attendances','customer.provinces.regions')
+                                                ->whereIn('user_id', $selected_user)
+                                                ->where('date', '>=' , $params['startDate'])
+                                                ->whereDate('date', '<=' , $params['endDate'])
+                                                ->whereHas('customer.provinces.regions', function($q) use($luzon_regions){
+                                                    $q->whereIn('id',$luzon_regions);
+                                                })
+                                                ->where('type','1')
+                                                ->orderBY('name','ASC')
+                                                ->count();
+
+        //Visayas Regions
+        $visayas_regions = [7,8,9];
+        $visayas = Schedule::with('customer.provinces.regions')
+                                                ->whereIn('user_id', $selected_user)
+                                                ->where('date', '>=' , $params['startDate'])
+                                                ->whereDate('date', '<=' , $params['endDate'])
+                                                ->whereHas('customer.provinces.regions', function($q) use($visayas_regions){
+                                                    $q->whereIn('id',$visayas_regions);
+                                                })
+                                                ->where('type','1')
+                                                ->orderBY('name','ASC')
+                                                ->count();
+        
+        //Mindanao Regions
+        $mindanao_regions = [10,11,12,13,14,15];
+        $mindanao = Schedule::with('customer.provinces.regions')
+                                                ->whereIn('user_id', $selected_user)
+                                                ->where('date', '>=' , $params['startDate'])
+                                                ->whereDate('date', '<=' , $params['endDate'])
+                                                ->whereHas('customer.provinces.regions', function($q) use($mindanao_regions){
+                                                    $q->whereIn('id',$mindanao_regions);
+                                                })
                                                 ->where('type','1')
                                                 ->orderBY('name','ASC')
                                                 ->count();                                        

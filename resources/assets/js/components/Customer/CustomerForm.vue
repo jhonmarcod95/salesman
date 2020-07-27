@@ -23,7 +23,33 @@
                                                 <span v-if="show">Last customer code: {{ pilili_code }}<br></span>
                                                 <label class="form-control-label" for="customer_code">Customer Code</label>
                                                 <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code">
-                                                <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
+                                                
+                                                <br>
+                                                <div v-if="customer.status == '1' || customer.status == '2'" style="border-radius:10px;border:1px solid red;padding:5px 10px 10px 5px;">
+                                                    <label class="form-control-label" for="customer_code">
+                                                        Select Customer Code from SAP
+                                                    </label>
+                                                    <div v-if="customer_codes.length > 0">
+                                                         <multiselect
+                                                            v-model="customercodeSelect"
+                                                            :options="customer_codes"
+                                                            :multiple="false"
+                                                            track-by="id"
+                                                            :custom-label="customLabelCustomerCode"
+                                                            :max="5"
+                                                            placeholder="Select Customer Code"
+                                                            id="selected_customer"
+                                                        >
+                                                        </multiselect>
+                                                         <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
+                                                    </div>
+                                                    <div v-else>
+                                                       <span class="text-primary">Please wait a moment.. Getting Customer Codes.. </span>
+                                                    </div>
+                                                    
+                                                   
+                                                </div>
+                                                
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -47,7 +73,7 @@
                                         <div class="col-lg-6">
                                            <div class="form-group">
                                                 <label class="form-control-label" for="classification">Status</label>
-                                                <select class="form-control" v-model="customer.status">
+                                                <select class="form-control" v-model="customer.status" @change="statusCustomerCode">
                                                     <option v-for="(status, c) in statuses" v-bind:key="c" :value="status.id">{{ status.description}}</option>
                                                 </select>
                                                 <span class="text-danger small" v-if="errors.status">{{ errors.status[0] }}</span>
@@ -174,13 +200,16 @@
         </div>
     </div>
 </template>
-
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <script>
     import Mapbox from 'mapbox-gl-vue';
     import mapboxgl from 'mapbox-gl';
+
+    import Multiselect from 'vue-multiselect';
+
     export default {
          components: {
-            Mapbox
+            Mapbox,Multiselect
         },
         props:['companyId'],
         data(){
@@ -212,10 +241,13 @@
                 regions:[],
                 classifications:[],
                 statuses:[],
-                errors: []
+                errors: [],
+                customer_codes : [],
+                customercodeSelect : ''
             }   
         },
         created(){
+            this.fetchCustomerCodes();
             this.fetchRegion();
             this.fetchProvince();
             this.fetchClassification();
@@ -261,7 +293,32 @@
             });
         },
         methods:{
+            statusCustomerCode(){
+                if(this.customer.status == 1 || this.customer.status == 2){
+                   this.customercodeSelect = '';    
+                }
+            },
+
+            customLabelCustomerCode (customer) {
+                return `${customer.customer_code  }`
+            },
+            fetchCustomerCodes(){
+                axios.get('/customer-codes-all')
+                .then(response => { 
+                    this.customer_codes = response.data;
+                })
+                .catch(error => {
+                    this.errors = error.response.data.errors;
+                })
+            },
             addCustomer(customer){
+
+                if(this.customer.status == 1 || this.customer.status == 2){
+                    if(this.customercodeSelect.customer_code){
+                        customer.customer_code = this.customercodeSelect.customer_code;
+                    }
+                }
+
                 axios.post('/customers',{
                     classification : customer.classification,
                     status : customer.status,

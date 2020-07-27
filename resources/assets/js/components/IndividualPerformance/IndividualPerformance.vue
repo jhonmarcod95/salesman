@@ -83,10 +83,16 @@
                                         <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
                                     </th>
                                     <th scope="col" @click="totalVolumeOrderSort" style="cursor:pointer">
-                                        Total Volume Order Order <br>
+                                        Total Volume Order <br>
                                         <span v-if="totalVolumeOrderSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
                                         <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
                                     </th>
+                                    <th scope="col" @click="totalCustomerSpendSort" style="cursor:pointer">
+                                        Total Customer Spend <br>
+                                        <span v-if="totalCustomerSpendSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
+                                        <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
+                                    </th>
+                                    <th>Monthly Qouta</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -98,6 +104,8 @@
                                         <td>{{ user.total_visited }}</td>
                                         <td>{{ user.total_customer_order }}</td>
                                         <td>{{ user.total_customer_volume_order }}</td>
+                                        <td>{{ user.total_customer_expenses }}</td>
+                                        <td>{{ user.monthly_qouta }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -203,10 +211,12 @@ export default {
                 'TOTAL CUSTOMER VISITED' : 'total_visited',
                 'TOTAL CUSTOMER ORDER' : 'total_customer_order',
                 'TOTAL CUSTOMER VOLUME ORDER' : 'total_customer_volume_order',
+                'TOTAL CUSTOMER SPEND' : 'total_customer_expenses',
             },
             totalVisitedSortby : 'DESC',
             totalCustomerOrderSortby : 'DESC',
             totalVolumeOrderSortby : 'DESC',
+            totalCustomerSpendSortby : 'DESC',
             loading: false,
             totalFilterIndividualPerformances: '',
         }
@@ -351,6 +361,30 @@ export default {
                             return 1;
                     });
                 v.totalVolumeOrderSortby = 'ASC';
+            }
+        },
+        totalCustomerSpendSort(){
+            let v = this;
+            if(v.totalCustomerSpendSortby == 'ASC'){
+                v.individualPerformances.sort(function(a,b){
+                        if (a.total_customer_expenses < b.total_customer_expenses)
+                            return -1;
+                        else if (a.total_customer_expenses == b.total_customer_expenses)
+                            return 0;
+                        else
+                            return 1;
+                    });
+                v.totalCustomerSpendSortby = 'DESC';
+            }else{
+                v.individualPerformances.sort(function(a,b){
+                        if (a.total_customer_expenses > b.total_customer_expenses)
+                            return -1;
+                        else if (a.total_customer_expenses == b.total_customer_expenses)
+                            return 0;
+                        else
+                            return 1;
+                    });
+                v.totalCustomerSpendSortby = 'ASC';
             }
         },
     },

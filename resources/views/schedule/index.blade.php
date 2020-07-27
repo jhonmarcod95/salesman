@@ -97,10 +97,26 @@
             var eventData = setEvents(data);
             $('#calendar').fullCalendar('renderEvent', eventData, true);
         }
+
+        function rendered(endTime, startTime) {
+            if(endTime && startTime){
+                var startTime = moment(startTime, "HH:mm:ss a");
+                var endTime = moment(endTime, "HH:mm:ss a");
+                var duration = moment.duration(endTime.diff(startTime));
+                var hours = parseInt(duration.asHours());
+                var minutes = parseInt(duration.asMinutes())%60;
+                return hours + 'h '+ minutes+' min.';
+            }else{
+                return "";
+            }
+        }
+
         
         function setEvents(data) {
 
             var fullname = data.full_name;
+            
+            var time = rendered(data.end_time,data.start_time);
 
             var eventData = {
                 id: data.id,
@@ -111,7 +127,7 @@
                 address: data.address,
                 title: fullname + '\n' +
                        data.name + '\n' +
-                       '(' + formatAMPM(data.start_time) + '-' + formatAMPM(data.end_time) +  ')',
+                       '(' + time +  ')',
                 start: data.date,
                 fullname: fullname,
                 start_time: data.start_time,

@@ -383,13 +383,21 @@ Route::get('/get-sap-tsr-actual-expense', 'HomeController@getSapTsrActualExpense
 
 Route::get('/customer-visited-per-area', 'HomeController@customerVisiterPerArea');
 
+Route::get('/customer-schedule-per-area', 'HomeController@customerSchedulePerArea');
+
 Route::get('/individual_performance', 'IndividualPerformanceController@index');
 
 Route::get('/individual-performance-data', 'IndividualPerformanceController@indexData');
 
 Route::post('/individual-performance-filter-data', 'IndividualPerformanceController@indexFilterData');
 
+Route::get('/tsr-get-last-visited/{attendance_id}/{user_id}', 'CustomerController@getLastVisitedDate');
+
 
 Route::get('/year-options', 'HomeController@yearOptions');
+
+Route::get('/customer-codes', 'CustomerController@getCustomerCodes');
+
+Route::get('/customer-codes-all', 'CustomerController@getCustomerCodesAll');
 
 

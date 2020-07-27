@@ -241,6 +241,12 @@
                             
                             <div class="card-body">
                                 <bar-chart :chart-data="datacustomerVisitedPerArea" :height="100"></bar-chart>
+
+                                <div class="mt-2">
+                                    <small>Luzon : <strong class="text-primary" v-if="dataPercentagePerArea.length > 0"> {{ dataPercentagePerArea[0].luzon != 'NaN' ? dataPercentagePerArea[0].luzon + '%' : "--" }} </strong> | </small>
+                                    <small>Visayas : <strong class="text-primary" v-if="dataPercentagePerArea.length > 0"> {{ dataPercentagePerArea[1].visayas != 'NaN' ? dataPercentagePerArea[1].visayas + '%' : "--" }} </strong>  | </small>
+                                    <small>Mindanao : <strong class="text-primary" v-if="dataPercentagePerArea.length > 0"> {{ dataPercentagePerArea[2].mindanao != 'NaN' ? dataPercentagePerArea[2].mindanao + '%' : "--" }} </strong>  </small>
+                                </div>
                             </div>
                         
                         </div>
@@ -336,7 +342,7 @@
                                             <td> <h5>{{ currentMonthTotalClientInteraction }} </h5> </td>
                                         </tr>
                                         <tr>
-                                            <td> <h5>SCHEDULE FOR VISIT</h5> </td>
+                                            <td> <h5>TOTAL SCHEDULES</h5> </td>
                                             <td> <h5>{{ currentMonthTotalSchedule }} </h5> </td>
                                         </tr>
                                         <tr>
@@ -344,7 +350,7 @@
                                             <td> <h5>{{ currentMonthTotalMapped }} </h5> </td>
                                         </tr>
                                         <tr>
-                                            <td> <h5>SCHEDULE MAPPED CUSTOMER</h5> </td>
+                                            <td> <h5>NOT VISITED MAPPED CUSTOMER</h5> </td>
                                             <td> <h5>{{ currentMonthTotalScheduleMapped }} </h5> </td>
                                         </tr>
                                     </tbody>
@@ -621,7 +627,11 @@ export default {
 
 
             //Demographic
-           datacustomerVisitedPerArea : []
+           datacustomerVisitedPerArea : [],
+
+           dataVisitedPerArea : [],
+           dataSchedulePerArea : [],
+           dataPercentagePerArea : [],
             
         }
     },
@@ -644,29 +654,84 @@ export default {
         this.fetchCustomerVisitedPerArea();
         
         
+        
     },
     methods:{
         //Demographic Customer Visited Per Area
         fetchCustomerVisitedPerArea(){
             axios.get('/customer-visited-per-area')
             .then(response => { 
-                this.employeeCustomerVisitedPerAreaData(response.data);
-                
+                this.dataVisitedPerArea = response.data;
+                this.fetchCustomerSchedulePerArea();
             })
             .catch(error => { 
                 this.errors = error.response.data.error;
             })
         },
-        employeeCustomerVisitedPerAreaData(regioncount)
+        fetchCustomerSchedulePerArea(){
+            axios.get('/customer-schedule-per-area')
+            .then(response => { 
+                this.dataSchedulePerArea = response.data;
+                //Fetch Percentage
+                this.fetchPercentagePerArea();
+                this.employeeCustomerVisitedPerAreaData();
+            })
+            .catch(error => { 
+                this.errors = error.response.data.error;
+            })
+        },
+        fetchPercentagePerArea(){
+
+            let v = this;
+            
+            let luzon_percentage = 0;
+            let visayas_percentage = 0;
+            let mindanao_percentage = 0;
+
+            let dataPercentage = [];
+            if(v.dataVisitedPerArea && v.dataSchedulePerArea){
+                //Luzon
+                var luzon_schedules = v.dataSchedulePerArea[0] ? v.dataSchedulePerArea[0] : 0;
+                var luzon_visited = v.dataVisitedPerArea[0] ? v.dataVisitedPerArea[0] : 0;
+                luzon_percentage = luzon_visited/luzon_schedules * 100;
+
+                dataPercentage.push({
+                    'luzon' : luzon_percentage.toFixed(0)
+                });
+                //Visayas
+                var visayas_schedules = v.dataSchedulePerArea[1] ? v.dataSchedulePerArea[1] : 0;
+                var visayas_visited = v.dataVisitedPerArea[1] ? v.dataVisitedPerArea[1] : 0;
+                visayas_percentage = visayas_visited/visayas_schedules * 100;
+
+                dataPercentage.push({
+                    'visayas' : visayas_percentage.toFixed(0)
+                });
+
+                //Mindanao
+                var mindanao_schedules = v.dataSchedulePerArea[2] ? v.dataSchedulePerArea[2] : 0;
+                var mindanao_visited = v.dataVisitedPerArea[2] ? v.dataVisitedPerArea[2] : 0;
+                mindanao_percentage = mindanao_visited/mindanao_schedules * 100;
+
+                dataPercentage.push({
+                    'mindanao' : mindanao_percentage.toFixed(0)
+                });
+            }
+
+            v.dataPercentagePerArea = dataPercentage;
+
+            
+        },
+        employeeCustomerVisitedPerAreaData()
         {
+            let v = this;
             var count = [];
 
-            regioncount.forEach(function(entry) {
-                count.push(entry);
-            });
+            // regioncount.forEach(function(entry) {
+            //     count.push(entry);
+            // });
             
             this.datacustomerVisitedPerArea = {
-                labels: ['Luzon (' + count[0] + ')' ,'Visayas (' + count[1] + ')', 'Mindanao (' + count[2] + ')'],
+                labels: ['Luzon' ,'Visayas', 'Mindanao'],
                 datasets: [
                     {
                         label: 'Customer Visited',
@@ -674,7 +739,15 @@ export default {
                         pointBackgroundColor: 'white',
                         borderWidth: 1,
                         pointBorderColor: '#249EBF',
-                        data: count
+                        data: v.dataVisitedPerArea
+                    },
+                    {
+                        label: 'Customer Visit Schedules',
+                        backgroundColor: 'rgba(245,54,92, 0.5)',
+                        pointBackgroundColor: 'white',
+                        borderWidth: 1,
+                        pointBorderColor: '#249EBF',
+                        data: v.dataSchedulePerArea
                     },
                 ]
             }

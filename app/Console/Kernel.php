@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         Commands\PaymentAutoPostingMonthEnd::class,
         Commands\EmailCustomerVisit::class,
         Commands\GetCustomerOrder::class,
+        Commands\SapCustomerCode::class,
     ];
 
     /**
@@ -47,6 +48,9 @@ class Kernel extends ConsoleKernel
 
         //Get Customer Order
         $schedule->command('command:customer_order')->dailyAt('6:00');
+
+        //Get Customer Order
+        $schedule->command('command:sap_customer_codes')->everyFourHours();
 
     }
 

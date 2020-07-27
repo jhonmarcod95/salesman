@@ -142,6 +142,14 @@
                                         </div>
                                     </div>
                                     <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="monthly_qouta">Monthly Qouta</label>
+                                                <input type="text" id="monthly_qouta" class="form-control form-control-alternative" v-model="tsr.monthly_qouta">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="text">
                                             <button @click="updateTsr(tsr)"  type="button" class="btn btn-primary mt-4">Save</button>
                                         </div>
@@ -227,6 +235,7 @@ export default {
                 contact_person: tsr.contact_person,
                 personal_email: tsr.personal_email,
                 plate_number: tsr.plate_number,
+                monthly_qouta: tsr.monthly_qouta,
                 company: tsr.company_id,
                 location: tsr.user.location[0].id,
                 vendor_code: tsr.user.vendor.vendor_code ? tsr.user.vendor.vendor_code.padStart(10, '0') : null,
