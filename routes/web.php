@@ -400,4 +400,7 @@ Route::get('/customer-codes', 'CustomerController@getCustomerCodes');
 
 Route::get('/customer-codes-all', 'CustomerController@getCustomerCodesAll');
 
+Route::get('/missed_itineraries', 'ScheduleController@missedItineraries');
+Route::post('/missed-itineraries-data', 'ScheduleController@missedItinerariesData');
+
 

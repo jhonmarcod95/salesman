@@ -27,6 +27,8 @@ Vue.component('sap-user-index', require('./components/SapUser/SapUserIndex.vue')
 // Schedule
 Vue.component('request-schedule-index', require('./components/Schedule/RequestScheduleIndex.vue'));
 
+Vue.component('missed-itineraries', require('./components/Schedule/MissedItineraries.vue'));
+
 // Payment
 Vue.component('payment-index', require('./components/Payment/PaymentIndex.vue'));
 

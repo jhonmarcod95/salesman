@@ -14,6 +14,7 @@ use App\ScheduleTypes;
 use App\TechnicalSalesRepresentative;
 use App\Message;
 use App\RequestSchedule;
+use App\User;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -435,5 +436,36 @@ class ScheduleController extends Controller
 
         return $customers;
 
+    }
+
+
+    public function missedItineraries(){
+        return view('schedule.missed-itineraries');
+    }
+
+    public function missedItinerariesData(Request $request){
+
+        $request->validate([
+            'company' => 'required',
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate'
+        ]);
+        
+
+        $users = User::select('id')->where('company_id',$request->company)->get();
+
+        $selected_user = [];
+        foreach($users as $user){
+            array_push($selected_user , $user['id']);
+        }
+
+        $missed_itineraries= Schedule::with('attendances','user')
+                        ->doesnthave('attendances')
+                        ->whereDate('created_at', '>=',  $request->startDate)
+                        ->whereDate('created_at' ,'<=', $request->endDate)
+                        ->whereIn('user_id',$selected_user)
+                        ->orderBy('id','desc')->get();
+
+        return $missed_itineraries;
     }
 }

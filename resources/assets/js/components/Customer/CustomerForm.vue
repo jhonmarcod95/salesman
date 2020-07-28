@@ -20,11 +20,6 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <span v-if="show">Last customer code: {{ pilili_code }}<br></span>
-                                                <label class="form-control-label" for="customer_code">Customer Code</label>
-                                                <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code">
-                                                
-                                                <br>
                                                 <div v-if="customer.status == '1' || customer.status == '2'" style="border-radius:10px;border:1px solid red;padding:5px 10px 10px 5px;">
                                                     <label class="form-control-label" for="customer_code">
                                                         Select Customer Code from SAP
@@ -46,8 +41,12 @@
                                                     <div v-else>
                                                        <span class="text-primary">Please wait a moment.. Getting Customer Codes.. </span>
                                                     </div>
+                                                </div>
+                                                <div v-else>
+                                                    <span v-if="show">Last customer code: {{ pilili_code }}<br></span>
+                                                    <label class="form-control-label" for="customer_code">Customer Code</label>
+                                                    <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code">
                                                     
-                                                   
                                                 </div>
                                                 
                                             </div>

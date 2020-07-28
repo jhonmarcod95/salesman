@@ -35,6 +35,11 @@
                         {!! Form::close() !!}
                     </div>
                     <div class="card-body">
+                        <div class="row">
+                            <div class="col text-right">
+                                <a href="/missed_itineraries" class="btn btn-sm btn-warning"> Missed Itineraries</a>
+                            </div>
+                        </div>
                         <div id='calendar'></div>
                     </div>
                 </div>
