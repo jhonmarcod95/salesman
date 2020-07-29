@@ -27,6 +27,9 @@ class CloseVisitController extends Controller
         $closeVisits = CloseVisit::when($request_status || $request_status == '0'  , function($q) use ($request_status){
                     $q->where('isApproved', $request_status);
                 })
+                ->whereHas('user', function ($q){
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                })
                 ->whereDate('created_at', '>=',  $request->startDate)
                 ->whereDate('created_at' ,'<=', $request->endDate)
                 ->orderBy('id','desc')

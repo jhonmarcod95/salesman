@@ -15,19 +15,51 @@
                                 </div>
                                 <div class="col text-right">
                                     <a :href="addLink" class="btn btn-sm btn-primary">Add New</a>
+
+                                    <download-excel
+                                        :data   = "customers"
+                                        :fields = "json_fields"
+                                        class   = "btn btn-sm btn-default"
+                                        name    = "Customers.xls">
+                                            Export to excel
+                                    </download-excel>
+
                                 </div>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <div class="col-md-4">
-                                <input type="text" class="form-control form-control-sm" placeholder="Search" v-model="keywords" id="name">
+                            <div class="row ml-2">
+                                <div class="col-md-3 float-left">
+                                    <div class="form-group">
+                                        <label for="name" class="form-control-label">Search</label> 
+                                        <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="start_date" class="form-control-label">Filter Verified Status</label> 
+                                        <multiselect
+                                            v-model="filterVerified"
+                                            :options="verifiedStatuses"
+                                            :multiple="false"
+                                            placeholder="Verified Status"
+                                            id="selected_filter_verified"
+                                        >
+                                        </multiselect>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-sm btn-primary" @click="fetchFilterCustomers()"> Apply Filter</button>
+                                </div>
                             </div>
+
                         </div>
                         <div class="table-responsive">
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col"></th>
+                                    <th scope="col">Verified</th>
                                     <th scope="col">Customer Code</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Street</th>
@@ -56,6 +88,12 @@
                                                     <a class="dropdown-item" @click="getGeocode(customer.lat,customer.lng)">View address</a>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <label class="container">
+                                                <input type="checkbox" style="width:20px;height:20px;"  :id="customer.id" :value="customer.verified_status"  true-value="1" false-value="0" v-model="customer.verified_status" @click="changeVerifiedStatus(customer,$event)">
+                                                <span class="checkmark"></span>
+                                            </label>
                                         </td>
                                         <td>{{ customer.customer_code }}</td>
                                         <td>{{ customer.name }}</td>
@@ -118,23 +156,115 @@
         </div>
     </div>
 </template>
-
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <script>
+import JsonExcel from 'vue-json-excel'
+import Multiselect from 'vue-multiselect';
+import Swal from 'sweetalert2'
+
 export default {
+    components: { 'downloadExcel': JsonExcel, Multiselect },
     data(){
         return{
+            filterVerified : '',
+            verifiedStatuses : ['Verified' , 'All'],
             customers: [],
             customer_id: '',
             errors: [],
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            json_fields: {
+                'CUSTOMER CODE' : 'customer_code',
+                'CUSTOMER NAME': 'name',
+                'ADDRESS': 'google_address',
+                'PROVINCE' : 'province',
+                'REGION CODE' : 'region_code',
+                'REGION' : 'region',
+                'CLASSIFICATION': {
+                    callback: (value) => {
+                        if(value.classification == 10 || value.classification == 16){
+                            return 'DIRECT';
+                        }else if(value.classification == 8 || value.classification == 9){
+                           return 'INDIRECT';
+                        }else{
+                            return '';
+                        }
+                    }
+                },
+                'STATUS' : {
+                    callback: (value) => {
+                        if(value.status == 1){
+                            return 'Active';
+                        }else if(value.status == 2){
+                           return 'Inactive';
+                        }else if(value.status == 3){
+                           return 'Prospect';
+                        }else if(value.status == 4){
+                           return 'Closed';
+                        }
+                        else{
+                            return '';
+                        }
+                    }
+                },
+                'CREATION DATE': 'created_at',
+            }
         }
     },
     created(){
         this.fetchCustomer();
     },
     methods:{
+        changeVerifiedStatus: function(customer,event) {
+            let check = event.target.checked;
+            let verified_status;
+            let verified_status_desc;
+            if(check == true){
+                verified_status = 1;
+                verified_status_desc = 'Verified';
+            }else{
+                verified_status = 0;
+                verified_status_desc = 'Unverified';
+            }
+
+            var index = this.customers.findIndex(item => item.id == customer.id);
+        
+            axios.post('/change-verified-status/' + customer.id,{
+                customer_id: customer.id,
+                verified_status: verified_status,
+            })
+            .then(response => {
+                this.customers.splice(index,1,response.data);
+
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Customer: '+ customer.name +' has been successfully ' + verified_status_desc +'.',
+                    icon: 'success',
+                    confirmButtonText: 'Okay'
+                })
+
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+
+            
+            
+
+        },
+        fetchFilterCustomers(){
+            let v = this;
+            axios.post('/customers-all-filter',{
+                verified_status: v.filterVerified,
+            })
+            .then(response => {
+                this.customers = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
       getCustomerId(id){
           this.customer_id = id;
       },

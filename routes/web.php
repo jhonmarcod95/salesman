@@ -20,6 +20,9 @@ Auth::routes();
 
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
+
 Route::get('logout', function(){
     return redirect('/');
   });
@@ -174,6 +177,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     
     Route::get('/customers-all', 'MapAnalyticsReportController@customersData');
     
+    
     Route::post('/user-locations', 'MapAnalyticsReportController@userLocations');
 
     Route::get('/map-users-all', 'MapAnalyticsReportController@users');
@@ -283,7 +287,13 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // show customer page
     Route::get('/customers', 'CustomerController@index')->name('customers_list');
     // fetch all customer
+    
     Route::get('/customers-all', 'CustomerController@indexData');
+
+    Route::post('/customers-all-filter', 'CustomerController@indexDataFilter');
+
+    Route::post('/change-verified-status/{customer}', 'CustomerController@changeVerifiedStatus');
+
     //show add customer page
     Route::get('/customers/create', 'CustomerController@create');
     //save new customer

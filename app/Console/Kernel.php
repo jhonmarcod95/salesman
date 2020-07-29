@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\PaymentAutoPosting::class,
         Commands\PaymentAutoCv::class,
+        Commands\PaymentAutoPostingMonthEnd::class,
     ];
 
     /**
@@ -36,6 +37,11 @@ class Kernel extends ConsoleKernel
         //auto cv
         $schedule->command('payment:autocheck')
             ->weekly()->tuesdays()->at('00:31');
+
+        //auto posting month end
+        $schedule->command('payment:autopostingmonthend')->monthlyOn(date('t'), '23:00');
+        $schedule->command('payment:autocv')->monthlyOn(date('t'), '23:21');
+        $schedule->command('payment:autocheck')->monthlyOn(date('t'), '23:31');
 
     }
 

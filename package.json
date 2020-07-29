@@ -23,6 +23,7 @@
     },
     "dependencies": {
         "@saeris/vue-spinners": "^1.0.8",
+        "chart.js": "^2.9.3",
         "exceljs": "^3.9.0",
         "file-saver": "^2.0.2",
         "highcharts": "^8.0.4",
@@ -33,8 +34,10 @@
         "moment": "^2.22.2",
         "npm": "^6.13.1",
         "pusher-js": "^4.3.1",
+        "sweetalert2": "^9.15.2",
         "to": "^0.2.9",
         "update": "^0.7.4",
+        "vue-chartjs": "^3.5.0",
         "vue-content-placeholders": "^0.2.1",
         "vue-json-excel": "^0.2.98",
         "vue-multiselect": "^2.1.3",

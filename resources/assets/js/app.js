@@ -72,6 +72,8 @@ Vue.component('attendance-report-index', require('./components/AttendanceReport/
 // Dashboard
 Vue.component('dashboard-index', require('./components/Dashboard/DashboardIndex.vue'));
 
+Vue.component('dashboard', require('./components/Dashboard/Dashboard.vue'));
+
 // Loader
 Vue.component('loader', require('./components/Loader.vue'));
 
