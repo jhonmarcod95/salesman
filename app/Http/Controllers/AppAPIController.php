@@ -58,6 +58,31 @@ class AppAPIController extends Controller
     }
 
     /**
+     * Check if IO is duplicate
+     */
+    public function checkDuplicateIo() {
+        $internalOrders = SalesmanInternalOrder::where('user_id', Auth::user()->id)->get();
+
+        $duplicateInternalOrders = collect($internalOrders)
+            ->groupBy('internal_order')
+            ->filter(function ($items) {
+                return $items->count() > 1;
+            })
+            ->flatMap(function ($items) {
+                return $items->map(function ($x) {
+                    // Expense Charge Type
+                    $expenseChargeType = ExpenseChargeType::where('charge_type_id', $x->chargeType->id);
+                    return array(
+                        'internal_order' => $x->internal_order,
+                        'amount' => (float) $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id),
+                    );
+                });
+            });
+
+        return $duplicateInternalOrders;
+    }
+
+    /**
      * Check budget balance from SAP by given expense type and user id
      *
      * @param [Integer] $expense_type
@@ -77,7 +102,22 @@ class AppAPIController extends Controller
 
                 $toJson = json_decode($response, true);
 
-                return $toJson[0]['balance_amount'];
+                // Expense Charge Type
+                $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
+
+                $simulatedBalancedReturn = (float) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id);
+
+                $zeroOrResult = $simulatedBalancedReturn < 0 ? 0 : $simulatedBalancedReturn;
+
+                $isDuplicate = false;
+                $isDuplicateIoAmount = 0;
+                $isDuplicateInfo = $this->checkDuplicateIo()->where('internal_order', $internalOrder->internal_order);
+                if ($isDuplicateInfo->count() > 1) {
+                    $isDuplicate = true;
+                    $isDuplicateIoAmount = (float) $toJson[0]['balance_amount'] - $isDuplicateInfo->sum('amount');
+                }
+
+                return $isDuplicate == true ? $isDuplicateIoAmount :  $zeroOrResult;
 
             }
             // if null, expense will not proceed
@@ -137,6 +177,22 @@ class AppAPIController extends Controller
 
         $expenseBalances = array();
 
+        $duplicateInternalOrders = collect($internalOrders)
+                                ->groupBy('internal_order')
+                                ->filter(function ($items) {
+                                     return $items->count() > 1;
+                                })
+                                ->flatMap(function ($items) {
+                                   return $items->map(function ($x) {
+                                    // Expense Charge Type
+                                    $expenseChargeType = ExpenseChargeType::where('charge_type_id', $x->chargeType->id);
+                                        return array(
+                                            'internal_order' => $x->internal_order,
+                                            'amount' => (double) $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id),
+                                        );
+                                    });
+                                });
+
         foreach($internalOrders as $internalOrder) {
 
             // SAP API
@@ -153,6 +209,15 @@ class AppAPIController extends Controller
             // Return value or zero when negative
             $simulatedBalancedReturn = (double) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id);
 
+            // Block for instances that theres a duplicate internal orders
+            $isDuplicate = false;
+            $isDuplicateIoAmount = 0;
+            $isDuplicateInfo = $duplicateInternalOrders->where('internal_order', $internalOrder->internal_order);
+            if($isDuplicateInfo->count() > 1) {
+                $isDuplicate = true;
+                $isDuplicateIoAmount = (float) $toJson[0]['balance_amount'] - $isDuplicateInfo->sum('amount');
+            }
+
             $zeroOrResult = $simulatedBalancedReturn < 0 ? 0 : $simulatedBalancedReturn;
 
             //Calculate Ramaining total amound
@@ -165,14 +230,14 @@ class AppAPIController extends Controller
                 'expense_type' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->name : null,
                 'expense_type_id' => $expenseChargeType->exists() ? $expenseChargeType->first()->expenseType->id : null,
                 'sap_server' => $internalOrder->sap_server,
-                'balance' => $totalBalance
+                'balance' => $isDuplicate == true ? $isDuplicateIoAmount : $totalBalance,
+                'check_if_duplicate' => $isDuplicate,
             );
             array_push($expenseBalances,$data);
 
         }
 
         return $expenseBalances;
-
     }
 
     /**
@@ -236,7 +301,7 @@ class AppAPIController extends Controller
                         ->where('expenses_type_id',$expenses_type_id)
                         ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
                         ->doesntHave('postedPayments')
-                        ->has('expensesEntry')
+                        // ->has('expensesEntry')
                         ->get();
 
         return $expense->sum('amount');
