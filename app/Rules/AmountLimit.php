@@ -140,7 +140,7 @@ class AmountLimit implements Rule
                     return false;
                     break;
                 case ($simulatedBalance >= $value): // simulated budget ( SAP - unposted = simulated) should > value
-                    $this->returnMessage = 'Budget Exceeded, Please check your balance';
+                    $this->returnMessage = 'Budget exceeded, please check your remaining balance';
                     return false;
                     break;
                 case ($this->getTodaysExpense($value) <= $isMaintainedExpenseRate): // total expense for given expense type should be <= max set for the given expense type
