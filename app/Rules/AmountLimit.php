@@ -81,7 +81,7 @@ class AmountLimit implements Rule
                         ->where('expenses_type_id',$this->expenses_type_id)
                         ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
                         ->doesntHave('postedPayments')
-                        ->has('expensesEntry')
+                        // ->has('expensesEntry')
                         ->get();
 
         return $expense->sum('amount');
@@ -123,8 +123,7 @@ class AmountLimit implements Rule
             // $simulatedBalance =  max((double) $this->io_balance - $this->getTodaysExpense($value), 0);
 
             // Get simulated balance SAP Balance - Unposted Expense = Simulated balance
-            $simulatedBalance = max((double) $this->io_balance - $this->getUnprocessSubmittedExpense(), 0);
-
+            $simulatedBalance = (float) $this->io_balance;
 
             // If user has SAP budget line assigned
             $isMaintainedExpenseRate = $maintainedExpenseRate->exists() ? $maintainedExpenseRate->pluck('amount')->first() : $defaultExpenseRate;

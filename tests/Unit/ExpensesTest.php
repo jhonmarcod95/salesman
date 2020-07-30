@@ -174,6 +174,32 @@ class ExpensesTest extends TestCase
     /**
      * @test
      */
+    public function check_current_expenses()
+    {
+        $response = $this->actingAs($this->defaultUser(), 'api')->json('GET', 'api/expenses');
+
+        $response->assertStatus(200);
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * @test
+     */
+    public function check_unprocess_submitted_expenses()
+    {
+        $expenses_type_id = 3;  // lodging
+
+        $response = $this->actingAs($this->defaultUser(), 'api')->json('GET', 'api/unprocess-expenses/'. $expenses_type_id);
+
+        $response->assertStatus(200);
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * @test
+     */
     public function can_store_expense()
     {
 
@@ -207,7 +233,7 @@ class ExpensesTest extends TestCase
     /**
      * @test
      */
-    public function check_unprocess_expenses()
+    public function submitted_expenses()
     {
 
         $expenses_type_id = 1;

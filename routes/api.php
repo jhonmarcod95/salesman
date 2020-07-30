@@ -87,6 +87,8 @@ Route::group(['middleware' => 'auth:api'], function() {
     // Check total spent in a month
     Route::get('total-spent','AppAPIController@totalSpent');
 
+    // check unproceed sumbmitted expenses per month
+    Route::get('unprocess-expenses/{expenses_type_id}', 'AppAPIController@getUnprocessSubmittedExpense');
 
     // Expense Representation API
     Route::post('receipt/representation','API\ExpenseRepresentationController@store');
