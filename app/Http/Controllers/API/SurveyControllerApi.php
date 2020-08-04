@@ -23,10 +23,10 @@ class SurveyControllerApi extends Controller
         $request->validate([
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate',
-            'company' => 'required'
+            // 'company' => 'required'
         ]);
 
-        $company = $request->company;
+        $company = $request->company != "" ? $request->company : Auth::user()->company->id;
 
         $surveys = Survey::whereHas('user.company', function($query) use ($company) {
             $query->where('id',$company);
@@ -45,12 +45,14 @@ class SurveyControllerApi extends Controller
         $request->validate([
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate',
-            'company' => 'required'
+            // 'company' => 'required'
         ]);
 
         $givenMonth = Carbon::parse($request->startDate);
-        
-        $questionnaires = SurveyHeader::where('company_id', $request->company)
+
+        $company = $request->company != "" ? $request->company : Auth::user()->company->id;
+
+        $questionnaires = SurveyHeader::where('company_id', $company)
                         ->whereMonth('created_at', '=', $givenMonth->month)
                         ->with('surveyQuestionnaires')
                         // ->whereHas('surveyQuestionnaires', function($q) {
@@ -70,7 +72,7 @@ class SurveyControllerApi extends Controller
         // check user company
         // show only status active
         $user_company = Auth::user()->company->id;
-        
+
         $questionnaires = SurveyHeader::where('company_id', $user_company)
                         ->whereHas('surveyQuestionnaires', function($q) {
                             $q->where('status',1);
@@ -105,8 +107,8 @@ class SurveyControllerApi extends Controller
         $surveys = Survey::orderBy('id','DESC')
                         ->where('user_id', Auth::user()->id)
                         ->get();
-        
-        return SurveyResource::collection($surveys); 
+
+        return SurveyResource::collection($surveys);
     }
 
     /**
