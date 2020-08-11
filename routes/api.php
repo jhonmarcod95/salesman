@@ -125,6 +125,14 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('surveys/{survey}','API\SurveyControllerApi@show');
     Route::post('surveys/attach/{survey}','API\SurveyControllerApi@uploadSurveyPhoto');
 
+    //Planters API
+    Route::get('planters/soil-types','API\PlanterVisitControllerApi@soilTypes');
+    Route::get('planters/soil-conditions','API\PlanterVisitControllerApi@soilConditions');
+    Route::post('planters','API\PlanterVisitControllerApi@store');
+    Route::post('planters/bir/{planter}','API\PlanterVisitControllerApi@uploadBirIdPhoto');
+    Route::post('planters/photo/{planter}','API\PlanterVisitControllerApi@uploadPlanterPhoto');
+    Route::post('planters/parcellary/{planter}','API\PlanterVisitControllerApi@uploadParcellaryPhoto');
+
     //Grassroots
     Route::get('grassroots/types','API\GrassrootsController@grassrootsExpenseTypes');
     Route::post('grassroots','API\GrassrootsController@store');

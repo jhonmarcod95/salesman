@@ -1,0 +1,177 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\PlanterVisitResource;
+use App\Planter;
+use App\PlanterSoilType;
+use App\PlanterSoilCondition;
+
+
+class PlanterVisitControllerApi extends Controller
+{
+
+    /**
+     * Display planter soil type
+     */
+    public function soilTypes()
+    {
+        $soil_types = PlanterSoilType::orderBy('id','desc')->get();
+        return $soil_types;
+    }   
+
+    /**
+     * Display planter soil condition
+     */
+    public function soilConditions()
+    {
+        $soil_conditions = PlanterSoilCondition::orderBy('id','desc')->get();
+        return $soil_conditions;
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'planter_name' => 'required',
+            'contact_number' => 'required',
+            'planter_address' => 'required',
+            'hacienda_loc' => 'required',
+            'total_area' => 'required',
+            'n_p' => 'required',
+            'r1_r2_r3' => 'required',
+            'empty' => 'required',
+            'planter_soil_type_id' => 'required',
+            'planter_soil_condition_id' => 'required',
+            'tons_cane' => 'required',
+            'tons_yields' => 'required',
+            'assistance_needed' => 'required',
+        ]);
+
+        $planter = new Planter;
+        $planter->user_id = Auth::user()->id;
+        $planter->planter_name = $request->planter_name;
+        $planter->contact_number = $request->contact_number;
+        $planter->planter_address = $request->planter_address;
+        $planter->hacienda_loc = $request->hacienda_loc;
+        $planter->total_area = $request->total_area;
+        $planter->tons_cane = $request->tons_cane;
+        $planter->tons_yields = $request->tons_yields;
+        $planter->n_p = json_encode($request->input('n_p'));
+        $planter->r1_r2_r3 = json_encode($request->input('r1_r2_r3'));
+        $planter->empty = json_encode($request->input('empty'));
+        $planter->assistance_needed = json_encode($request->input('assistance_needed'));
+        $planter->planterSoilType()->associate($request->input('planter_soil_type_id'));
+        $planter->planterSoilConditionType()->associate($request->input('planter_soil_condition_id'));
+        $planter->save();
+
+        return new PlanterVisitResource($planter);
+
+    }
+
+    /**
+     * Upload BIR ID photo
+     *
+     * @param Planter $planter
+     * @return response
+     */
+    public function uploadBirIdPhoto(Request $request, Planter $planter)
+    {
+
+        file_put_contents(public_path('storage/planters/') . $request->header('File-Name'), file_get_contents('php://input'));
+
+        $planter->bir_id = 'planters/'. $request->header('File-Name');
+        $planter->save();
+
+        return $planter;
+
+    }
+
+    /**
+     * Upload Planter photo
+     *
+     * @param Planter $planter
+     * @return response
+     */
+    public function uploadPlanterPhoto(Request $request, Planter $planter)
+    {
+
+        file_put_contents(public_path('storage/planters/') . $request->header('File-Name'), file_get_contents('php://input'));
+
+        $planter->planter_picture = 'planters/'. $request->header('File-Name');
+        $planter->save();
+
+        return $planter;
+
+    }
+
+    /**
+     * Upload Planter photo
+     *
+     * @param Planter $planter
+     * @return response
+     */
+    public function uploadParcellaryPhoto(Request $request, Planter $planter)
+    {
+
+        file_put_contents(public_path('storage/planters/') . $request->header('File-Name'), file_get_contents('php://input'));
+
+        $planter->parcellary = 'planters/'. $request->header('File-Name');
+        $planter->save();
+
+        return $planter;
+
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+}
