@@ -32,6 +32,7 @@ class PlanterVisitResource extends JsonResource
             'bir_id' =>  $this->bir_id,
             'planter_picture' =>  $this->planter_picture,
             'parcellary' =>  $this->parcellary,
+            'created_at' => (string) $this->created_at
         ];
     }
 }

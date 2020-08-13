@@ -64,11 +64,11 @@ class Planter extends Model
 
     public function planterSoilType()
     {
-        return $this->belongsTo(PlanterSoilType::class);
+        return $this->belongsTo(PlanterSoilType::class,'planter_soil_type_id');
     }
 
     public function planterSoilConditionType()
     {
-        return $this->belongsTo(PlanterSoilConditionType::class);
+        return $this->belongsTo(PlanterSoilCondition::class,'planter_soil_condition_id');
     }
 }

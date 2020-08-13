@@ -39,7 +39,11 @@ class PlanterVisitControllerApi extends Controller
      */
     public function index()
     {
-        //
+        $planters = Planter::orderBy('id','DESC')
+                    ->where('user_id',Auth::user()->id)
+                    ->get();
+
+        return PlanterVisitResource::collection($planters);
     }
 
     /**
@@ -55,7 +59,7 @@ class PlanterVisitControllerApi extends Controller
             'contact_number' => 'required',
             'planter_address' => 'required',
             'hacienda_loc' => 'required',
-            'total_area' => 'required',
+            // 'total_area' => 'required',
             'n_p' => 'required',
             'r1_r2_r3' => 'required',
             'empty' => 'required',
@@ -72,7 +76,7 @@ class PlanterVisitControllerApi extends Controller
         $planter->contact_number = $request->contact_number;
         $planter->planter_address = $request->planter_address;
         $planter->hacienda_loc = $request->hacienda_loc;
-        $planter->total_area = $request->total_area;
+        $planter->total_area = 0; // temporarily
         $planter->tons_cane = $request->tons_cane;
         $planter->tons_yields = $request->tons_yields;
         $planter->n_p = json_encode($request->input('n_p'));
