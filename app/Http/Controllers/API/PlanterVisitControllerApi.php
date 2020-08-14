@@ -6,13 +6,25 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\PlanterVisitResource;
+use App\Http\Resources\CustomerResource;
 use App\Planter;
 use App\PlanterSoilType;
 use App\PlanterSoilCondition;
+use App\Customer;
 
 
 class PlanterVisitControllerApi extends Controller
 {
+
+    public function getPlanterCustomer()
+    {
+        $customers = Customer::orderBy('id','desc')
+                    ->where('classification', 17)
+                    ->get();
+
+        return CustomerResource::collection($customers);
+
+    }
 
     /**
      * Display planter soil type
