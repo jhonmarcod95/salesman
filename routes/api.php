@@ -127,6 +127,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 
     //Planters API
     Route::get('planters','API\PlanterVisitControllerApi@index');
+    Route::get('planters-area-types', 'API\PlanterVisitControllerApi@getPlanterAreaTypes');
     Route::get('planters-customers','API\PlanterVisitControllerApi@getPlanterCustomer');
     Route::get('planters/soil-types','API\PlanterVisitControllerApi@soilTypes');
     Route::get('planters/soil-conditions','API\PlanterVisitControllerApi@soilConditions');

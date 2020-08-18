@@ -21,9 +21,13 @@ class CreatePlantersTable extends Migration
             $table->string('planter_address');
             $table->string('hacienda_loc');
             $table->double('total_area');
-            $table->longText('n_p');
-            $table->longText('r1_r2_r3');
-            $table->longText('empty');
+            $table->integer('planter_area_type_id')->unsigned();
+            $table->integer('area')->unsigned();
+            $table->timestamp('date_planted')->nullable();
+            $table->timestamp('date_estimate_harvest')->nullable();
+            // $table->longText('n_p');
+            // $table->longText('r1_r2_r3');
+            // $table->longText('empty');
             $table->integer('planter_soil_type_id')->unsigned();
             $table->integer('planter_soil_condition_id')->unsigned();
             $table->integer('tons_cane');

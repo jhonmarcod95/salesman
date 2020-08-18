@@ -12,9 +12,9 @@ class Planter extends Model
         'planter_address',
         'hacienda_loc',
         'total_area',
-        'n_p',
-        'r1_r2_r3',
-        'empty',
+        // 'n_p',
+        // 'r1_r2_r3',
+        // 'empty',
         'soil_type',
         'soil_condition',
         'tons_cane',
@@ -23,32 +23,37 @@ class Planter extends Model
         'bir_id',
         'planter_picture',
         'parcellary',
+        'area',
+        'date_planted',
+        'date_estimate_harvest',
+        'planter_area_type_id',
+        'remarks',
     ];
 
     protected $casts = [
-        'n_p' => 'array',
-        'r1_r2_r3' => 'array',
-        'empty' => 'array',
+        // 'n_p' => 'array',
+        // 'r1_r2_r3' => 'array',
+        // 'empty' => 'array',
         'assistance_needed' => 'array',
     ];
 
     /**
      * Convet array to string conversion
      */
-    public function setNPAttribute($value)
-    {
-        $this->attributes['n_p'] = json_encode($value);
-    }
+    // public function setNPAttribute($value)
+    // {
+    //     $this->attributes['n_p'] = json_encode($value);
+    // }
 
-    public function setR1R2R3Attribute($value)
-    {
-        $this->attributes['r1_r2_r3'] = json_encode($value);
-    }
+    // public function setR1R2R3Attribute($value)
+    // {
+    //     $this->attributes['r1_r2_r3'] = json_encode($value);
+    // }
 
-    public function setEmptyAttribute($value)
-    {
-        $this->attributes['empty'] = json_encode($value);
-    }
+    // public function setEmptyAttribute($value)
+    // {
+    //     $this->attributes['empty'] = json_encode($value);
+    // }
 
     public function setAssitanceNeededAttribute($value)
     {
@@ -70,5 +75,10 @@ class Planter extends Model
     public function planterSoilConditionType()
     {
         return $this->belongsTo(PlanterSoilCondition::class,'planter_soil_condition_id');
+    }
+
+    public function planterAreaType()
+    {
+        return $this->belongsTo(PlanterAreaType::class);
     }
 }

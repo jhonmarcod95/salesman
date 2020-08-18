@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class PlanterVisitResource extends JsonResource
 {
@@ -21,17 +22,22 @@ class PlanterVisitResource extends JsonResource
             'planter_address' => $this->planter_address,
             'hacienda_loc' => $this->hacienda_loc,
             'total_area' => $this->total_area,
-            'n_p' =>  json_decode($this->n_p, true),
-            'r1_r2_r3' =>  json_decode($this->r1_r2_r3, true),
-            'empty' =>  json_decode($this->empty, true),
+            'area' => number_format($this->area, 2),
+            'date_planted' => Carbon::parse($this->date_planted)->format('m/d/Y'),
+            'date_estimate_harvest' => Carbon::parse($this->date_estimate_harvest)->format('m/d/Y'),
+            // 'n_p' =>  json_decode($this->n_p, true),
+            // 'r1_r2_r3' =>  json_decode($this->r1_r2_r3, true),
+            // 'empty' =>  json_decode($this->empty, true),
             'assistance_needed' =>  json_decode($this->assistance_needed, true),
             'soil_type' =>  $this->planterSoilType,
             'soil_condition' =>  $this->planterSoilConditionType,
-            'tons_yields' =>  $this->tons_yields,
-            'tons_cane' =>  $this->tons_cane,
+            'area_plant_type' =>  $this->planterAreaType,
+            'tons_yields' => number_format($this->tons_yields, 2),
+            'tons_cane' =>   number_format($this->tons_cane, 2),
             'bir_id' =>  $this->bir_id,
             'planter_picture' =>  $this->planter_picture,
             'parcellary' =>  $this->parcellary,
+            'remarks' =>  $this->remarks,
             'created_at' => (string) $this->created_at
         ];
     }

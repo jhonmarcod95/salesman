@@ -11,10 +11,17 @@ use App\Planter;
 use App\PlanterSoilType;
 use App\PlanterSoilCondition;
 use App\Customer;
+use App\PlanterAreaType;
 
 
 class PlanterVisitControllerApi extends Controller
 {
+
+    public function getPlanterAreaTypes()
+    {
+        $area_types = PlanterAreaType::orderBy('id','desc')->get();
+        return $area_types;
+    }
 
     public function getPlanterCustomer()
     {
@@ -33,7 +40,7 @@ class PlanterVisitControllerApi extends Controller
     {
         $soil_types = PlanterSoilType::orderBy('id','desc')->get();
         return $soil_types;
-    }   
+    }
 
     /**
      * Display planter soil condition
@@ -72,14 +79,15 @@ class PlanterVisitControllerApi extends Controller
             'planter_address' => 'required',
             'hacienda_loc' => 'required',
             // 'total_area' => 'required',
-            'n_p' => 'required',
-            'r1_r2_r3' => 'required',
-            'empty' => 'required',
+            // 'n_p' => 'required',
+            // 'r1_r2_r3' => 'required',
+            // 'empty' => 'required',
             'planter_soil_type_id' => 'required',
             'planter_soil_condition_id' => 'required',
             'tons_cane' => 'required',
             'tons_yields' => 'required',
             'assistance_needed' => 'required',
+            'planter_area_type_id' => 'required',
         ]);
 
         $planter = new Planter;
@@ -91,12 +99,17 @@ class PlanterVisitControllerApi extends Controller
         $planter->total_area = 0; // temporarily
         $planter->tons_cane = $request->tons_cane;
         $planter->tons_yields = $request->tons_yields;
-        $planter->n_p = json_encode($request->input('n_p'));
-        $planter->r1_r2_r3 = json_encode($request->input('r1_r2_r3'));
-        $planter->empty = json_encode($request->input('empty'));
+        $planter->area = $request->area;
+        $planter->date_planted = $request->date_planted;
+        $planter->date_estimate_harvest = $request->date_estimate_harvest;
+        $planter->remarks = $request->remarks;
+        // $planter->n_p = json_encode($request->input('n_p'));
+        // $planter->r1_r2_r3 = json_encode($request->input('r1_r2_r3'));
+        // $planter->empty = json_encode($request->input('empty'));
         $planter->assistance_needed = json_encode($request->input('assistance_needed'));
         $planter->planterSoilType()->associate($request->input('planter_soil_type_id'));
         $planter->planterSoilConditionType()->associate($request->input('planter_soil_condition_id'));
+        $planter->planterAreaType()->associate($request->input('planter_area_type_id'));
         $planter->save();
 
         return new PlanterVisitResource($planter);
