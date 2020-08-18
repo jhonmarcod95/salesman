@@ -2,7 +2,7 @@
     <div>
         <!-- Header -->
         <div class="header bg-green pb-8 pt-5 pt-md-8" style="min-height: 300px; background-image: url(/img/bg.jpg); background-size: cover; background-position: center bottom;">
-            <span class="mask bg-gradient-primary opacity-7"></span>
+            <span class="mask bg-gradient-success opacity-7"></span>
             <div class="container-fluid">
                 <div class="header-body mt--4">
 
@@ -147,33 +147,33 @@
                                     <th scope="col">TSR Name</th>
                                     <th scope="col" @click="mostCustomerVisitedScheduleSort" style="cursor:pointer">
                                        Total Schedule
-                                        <span v-if="mostCustomerVisitedScheduleSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
+                                        <span v-if="mostCustomerVisitedScheduleSortby=='ASC'"><i class="fas fa-sort"></i></span>
                                         <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
                                     </th>
                                     <th scope="col" @click="mostCustomerVisitedSort" style="cursor:pointer">
                                         Total Visits
-                                        <span v-if="mostCustomerVisitedSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
-                                        <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
+                                        <span v-if="mostCustomerVisitedSortby=='ASC'"><i class="fas fa-sort"></i></span>
+                                        <span v-else><i class="fas fa-sort"></i></span>
                                     </th>
                                     <th scope="col" @click="mostCustomerVisitedDwellTimeSort" style="cursor:pointer">
                                         Total Customer Dwell Time
-                                        <span v-if="mostCustomerVisitedDwellTimeSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
-                                        <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
+                                        <span v-if="mostCustomerVisitedDwellTimeSortby=='ASC'"><i class="fas fa-sort"></i></span>
+                                        <span v-else><i class="fas fa-sort"></i></span>
                                     </th>
                                     <th scope="col" @click="mostCustomerAverageTimeSort" style="cursor:pointer">
                                         Average Time per Visit
-                                        <span v-if="mostCustomerAverageTimeSortSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
-                                        <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
+                                        <span v-if="mostCustomerAverageTimeSortSortby=='ASC'"><i class="fas fa-sort"></i></span>
+                                        <span v-else><i class="fas fa-sort"></i></span>
                                     </th>
                                     <th scope="col" @click="mostCustomerAverageVisitSort" style="cursor:pointer">
                                         Average Visit per Day
-                                        <span v-if="mostCustomerAverageVisitSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
-                                        <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
+                                        <span v-if="mostCustomerAverageVisitSortby=='ASC'"><i class="fas fa-sort"></i></span>
+                                        <span v-else><i class="fas fa-sort"></i></span>
                                     </th>
                                     <th scope="col" @click="mostCustomerAverageExpenseSort" style="cursor:pointer">
                                         Average Expense per Day
-                                        <span v-if="mostCustomerAverageExpenseSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
-                                        <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
+                                        <span v-if="mostCustomerAverageExpenseSortby=='ASC'"><i class="fas fa-sort"></i></span>
+                                        <span v-else><i class="fas fa-sort"></i></span>
                                     </th>
                                 </tr>
                                 </thead>
@@ -604,7 +604,7 @@ export default {
             mostCustomerVisitedkeyword:'',
             mostCustomerVisited:[],
             mostCustomerVisitedcurrentPage: 0,
-            mostCustomerVisiteditemsPerPage: 10,
+            mostCustomerVisiteditemsPerPage: 5,
 
             mostCustomerVisitedSortby:'ASC',
             mostCustomerVisitedScheduleSortby:'ASC',
@@ -734,7 +734,7 @@ export default {
                 labels: ['Luzon' ,'Visayas', 'Mindanao'],
                 datasets: [
                     {
-                        label: 'Customer Visited',
+                        label: 'Actual Visited',
                         backgroundColor: 'rgba(45,206,172, 0.5)',
                         pointBackgroundColor: 'white',
                         borderWidth: 1,
@@ -742,7 +742,7 @@ export default {
                         data: v.dataVisitedPerArea
                     },
                     {
-                        label: 'Customer Visit Schedules',
+                        label: 'Customer Schedules',
                         backgroundColor: 'rgba(245,54,92, 0.5)',
                         pointBackgroundColor: 'white',
                         borderWidth: 1,
