@@ -41,6 +41,8 @@ class CustomerController extends Controller
      */
 
     public function indexData(){
+        ini_set('memory_limit', '2048M'); // revise this
+
         return  Customer::orderBy('customers.id', 'desc')
             ->when(Auth::user()->level() < 8, function($q){
                 $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
