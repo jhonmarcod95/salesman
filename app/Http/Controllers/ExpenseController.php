@@ -12,10 +12,13 @@ use App\{
     SapUser,
     SapServer,
     PaymentHeader,
-    PaymentHeaderError
+    PaymentHeaderError,
+    SalesmanInternalOrder
 };
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+
+use DB;
 
 class ExpenseController extends Controller
 {
@@ -384,4 +387,142 @@ class ExpenseController extends Controller
         }])->where('cover_week','SALESFORCE REIMBURSEMENT; '. $coveredWeek)
         ->where('posting_type', 'POST')->orderBy('id', 'desc')->get();
     }
+
+    public function historicalExpenseReport(){
+        session(['header_text' => 'Expenses Report']);
+        return view('expense.historical-expense-report');
+    }
+
+    public function historicalExpenseReportData(){
+
+    }
+
+    public function expenseTopSpender(){
+        session(['header_text' => 'Expenses Report']);
+        return view('expense.expense-top-spender');
+    }
+
+    public function expenseTopSpenderData(Request $request){
+
+        $request->validate([
+            'company' => 'required'
+        ]);
+
+        $data_request = $request->all();
+
+        $data_request['year'] = $data_request['year'] ? $data_request['year'] : date('Y');
+        $data_request['month'] = $data_request['month'] ? $data_request['month'] : date('m');
+
+        $all_expenses_by_tsr = DB::table('users')
+                                        ->select([
+                                            'users.id',
+                                            'users.name',
+                                            'companies.name as company',
+                                            DB::raw("SUM(expenses.amount) AS total_expenses_amount"),
+                                        ])
+                                        ->leftJoin('companies', function($q){
+                                            $q->on('companies.id', '=', 'users.company_id');
+                                        })
+                                        ->leftJoin('payments', function($q){
+                                            $q->on('users.id', '=', 'payments.user_id');
+                                        })
+                                        ->leftJoin('expenses', function($q){
+                                            $q->on('expenses.id', '=', 'payments.expense_id');
+                                        })
+                                        ->whereNotNull('payments.document_code')
+                                        ->where('users.company_id', $data_request['company'])
+                                        ->whereYear('expenses.created_at',$data_request['year'])
+                                        ->whereMonth('expenses.created_at',$data_request['month'])
+                                        ->orderBy('users.name','ASC')
+                                        ->groupBy('users.id','users.name','companies.name')
+                                        ->get();
+        
+        $all_expenses_by_tsr_with_budget = [];
+
+        if($all_expenses_by_tsr){
+            foreach($all_expenses_by_tsr as $k => $tsr){
+                $all_expenses_by_tsr_with_budget[$k] = $tsr;
+                $salesman_internal_orders = SalesmanInternalOrder::with(['balanceHistory' => function ($query) use($data_request){
+                                                                        $query->whereMonth('date',$data_request['month']);
+                                                                        $query->whereYear('date',$data_request['year']);
+                                                                    }])
+                                                                    ->where('user_id', $tsr->id)->get();
+                $total_amount_balance_history = 0;
+                if(count($salesman_internal_orders) > 0){
+                    $balance_history = 0;
+                    foreach($salesman_internal_orders as $internal_order){
+                        if(count($internal_order['balanceHistory']) > 0){
+                            $balance_history += $internal_order['balanceHistory'][0] ? $internal_order['balanceHistory'][0]['from'] : 0;
+                        }
+                    }
+                    $total_amount_balance_history = $balance_history;
+                }
+                $all_expenses_by_tsr_with_budget[$k]->monthly_total_budget = $total_amount_balance_history;
+                
+            }
+        }
+
+        return $all_expenses_by_tsr_with_budget;
+    }
+
+    public function expenseCurrentTopSpenderData(){
+
+        $data_request = [];
+        $data_request['company'] = Auth::user()->company_id;
+        $data_request['year'] = date('Y');
+        $data_request['month'] = date('m');
+
+        $all_expenses_by_tsr = DB::table('users')
+                                        ->select([
+                                            'users.id',
+                                            'users.name',
+                                            'companies.name as company',
+                                            DB::raw("SUM(expenses.amount) AS total_expenses_amount"),
+                                        ])
+                                        ->leftJoin('companies', function($q){
+                                            $q->on('companies.id', '=', 'users.company_id');
+                                        })
+                                        ->leftJoin('payments', function($q){
+                                            $q->on('users.id', '=', 'payments.user_id');
+                                        })
+                                        ->leftJoin('expenses', function($q){
+                                            $q->on('expenses.id', '=', 'payments.expense_id');
+                                        })
+                                        ->whereNotNull('payments.document_code')
+                                        ->where('users.company_id', $data_request['company'])
+                                        ->whereYear('expenses.created_at',$data_request['year'])
+                                        ->whereMonth('expenses.created_at',$data_request['month'])
+                                        ->orderBy('users.name','ASC')
+                                        ->groupBy('users.id','users.name','companies.name')
+                                        ->get();
+
+        $all_expenses_by_tsr_with_budget = [];
+
+        if($all_expenses_by_tsr){
+            foreach($all_expenses_by_tsr as $k => $tsr){
+                $all_expenses_by_tsr_with_budget[$k] = $tsr;
+                $salesman_internal_orders = SalesmanInternalOrder::with(['balanceHistory' => function ($query) use($data_request){
+                                                                        $query->whereMonth('date',$data_request['month']);
+                                                                        $query->whereYear('date',$data_request['year']);
+                                                                    }])
+                                                                    ->where('user_id', $tsr->id)->get();
+                $total_amount_balance_history = 0;
+                if(count($salesman_internal_orders) > 0){
+                    $balance_history = 0;
+                    foreach($salesman_internal_orders as $internal_order){
+                        if(count($internal_order['balanceHistory']) > 0){
+                            $balance_history += $internal_order['balanceHistory'][0] ? $internal_order['balanceHistory'][0]['from'] : 0;
+                        }
+                    }
+                    $total_amount_balance_history = $balance_history;
+                }
+                $all_expenses_by_tsr_with_budget[$k]->monthly_total_budget = $total_amount_balance_history;
+                
+            }
+        }
+
+        return $all_expenses_by_tsr_with_budget;
+
+    }
+
 }

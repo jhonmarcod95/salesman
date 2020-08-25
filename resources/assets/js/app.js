@@ -27,6 +27,8 @@ Vue.component('sap-user-index', require('./components/SapUser/SapUserIndex.vue')
 // Schedule
 Vue.component('request-schedule-index', require('./components/Schedule/RequestScheduleIndex.vue'));
 
+Vue.component('missed-itineraries', require('./components/Schedule/MissedItineraries.vue'));
+
 // Payment
 Vue.component('payment-index', require('./components/Payment/PaymentIndex.vue'));
 
@@ -42,6 +44,10 @@ Vue.component('company-index', require('./components/Company/CompanyIndex.vue'))
 Vue.component('expense-index', require('./components/Expense/ExpenseIndex.vue'));
 Vue.component('expense-report-index', require('./components/Expense/ExpenseReportIndex.vue'));
 Vue.component('expense-submitted-index', require('./components/Expense/ExpenseSubmittedIndex.vue'));
+
+Vue.component('historical-expense-index', require('./components/Expense/HistoricalExpense.vue'));
+
+Vue.component('expense-top-spender', require('./components/Expense/ExpenseTopSpender.vue'));
 
 // Announcement
 Vue.component('announcement-index', require('./components/Announcement/AnnouncementIndex.vue'));
@@ -98,6 +104,8 @@ Vue.component('appointment-duration-report-index', require('./components/Appoint
 // Survey Report Component
 Vue.component('survey-index', require('./components/Survey/SurveyIndex.vue'));
 
+// Individual Performance
+Vue.component('individual-performance', require('./components/IndividualPerformance/IndividualPerformance.vue'));
 
 const app = new Vue({
     el: '#app',

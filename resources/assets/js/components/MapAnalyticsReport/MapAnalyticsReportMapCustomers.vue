@@ -263,9 +263,23 @@
             <div class="customer-modal-header">
                 <span class="customer-close" @click="closecustomerDetailsModal">&times;</span>
                 <h4 class="mt-3">{{ customer.name }}</h4>
-                <span>{{ customer.google_address }}</span>
             </div>
             <div class="customer-modal-body mt-3">
+                <div class="row">
+                    <div class="col-md-12 mb-5">
+                        <h5>CUSTOMER INFORMATION</h5>
+                        <div class="col-md-12">
+                            <span>Customer code: {{ customer.customer_code }}</span><br>
+                            <span>Classification: {{ customer.classifications ? customer.classifications.description : "" }}</span><br>
+                            <span>Status: {{ customer.statuses ? customer.statuses.description : "" }}</span><br>
+                            <span>Address: {{ customer.google_address }}</span><br>
+                            <span>Town or City: {{ customer.town_city }}</span><br>
+                            <span>Provinces: {{ customer.provinces ? customer.provinces.name : "" }}</span><br>
+                            <span>Telephone 1: {{ customer.telephone_1 }}</span><br>
+                            <span>Telephone 2: {{ customer.telephone_2 }}</span><br>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-4 float-left">
                     <div class="form-group">
                         <label for="visit_keywords" class="form-control-label">Search</label> 
@@ -621,7 +635,7 @@
                                 if(marker.visits.length > 0){
                                     disabled = '<button id="customer-'+ marker.id +'" class="btn btn-outline-primary btn-sm" '+ disabled +'> '+ marker.visits.length +' Visit(s) </button>'; 
                                 }else{
-                                    disabled = ""; 
+                                    disabled = '<button id="customer-'+ marker.id +'" class="btn btn-outline-primary btn-sm" '+ disabled +'> View Details </button>';
                                 }
                             }
 

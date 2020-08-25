@@ -15,11 +15,11 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <div class="row ml-2">
-                                <div class="col-md-4 float-left">
+                            <div class="row ml-2 mr-2">
+                                <div class="col-md-3 float-left">
                                     <div class="form-group">
-                                        <label for="name" class="form-control-label">Search</label> 
-                                        <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                                        <label for="name" class="form-control-label">Search TSR</label> 
+                                        <input type="text" class="form-control" placeholder="Search TSR" v-model="keywords" id="name">
                                     </div>
                                 </div>
                                 <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
@@ -45,7 +45,26 @@
                                         <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+
+                                        <label for="customerSelect" class="form-control-label">Select Region</label> 
+                                        <multiselect
+                                                v-model="regionIds"
+                                                :options="regionOptions"
+                                                :multiple="true"
+                                                track-by="id"
+                                                :custom-label="customLabelRegion"
+                                                placeholder="Select Region"
+                                                id="selected_region"
+                                        >
+                                        </multiselect>
+                                        <span class="text-danger small" v-if="errors.selectedRegion">{{ errors.selectedRegion[0] }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12 text-right">
                                     <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
                                     <download-excel
                                         :data   = "schedules"
@@ -58,6 +77,8 @@
                             </div>
                         </div>
                         <div class="table-responsive">
+                            <h4 class="ml-3" v-if="loading"><i>Please wait. Loading...</i></h4>
+                            <h4 class="ml-3" v-else>Total Filtered Attendance : {{ totalFilterSchedule }}</h4>
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
@@ -89,7 +110,11 @@
                                         <td>
                                             Customer: {{ schedule.name }} <br>
                                             Date: {{ moment(schedule.date).format('ll') }} <br>
-                                            Schedule: {{  moment(schedule.start_time, "HH:mm:ss").format("hh:mm A")  }} - {{ moment(schedule.end_time, "HH:mm:ss").format("hh:mm A") }}
+                                            Schedule: {{  moment(schedule.start_time, "HH:mm:ss").format("hh:mm A")  }} - {{ moment(schedule.end_time, "HH:mm:ss").format("hh:mm A") }}<br>
+                                            Location: {{  schedule.address  }} <br>
+                                            <div v-if="schedule.customer">
+                                                Region: {{  schedule.customer.provinces ? schedule.customer.provinces.regions.name : ""  }} 
+                                            </div>
                                         </td>
                                         <td>
                                             <div v-if="schedule.attendances">
@@ -164,13 +189,14 @@
         
     </div>
 </template>
-
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <script>
 import moment from 'moment';
 import JsonExcel from 'vue-json-excel'
+import Multiselect from 'vue-multiselect';
 
 export default {
-    components: { 'downloadExcel': JsonExcel },
+    components: { 'downloadExcel': JsonExcel, Multiselect },
     props: ['userRole'],
     data(){
         return{
@@ -190,6 +216,7 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            totalFilterSchedule : 0,
             json_fields: {
                 'TYPE': {
                     callback: (value) => {
@@ -268,14 +295,31 @@ export default {
                         }
                     }
                 }
-            }
+            },
+            regionIds:[],
+            regionOptions : [],
+            loading : false,
         }
     },
     created(){
         this.fetchCompanies();
+        this.fetchTodaySchedules();
+        this.fetchRegion();
     },
     methods:{
         moment,
+        fetchRegion(){
+            axios.get('/regions')
+            .then(response => { 
+                this.regionOptions = response.data;
+            })
+            .catch(error =>{
+                this.errors = error.response.data.errors;
+            })
+        },
+        customLabelRegion(region) {
+                return `${region.name}`
+        },
         fetchCompanies(){
             axios.get('/companies-all')
             .then(response => {
@@ -285,18 +329,36 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
+        fetchTodaySchedules(){
+            this.loading = true;
+            axios.get('/attendance-report-today')
+            .then(response => {
+                this.schedules = response.data;
+                this.errors = []; 
+                this.loading = false;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+                this.loading = false;
+            })
+        },
         fetchSchedules(){
+            this.loading = true;
+            this.schedules = [];
             axios.post('/attendance-report-bydate', {
                 startDate: this.startDate,
                 endDate: this.endDate,
-                company: this.company
+                company: this.company,
+                selectedRegion: this.regionIds,
             })
             .then(response => {
                 this.schedules = response.data;
                 this.errors = []; 
+                 this.loading = false;
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
+                this.loading = false;
             })
         },
         // fetchTsrs(){
@@ -309,13 +371,16 @@ export default {
         //     })
         // },
         rendered(endTime, startTime){ 
-            var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
-            var d = moment.duration(ms);
-            var hours = Math.floor(d.asHours());
-            var minutes = moment.utc(ms).format("mm");
+            if(endTime && startTime){
+                var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
+                var d = moment.duration(ms);
+                var hours = Math.floor(d.asHours());
+                var minutes = moment.utc(ms).format("mm");
 
-            return hours + 'h '+ minutes+' min.';
-                                            
+                return hours + 'h '+ minutes+' min.';
+             }else{
+                return "";
+            }                            
         },
         getImage(schedule){
             this.image = window.location.origin+'/storage/'+schedule.attendances.sign_out_image;
@@ -355,6 +420,7 @@ export default {
             return Math.ceil(this.filteredSchedules.length / this.itemsPerPage)
         },
         filteredQueues() {
+            this.totalFilterSchedule = this.filteredSchedules.length;
             var index = this.currentPage * this.itemsPerPage;
             var queues_array = this.filteredSchedules.slice(index, index + this.itemsPerPage);
 

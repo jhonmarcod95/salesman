@@ -150,6 +150,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Maatwebsite\Excel\ExcelServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -211,7 +212,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Carbon' => \Carbon\Carbon::class,
         'Geocoder' => Spatie\Geocoder\Facades\Geocoder::class,
-
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];

@@ -1,6 +1,5 @@
 <template>
       <div>
-        <loader v-if="loading"></loader>
         <div class="header bg-green pb-6 pt-5 pt-md-6"></div>
         <div class="container-fluid mt--7">
             <!-- Table -->
@@ -50,13 +49,15 @@
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table align-items-center table-flush">
+                            <h4 class="ml-3" v-if="loading"><i>Please wait. Loading...</i></h4>
+                            <h4 class="ml-3" v-else>Total Filtered Customer : {{ totalFilterCustomer }}</h4>
+                            <table id="tblCustomer" class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
 <!--                                    <th scope="col"></th>-->
                                     <th scope="col">Customer Code</th>
                                     <th scope="col">Customer Name</th>
-                                    <th scope="col">Visit Count</th>
+                                    <th scope="col">Schedules / Attendance</th>
                                 </tr>
                                 </thead>
                                 <tbody v-if="customerVisiteds.length">
@@ -72,14 +73,47 @@
 <!--                                                </div>-->
 <!--                                            </div>-->
 <!--                                        </td>-->
-                                        <td>{{ customerVisited.code }}</td>
+                                        <td>{{ customerVisited.customer_code }}</td>
                                         <td>{{ customerVisited.name }}</td>
-                                        <td>{{ customerVisited.count }}</td>
+                                        <td>
+                                            Total Schedules: {{ customerVisited.schedules.length }} | Total Visited: {{ countCustomerVisited(customerVisited.schedules) }}
+                                            <tr style="width:100%!important; background-color: #2DCE89;color:white;border-radius:5px;">
+                                                <th>SCHEDULE</th>
+                                                <th>ATTENDANCE</th>
+                                                <th>DWELL TIME</th>
+                                                <th>TRAVEL TIME</th>
+                                                <th>TSR</th>
+                                            </tr>
+                                            <tr v-for="(schedule, c) in customerVisited.schedules" v-bind:key="c">
+                                                <td>Date : {{ schedule.date }} Time: ({{ schedule.start_time + '-' + schedule.end_time}})</td>
+                                                <td>
+                                                    <div v-if="schedule.attendances">
+                                                        {{ schedule.attendances.sign_in ? schedule.attendances.sign_in : "No Sign In" }} - {{ schedule.attendances.sign_out ? schedule.attendances.sign_out : "No Sign Out" }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div v-if="schedule.attendances">
+                                                        {{ rendered(schedule.attendances.sign_out ? schedule.attendances.sign_out : "", schedule.attendances.sign_in ? schedule.attendances.sign_in : "") }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div v-if="schedule.attendances">
+                                                       <button class="btn btn-outline-success btn-sm" @click="checkTravelTime(schedule.attendances.id,schedule.user_id)">View Total Time Travel</button>
+                                                    </div>
+                                                </td>
+                                                <td style="width:300px!important;">
+                                                    <div v-if="schedule.user">
+                                                        {{ schedule.user.name ? schedule.user.name : "" }}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                       
+                                        </td>
                                     </tr>
                                 </tbody>
                                 <tbody v-else>
                                        <tr>
-                                           <td>No data available in the table</td>
+                                           <td colspan="3">No data available in the table</td>
                                        </tr>
                                 </tbody>
                             </table>
@@ -258,6 +292,28 @@
                 </div>
             </div>
         </div>
+
+
+        <div class="modal fade" id="timeTravelModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+            <span class="closed" data-dismiss="modal">&times;</span>
+            <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCompanyLabel">Time Travel</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center" >
+                    <h2 v-if="timeTravel=='Getting Time Travel..' || timeTravel=='No Time Travel'" class="text-danger">{{timeTravel}}</h2>
+                    <h2 v-else class="text-success">{{timeTravel}}</h2>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -278,6 +334,7 @@ export default {
             currentPage: 0,
             itemsPerPage: 10,
             loading: false,
+            totalFilterCustomer : 0,
             json_fields: {
                 'DOCUMENT CODE': 'document_code',
                 'AMOUNT(PHP)': {
@@ -297,30 +354,85 @@ export default {
                 'DOCUMENT DATE': 'document_date',
                 'POSTING DATE': 'posting_date',
                 'BASELINE DATE': 'baseline_date',
-            }
+            },
+            timeTravel : ''
         }
     },
     created(){
-
+        this.fetchCustomerVisitToday();
     },
     methods:{
         moment,
+        countCustomerVisited(schedules){
+            let count = 0;
+            schedules.forEach(function(s){
+                if(s.attendances){
+                    count += 1;
+                }
+            })
+            return count;
+        },
+        rendered(endTime, startTime){ 
+                if(endTime && startTime){
+                    var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
+                    var d = moment.duration(ms);
+                    var hours = Math.floor(d.asHours());
+                    var minutes = moment.utc(ms).format("mm");
+                    return hours + 'h '+ minutes+' min.'; 
+                }else{
+                    return 0;
+                }                                  
+        },
+        checkTravelTime(attendance_id,user_id){
+            let v = this;
+            v.timeTravel = "Getting Time Travel..";
+            $('#timeTravelModal').modal('show');
+            axios.get('/tsr-get-last-visited/' + attendance_id + '/' + user_id)
+            .then(response => {
+                v.timeTravel = "Getting Time Travel.."; 
+                if(response.data){
+                    var get_time = response.data;
+                    v.timeTravel = this.rendered(get_time[0],get_time[1]);
+                }else{
+                     v.timeTravel="No Time Travel";
+                }
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
         noImage(event){
             event.target.src = window.location.origin+'/img/brand/no-image.png';
         },
         copyObject(paymentHeader){
             this.copiedObject = Object.assign({}, paymentHeader)
         },
+        fetchCustomerVisitToday(){
+            this.loading = true;
+            axios.get('/visited-customer-today')
+            .then(response => { 
+                this.customerVisiteds = response.data;
+                this.loading = false;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+                this.loading = false;
+            })
+        },
         fetchCustomerVisit(){
+            this.loading = true;
+            this.customerVisiteds = [];
             axios.post('/visited-customer-all',{
                 startDate: this.startDate,
                 endDate: this.endDate
             })
             .then(response => { 
                 this.customerVisiteds = response.data;
+                this.loading = false;
             })
             .catch(error => { 
                 this.errors = error.response.data.errors;
+                this.loading = false;
             })
         },
         setPage(pageNumber) {
@@ -349,6 +461,7 @@ export default {
             return Math.ceil(this.filteredPaymentHeaders.length / this.itemsPerPage)
         },
         filteredQueues() {
+            this.totalFilterCustomer = this.filteredPaymentHeaders.length;
             var index = this.currentPage * this.itemsPerPage;
             var queues_array = this.filteredPaymentHeaders.slice(index, index + this.itemsPerPage);
 
@@ -368,3 +481,11 @@ export default {
     },
 }
 </script>
+
+<style>
+    #tblCustomer td, #tblCustomer th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+</style>

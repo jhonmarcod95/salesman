@@ -107,6 +107,7 @@ class TsrController extends Controller
         $tsr->contact_person = $request->contact_person;
         $tsr->personal_email = $request->personal_email;
         $tsr->company_id = $request->company;
+        $tsr->monthly_qouta = $request->monthly_qouta;
 
         if($tsr->save()){
             // Create Temporary code for user
@@ -204,6 +205,7 @@ class TsrController extends Controller
         $technicalSalesRepresentative->contact_person = $request->contact_person;
         $technicalSalesRepresentative->personal_email = $request->personal_email;
         $technicalSalesRepresentative->company_id = $request->company;
+        $technicalSalesRepresentative->monthly_qouta = $request->monthly_qouta;
 
         if($technicalSalesRepresentative->save()){
 

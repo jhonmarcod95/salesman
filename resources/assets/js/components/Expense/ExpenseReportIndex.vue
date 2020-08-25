@@ -39,6 +39,10 @@
                                 <div class="col-md-2">
                                     <button class="btn btn-sm btn-primary" @click="fetchExpenses"> Filter</button>
                                 </div>
+
+                                <div class="col-md-12 text-right">
+                                      <a class="btn btn-sm btn-info mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a>  
+                                </div>
                             </div>
                         </div>
                         <div class="table-responsive">

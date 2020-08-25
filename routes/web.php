@@ -145,6 +145,15 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/expenses-all', 'ExpenseController@indexExpenseData');
     // Show Expense Report page
     Route::get('/expenses-report', 'ExpenseController@index');
+
+    Route::get('/historical-expenses-report', 'ExpenseController@historicalExpenseReport');
+    Route::get('/historical-expenses-report-data', 'ExpenseController@historicalExpenseReportData');
+
+    Route::get('/expenses-top-spender-report', 'ExpenseController@expenseTopSpender');
+    Route::post('/expenses-top-spender-data', 'ExpenseController@expenseTopSpenderData');
+    Route::get('/expenses-current-top-spender-data', 'ExpenseController@expenseCurrentTopSpenderData');
+
+
     // Fetch expense report by date
     Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
     // Fetch expense report by date per user
@@ -234,6 +243,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/attendance-report-all', 'AttendanceReportController@indexData');
     // fetch attendance report by date
     Route::post('/attendance-report-bydate', 'AttendanceReportController@generateBydate');
+    Route::get('/attendance-report-today', 'AttendanceReportController@generateByToday');
 
     // Companies
     Route::get('/companies', 'CompanyController@index');
@@ -336,6 +346,7 @@ Route::get('/sap/server', 'SapServerController@index');
 Route::get('/auth-role', 'UserController@getRole');
 
 Route::get('/visited-customer', 'CustomerController@customerVisitedIndex');
+Route::get('/visited-customer-today', 'CustomerController@customerVisitedToday');
 Route::post('/visited-customer-all', 'CustomerController@customerVisitedIndexData');
 
 Route::get('/sales-report', 'CustomerController@customerSalesReport');
@@ -347,5 +358,49 @@ Route::post('/sales-report-customer-visit-data', 'CustomerController@customersSa
 Route::get('/appointment-duration-report', 'CustomerController@customerAppointmentDurationReport');
 
 Route::post('/appointment-duration-report-data', 'CustomerController@customerAppointmentDurationReportData');
+
+
+//Dashboard
+Route::get('/schedule-for-visit', 'HomeController@scheduleForVisit');
+
+Route::get('/monthly-actual-visited', 'HomeController@monthlyActualVisited');
+
+Route::get('/most-customer-visit', 'HomeController@mostCustomerVisits');
+
+Route::get('/work-start-time', 'HomeController@workStartEndTime');
+
+Route::get('/total-travel-time', 'HomeController@totalTimeTravel');
+
+Route::get('/monthly-total-travel-time', 'HomeController@monthlyTotalTimeTravel');
+
+
+Route::post('/save-dashboard-filter', 'HomeController@saveDashboardFilter');
+
+Route::get('/get-dashboard-filter', 'HomeController@getDashboardFilter');
+
+Route::get('/get-sap-tsr', 'HomeController@getSapTsr');
+Route::get('/get-sap-tsr-actual-expense', 'HomeController@getSapTsrActualExpense');
+
+Route::get('/customer-visited-per-area', 'HomeController@customerVisiterPerArea');
+
+Route::get('/customer-schedule-per-area', 'HomeController@customerSchedulePerArea');
+
+Route::get('/individual_performance', 'IndividualPerformanceController@index');
+
+Route::get('/individual-performance-data', 'IndividualPerformanceController@indexData');
+
+Route::post('/individual-performance-filter-data', 'IndividualPerformanceController@indexFilterData');
+
+Route::get('/tsr-get-last-visited/{attendance_id}/{user_id}', 'CustomerController@getLastVisitedDate');
+
+
+Route::get('/year-options', 'HomeController@yearOptions');
+
+Route::get('/customer-codes', 'CustomerController@getCustomerCodes');
+
+Route::get('/customer-codes-all', 'CustomerController@getCustomerCodesAll');
+
+Route::get('/missed_itineraries', 'ScheduleController@missedItineraries');
+Route::post('/missed-itineraries-data', 'ScheduleController@missedItinerariesData');
 
 

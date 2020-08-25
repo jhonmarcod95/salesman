@@ -318,7 +318,7 @@ export default {
             let self = this;
 
             return self.customers.filter(customer => {
-                return customer.name.toLowerCase().includes(this.keywords.toLowerCase())
+                return customer.name.toLowerCase().includes(this.keywords.toLowerCase()) || customer.customer_code.toLowerCase().includes(this.keywords.toLowerCase())
             });
         },
         totalPages() {

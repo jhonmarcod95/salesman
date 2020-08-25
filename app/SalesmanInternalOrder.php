@@ -24,4 +24,9 @@ class SalesmanInternalOrder extends Model implements Auditable
     {
         return $this->belongsTo(ChargeType::class,'charge_type','name');
     }
+
+    public function balanceHistory()
+    {
+        return $this->hasMany(BalanceHistory::class,'internal_order','internal_order');
+    }
 }

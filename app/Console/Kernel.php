@@ -16,6 +16,9 @@ class Kernel extends ConsoleKernel
         Commands\PaymentAutoPosting::class,
         Commands\PaymentAutoCv::class,
         Commands\PaymentAutoPostingMonthEnd::class,
+        Commands\EmailCustomerVisit::class,
+        Commands\GetCustomerOrder::class,
+        Commands\SapCustomerCode::class,
     ];
 
     /**
@@ -39,9 +42,15 @@ class Kernel extends ConsoleKernel
             ->weekly()->tuesdays()->at('00:31');
 
         //auto posting month end
-        $schedule->command('payment:autopostingmonthend')->monthlyOn(date('t'), '23:00');
-        $schedule->command('payment:autocv')->monthlyOn(date('t'), '23:21');
-        $schedule->command('payment:autocheck')->monthlyOn(date('t'), '23:31');
+//        $schedule->command('payment:autopostingmonthend')->monthlyOn(date('t'), '23:00');
+//        $schedule->command('payment:autocv')->monthlyOn(date('t'), '23:21');
+//        $schedule->command('payment:autocheck')->monthlyOn(date('t'), '23:31');
+
+        //Get Customer Order
+        $schedule->command('command:customer_order')->dailyAt('6:00');
+
+        //Get Customer Order
+        $schedule->command('command:sap_customer_codes')->dailyAt('23:59');
 
     }
 

@@ -157,6 +157,12 @@
                                 </li>
 
                                 <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/individual_performance') }}">
+                                        <i class="ni ni-circle-08 text-danger"></i> Individual Performance
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
                                     <a data-toggle="collapse" href="#Map" class="collapsed" aria-expanded="false">
                                         <div class="nav-link">
                                             <i class="ni ni-square-pin text-blue"></i>

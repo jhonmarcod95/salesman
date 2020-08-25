@@ -6,10 +6,17 @@ use Carbon\Carbon;
 use DB;
 use Auth;
 use App\Customer;
+use App\CustomerOrder;
 use App\User;
 use App\Message;
+use App\Attendance;
 use Illuminate\Http\Request;
 use Spatie\Geocoder\Facades\Geocoder;
+
+use App\CustomerCode;
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 
 class CustomerController extends Controller
 {
@@ -357,6 +364,7 @@ class CustomerController extends Controller
 
         return view('customer.visited', compact('notification'));
     }
+    
 
     /**
      * Fetch all customer visited
@@ -368,10 +376,91 @@ class CustomerController extends Controller
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
-        
+    
+        $startDate = $request->startDate;
+        $endDate = $request->endDate;
+
         $companyId = Auth::user()->companies[0]->id;
 
-        return DB::select("call p_customer_visited('$request->startDate','$request->endDate' , '$companyId')");
+        $users = User::select('id')->where('company_id',$companyId)->get();
+
+        $selected_user = [];
+        foreach($users as $user){
+            array_push($selected_user , $user['id']);
+        }
+
+        $customers = Customer::
+                with([
+                    'schedules' => function($query) use($startDate,$endDate) {
+                        $query->where('date', '>=',  $startDate);
+                        $query->whereDate('date', '<=',  $endDate);
+                    },
+                    'schedules.attendances',
+                    'schedules.user',
+                ])
+                ->whereHas('schedules', function ($q) use($selected_user,$startDate,$endDate){
+                    $q->whereIn('user_id', $selected_user);
+                    $q->where('date', '>=',  $startDate);
+                    $q->whereDate('date', '<=', $endDate);
+                    $q->where('type','1');
+                    $q->where('status','1');
+                })->get();
+        return $customers;
+    }
+
+    public function customerVisitedToday(){
+        $startDate = date('Y-m-d');
+        $endDate = date('Y-m-d');
+        
+        $companyId = Auth::user()->companies[0]->id;
+        $users = User::select('id')->where('company_id',$companyId)->get();
+        $selected_user = [];
+        foreach($users as $user){
+            array_push($selected_user , $user['id']);
+        }
+
+        $customers = Customer::
+                with([
+                    'schedules' => function($query) use($startDate,$endDate) {
+                        $query->where('date', '>=',  $startDate);
+                        $query->whereDate('date', '<=',  $endDate);
+                    },
+                    'schedules.attendances',
+                    'schedules.user',
+                ])
+                ->whereHas('schedules', function ($q) use($selected_user,$startDate,$endDate){
+                    $q->whereIn('user_id', $selected_user);
+                    $q->where('date', '>=',  $startDate);
+                    $q->whereDate('date', '<=', $endDate);
+                    $q->where('type','1');
+                    $q->where('status','1');
+                })->get();
+
+        return $customers;
+    }
+
+    public function getLastVisitedDate($attendance_id,$user_id){
+
+        $attendance_data = [];
+        $attendance = Attendance::where('id' , '=',$attendance_id)->first();
+
+        if($attendance){
+            $sign_in = $attendance['sign_in'];
+            $sign_in_date = date('Y-m-d',strtotime($attendance['sign_in']));
+
+            $sign_out = Attendance::where('user_id' , '=',$user_id)->whereDate('sign_in' , $sign_in_date)->where('id','<',$attendance_id)->first();
+
+            if($sign_out){
+                return $data = [
+                    $sign_in,
+                    $sign_out['sign_out']
+                ];
+            }else{
+                return '';
+            }
+        }else{
+            return '';
+        }
     }
 
     public function getCustomerDetails($customer){
@@ -401,7 +490,8 @@ class CustomerController extends Controller
                         $query->where('status', '1');
                         $query->orderBy('date', 'DESC');
                         $query->with('attendances','user');
-                    }])
+                    }
+                    ])
                     ->with('last_visited')
                     ->where('company_id',$companyId)
                     ->orderBy('id', 'DESC')
@@ -440,12 +530,77 @@ class CustomerController extends Controller
                                     $query->where('date', '<=', $params['endDate']);
                                     $query->select('attendances.sign_in','schedules.*');
                                     $query->orderBy('sign_in','ASC');
-                                }])
+                                },
+                                'schedules.user'
+                                ])
                                 ->whereIn('id',$selected_user_ids)
                                 ->get();
 
         return $users_schedules_data;
                                   
+    }
+
+
+    public function getCustomerCodes(){
+
+
+        $client = new Client();
+
+        $connection = [
+            'ashost' => '172.17.2.36',
+            'sysnr' => '00',
+            'client' => '888',
+            'user' => 'rfidproject',
+            'passwd' => 'P@ssw0rd4'
+        ];
+        $date = date('Ymd');
+        $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                            ['query' => 
+                                ['connection' => $connection,
+                                    'table' => [
+                                        'table' => ['KNA1' => 'do_headers'],
+                                        'fields' => [
+                                            'KUNNR' => 'customer_code',
+                                        ],
+                                        'options' => [
+                                            ['TEXT' => "ERDAT = '$date'"]
+                                        ],
+                                    ]
+                                ]
+                            ],
+                            ['timeout' => 60],
+                            ['delay' => 10000]
+                        );
+                        
+        return $customers_data = json_decode($customers->getBody(), true);
+
+
+        $customer_codes_local = Customer::select('customer_code')->get();
+        $customer_codes_from_sap = CustomerOrder::select('customer_code')->groupBy('customer_code')
+                                                ->where(function($query) use ($customer_codes_local){
+                                                    foreach($customer_codes_local as $customer_code){
+                                                            $search_customer_code = $customer_code['customer_code'];
+                                                            $query = $query->orWhere('customer_code', 'not like', "%$search_customer_code%");
+                                                        }
+                                                        return $query;
+                                                })
+                                                ->get();
+
+        return count($customer_codes_from_sap);
+    }
+
+    public function getCustomerCodesAll(){
+        $customer_code_within = Customer::select('customer_code')->get();
+
+        $customer_codes_not = [];
+        if($customer_code_within){
+            foreach($customer_code_within as $customer){
+                $customer_code_selected = str_pad($customer['customer_code'], 10, '0', STR_PAD_LEFT);
+                array_push($customer_codes_not,$customer_code_selected);
+            }
+        }
+
+        return $customer_codes = CustomerCode::select('id','customer_code')->whereNotIn('customer_code',$customer_codes_not)->get();
     }
 
 }
