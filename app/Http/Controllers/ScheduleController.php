@@ -446,13 +446,18 @@ class ScheduleController extends Controller
     public function missedItinerariesData(Request $request){
 
         $request->validate([
-            'company' => 'required',
+            // 'company' => 'required',
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
         
-
-        $users = User::select('id')->where('company_id',$request->company)->get();
+        if($request->company){
+            $company_id = $request->company;
+        }else{
+            $company_id = Auth::user()->companies->first()->id;
+        }
+        
+        $users = User::select('id')->where('company_id',$company_id)->get();
 
         $selected_user = [];
         foreach($users as $user){
