@@ -56,7 +56,7 @@ class AttendanceReportController extends Controller
     public function generateBydate(Request $request){
 
         $request->validate([
-            'company' => 'required',
+            // 'company' => 'required',
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
