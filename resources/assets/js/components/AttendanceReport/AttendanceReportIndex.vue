@@ -113,7 +113,9 @@
                                             Schedule: {{  moment(schedule.start_time, "HH:mm:ss").format("hh:mm A")  }} - {{ moment(schedule.end_time, "HH:mm:ss").format("hh:mm A") }}<br>
                                             Location: {{  schedule.address  }} <br>
                                             <div v-if="schedule.customer">
-                                                Region: {{  schedule.customer.provinces ? schedule.customer.provinces.regions.name : ""  }} 
+                                                <p v-if="schedule.customer.provinces">
+                                                     Region: {{  schedule.customer.provinces.regions ? schedule.customer.provinces.regions.name : ""  }} 
+                                                </p>
                                             </div>
                                         </td>
                                         <td>
@@ -256,7 +258,7 @@ export default {
                 },
                 'SALES PERSONNEL': {
                     callback: (value) => {
-                        return value.user.name;
+                        return value.user ? value.user.name : "";
                     }
                 },
                 'IN': {
@@ -318,7 +320,12 @@ export default {
             })
         },
         customLabelRegion(region) {
-                return `${region.name}`
+                if(region){
+                    return `${region.name}`
+                }else{
+                    return '';
+                }
+                
         },
         fetchCompanies(){
             axios.get('/companies-all')
@@ -384,13 +391,13 @@ export default {
         },
         getImage(schedule){
             this.image = window.location.origin+'/storage/'+schedule.attendances.sign_out_image;
-            this.tsrName = schedule.user.name;
+            this.tsrName = schedule.user ? schedule.user.name : "";
             this.remarks = schedule.attendances.remarks;
             this.signOutLink = 'https://www.google.com/maps/place/'+schedule.attendances.sign_out_latitude+','+schedule.attendances.sign_out_longitude;
         },
         getSingInImage(schedule){
             this.signImage = window.location.origin+'/storage/'+schedule.attendances.sign_in_image;
-            this.tsrName = schedule.user.name;
+            this.tsrName = schedule.user ? schedule.user.name : "";
             this.signInLink = 'https://www.google.com/maps/place/'+schedule.attendances.sign_in_latitude+','+schedule.attendances.sign_in_longitude;
         },
         setPage(pageNumber) {
@@ -413,7 +420,9 @@ export default {
         filteredSchedules(){
             let self = this;
             return self.schedules.filter(schedule => {
-                return schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+                if(schedule.user){
+                    return schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+                }   
             });
         },
         totalPages() {
