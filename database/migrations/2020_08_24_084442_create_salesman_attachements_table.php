@@ -17,7 +17,7 @@ class CreateSalesmanAttachementsTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('schedule_id')->unsigned();
-            $table->string('attachement')->default('default.jpg');
+            $table->string('attachment')->default('default.jpg');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });
