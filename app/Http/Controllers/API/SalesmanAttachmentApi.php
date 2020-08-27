@@ -14,7 +14,7 @@ class SalesmanAttachmentApi extends Controller
         file_put_contents(public_path('storage/online_visit/') . $request->header('File-Name'), file_get_contents('php://input'));
 
         $salesmanAttachment = new SalesmanAttachement;
-        $salesmanAttachment->user_id =  1; // Auth::user()->id;
+        $salesmanAttachment->user_id =  Auth::user()->id;
         $salesmanAttachment->schedule_id = $request->header('Schedule-Id');
         $salesmanAttachment->attachment = 'attachments/' . $request->header('File-Name');
         $salesmanAttachment->save();
