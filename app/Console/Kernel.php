@@ -50,7 +50,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('command:customer_order')->dailyAt('6:00');
 
         //Get Customer Order
-        $schedule->command('command:sap_customer_codes')->everyFourHours();
+        $schedule->command('command:sap_customer_codes')->dailyAt('23:00');
 
     }
 
