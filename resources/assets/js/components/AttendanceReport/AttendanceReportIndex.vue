@@ -233,6 +233,29 @@ export default {
                 },
                 'NAME': 'name',
                 'ADDRESS': 'address',
+                'REGION': {
+                    callback: (value) => {
+                        if(value.customer){
+                            if(value.customer.provinces){
+                                var region = value.customer.provinces.regions ? value.customer.provinces.regions.name : "";
+                                return region;
+                            }else{
+                                return "";
+                            }
+                        }else{
+                            return "";
+                        }
+                    }
+                },
+                'SCHEDULE TYPE' : {
+                    callback: (value) => {
+                        if(value.schedule_type){
+                            return value.schedule_type.description;
+                        }else{
+                            return "";
+                        }
+                    }
+                },
                 'DATE': 'date',
                 'START TIME': 'start_time',
                 'END TIME': 'end_time',
