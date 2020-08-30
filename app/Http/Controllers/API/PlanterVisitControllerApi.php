@@ -12,10 +12,16 @@ use App\PlanterSoilType;
 use App\PlanterSoilCondition;
 use App\Customer;
 use App\PlanterAreaType;
-
+use App\PlanterCropType;
 
 class PlanterVisitControllerApi extends Controller
 {
+
+    public function getPlanterCropTypes()
+    {
+        $crop_types = PlanterCropType::orderBy('id','desc')->get();
+        return $crop_types;
+    }
 
     public function getPlanterAreaTypes()
     {

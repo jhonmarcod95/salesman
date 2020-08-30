@@ -131,6 +131,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('planters-customers','API\PlanterVisitControllerApi@getPlanterCustomer');
     Route::get('planters/soil-types','API\PlanterVisitControllerApi@soilTypes');
     Route::get('planters/soil-conditions','API\PlanterVisitControllerApi@soilConditions');
+    Route::get('planters/crop-types', 'API\PlanterVisitControllerApi@getPlanterCropTypes');
     Route::post('planters','API\PlanterVisitControllerApi@store');
     Route::post('planters/bir/{planter}','API\PlanterVisitControllerApi@uploadBirIdPhoto');
     Route::post('planters/photo/{planter}','API\PlanterVisitControllerApi@uploadPlanterPhoto');
