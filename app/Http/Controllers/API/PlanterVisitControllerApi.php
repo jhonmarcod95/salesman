@@ -94,6 +94,7 @@ class PlanterVisitControllerApi extends Controller
             'tons_yields' => 'required',
             'assistance_needed' => 'required',
             'planter_area_type_id' => 'required',
+            'planter_crop_type_id' => 'required',
         ]);
 
         $planter = new Planter;
@@ -109,6 +110,8 @@ class PlanterVisitControllerApi extends Controller
         $planter->date_planted = $request->date_planted;
         $planter->date_estimate_harvest = $request->date_estimate_harvest;
         $planter->remarks = $request->remarks;
+        $planter->crop_tech_remarks = $request->crop_tech_remarks;
+        $planter->area_converted = $request->area_converted;
         // $planter->n_p = json_encode($request->input('n_p'));
         // $planter->r1_r2_r3 = json_encode($request->input('r1_r2_r3'));
         // $planter->empty = json_encode($request->input('empty'));
@@ -116,6 +119,7 @@ class PlanterVisitControllerApi extends Controller
         $planter->planterSoilType()->associate($request->input('planter_soil_type_id'));
         $planter->planterSoilConditionType()->associate($request->input('planter_soil_condition_id'));
         $planter->planterAreaType()->associate($request->input('planter_area_type_id'));
+        $planter->planterCropType()->associate($request->input('planter_crop_type_id'));
         $planter->save();
 
         return new PlanterVisitResource($planter);

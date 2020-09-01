@@ -28,6 +28,8 @@ class Planter extends Model
         'date_estimate_harvest',
         'planter_area_type_id',
         'remarks',
+        'area_converted',
+        'crop_tech_remarks'
     ];
 
     protected $casts = [
@@ -80,5 +82,10 @@ class Planter extends Model
     public function planterAreaType()
     {
         return $this->belongsTo(PlanterAreaType::class);
+    }
+
+    public function planterCropType()
+    {
+        return $this->belongsTo(PlanterCropType::class);
     }
 }
