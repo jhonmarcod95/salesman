@@ -67,6 +67,7 @@ class SapCustomerCode extends Command
                                         'table' => ['KNA1' => 'do_headers'],
                                         'fields' => [
                                             'KUNNR' => 'customer_code',
+                                            'NAME1' => 'name'
                                         ],
                                         'options' => [
                                             ['TEXT' => "ERDAT = '$date'"]
@@ -93,10 +94,23 @@ class SapCustomerCode extends Command
                         $data = [
                             'customer_code'=>$customer_code['customer_code'],
                             'server'=>'LFUG',
+                            'name'=>$customer_code['name'],
                         ];
                         //Create DO Number
                         CustomerCode::create($data);
                         $x++;
+                    }else{
+                        try{
+                            $data = [
+                                'name'=>$customer_code['name'],
+                            ];
+                            $validate_customer_code->update($data);
+                            $x++;
+                        }catch (Exception $e) {
+                            
+                        }catch (QueryException $e) {
+                            
+                        }
                     }
                 }
                 
@@ -127,6 +141,7 @@ class SapCustomerCode extends Command
                                         'table' => ['KNA1' => 'do_headers'],
                                         'fields' => [
                                             'KUNNR' => 'customer_code',
+                                            'NAME1' => 'name'
                                         ],
                                         'options' => [
                                             ['TEXT' => "ERDAT = '$date'"]
@@ -152,11 +167,25 @@ class SapCustomerCode extends Command
 
                         $data = [
                             'customer_code'=>$customer_code['customer_code'],
+                            'name'=>$customer_code['name'],
                             'server'=>'PFMC',
                         ];
                         //Create DO Number
                         CustomerCode::create($data);
                         $x++;
+                    }else{
+                        try{
+                            $data = [
+                                'name'=>$customer_code['name'],
+                            ];
+                            $validate_customer_code->update($data);
+                            $x++;
+                        }catch (Exception $e) {
+                            
+                        }catch (QueryException $e) {
+                            
+                        }
+                        
                     }
                 }
                 

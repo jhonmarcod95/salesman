@@ -595,7 +595,12 @@ class CustomerController extends Controller
             }
         }
 
-        return $customer_codes = CustomerCode::select('id','customer_code')->whereNotIn('customer_code',$customer_codes_not)->get();
+        return $customer_codes = CustomerCode::select('id','customer_code','name')
+                                ->whereNotIn('customer_code',$customer_codes_not)
+                                ->where('name','not like','%XXX%')
+                                // ->where('name','not like','%XX:%')
+                                // ->where('name','not like','%X:%')
+                                ->get();
     }
 
 }
