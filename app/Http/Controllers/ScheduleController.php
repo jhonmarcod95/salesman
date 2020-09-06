@@ -6,7 +6,7 @@ use App\CustomerClassification;
 use App\Rules\GeocodeCustomerRule;
 use App\Rules\GeocodeEventRule;
 use Auth;
-use Carbon;   
+use Carbon;
 use App\Customer;
 use App\Rules\TimeRule;
 use App\Schedule;
@@ -117,7 +117,7 @@ class ScheduleController extends Controller
         DB::beginTransaction();
         foreach ($dates as $date){
             #Customer & Office Visit
-            if($schedule_type == '1' || $schedule_type == '5'){
+            if($schedule_type == '1' || $schedule_type == '5' || $schedule_type == '7'){
 
                 $request->validate([
                     'customer_codes' => 'required',
@@ -324,13 +324,13 @@ class ScheduleController extends Controller
                 });
             })
             ->where('date', Carbon\Carbon::now()->toDateString())->get();
-         
+
          return  array ($schedule->sortBy('user.name')->groupBy('user.name'));
     }
 
 
     /**
-    *  show changed schedule 
+    *  show changed schedule
      *
      * @return \Illuminate\Http\Response
      */
@@ -351,7 +351,7 @@ class ScheduleController extends Controller
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
-        
+
         $request_status = $request->request_status;
 
         return RequestSchedule::with('user')

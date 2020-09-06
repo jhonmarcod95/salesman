@@ -11,7 +11,7 @@ class SalesmanAttachmentApi extends Controller
 {
     public function uploadAttachment(Request $request)
     {
-        file_put_contents(public_path('storage/online_visit/') . $request->header('File-Name'), file_get_contents('php://input'));
+        file_put_contents(public_path('storage/attachments/') . $request->header('File-Name'), file_get_contents('php://input'));
 
         $salesmanAttachment = new SalesmanAttachement;
         $salesmanAttachment->user_id =  Auth::user()->id;
