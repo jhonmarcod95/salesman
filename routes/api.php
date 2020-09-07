@@ -58,6 +58,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('attendances/sync/signout/{schedule}','AppAPIController@syncSignOut');
     Route::post('attendances/sync','AppAPIController@syncAttendances');
 
+    //Salesman Attachments
+    Route::post('attachments/online', 'Api\SalesmanAttachmentApi@uploadAttachment');
+
     //Payments
     Route::get('payments','AppAPIController@getPayments');
 

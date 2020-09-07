@@ -116,11 +116,11 @@
             }
         }
 
-        
+
         function setEvents(data) {
 
             var fullname = data.full_name;
-            
+
             var time = rendered(data.end_time,data.start_time);
 
             var eventData = {
@@ -245,7 +245,7 @@
                 }
             });
         }
-        
+
         function changeDateSchedule(event) {
             $.ajax({
                 type:'PATCH',
@@ -277,7 +277,7 @@
 
         /*-------------------- sched type event in add & update modal -----------------------*/
         function setModalElementVisibility(type){
-            if(type == 1 || type == 5){ //customer and office
+            if(type == 1 || type == 5 || type == 7){ //customer and office and online visit
                 $("#add_customer_schedule").show();
                 $("#add_mapping_event_schedule").hide();
 
@@ -302,6 +302,12 @@
 
             /* revise this code, radius must be defined in schedule type table */
             if(type == '1'){ // customer
+                $("#radius-add").val('0.5');
+                $("#radius-update").val('0.5');
+
+                retrieveCustomers('#sel-customer-codes', null);
+            }
+            if(type == '7'){ // online visit
                 $("#radius-add").val('0.5');
                 $("#radius-update").val('0.5');
 
