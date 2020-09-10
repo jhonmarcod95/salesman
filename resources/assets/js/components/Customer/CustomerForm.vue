@@ -34,6 +34,7 @@
                                                             :max="5"
                                                             placeholder="Select Customer Code"
                                                             id="selected_customer"
+                                                            @input="onChangeCustomerCode(customercodeSelect)"
                                                         >
                                                         </multiselect>
                                                          <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
@@ -292,14 +293,16 @@
             });
         },
         methods:{
+            onChangeCustomerCode(){
+                this.customer.name = this.customercodeSelect.name
+            },
             statusCustomerCode(){
                 if(this.customer.status == 1 || this.customer.status == 2){
                    this.customercodeSelect = '';    
                 }
             },
-
             customLabelCustomerCode (customer) {
-                return `${customer.customer_code  }`
+                return `${customer.customer_code  }` + ' - ' + `${customer.name  }`
             },
             fetchCustomerCodes(){
                 axios.get('/customer-codes-all')

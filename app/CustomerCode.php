@@ -8,6 +8,7 @@ class CustomerCode extends Model
 {
     protected $fillable = [
         'customer_code',
-        'server'
+        'server',
+        'name'
     ];
 }

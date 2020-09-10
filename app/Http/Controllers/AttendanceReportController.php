@@ -55,13 +55,19 @@ class AttendanceReportController extends Controller
 
     public function generateBydate(Request $request){
 
+        ini_set('memory_limit', '2048M');
+
         $request->validate([
             // 'company' => 'required',
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
-
-        $company = $request->company;
+        
+        if($request->company){
+            $company = $request->company;
+        }else{
+            $company = Auth::user()->companies->first()->id;
+        }
 
         $regions = [];
         if($request->selectedRegion){
