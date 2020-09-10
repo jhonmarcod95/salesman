@@ -124,9 +124,9 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="(recent, r) in recents" v-bind:key="r">
-                                        <td>{{ recent.user.name }}</td>
+                                        <td>{{ recent.user ? recent.user.name : "" }}</td>
                                         <td>
-                                            {{ recent.schedule.name }}<br>
+                                            {{ recent.schedule ? recent.schedule.name : "" }}<br>
                                             Schedule Type: {{ scheduleType(recent.schedule.type) }}
                                         </td>
                                         <td>{{ moment(recent.sign_in ).format('lll') }}</td>
@@ -231,7 +231,10 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="(tsrUnique, tsrU) in filteredQueues" v-bind:key="tsrU">
-                                        <td>{{ tsrUnique[0].user.name }}</td>
+                                        <td>
+                                            <p v-if="tsrUnique">{{ tsrUnique[0].user ? tsrUnique[0].user.name : "" }}</p>
+                                            
+                                        </td>
                                         <td>{{ tsrUnique.length }}</td>
                                         <td>{{ countCompleted(tsrUnique) }}</td>
                                         <td>{{ percentageCompleted(tsrUnique.length,countCompleted(tsrUnique)) }}% </td>
@@ -276,8 +279,8 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(visit, v) in visiting" v-bind:key="v">
-                                    <td>{{ visit.user.name }}</td>
-                                    <td>{{ visit.schedule.name }} <br></td>
+                                    <td>{{ visit.user ? visit.user.name : "" }}</td>
+                                    <td>{{ visit.schedule ? visit.schedule.name : "" }} <br></td>
                                     <td><span>{{ moment(visit.sign_in ).format('lll') }}</span> </td>
                                 </tr>
                                 <tr v-if="!visiting.length">
@@ -317,9 +320,9 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="(complete, c) in completed" v-bind:key="c">
-                                        <td>{{ complete.user.name }}</td>
+                                        <td>{{ complete.user ? complete.user.name : "" }}</td>
                                         <td>
-                                            {{ complete.schedule.name }}<br>
+                                            {{ complete.schedule ? complete.schedule.name : "" }}<br>
                                             Schedule Type: {{ scheduleType(complete.schedule.type) }}
                                         </td>
                                         <td> 
@@ -364,7 +367,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(today, t) in todays" v-bind:key="t">
-                                    <td>{{ today.user.name }}</td>
+                                    <td>{{ today.user ? today.user.name : "" }}</td>
                                     <td>
                                         Customer : {{ today.name }} <br>
                                         Address : {{ today.address }}  
@@ -410,7 +413,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(todaysUnvisited, t) in todaysUnvisiteds" v-bind:key="t">
-                                    <td>{{ todaysUnvisited.user.name }}</td>
+                                    <td>{{ todaysUnvisited.user ? todaysUnvisited.user.name : "" }}</td>
                                     <td>
                                         Customer : {{ todaysUnvisited.name }} <br>
                                         Address : {{ todaysUnvisited.address }} <br>
@@ -679,7 +682,12 @@ export default {
         filteredTsrUniques(){
             let self = this;
             return Object.values(self.tsrUniques).filter(tsrUnique => {
-                return tsrUnique[0].user.name.toLowerCase().includes(this.keywords.toLowerCase())
+                if(tsrUnique[0]){
+                    if(tsrUnique[0].user){
+                        return tsrUnique[0].user.name.toLowerCase().includes(this.keywords.toLowerCase())
+                    }
+                }
+               
             });
         },
         totalPages() {

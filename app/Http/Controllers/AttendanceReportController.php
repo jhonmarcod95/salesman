@@ -71,7 +71,7 @@ class AttendanceReportController extends Controller
         }
 
         if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
-            $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout')
+            $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
@@ -88,7 +88,7 @@ class AttendanceReportController extends Controller
             ->whereDate('date' ,'<=', $request->endDate)
             ->orderBy('date', 'desc')->get();
         }else{
-            $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout')
+            $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type')
             ->when($company, function ($query) use ($company) {
                 $query->whereHas('user', function($q) use ($company){
                     $q->whereHas('companies', function ($q) use ($company){
@@ -133,7 +133,7 @@ class AttendanceReportController extends Controller
         $today = date('Y-m-d');
 
         
-        $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout')
+        $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
