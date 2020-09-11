@@ -17,8 +17,8 @@ class Planter extends Model
         // 'empty',
         'soil_type',
         'soil_condition',
-        'tons_cane',
-        'tons_yields',
+        // 'tons_cane',
+        // 'tons_yields',
         'assistance_needed',
         'bir_id',
         'planter_picture',
@@ -29,7 +29,8 @@ class Planter extends Model
         'planter_area_type_id',
         'remarks',
         'area_converted',
-        'crop_tech_remarks'
+        'crop_tech_remarks',
+        'variety',
     ];
 
     protected $casts = [

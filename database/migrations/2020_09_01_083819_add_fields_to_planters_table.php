@@ -16,6 +16,7 @@ class AddFieldsToPlantersTable extends Migration
         Schema::table('planters', function (Blueprint $table) {
             $table->text('crop_tech_remarks')->nullable();
             $table->integer('area_converted')->unsigned();
+            $table->string('variety')->nullable();
         });
     }
 
@@ -29,6 +30,7 @@ class AddFieldsToPlantersTable extends Migration
         Schema::table('planters', function (Blueprint $table) {
             $table->dropColumn('crop_tech_remarks');
             $table->dropColumn('area_converted');
+            $table->dropColumn('variety');
         });
     }
 }
