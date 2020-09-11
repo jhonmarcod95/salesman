@@ -18,29 +18,43 @@
                                 <h6 class="heading-small text-muted mb-4">Customer information</h6>
                                 <div class="pl-lg-4">
                                     <div class="row">
-                                        <div class="col-lg-6">
+                                        <div class="col-lg-6  mb-4">
                                             <div class="form-group">
                                                 <div v-if="customer.status == '1' || customer.status == '2'" style="border-radius:10px;border:1px solid red;padding:5px 10px 10px 5px;">
-                                                    <label class="form-control-label" for="customer_code">
-                                                        Select Customer Code from SAP
-                                                    </label>
-                                                    <div v-if="customer_codes.length > 0">
-                                                         <multiselect
-                                                            v-model="customercodeSelect"
-                                                            :options="customer_codes"
-                                                            :multiple="false"
-                                                            track-by="id"
-                                                            :custom-label="customLabelCustomerCode"
-                                                            :max="5"
-                                                            placeholder="Select Customer Code"
-                                                            id="selected_customer"
-                                                            @input="onChangeCustomerCode(customercodeSelect)"
-                                                        >
-                                                        </multiselect>
-                                                         <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
+                                                    <div v-if="checkCustomerCodeSAP">
+                                                        <label class="form-control-label" for="customer_code">
+                                                            Select Customer Code from SAP
+                                                        </label>
+                                                        <div v-if="customer_codes.length > 0">
+                                                            <multiselect
+                                                                v-model="customercodeSelect"
+                                                                :options="customer_codes"
+                                                                :multiple="false"
+                                                                track-by="id"
+                                                                :custom-label="customLabelCustomerCode"
+                                                                :max="5"
+                                                                placeholder="Select Customer Code"
+                                                                id="selected_customer"
+                                                                @input="onChangeCustomerCode(customercodeSelect)"
+                                                            >
+                                                            </multiselect>
+                                                            <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
+                                                        </div>
+                                                        <div v-else>
+                                                        <span class="text-primary">Please wait a moment.. Getting Customer Codes.. </span>
+                                                        </div>
                                                     </div>
                                                     <div v-else>
-                                                       <span class="text-primary">Please wait a moment.. Getting Customer Codes.. </span>
+                                                        <label class="form-control-label" for="customer_code">Customer Code</label>
+                                                        <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code">
+                                                        <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
+                                                    </div>
+
+                                                    <div class="custom-control custom-checkbox mt-2">
+                                                        <input type="checkbox" class="custom-control-input" id="with_customer_sap" v-model="checkCustomerCodeSAP" @change="changeCustomerCodeSAP">
+                                                        <label class="custom-control-label" for="with_customer_sap">
+                                                            With Customer Code From SAP
+                                                        </label>
                                                     </div>
                                                 </div>
                                                 <div v-else>
@@ -51,8 +65,9 @@
                                                 </div>
                                                 
                                             </div>
+                                            
                                         </div>
-                                        <div class="col-lg-6">
+                                        <div class="col-lg-6  mb-2">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-email">Name</label>
                                                 <input type="text" id="name" class="form-control form-control-alternative" v-model="customer.name">
@@ -229,7 +244,7 @@
                     fax_number: '',
                     remarks: '',
                     lat: '',
-                    lng: ''
+                    lng: '',
                 },
                 accessToken: 'pk.eyJ1IjoiamF5LWx1bWFnZG9uZzEyMyIsImEiOiJjazFxNm5wZGwxNG02M2dtaXF2dHE1YzluIn0.SHUJTfNTrhGoyacA8H7Tbw',
                 mapStyle: 'mapbox://styles/mapbox/streets-v11',
@@ -243,7 +258,8 @@
                 statuses:[],
                 errors: [],
                 customer_codes : [],
-                customercodeSelect : ''
+                customercodeSelect : '',
+                checkCustomerCodeSAP : true
             }   
         },
         created(){
@@ -293,6 +309,16 @@
             });
         },
         methods:{
+            changeCustomerCodeSAP(){
+                if(this.checkCustomerCodeSAP){
+                    this.customercodeSelect = '';
+                    this.customer.name = '';
+                }else{
+                    this.customercodeSelect = '';
+                    this.customer.customer_code = '';
+                    this.customer.name = '';
+                }
+            },
             onChangeCustomerCode(){
                 this.customer.name = this.customercodeSelect.name
             },
