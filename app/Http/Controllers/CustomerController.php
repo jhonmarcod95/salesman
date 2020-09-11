@@ -308,7 +308,7 @@ class CustomerController extends Controller
             }
 
             //pad zeros at left
-            $customer_code = str_pad($customer_code, 10, "0");
+            $customer_code = str_pad($customer_code + 1, 10, "0");
             return $customer_code;
         }
     }
