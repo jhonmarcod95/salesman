@@ -296,7 +296,6 @@ class CustomerController extends Controller
             $customer = Customer::withTrashed()->where('classification',8)->where('company_id', 5)->orderBy('id','asc')->get();
             $customer_code = $customer->last()->customer_code;
             return $customer_code;
-
         }else{
             // $customer = Customer::withTrashed()->whereNotIn('classification', [1,2,8])->orderBy('id','asc')->get();
             // $customer_code = $customer->last()->customer_code;
@@ -308,15 +307,22 @@ class CustomerController extends Controller
             //     goto generate;
             // }
 
-            $validate_customer_code = Customer::withTrashed()->where('check_customer_code','!=','1')->orWhereNull('check_customer_code')->orderBy('id', 'DESC')->first();
+            // $validate_customer_code = Customer::withTrashed()->where('check_customer_code','!=','1')->orWhereNull('check_customer_code')->orderBy('id', 'DESC')->first();
 
-            if($validate_customer_code){
-                $selected_customer_code = $validate_customer_code['customer_code'];
-                $customer_code = $selected_customer_code + 1;
+            // if($validate_customer_code){
+            //     $selected_customer_code = $validate_customer_code['customer_code'];
+            //     $customer_code = $selected_customer_code + 1;
+            // }
+
+            $customer_code = '9' . date('ymd') . $request->company_id;
+            $customer_code = str_pad($customer_code, 11, "0");
+
+            $get_count_customer_code = Customer::withTrashed()->where('check_customer_code','!=','1')->orWhereNull('check_customer_code')->whereDate('created_at',date('Y-m-d'))->orderBy('id', 'DESC')->count();
+
+            if($get_count_customer_code > 0){
+                $customer_code = $customer_code + $get_count_customer_code + 1;
             }
-          
-            //pad zeros at left
-            $customer_code = str_pad($customer_code, 10, "0");
+        
             return $customer_code;
         }
     }
