@@ -327,6 +327,8 @@
             statusCustomerCode(){
                 if(this.customer.status == 1 || this.customer.status == 2){
                    this.customercodeSelect = '';    
+                }else{
+                     this.checkCustomerCode();
                 }
             },
             customLabelCustomerCode (customer) {
