@@ -61,7 +61,7 @@
                                                     <span v-if="show">Last customer code: {{ pilili_code }}<br></span>
                                                     <label class="form-control-label" for="customer_code">Customer Code</label>
                                                     <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code">
-                                                    
+                                                    <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
                                                 </div>
                                                 
                                             </div>
@@ -317,6 +317,8 @@
                     this.customercodeSelect = '';
                     this.customer.customer_code = '';
                     this.customer.name = '';
+
+                    this.checkCustomerCode();
                 }
             },
             onChangeCustomerCode(){

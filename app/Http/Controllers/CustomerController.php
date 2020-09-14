@@ -297,18 +297,25 @@ class CustomerController extends Controller
             return $customer_code;
 
         }else{
-            $customer = Customer::withTrashed()->whereNotIn('classification', [1,2,8])->orderBy('id','asc')->get();
-            $customer_code = $customer->last()->customer_code;
+            // $customer = Customer::withTrashed()->whereNotIn('classification', [1,2,8])->orderBy('id','asc')->get();
+            // $customer_code = $customer->last()->customer_code;
 
-            //generate until to become unique
-            generate:
-            if(Customer::withTrashed()->where('customer_code', $customer_code)->exists()){
-                $customer_code = $customer_code + 1;
-                goto generate;
+            // //generate until to become unique
+            // generate:
+            // if(Customer::withTrashed()->where('customer_code', $customer_code)->exists()){
+            //     $customer_code = $customer_code + 1;
+            //     goto generate;
+            // }
+
+            $validate_customer_code = Customer::withTrashed()->whereNotIn('classification', [1,2])->orderBy('id', 'DESC')->first();
+
+            if($validate_customer_code){
+                $selected_customer_code = $validate_customer_code['customer_code'];
+                $customer_code = $selected_customer_code + 1;
             }
 
             //pad zeros at left
-            $customer_code = str_pad($customer_code + 1, 10, "0");
+            $customer_code = str_pad($customer_code, 10, "0");
             return $customer_code;
         }
     }
