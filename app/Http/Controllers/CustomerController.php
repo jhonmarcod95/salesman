@@ -308,7 +308,7 @@ class CustomerController extends Controller
             //     goto generate;
             // }
 
-            $validate_customer_code = Customer::where('check_customer_code','!=','1')->orWhereNull('check_customer_code')->orderBy('id', 'DESC')->first();
+            $validate_customer_code = Customer::withTrashed()->where('check_customer_code','!=','1')->orWhereNull('check_customer_code')->orderBy('id', 'DESC')->first();
 
             if($validate_customer_code){
                 $selected_customer_code = $validate_customer_code['customer_code'];
