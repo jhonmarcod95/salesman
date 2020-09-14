@@ -346,7 +346,11 @@
                 if(this.customer.status == 1 || this.customer.status == 2){
                     if(this.customercodeSelect.customer_code){
                         customer.customer_code = this.customercodeSelect.customer_code;
+                    }else{
+                        this.checkCustomerCodeSAP = false;
                     }
+                }else{
+                    this.checkCustomerCodeSAP = false;
                 }
 
                 axios.post('/customers',{
@@ -364,7 +368,8 @@
                     telephone_1: customer.telephone_1,
                     telephone_2: customer.telephone_2,
                     fax_number: customer.fax_number,
-                    remarks: customer.remarks
+                    remarks: customer.remarks,
+                    check_customer_code : this.checkCustomerCodeSAP
                 })
                 .then(response => { 
                     if(confirm('Customer Successful Added')){

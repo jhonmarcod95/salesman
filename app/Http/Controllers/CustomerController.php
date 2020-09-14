@@ -190,6 +190,7 @@ class CustomerController extends Controller
         $customers->telephone_2 = $request->telephone_2;
         $customers->fax_number = $request->fax_number;
         $customers->remarks = $request->remarks;
+        $customers->check_customer_code = $request->check_customer_code;
         
         // return $customers;
 
@@ -307,13 +308,13 @@ class CustomerController extends Controller
             //     goto generate;
             // }
 
-            $validate_customer_code = Customer::withTrashed()->whereNotIn('classification', [1,2])->orderBy('id', 'DESC')->first();
+            $validate_customer_code = Customer::where('check_customer_code','!=','1')->orWhereNull('check_customer_code')->orderBy('id', 'DESC')->first();
 
             if($validate_customer_code){
                 $selected_customer_code = $validate_customer_code['customer_code'];
                 $customer_code = $selected_customer_code + 1;
             }
-
+          
             //pad zeros at left
             $customer_code = str_pad($customer_code, 10, "0");
             return $customer_code;
