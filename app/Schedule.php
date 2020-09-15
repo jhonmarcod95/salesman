@@ -104,4 +104,9 @@ class Schedule extends Model implements Auditable
         return $this->hasOne(Customer::class,'customer_code','code');
     }
 
+    public function salesmanAttachement()
+    {
+        return $this->hasOne(SalesmanAttachement::class);
+    }
+
 }

@@ -6,6 +6,7 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Faker\Factory;
+use Carbon\Carbon;
 
 class ScheduleTest extends TestCase
 {
@@ -24,6 +25,27 @@ class ScheduleTest extends TestCase
         
         echo "\n\n".json_encode($response, JSON_PRETTY_PRINT);
 
+    }
+
+
+    /**
+     * @test
+     */
+    public function check_generate_attendance()
+    {
+
+        $response = $this->actingAs($this->defaultUser(), 'api')
+            ->json('POST',"attendance-report-bydate",[
+                'startDate' => Carbon::today(),
+                'endDate'  => Carbon::today()
+            ]);
+
+        \Log::info($response->getContent());
+
+        //then
+        $response->assertStatus(200);
+        
+        echo "\n\n".json_encode($response, JSON_PRETTY_PRINT);
     }
 
 }
