@@ -103,6 +103,7 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a v-if="schedule.attendances && schedule.attendances.sign_in !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#singInphotoModal" @click="getSingInImage(schedule)">Sign In Photo</a>
                                                     <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule)">Sign out Photo</a>
+                                                    <a v-if="schedule.type == 7" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#salesCallModal" @click="getSalesCallAttachment(schedule)">Online Visit</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -188,6 +189,20 @@
                 </div>
             </div>
         </div>
+
+        <!-- Sign in Photo Modal -->
+        <div class="modal fade" id="salesCallModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <span class="closed" data-dismiss="modal">&times;</span>
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                <div class="modal-body text-center">
+                    <img class="w-100 h-75" style="max-height: 700px" :src="salesCallAttachment">
+                    <h1 class="mt-3"> {{ tsrName }} </h1>
+                    <!-- <a :href="signInLink" target="__blank">Sign In link</a> -->
+                </div>
+                </div>
+            </div>
+        </div>
         
     </div>
 </template>
@@ -211,6 +226,7 @@ export default {
             image: '',
             signImage: '',
             signInLink: '',
+            salesCallAttachment: '',
             signOutLink: '',
             errors: [],
             companies: [],
@@ -422,6 +438,10 @@ export default {
             this.signImage = window.location.origin+'/storage/'+schedule.attendances.sign_in_image;
             this.tsrName = schedule.user ? schedule.user.name : "";
             this.signInLink = 'https://www.google.com/maps/place/'+schedule.attendances.sign_in_latitude+','+schedule.attendances.sign_in_longitude;
+        },
+        getSalesCallAttachment(schedule) {
+            this.salesCallAttachment = window.location.origin+'/storage/'+schedule.salesmanAttachement.attachment;
+            this.tsrName = schedule.user.name;
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
