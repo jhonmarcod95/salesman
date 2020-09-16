@@ -34,12 +34,13 @@ class ScheduleTest extends TestCase
     public function check_generate_attendance()
     {
 
-        $date = '2020-'
+        $sdate = "2020-09-10";
+        $edate = "2020-09-16";
 
         $response = $this->actingAs($this->defaultUser(), 'api')
-            ->json('POST',"attendance-report-bydate",[
-                'startDate' => Carbon::today(),
-                'endDate'  => Carbon::today()
+            ->json('POST',"/attendance-report-bydate",[
+                'startDate' => $sdate,
+                'endDate'  => $edate
             ]);
 
         \Log::info($response->getContent());
