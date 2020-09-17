@@ -106,9 +106,9 @@ class PlanterVisitControllerApi extends Controller
         $planter->total_area = 0; // temporarily
         // $planter->tons_cane = $request->tons_cane;
         // $planter->tons_yields = $request->tons_yields;
-        $planter->area = $request->area == '' ? "N\A" : $request->area;
+        $planter->area = $request->area == '' ? 0 : $request->area;
         $planter->date_planted = $request->date_planted == '' ? null : $request->date_planted;
-        $planter->date_estimate_harvest = $request->date_estimate_harvest == '' ? "N\A" : $request->date_estimate_harvest;
+        $planter->date_estimate_harvest = $request->date_estimate_harvest == '' ? null : $request->date_estimate_harvest;
         $planter->crop_tech_remarks = $request->crop_tech_remarks == '' ? "N/A" :  $request->crop_tech_remarks;
         $planter->area_converted = $request->area_converted == '' ? "N/A" : $request->area_converted;
         $planter->variety = $request->variety == '' ? "N/A" : $request->variety;
