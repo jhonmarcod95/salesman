@@ -125,6 +125,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('surveys/{survey}','API\SurveyControllerApi@show');
     Route::post('surveys/attach/{survey}','API\SurveyControllerApi@uploadSurveyPhoto');
 
+    // Planters Haciendas API
+    Route::get('haciendas','API\PlanterHaciendaApiController@index');
+
     //Planters API
     Route::get('planters','API\PlanterVisitControllerApi@index');
     Route::get('planters-area-types', 'API\PlanterVisitControllerApi@getPlanterAreaTypes');

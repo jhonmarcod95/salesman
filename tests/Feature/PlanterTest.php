@@ -34,4 +34,17 @@ class PlanterTest extends TestCase
 
         echo json_encode($response, JSON_PRETTY_PRINT);
     }
+
+    /**
+     * @test
+     */
+    public function check_hacienda_details()
+    {
+        $response = $this->actingAs($this->defaultUser(), 'api')
+        ->json('GET','api/haciendas');
+
+        $response->assertStatus(200);
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
+    }
 }

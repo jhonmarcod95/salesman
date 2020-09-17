@@ -15,7 +15,9 @@ class PlanterHaciendaApiController extends Controller
      */
     public function index()
     {
-        //
+        $haciendas = PlanterHacienda::orderBy('id','asc')->get();
+
+        return $haciendas;
     }
 
     /**
