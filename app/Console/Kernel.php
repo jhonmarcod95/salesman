@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         Commands\PaymentAutoPosting::class,
         Commands\PaymentAutoCv::class,
         Commands\PaymentAutoPostingMonthEnd::class,
+        Commands\FetchHaciendaFromSap::class,
     ];
 
     /**
