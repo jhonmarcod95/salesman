@@ -17,6 +17,8 @@ use Illuminate\Http\Request;
 Route::post('register', 'AuthController@register');
 Route::post('login', 'AuthController@login');
 
+// fetch hacienda from SAP
+Route::get('hacienda/sap', 'API\PlanterHaciendaApiController@fetchHacienda');
 
 // Route API setup for Mobile Client
 Route::group(['middleware' => 'auth:api'], function() {

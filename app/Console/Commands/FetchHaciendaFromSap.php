@@ -6,6 +6,9 @@ use App\Http\Controllers\APIController;
 use Illuminate\Console\Command;
 use App\SapServer;
 use App\SapUser;
+use App\PlanterHacienda;
+use DB;
+use Carbon\Carbon;
 
 class FetchHaciendaFromSap extends Command
 {
@@ -50,8 +53,30 @@ class FetchHaciendaFromSap extends Command
         ];
 
         $planters = APIController::executeSapFunction($connection, 'ZFM_CMS', [], null);
-        
-        return $planters;
+
+        $collecPlanters = collect($planters['CMS_OUT'])
+                    ->take(100);
+
+        foreach ($collecPlanters as $planter) {
+            DB::table('planter_haciendas')->insert([
+                array(
+                    'planter_id' => 0,
+                    'planter_code' => $planter->PL_CODE,
+                    'name' => $planter->PL_SNAME,
+                    'mobile_number' => $planter->PL_MOBILE,
+                    'hacienda_code' => $planter->H_HCODE,
+                    'planter_audit_no' => $planter->H_PAN,
+                    'address' =>  $planter->BG_NAME." ".$planter->DI_NAME." ".$planter->PR_NAME,
+                    'area' => $planter->H_AREA,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                )
+            ]);
+        }
+
+        $checkLastSave = PlanterHacienda::orderBy('id','desc')->first();
+
+        return $checkLastSave;
 
     }
 
@@ -63,6 +88,7 @@ class FetchHaciendaFromSap extends Command
     public function handle()
     {
         $this->info('Fetch from sap dev server');
-        $this->infor(' result: '. $this->fetchFromSap());
+        // dd($this->fetchFromSap());
+        $this->info($this->fetchFromSap());
     }
 }

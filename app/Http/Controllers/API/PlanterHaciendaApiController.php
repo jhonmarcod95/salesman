@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\APIController;
 use App\Http\Controllers\Controller;
 use App\PlanterHacienda;
+use App\SapServer;
+use App\SapUser;
 
 class PlanterHaciendaApiController extends Controller
 {
@@ -74,5 +77,26 @@ class PlanterHaciendaApiController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    /**
+     * Fetch SAP Hacienda array
+     */
+    public function fetchHacienda()
+    {
+        $sap_server = SapServer::where('sap_server', 'PFMC')->first();
+        $sap_user = SapUser::where('user_id', 175)->where('sap_server', 'PFMC')->first();
+
+        $connection = [
+            'ashost' => $sap_server->app_server,
+            'sysnr' => $sap_server->system_number,
+            'client' => $sap_server->client,
+            'user' => $sap_user->sap_id,
+            'passwd' => $sap_user->sap_password,
+        ];
+
+        $planters = APIController::executeSapFunction($connection, 'ZFM_CMS', [], null);
+
+        return $planters['CMS_OUT'];
     }
 }
