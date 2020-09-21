@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
+use App\Http\Resources\HaciendaResource;
 use App\Http\Controllers\Controller;
 use App\PlanterHacienda;
 use App\SapServer;
@@ -19,8 +20,7 @@ class PlanterHaciendaApiController extends Controller
     public function index()
     {
         $haciendas = PlanterHacienda::orderBy('id','asc')->get();
-
-        return $haciendas;
+        return HaciendaResource::collection($haciendas);
     }
 
     /**
