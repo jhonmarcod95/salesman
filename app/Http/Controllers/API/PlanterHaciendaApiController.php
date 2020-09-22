@@ -24,6 +24,24 @@ class PlanterHaciendaApiController extends Controller
     }
 
     /**
+     * Debounce search for planters
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function search(Request $request)
+    {
+        $search = $request->search;
+        if($search != "") {
+            $haciendas = PlanterHacienda::where('name', 'LIKE', "%$search%")->get();
+        } else {
+            $haciendas = PlanterHacienda::take(10)->get();
+        }
+
+        return HaciendaResource::collection($haciendas);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request

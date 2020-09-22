@@ -129,6 +129,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 
     // Planters Haciendas API
     Route::get('haciendas','API\PlanterHaciendaApiController@index');
+    Route::post('haciendas/search', 'API\PlanterHaciendaApiController@search');
 
     //Planters API
     Route::get('planters','API\PlanterVisitControllerApi@index');
