@@ -155,6 +155,9 @@
                                         <span v-if="mostCustomerVisitedSortby=='ASC'"><i class="fas fa-sort"></i></span>
                                         <span v-else><i class="fas fa-sort"></i></span>
                                     </th>
+                                    <th>
+                                        <span>Visit Percentage</span>
+                                    </th>
                                     <th scope="col" @click="mostCustomerVisitedDwellTimeSort" style="cursor:pointer">
                                         Total Customer Dwell Time
                                         <span v-if="mostCustomerVisitedDwellTimeSortby=='ASC'"><i class="fas fa-sort"></i></span>
@@ -188,6 +191,9 @@
                                         </td>
                                         <td>
                                             <h5>{{customer.total_count_visit}}</h5>
+                                        </td>
+                                        <td>
+                                            <h5>{{customer.percentage + '%'}}</h5>
                                         </td>
                                         <td>
                                             <h5>{{customer.total_customer_dwell_time}}</h5>
@@ -1363,17 +1369,20 @@ export default {
                         average_time_per_visit = rhours + " hr(s) and " + rminutes + " min(s)";
                     }
 
+                    var percentage = user.total_count_visit / user.total_count_schedule * 100;
+
                     v.mostCustomerVisited.push({
                         'company' : user.company,
                         'name' : user.name,
                         'total_count_schedule' : user.total_count_schedule,
                         'total_count_visit' : user.total_count_visit,
+                        'percentage' : percentage.toFixed(0),
                         'total_customer_dwell_time' : total_customer_dwell_time,
                         'total_customer_dwell_time_min' : user.total_customer_dwell_time,
                         'average_time_per_visit_min' : user.average_time_per_visit,
                         'average_time_per_visit' : average_time_per_visit,
                         'average_visit_per_day' : user.average_visit_per_day,
-                        'average_expense_per_day' : user.average_expense_per_day,
+                        'average_expense_per_day' : user.average_expense_per_day.toFixed(2),
                     });
 
                 });

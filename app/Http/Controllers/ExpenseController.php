@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Auth;
 use App\{
+    Http\Controllers\APIController,
     Message,
     Expense,
     ExpensesEntry,
@@ -13,10 +14,15 @@ use App\{
     SapServer,
     PaymentHeader,
     PaymentHeaderError,
-    SalesmanInternalOrder
+    SalesmanInternalOrder,
+    ExpenseSapIoBudget
 };
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 
 use DB;
 
@@ -523,6 +529,99 @@ class ExpenseController extends Controller
 
         return $all_expenses_by_tsr_with_budget;
 
+    }
+
+    public function expenseIOReport(){
+        return view('expense.expense-io-report');
+    }
+
+    public function expenseIOReportData(Request $request){
+        $data = $request->all();
+        
+
+        $expense_io_budget = DB::table('users')
+                                    ->select([
+                                        'users.id',
+                                        'users.name',
+                                        'companies.name as company',
+                                        DB::raw("SUM(expense_sap_io_budgets.planned_budget) AS total_planned_budget"),
+                                        DB::raw("SUM(expense_sap_io_budgets.budget_balance) AS total_budget_balance"),
+                                    ])
+                                    ->leftJoin('companies', function($q){
+                                        $q->on('companies.id', '=', 'users.company_id');
+                                    })
+                                    ->leftJoin('expense_sap_io_budgets', function($q){
+                                        $q->on('expense_sap_io_budgets.user_id', '=', 'users.id');
+                                    })
+                                    ->where('users.company_id', $data['company'])
+                                    ->where('expense_sap_io_budgets.io_date',$data['year'] . $data['month'] . '01')
+                                    ->orderBy('users.name','ASC')
+                                    ->groupBy('users.id','users.name','companies.name')
+                                    ->get();
+        return $expense_io_budget;
+    }
+
+
+    public function expenseIOChecker(){
+
+        $sapConnection = [
+            'ashost' => '172.17.1.33',
+            'sysnr' => '00',
+            'client' => '400',
+            'user' => 'payproject',
+            'passwd' => 'welcome69'
+        ];
+        
+        $all_tsr = User::with('company')->where('company_id', Auth::user()->company_id)->orderBy('name','ASC')->take(10)->get();
+
+        $sapConnection = [
+            'ashost' => '172.17.1.33',
+            'sysnr' => '00',
+            'client' => '400',
+            'user' => 'payproject',
+            'passwd' => 'welcome69'
+        ];
+
+        $month = date('07');
+        $year = date('Y');
+
+        $tsr_arr = [];
+        foreach($all_tsr as $k => $tsr){
+
+            $tsr_arr[$k]['name'] = $tsr['name'];
+
+            //PFMC
+            $io_pfmc = SalesmanInternalOrder::where('user_id', $tsr['id'])->where('sap_server','PFMC')->get();
+            $expense_tsr_pfmc = [];
+            $ioBalances = [];
+            if($io_pfmc){
+                foreach($io_pfmc as $k => $tsr_io){
+                
+                    $io = $tsr_io['internal_order'];
+                    try{
+                        $budget = APIController::executeSapFunction($sapConnection, 'ZFI_BUDGET_CHK_INTEG', [
+                            'P_AUFNR' => $io,
+                            'P_BUDAT' => $year . $month . '01',    
+                        ],null);
+                    }catch (RequestException $e){
+                        return $budget = [];
+                    }
+                   
+        
+                    $expense_tsr_pfmc[$k]['io'] = $io;
+                    $expense_tsr_pfmc[$k]['date'] = $year . $month . '01';
+                    $expense_tsr_pfmc[$k]['budget'] = $budget;
+
+                }
+                $tsr_arr[$k]['budget'] = $budget;
+            }else{
+                $tsr_arr[$k]['budget'] = [];
+            }
+
+            
+        }
+
+        return $tsr_arr;
     }
 
 }

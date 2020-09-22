@@ -154,6 +154,12 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/expenses-current-top-spender-data', 'ExpenseController@expenseCurrentTopSpenderData');
 
 
+    Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
+    Route::post('/expense-io-report-data', 'ExpenseController@expenseIOReportData');
+
+    //Checker
+    Route::get('/expense-io-checker', 'ExpenseController@expenseIOChecker');
+
     // Fetch expense report by date
     Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
     // Fetch expense report by date per user
@@ -402,5 +408,8 @@ Route::get('/customer-codes-all', 'CustomerController@getCustomerCodesAll');
 
 Route::get('/missed_itineraries', 'ScheduleController@missedItineraries');
 Route::post('/missed-itineraries-data', 'ScheduleController@missedItinerariesData');
+
+
+
 
 
