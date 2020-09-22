@@ -22,7 +22,10 @@ class Schedule extends Model implements Auditable
         'remarks',
         'lat',
         'lng',
-        'km_distance'
+        'km_distance',
+        'is_generated',
+        'user_id',
+        'type'
     ];
 
     public static function createScheduleCode($type){
@@ -108,7 +111,7 @@ class Schedule extends Model implements Auditable
     {
         return $this->hasMany(CustomerOrder::class,'customer_code','code');
     }
-    
+
     public function salesmanAttachement()
     {
         return $this->hasOne(SalesmanAttachement::class);

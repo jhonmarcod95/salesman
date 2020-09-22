@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Schedule;
 use Carbon\Carbon;
+use DB;
 
 class GenerateVirtualVisit extends Command
 {
@@ -30,6 +31,7 @@ class GenerateVirtualVisit extends Command
     public function __construct()
     {
         parent::__construct();
+        $this->saveCounter = 0;
     }
 
     /**
@@ -37,11 +39,77 @@ class GenerateVirtualVisit extends Command
      */
     public function generateVirturalVisit()
     {
+        // Get the schedule from table where type is Virtual Visit
         $schedules = Schedule::where('type',7)
                     ->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
-                    ->count();
+                    ->where('date', '<', Carbon::today()->startOfWeek()->addWeek(1))
+                    ->whereDoesntHave('attendances');
 
-        return $schedules;
+        // get the chunk
+        $scheduleDistribution = ceil($schedules->count() / 5) < 5 ? 5 : ceil($schedules->count());
+
+        // Return the schedule to be insert into schedule table
+        $filerSchedules = collect($schedules->get())
+            ->chunk($scheduleDistribution)
+            ->map(function ($items, $key) {
+                return collect($items)
+                    ->map(function ($item) use ($key) {
+                        return array(
+                            'user_id' => $item->user_id,
+                            'type' => $item->type,
+                            'code' => $item->code,
+                            'name' => $item->name,
+                            'address' => $item->address,
+                            'date' => Carbon::today()->startOfWeek()->addWeek(1)->addDays($key),
+                            'start_time' => $item->start_time,
+                            'end_time' => $item->end_time,
+                            'lat' => 0,
+                            'lng' => 0,
+                            'status' => 2,
+                            'is_generated' => 1,
+                            'km_distance' => 0,
+                            'created_at' => Carbon::now(),
+                            'updated_at' => Carbon::now()
+                        );
+                    })->all();
+            })
+            ->each(function ($items, $key)   {
+
+                $this->info("\n\n"."Inserting for date : ". Carbon::today()->startOfWeek()->addWeek(1)->addDays($key)."\n");
+                $this->output->progressStart(count($items));
+
+                foreach($items as $item) {
+
+                    sleep(1);
+
+                    $schedule = Schedule::firstOrNew(
+                        ['code' => $item["code"],'date' => $item["date"]],
+                        [
+                            'user_id' => $item["user_id"],
+                            'type' => 7,
+                            'name' => $item["name"],
+                            'address' => $item["address"],
+                            'start_time' => $item["start_time"],
+                            'end_time' => $item["end_time"],
+                            'lat' => 0,
+                            'lng' => 0,
+                            'status' => 2,
+                            'is_generated' => 1,
+                            'km_distance' => 0,
+                            'created_at' => $item["created_at"],
+                            'updated_at' => $item["updated_at"]
+                        ]);
+
+                    $schedule->save();
+
+                    $this->output->progressAdvance();
+                }
+
+                $this->output->progressFinish();
+
+                $this->info( "Load Finished");
+                // DB::table('schedules')->insert($items);
+            });
     }
 
     /**
@@ -52,6 +120,6 @@ class GenerateVirtualVisit extends Command
     public function handle()
     {
         $this->info('Starting Generate Virtual Visit');
-        dd($this->generateVirturalVisit());
+        $this->generateVirturalVisit();
     }
 }
