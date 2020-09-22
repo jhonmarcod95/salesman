@@ -1,4 +1,8 @@
 <?php
+use App\CustomerOrder;
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 
 /*
 |--------------------------------------------------------------------------
@@ -410,6 +414,139 @@ Route::get('/missed_itineraries', 'ScheduleController@missedItineraries');
 Route::post('/missed-itineraries-data', 'ScheduleController@missedItinerariesData');
 
 
+//Get SAP Customer with sales
+Route::get('/get-sap-customer', function () {
 
+    $client = new Client();
+
+    $connection_pfmc = [
+        'ashost' => '172.17.1.35',
+        'sysnr' => '02',
+        'client' => '888',
+        'user' => 'rfidproject',
+        'passwd' => 'P@ssw0rd4',
+    ];
+
+    $connection_lfug = [
+        'ashost' => '172.17.2.36',
+        'sysnr' => '00',
+        'client' => '888',
+        'user' => 'rfidproject',
+        'passwd' => 'P@ssw0rd4'
+    ];
+
+    $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                            ['query' => 
+                                ['connection' => $connection_pfmc,
+                                    'table' => [
+                                        'table' => ['KNVP' => 'customers_tsr'],
+                                        'fields' => [
+                                            'KUNNR' => 'customer_code',
+                                            'KUNN2' => 'tsr_customer_code',
+                                            'VKORG' => 'sales_organization',
+                                            'VTWEG' => 'common_division',
+                                            'SPART' => 'division',
+                                            'PARVW' => 'partner_function',
+                                        ],
+                                        'options' => [
+                                            ['TEXT' => "PARVW ='Z1' OR "],
+                                            ['TEXT' => "PARVW ='Z3' OR "],
+                                            ['TEXT' => "PARVW ='ZS'"],
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            ['timeout' => 60],
+                            ['delay' => 10000]
+                        );
+
+    return $customers_data = json_decode($customers->getBody(), true); 
+
+});
+
+//Get SAP Customer with sales PFMC
+Route::get('/get-all-customer-pfmc', function () {
+
+    $client = new Client();
+
+    $connection_pfmc = [
+        'ashost' => '172.17.1.35',
+        'sysnr' => '02',
+        'client' => '888',
+        'user' => 'rfidproject',
+        'passwd' => 'P@ssw0rd4',
+    ];
+    $connection_lfug = [
+        'ashost' => '172.17.2.36',
+        'sysnr' => '00',
+        'client' => '888',
+        'user' => 'rfidproject',
+        'passwd' => 'P@ssw0rd4'
+    ];
+
+    $tsr_pfmc = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                    ['query' => 
+                        ['connection' => $connection_pfmc,
+                            'table' => [
+                                'table' => ['KNA1' => 'tsr'],
+                                'fields' => [
+                                    'KUNNR' => 'tsr_number',
+                                    'NAME1' => 'name',
+                                    'NAME2' => 'name_2',
+                                ],
+                                // 'options' => [
+                                //     ['TEXT' => "NAME2 ='Technical Sales Representative'"]
+                                // ]
+                            ]
+                        ]
+                    ],
+                    ['timeout' => 60],
+                    ['delay' => 10000]
+                );
+
+    $tsr_pfmc_data = json_decode($tsr_pfmc->getBody(), true); 
+
+    return $tsr_pfmc_data;
+
+});
+
+//Get SAP Customer with sales LFUG
+Route::get('/get-all-customer-lfug', function () {
+
+    $client = new Client();
+
+    $connection_lfug = [
+        'ashost' => '172.17.2.36',
+        'sysnr' => '00',
+        'client' => '888',
+        'user' => 'rfidproject',
+        'passwd' => 'P@ssw0rd4'
+    ];
+
+    $tsr_lfug = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                    ['query' => 
+                        ['connection' => $connection_lfug,
+                            'table' => [
+                                'table' => ['KNA1' => 'tsr'],
+                                'fields' => [
+                                    'KUNNR' => 'tsr_number',
+                                    'NAME1' => 'name',
+                                    'NAME2' => 'name_2',
+                                ],
+                                // 'options' => [
+                                //     ['TEXT' => "NAME2 ='Technical Sales Representative'"]
+                                // ]
+                            ]
+                        ]
+                    ],
+                    ['timeout' => 60],
+                    ['delay' => 10000]
+                );
+
+    $tsr_lfug_data = json_decode($tsr_lfug->getBody(), true); 
+
+    return $tsr_lfug_data;
+
+});
 
 
