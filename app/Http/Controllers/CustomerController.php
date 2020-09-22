@@ -239,7 +239,7 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $request->validate([
-            'customer_code' => 'required|unique:customers,customer_code,'. $customer->id,
+            // 'customer_code' => 'required|unique:customers,customer_code,'. $customer->id,
             'name' => 'required',
             'classification' => 'required',
             'street' => 'required',
