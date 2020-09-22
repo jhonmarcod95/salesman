@@ -6,7 +6,9 @@ use Illuminate\Console\Command;
 use Auth;
 use DB;
 use Carbon\Carbon;
-use App\{Http\Controllers\APIController,
+use App\{CronLog,
+    Http\Controllers\APIController,
+    RunningCommand,
     User,
     SapUser,
     Company,
@@ -49,9 +51,14 @@ class PaymentAutoPosting extends Command
      */
     public function handle()
     {
+        CronLog::create(['name' => $this->signature]);
+        RunningCommand::create(['name' => $this->signature]); // this will force error if command runs at the same time
+
         $lastWeekMonday = date("Y-m-d", strtotime("last week monday"));
         $lastWeekSunday = date("Y-m-d", strtotime("last sunday"));
         $this->generateExpense($lastWeekMonday, $lastWeekSunday);
+
+        RunningCommand::where('name', $this->signature)->delete();
     }
 
     public function generateExpense($dateFrom, $dateTo){
@@ -69,6 +76,7 @@ class PaymentAutoPosting extends Command
                 ->where('expenses_entry_id', '!=', 0)
                 ->get()
                 ->groupBy('user.id');
+
             $this->simulateExpense($expenses,$coveredWeek, $dateFrom, $dateTo);
         }
     }

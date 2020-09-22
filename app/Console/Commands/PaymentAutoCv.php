@@ -104,6 +104,7 @@ class PaymentAutoCv extends Command
                 $check_voucher->business_area = $business_area;
                 $check_voucher->vendor_code = $vendor_code;
                 $check_voucher->document_code = $posted_cv['document_number'];
+                $check_voucher->apv = $document_code;
                 $check_voucher->save();
             }
             else{
