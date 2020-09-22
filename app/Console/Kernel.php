@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
         Commands\EmailCustomerVisit::class,
         Commands\GetCustomerOrder::class,
         Commands\SapCustomerCode::class,
+        Commands\GenerateVirtualVisit::class,
     ];
 
     /**

@@ -61,6 +61,9 @@ Route::group(['middleware' => 'auth:api'], function() {
     //Salesman Attachments
     Route::post('attachments/online', 'Api\SalesmanAttachmentApi@uploadAttachment');
 
+    // Viritual Visit schedule
+    Route::post('virtual-schedule/import', 'Api\VirtualVisitControllerApi@import');
+
     //Payments
     Route::get('payments','AppAPIController@getPayments');
 
