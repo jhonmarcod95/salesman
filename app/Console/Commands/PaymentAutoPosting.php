@@ -727,6 +727,8 @@ class PaymentAutoPosting extends Command
             }
         }
         catch (\Exception $e){
+            RunningCommand::where('name', $this->signature)->delete();
+            CronLog::create(['name' => $e]);
             dd('#Error: ' . $e);
             //write file here
         }
