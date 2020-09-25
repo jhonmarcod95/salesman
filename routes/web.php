@@ -1,5 +1,6 @@
 <?php
 use App\CustomerOrder;
+use App\TsrSapCustomer;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
@@ -413,6 +414,9 @@ Route::get('/customer-codes-all', 'CustomerController@getCustomerCodesAll');
 Route::get('/missed_itineraries', 'ScheduleController@missedItineraries');
 Route::post('/missed-itineraries-data', 'ScheduleController@missedItinerariesData');
 
+Route::get('/virtual-schedule-report', 'ScheduleController@virtualScheduleReport');
+Route::get('/virtual-schedule-report-data-today', 'ScheduleController@virtualScheduleReportDataToday');
+Route::post('/virtual-schedule-report-data-filter', 'ScheduleController@virtualScheduleReportDataFilter');
 
 //Get SAP Customer with sales
 Route::get('/get-sap-customer', function () {
@@ -425,14 +429,6 @@ Route::get('/get-sap-customer', function () {
         'client' => '888',
         'user' => 'rfidproject',
         'passwd' => 'P@ssw0rd4',
-    ];
-
-    $connection_lfug = [
-        'ashost' => '172.17.2.36',
-        'sysnr' => '00',
-        'client' => '888',
-        'user' => 'rfidproject',
-        'passwd' => 'P@ssw0rd4'
     ];
 
     $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
@@ -460,7 +456,36 @@ Route::get('/get-sap-customer', function () {
                             ['delay' => 10000]
                         );
 
-    return $customers_data = json_decode($customers->getBody(), true); 
+    $customers_data = json_decode($customers->getBody(), true);
+    
+    if($customers_data){
+        $x = 0;
+        foreach($customers_data as $k => $data){
+            $tsr_customer_arr = [];
+            $tsr_customer_arr['server'] = 'PFMC';
+          
+            $validate = TsrSapCustomer::where('customer_code',$data['customer_code'])
+                            ->where('tsr_customer_code',$data['tsr_customer_code'])
+                            ->where('sales_organization',$data['sales_organization'])
+                            ->where('common_division',$data['common_division'])
+                            ->where('division',$data['division'])
+                            ->where('partner_function',$data['partner_function'])
+                            ->first();
+                            
+            if(empty($validate)){
+                $tsr_customer_arr['customer_code'] = $data['customer_code'];
+                $tsr_customer_arr['tsr_customer_code'] = $data['tsr_customer_code'];
+                $tsr_customer_arr['sales_organization'] = $data['sales_organization'];
+                $tsr_customer_arr['common_division'] = $data['common_division'];
+                $tsr_customer_arr['division'] = $data['division'];
+                $tsr_customer_arr['partner_function'] = $data['partner_function'];
+                TsrSapCustomer::create($tsr_customer_arr);
+                $x++;
+            }
+           
+        }
+        return $x;
+    }
 
 });
 

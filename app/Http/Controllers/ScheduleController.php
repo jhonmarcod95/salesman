@@ -473,4 +473,48 @@ class ScheduleController extends Controller
 
         return $missed_itineraries;
     }
+
+    public function virtualScheduleReport(){
+        session(['header_text' => 'Virtual Schedule Report']);
+        return view('schedule.virtual_schedule_report');
+    }
+
+    public function virtualScheduleReportDataToday(){
+        $dateToday = date('Y-m-d');
+        $default_company_id = Auth::user()->companies->first()->id;
+        $users = User::select('id')->where('company_id',$default_company_id)->get();
+
+        $selected_user = [];
+        foreach($users as $user){
+            array_push($selected_user , $user['id']);
+        }
+        return Schedule::with('attendances','user','schedule_type')->where('date',$dateToday)->whereIn('user_id',$selected_user)->where('type','7')->get();
+    }
+
+    public function virtualScheduleReportDataFilter(Request $request){
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate'
+        ]);
+        
+        if($request->company){
+            $company_id = $request->company;
+        }else{
+            $company_id = Auth::user()->companies->first()->id;
+        }
+        
+        $users = User::select('id')->where('company_id',$company_id)->get();
+
+        $selected_user = [];
+        foreach($users as $user){
+            array_push($selected_user , $user['id']);
+        }
+
+        return Schedule::with('attendances','user','schedule_type')
+                            ->whereDate('date', '>=',  $request->startDate)
+                            ->whereDate('date' ,'<=', $request->endDate)
+                            ->whereIn('user_id',$selected_user)
+                            ->where('type','7')
+                            ->get();
+    }
 }
