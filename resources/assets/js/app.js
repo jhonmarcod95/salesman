@@ -95,7 +95,7 @@ Vue.component('map-analytics-report-map-users', require('./components/MapAnalyti
 Vue.component('map-analytics-report-map-customers', require('./components/MapAnalyticsReport/MapAnalyticsReportMapCustomers.vue'));
 
 
-//Sales Report 
+//Sales Report
 Vue.component('sales-report-index', require('./components/SalesReport/SalesReportIndex.vue'));
 
 //Appointment Duration Report
@@ -106,6 +106,10 @@ Vue.component('survey-index', require('./components/Survey/SurveyIndex.vue'));
 
 // Individual Performance
 Vue.component('individual-performance', require('./components/IndividualPerformance/IndividualPerformance.vue'));
+
+//Viritual Visit Import Page
+Vue.component('virtual-visit-import', require('./components/VirtualVisit/Index.vue'));
+
 
 const app = new Vue({
     el: '#app',

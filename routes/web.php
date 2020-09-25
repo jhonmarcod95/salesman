@@ -44,6 +44,8 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/user/change-password', 'UserController@changePasswordIndex')->name('change_password');
     // Fetch all companies
     Route::get('/companies-all', 'CompanyController@indexData');
+    // Virutal Visit
+    Route::get('virtual-schedules', 'VirtualVisitController@index');
 });
 
 
@@ -113,7 +115,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::patch('/tsr/{technicalSalesRepresentative}', 'TsrController@update');
 
 
-    
+
     //Messages
     Route::get('/messages', 'MessageController@index')->name('messages_list');
     //save new message
@@ -179,14 +181,14 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     Route::get('/map-analytics-report-customer', 'MapAnalyticsReportController@mapCustomers');
 
-    //Get Map Customers Data 
+    //Get Map Customers Data
     Route::post('/users-data', 'MapAnalyticsReportController@usersData');
-    
+
     Route::get('/schedule-types-all', 'MapAnalyticsReportController@scheduleTypes');
-    
+
     Route::get('/customers-all', 'MapAnalyticsReportController@customersData');
-    
-    
+
+
     Route::post('/user-locations', 'MapAnalyticsReportController@userLocations');
 
     Route::get('/map-users-all', 'MapAnalyticsReportController@users');
@@ -247,7 +249,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     // Companies
     Route::get('/companies', 'CompanyController@index');
-    // Add company  
+    // Add company
     Route::post('/company', 'CompanyController@store');
     // Update company
     Route::patch('/company/{company}', 'CompanyController@update');
@@ -297,7 +299,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // show customer page
     Route::get('/customers', 'CustomerController@index')->name('customers_list');
     // fetch all customer
-    
+
     Route::get('/customers-all', 'CustomerController@indexData');
 
     Route::post('/customers-all-filter', 'CustomerController@indexDataFilter');

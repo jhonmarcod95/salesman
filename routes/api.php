@@ -64,6 +64,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     // Viritual Visit schedule
     Route::post('virtual-schedule/import', 'Api\VirtualVisitControllerApi@import');
 
+
     //Payments
     Route::get('payments','AppAPIController@getPayments');
 

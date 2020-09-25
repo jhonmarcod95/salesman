@@ -47,6 +47,7 @@ class GenerateVirtualVisit extends Command
 
         // get the chunk
         $scheduleDistribution = ceil($schedules->count() / 5) < 5 ? 5 : ceil($schedules->count());
+        // $scheduleDistribution = ceil($schedules->count() / 5);
 
         // Return the schedule to be insert into schedule table
         $filerSchedules = collect($schedules->get())
