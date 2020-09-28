@@ -55,7 +55,7 @@ class RequestsAPIController extends Controller
         ]);
 
         // If customer was selected
-        if($request->input('type') == '1') {
+        if($request->input('type') == '1' || $request->input('type') == '7') {
             $this->validate($request, [
                 'code' => 'required',
             ]);
@@ -74,9 +74,9 @@ class RequestsAPIController extends Controller
             $requestSchedule = new RequestSchedule();
             $requestSchedule->user_id = Auth::user()->id;
             $requestSchedule->type = $request->input('type');
-            $requestSchedule->code = $request->type == '1' ?  $request->input('code') : Schedule::createScheduleCode($request->input('type'));
-            $requestSchedule->name = $request->type == '1' ? $customer->name : $request->input('name');
-            $requestSchedule->address = $request->type == '1' ? $customer->town_city : $request->input('address');
+            $requestSchedule->code = $request->input('name') == '' ?  $request->input('code') : Schedule::createScheduleCode($request->input('type'));
+            $requestSchedule->name = $request->input('name') == '' ? $customer->name : $request->input('name');
+            $requestSchedule->address = $request->input('name') == '' ? $customer->town_city : $request->input('address');
             $requestSchedule->date = $request->input('date');
             $requestSchedule->start_time = $request->input('start_time');
             $requestSchedule->end_time = $request->input('end_time');
@@ -116,7 +116,7 @@ class RequestsAPIController extends Controller
         ]);
 
         // If customer was selected
-        if($request->input('type') == '1') {
+        if($request->input('type') == '1' || $request->input('type') == '7') {
             $this->validate($request, [
                 'code' => 'required',
             ]);
@@ -133,9 +133,9 @@ class RequestsAPIController extends Controller
 
          // Store to Request Model
         $requestSchedule->type = $request->input('type');
-        $requestSchedule->code = $request->type == '1' ?  $request->input('code') : Schedule::createScheduleCode($request->input('type'));
-        $requestSchedule->name = $request->type == '1' ? $customer->name : $request->input('name');
-        $requestSchedule->address = $request->type == '1' ? $customer->town_city : $request->input('address');
+        $requestSchedule->code = $request->input('name') == '' ?  $request->input('code') : Schedule::createScheduleCode($request->input('type'));
+        $requestSchedule->name = $request->input('name') == '' ? $customer->name : $request->input('name');
+        $requestSchedule->address = $request->input('name') == '' ? $customer->town_city : $request->input('address');
         $requestSchedule->date = $request->input('date');
         $requestSchedule->start_time = $request->input('start_time');
         $requestSchedule->end_time = $request->input('end_time');
