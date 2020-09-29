@@ -55,15 +55,14 @@ class GenerateVirtualVisit extends Command
         $filteredSchedules = collect($arraySchedules)
         ->map(function ($item, $key) {
             return collect($item)
-                    ->chunk(5)
-                    ->map(function ($x, $k) use ($key) {
+                    ->map(function ($x, $k) {
                         return array(
                             'user_id' => $x->user_id,
                             'type' => $x->type,
                             'code' => $x->code,
                             'name' => $x->name,
                             'address' => $x->address,
-                            'date' => Carbon::today()->startOfWeek()->addWeek(1)->addDays($key),
+                            'date' => $x->date,
                             'start_time' => $x->start_time,
                             'end_time' => $x->end_time,
                             'lat' => 0,
@@ -75,11 +74,98 @@ class GenerateVirtualVisit extends Command
                             'updated_at' => Carbon::now()
                         );
                     })->all();
+        })->each(function ($items, $key) {
+
+            $getChunk = ceil(count($items) / 5);
+
+            $finalItems = collect($items);
+
+            echo json_encode(count($items)."-", JSON_PRETTY_PRINT);
+
+
+            foreach($finalItems->chunk($getChunk)->all() as $item) {
+
+                $setKey = 0;
+
+                // echo json_encode($item, JSON_PRETTY_PRINT);
+
+
+                // echo json_encode($item[$setKey], JSON_PRETTY_PRINT);
+
+
+                // $schedule = Schedule::firstOrNew(
+                // [
+                //     'code' => $item->code,
+                //     'date' => Carbon::today()->startOfWeek()->addWeek(1)->addDays($setKey),
+                // ],
+                // [
+                //     'user_id' => $item->user_id,
+                //     'type' => 7,
+                //     'name' => $item->name,
+                //     'address' => $item->address,
+                //     'start_time' => $item->start_time,
+                //     'end_time' => $item->end_time,
+                //     'lat' => 0,
+                //     'lng' => 0,
+                //     'status' => 2,
+                //     'is_generated' => 1,
+                //     'km_distance' => 0,
+                //     'created_at' => $item->created_at,
+                //     'updated_at' => $item->updated_at
+                // ]);
+
+                // $schedule->save();
+                $setKey++;
+
+            }
+                        
+                        // ->map(function ($item, $key)  {
+
+                        //     return array(
+                        //         'code' => $item["code"],
+                        //         'date' => Carbon::today()->startOfWeek()->addWeek(1)->addDays($key),
+                        //         'user_id' => $item["user_id"],
+                        //         'type' => 7,
+                        //         'name' => $item["name"],
+                        //         'address' => $item["address"],
+                        //         'start_time' => $item["start_time"],
+                        //         'end_time' => $item["end_time"],
+                        //         'lat' => 0,
+                        //         'lng' => 0,
+                        //         'status' => 2,
+                        //         'is_generated' => 1,
+                        //         'km_distance' => 0,
+                        //         'created_at' => $item["created_at"],
+                        //         'updated_at' => $item["updated_at"]
+                        //     );
+
+                        //     // $schedule = Schedule::firstOrNew(
+                        //     //     [
+                        //     //         'code' => $item["code"],
+                        //     //         'date' => Carbon::today()->startOfWeek()->addWeek(1)->addDays($key),
+                        //     //     ],
+                        //     //     [
+                        //     //         'user_id' => $item["user_id"],
+                        //     //         'type' => 7,
+                        //     //         'name' => $item["name"],
+                        //     //         'address' => $item["address"],
+                        //     //         'start_time' => $item["start_time"],
+                        //     //         'end_time' => $item["end_time"],
+                        //     //         'lat' => 0,
+                        //     //         'lng' => 0,
+                        //     //         'status' => 2,
+                        //     //         'is_generated' => 1,
+                        //     //         'km_distance' => 0,
+                        //     //         'created_at' => $item["created_at"],
+                        //     //         'updated_at' => $item["updated_at"]
+                        //     //     ]);
+                        //     // $schedule->save();
+                        // })->all();
+
+            // dd(json_encode($finalItems, JSON_PRETTY_PRINT));
         });
 
-        echo json_encode($filteredSchedules, JSON_PRETTY_PRINT);
-
-        
+        // echo json_encode($filteredSchedules, JSON_PRETTY_PRINT);
             
         // return collect($schedules->get())->groupBy('user_id')->toArray();
         // dd(collect($schedules->get())->groupBy('user_id')->toArray());
