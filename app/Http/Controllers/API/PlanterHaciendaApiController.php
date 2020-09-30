@@ -32,12 +32,14 @@ class PlanterHaciendaApiController extends Controller
     public function search(Request $request)
     {
         $search = $request->search;
+
+        $haciendas = PlanterHacienda::take(10)->get();
+
         if($search != "") {
             $haciendas = PlanterHacienda::where('name', 'LIKE', "%$search%")->get();
-        } else {
-            $haciendas = PlanterHacienda::take(10)->get();
         }
 
+        // return $haciendas;
         return HaciendaResource::collection($haciendas);
     }
 

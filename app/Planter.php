@@ -7,18 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Planter extends Model
 {
     protected $fillable = [
+        'user_id',
         'planter_name',
         'contact_number',
         'planter_address',
         'hacienda_loc',
         'total_area',
-        // 'n_p',
-        // 'r1_r2_r3',
-        // 'empty',
-        'soil_type',
-        'soil_condition',
-        // 'tons_cane',
-        // 'tons_yields',
         'assistance_needed',
         'bir_id',
         'planter_picture',
@@ -27,10 +21,14 @@ class Planter extends Model
         'date_planted',
         'date_estimate_harvest',
         'planter_area_type_id',
+        'planter_soil_type_id',
+        'planter_soil_condition_id',
+        'planter_crop_type_id',
         'remarks',
         'area_converted',
         'crop_tech_remarks',
         'variety',
+        'planter_code',
     ];
 
     protected $casts = [
@@ -88,5 +86,10 @@ class Planter extends Model
     public function planterCropType()
     {
         return $this->belongsTo(PlanterCropType::class);
+    }
+
+    public function planterHacienda()
+    {
+        return $this->belongsTo(PlanterHacienda::class,'planter_code','planter_code');
     }
 }

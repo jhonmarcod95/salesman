@@ -12,6 +12,6 @@ class PlanterHacienda extends Model
 
     public function planter()
     {
-        return $this->belongsTo(Planter::class);
+        return $this->hasOne(Planter::class,'planter_code','planter_code');
     }
 }

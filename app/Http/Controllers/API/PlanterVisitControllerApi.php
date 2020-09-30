@@ -66,7 +66,8 @@ class PlanterVisitControllerApi extends Controller
     {
         $planters = Planter::orderBy('id','DESC')
                     ->where('user_id',Auth::user()->id)
-                    ->get();
+                    ->get()
+                    ->unique('planter_code');
 
         return PlanterVisitResource::collection($planters);
     }
@@ -84,59 +85,34 @@ class PlanterVisitControllerApi extends Controller
             'contact_number' => 'required',
             'planter_address' => 'required',
             'hacienda_loc' => 'required',
-            // 'total_area' => 'required',
-            // 'n_p' => 'required',
-            // 'r1_r2_r3' => 'required',
-            // 'empty' => 'required',
-            // 'planter_soil_type_id' => 'required',
-            // 'planter_soil_condition_id' => 'required',
-            // 'tons_cane' => 'required',
-            // 'tons_yields' => 'required',
             'assistance_needed' => 'required',
-            // 'planter_crop_type_id' => 'required',
             'planter_area_type_id' => 'required',
         ]);
 
-        $planter = new Planter;
-        $planter->user_id = Auth::user()->id;
-        $planter->planter_name = $request->planter_name;
-        $planter->contact_number = $request->contact_number;
-        $planter->planter_address = $request->planter_address;
-        $planter->hacienda_loc = $request->hacienda_loc;
-        $planter->total_area = 0; // temporarily
-        // $planter->tons_cane = $request->tons_cane;
-        // $planter->tons_yields = $request->tons_yields;
-        $planter->area = $request->area == '' ? 0 : $request->area;
-        $planter->date_planted = $request->date_planted == '' ? null : $request->date_planted;
-        $planter->date_estimate_harvest = $request->date_estimate_harvest == '' ? null : $request->date_estimate_harvest;
-        $planter->crop_tech_remarks = $request->crop_tech_remarks == '' ? "N/A" :  $request->crop_tech_remarks;
-        $planter->area_converted = $request->area_converted == '' ? "N/A" : $request->area_converted;
-        $planter->variety = $request->variety == '' ? "N/A" : $request->variety;
-        // $planter->n_p = json_encode($request->input('n_p'));
-        // $planter->r1_r2_r3 = json_encode($request->input('r1_r2_r3'));
-        // $planter->empty = json_encode($request->input('empty'));
-        $planter->remarks = $request->remarks;
-        $planter->assistance_needed = json_encode($request->input('assistance_needed'));
-        $planter->planterAreaType()->associate($request->input('planter_area_type_id'));
-
-        if($request->planter_soil_type_id) {
-            $planter->planterSoilType()->associate($request->input('planter_soil_type_id'));
-        } else {
-            $planter->planter_soil_type_id = 0;
-        }
-
-        if($request->planter_soil_condition_id) {
-            $planter->planterSoilConditionType()->associate($request->input('planter_soil_condition_id'));
-        } else {
-            $planter->planter_soil_condition_id = 0;
-        }
-
-        if($request->planter_crop_type_id) {
-            $planter->planterCropType()->associate($request->input('planter_crop_type_id'));
-        } else {
-            $planter->planter_crop_type_id = 0;
-        }
-        $planter->save();
+        $planter = Planter::updateOrCreate(
+            [
+                'planter_code' => $request->planter_code
+            ],
+            [
+                'user_id' => Auth::user()->id,
+                'planter_name' => $request->planter_name,
+                'contact_number' => $request->contact_number,
+                'planter_address' => $request->planter_address,
+                'hacienda_loc' => $request->hacienda_loc,
+                'total_area' => 0,
+                'area' => $request->area == '' ? 0 : $request->area,
+                'date_planted' => $request->date_planted == '' ? null : $request->date_planted,
+                'date_estimate_harvest' => $request->date_estimate_harvest == '' ? null : $request->date_estimate_harvest,
+                'crop_tech_remarks' => $request->crop_tech_remarks == '' ? "N/A" :  $request->crop_tech_remarks,
+                'area_converted' => $request->area_converted == '' ? "N/A" : $request->area_converted,
+                'variety' => $request->variety == '' ? "N/A" : $request->variety,
+                'remarks' => $request->remarks,
+                'assistance_needed' => json_encode($request->input('assistance_needed')),
+                'planter_area_type_id' => $request->planter_area_type_id == '' ? 0 :$request->planter_area_type_id,
+                'planter_soil_type_id' => $request->planter_soil_type_id == '' ? 0 :$request->planter_soil_type_id,
+                'planter_soil_condition_id' => $request->planter_soil_condition_id == '' ? 0 :$request->planter_soil_condition_id,
+                'planter_crop_type_id' => $request->planter_crop_type_id == '' ? 0 :$request->planter_crop_type_id,
+            ]);
 
         return new PlanterVisitResource($planter);
 
