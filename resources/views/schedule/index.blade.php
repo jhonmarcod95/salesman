@@ -37,6 +37,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col text-right">
+                                <a href="/virtual-schedule-report" class="btn btn-sm btn-primary"> Virtual Schedule</a>
                                 <a href="/missed_itineraries" class="btn btn-sm btn-warning"> Missed Itineraries</a>
                             </div>
                         </div>
