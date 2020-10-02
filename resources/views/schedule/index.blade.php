@@ -308,7 +308,7 @@
 
                 retrieveCustomers('#sel-customer-codes', null);
             }
-            if(type == '7'){ // online visit
+            else if(type == '7'){ // online visit
                 $("#radius-add").val('0.5');
                 $("#radius-update").val('0.5');
 
