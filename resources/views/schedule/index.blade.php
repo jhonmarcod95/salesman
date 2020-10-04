@@ -37,6 +37,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col text-right">
+                                <a href="/virtual-schedule-report" class="btn btn-sm btn-primary"> Virtual Schedule</a>
                                 <a href="/missed_itineraries" class="btn btn-sm btn-warning"> Missed Itineraries</a>
                             </div>
                         </div>
@@ -307,7 +308,7 @@
 
                 retrieveCustomers('#sel-customer-codes', null);
             }
-            if(type == '7'){ // online visit
+            else if(type == '7'){ // online visit
                 $("#radius-add").val('0.5');
                 $("#radius-update").val('0.5');
 
