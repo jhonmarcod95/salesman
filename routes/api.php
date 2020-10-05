@@ -12,7 +12,8 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
+//TSR with customer
+Route::get('tsr_sap_customers','API\TsrCustomerControllerApi@tsrCustomers');
 
 Route::post('register', 'AuthController@register');
 Route::post('login', 'AuthController@login');
@@ -131,5 +132,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     //Grassroots
     Route::get('grassroots/types','API\GrassrootsController@grassrootsExpenseTypes');
     Route::post('grassroots','API\GrassrootsController@store');
+
+    
 
 });

@@ -42,10 +42,10 @@ class GetSapTsrCustomer extends Command
      */
     public function handle()
     {
-        // $pfmc_server = $this->getPFMCServers();
+        $pfmc_server = $this->getPFMCServers();
         $lfug_server = $this->getLFUGServers();
         // $this->info('Save PFMC : ' . $pfmc_server);
-        $this->info('Save LFUG : ' . $lfug_server);
+        $this->info('Save LFUG : ' . $lfug_server . ' Save PFMC : ' . $pfmc_server);
     }
 
     public function getPFMCServers(){
