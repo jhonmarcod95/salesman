@@ -88,7 +88,7 @@ class GenerateVirtualVisit extends Command
                 sleep(1);
 
                 foreach($item as $i) {
-                    
+
                     $schedule = Schedule::firstOrNew(
                         [
                             'code' => $i['code'],
@@ -109,7 +109,7 @@ class GenerateVirtualVisit extends Command
                             'created_at' => $i['created_at'],
                             'updated_at' => $i['updated_at']
                         ]);
-                    $schedule->save();                  
+                    $schedule->save();
                 }
 
                 $this->output->progressAdvance();
@@ -117,7 +117,7 @@ class GenerateVirtualVisit extends Command
 
             $this->output->progressFinish();
         });
-          
+
     }
 
     /**

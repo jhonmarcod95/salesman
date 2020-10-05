@@ -29,6 +29,8 @@ Vue.component('request-schedule-index', require('./components/Schedule/RequestSc
 
 Vue.component('missed-itineraries', require('./components/Schedule/MissedItineraries.vue'));
 
+Vue.component('virtual-schedule-report', require('./components/Schedule/VirtualScheduleReport.vue'));
+
 // Payment
 Vue.component('payment-index', require('./components/Payment/PaymentIndex.vue'));
 
@@ -110,6 +112,8 @@ Vue.component('individual-performance', require('./components/IndividualPerforma
 //Viritual Visit Import Page
 Vue.component('virtual-visit-import', require('./components/VirtualVisit/Index.vue'));
 
+// Expense per IO
+Vue.component('expense-io-report-index', require('./components/Expense/ExpenseIoReportIndex.vue'));
 
 const app = new Vue({
     el: '#app',

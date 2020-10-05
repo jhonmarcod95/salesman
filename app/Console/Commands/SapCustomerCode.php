@@ -67,7 +67,9 @@ class SapCustomerCode extends Command
                                         'table' => ['KNA1' => 'do_headers'],
                                         'fields' => [
                                             'KUNNR' => 'customer_code',
-                                            'NAME1' => 'name'
+                                            'NAME1' => 'name',
+                                            'STRAS' => 'street',
+                                            'ORT01' => 'city'
                                         ],
                                         'options' => [
                                             ['TEXT' => "ERDAT = '$date'"]
@@ -95,6 +97,8 @@ class SapCustomerCode extends Command
                             'customer_code'=>$customer_code['customer_code'],
                             'server'=>'LFUG',
                             'name'=>$customer_code['name'],
+                            'street'=>$customer_code['street'],
+                            'city'=>$customer_code['city'],
                         ];
                         //Create DO Number
                         CustomerCode::create($data);
@@ -103,6 +107,8 @@ class SapCustomerCode extends Command
                         try{
                             $data = [
                                 'name'=>$customer_code['name'],
+                                'street'=>$customer_code['street'],
+                                'city'=>$customer_code['city'],
                             ];
                             $validate_customer_code->update($data);
                             $x++;
@@ -141,7 +147,9 @@ class SapCustomerCode extends Command
                                         'table' => ['KNA1' => 'do_headers'],
                                         'fields' => [
                                             'KUNNR' => 'customer_code',
-                                            'NAME1' => 'name'
+                                            'NAME1' => 'name',
+                                            'STRAS' => 'street',
+                                            'ORT01' => 'city'
                                         ],
                                         'options' => [
                                             ['TEXT' => "ERDAT = '$date'"]
@@ -169,6 +177,8 @@ class SapCustomerCode extends Command
                             'customer_code'=>$customer_code['customer_code'],
                             'name'=>$customer_code['name'],
                             'server'=>'PFMC',
+                            'street'=>$customer_code['street'],
+                            'city'=>$customer_code['city'],
                         ];
                         //Create DO Number
                         CustomerCode::create($data);
@@ -177,6 +187,8 @@ class SapCustomerCode extends Command
                         try{
                             $data = [
                                 'name'=>$customer_code['name'],
+                                'street'=>$customer_code['street'],
+                                'city'=>$customer_code['city'],
                             ];
                             $validate_customer_code->update($data);
                             $x++;

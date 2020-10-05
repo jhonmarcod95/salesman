@@ -1,4 +1,9 @@
 <?php
+use App\CustomerOrder;
+use App\TsrSapCustomer;
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 
 /*
 |--------------------------------------------------------------------------
@@ -155,6 +160,12 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::post('/expenses-top-spender-data', 'ExpenseController@expenseTopSpenderData');
     Route::get('/expenses-current-top-spender-data', 'ExpenseController@expenseCurrentTopSpenderData');
 
+
+    Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
+    Route::post('/expense-io-report-data', 'ExpenseController@expenseIOReportData');
+
+    //Checker
+    Route::get('/expense-io-checker', 'ExpenseController@expenseIOChecker');
 
     // Fetch expense report by date
     Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
@@ -404,5 +415,165 @@ Route::get('/customer-codes-all', 'CustomerController@getCustomerCodesAll');
 
 Route::get('/missed_itineraries', 'ScheduleController@missedItineraries');
 Route::post('/missed-itineraries-data', 'ScheduleController@missedItinerariesData');
+
+Route::get('/virtual-schedule-report', 'ScheduleController@virtualScheduleReport');
+Route::get('/virtual-schedule-report-data-today', 'ScheduleController@virtualScheduleReportDataToday');
+Route::post('/virtual-schedule-report-data-filter', 'ScheduleController@virtualScheduleReportDataFilter');
+
+//Get SAP Customer with sales
+Route::get('/get-sap-customer', function () {
+
+    $client = new Client();
+
+    $connection_pfmc = [
+        'ashost' => '172.17.1.35',
+        'sysnr' => '02',
+        'client' => '888',
+        'user' => 'rfidproject',
+        'passwd' => 'P@ssw0rd4',
+    ];
+
+    $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                            ['query' => 
+                                ['connection' => $connection_pfmc,
+                                    'table' => [
+                                        'table' => ['KNVP' => 'customers_tsr'],
+                                        'fields' => [
+                                            'KUNNR' => 'customer_code',
+                                            'KUNN2' => 'tsr_customer_code',
+                                            'VKORG' => 'sales_organization',
+                                            'VTWEG' => 'common_division',
+                                            'SPART' => 'division',
+                                            'PARVW' => 'partner_function',
+                                        ],
+                                        'options' => [
+                                            ['TEXT' => "PARVW ='Z1' OR "],
+                                            ['TEXT' => "PARVW ='Z3' OR "],
+                                            ['TEXT' => "PARVW ='ZS'"],
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            ['timeout' => 60],
+                            ['delay' => 10000]
+                        );
+
+    $customers_data = json_decode($customers->getBody(), true);
+    
+    if($customers_data){
+        $x = 0;
+        foreach($customers_data as $k => $data){
+            $tsr_customer_arr = [];
+            $tsr_customer_arr['server'] = 'PFMC';
+          
+            $validate = TsrSapCustomer::where('customer_code',$data['customer_code'])
+                            ->where('tsr_customer_code',$data['tsr_customer_code'])
+                            ->where('sales_organization',$data['sales_organization'])
+                            ->where('common_division',$data['common_division'])
+                            ->where('division',$data['division'])
+                            ->where('partner_function',$data['partner_function'])
+                            ->first();
+                            
+            if(empty($validate)){
+                $tsr_customer_arr['customer_code'] = $data['customer_code'];
+                $tsr_customer_arr['tsr_customer_code'] = $data['tsr_customer_code'];
+                $tsr_customer_arr['sales_organization'] = $data['sales_organization'];
+                $tsr_customer_arr['common_division'] = $data['common_division'];
+                $tsr_customer_arr['division'] = $data['division'];
+                $tsr_customer_arr['partner_function'] = $data['partner_function'];
+                TsrSapCustomer::create($tsr_customer_arr);
+                $x++;
+            }
+           
+        }
+        return $x;
+    }
+
+});
+
+//Get SAP Customer with sales PFMC
+Route::get('/get-all-customer-pfmc', function () {
+
+    $client = new Client();
+
+    $connection_pfmc = [
+        'ashost' => '172.17.1.35',
+        'sysnr' => '02',
+        'client' => '888',
+        'user' => 'rfidproject',
+        'passwd' => 'P@ssw0rd4',
+    ];
+    $connection_lfug = [
+        'ashost' => '172.17.2.36',
+        'sysnr' => '00',
+        'client' => '888',
+        'user' => 'rfidproject',
+        'passwd' => 'P@ssw0rd4'
+    ];
+
+    $tsr_pfmc = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                    ['query' => 
+                        ['connection' => $connection_pfmc,
+                            'table' => [
+                                'table' => ['KNA1' => 'tsr'],
+                                'fields' => [
+                                    'KUNNR' => 'tsr_number',
+                                    'NAME1' => 'name',
+                                    'NAME2' => 'name_2',
+                                ],
+                                // 'options' => [
+                                //     ['TEXT' => "NAME2 ='Technical Sales Representative'"]
+                                // ]
+                            ]
+                        ]
+                    ],
+                    ['timeout' => 60],
+                    ['delay' => 10000]
+                );
+
+    $tsr_pfmc_data = json_decode($tsr_pfmc->getBody(), true); 
+
+    return $tsr_pfmc_data;
+
+});
+
+//Get SAP Customer with sales LFUG
+Route::get('/get-all-customer-lfug', function () {
+
+    $client = new Client();
+
+    $connection_lfug = [
+        'ashost' => '172.17.2.36',
+        'sysnr' => '00',
+        'client' => '888',
+        'user' => 'rfidproject',
+        'passwd' => 'P@ssw0rd4'
+    ];
+
+    $tsr_lfug = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                    ['query' => 
+                        ['connection' => $connection_lfug,
+                            'table' => [
+                                'table' => ['KNA1' => 'tsr'],
+                                'fields' => [
+                                    'KUNNR' => 'tsr_number',
+                                    'NAME1' => 'name',
+                                    'NAME2' => 'name_2',
+                                ],
+                                // 'options' => [
+                                //     ['TEXT' => "NAME2 ='Technical Sales Representative'"]
+                                // ]
+                            ]
+                        ]
+                    ],
+                    ['timeout' => 60],
+                    ['delay' => 10000]
+                );
+
+    $tsr_lfug_data = json_decode($tsr_lfug->getBody(), true); 
+
+    return $tsr_lfug_data;
+
+});
 
 
