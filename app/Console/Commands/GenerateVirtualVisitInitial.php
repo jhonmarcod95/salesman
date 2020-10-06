@@ -35,6 +35,7 @@ class GenerateVirtualVisitInitial extends Command
     {
         parent::__construct();
         $this->finalArray = [];
+        $this->counter = 0;
     }
 
     public function getCustomers($tsr_customer_code)
@@ -92,8 +93,9 @@ class GenerateVirtualVisitInitial extends Command
                         foreach ($get_customer_pfmc as $customer) {
                             $data = array(
                                 'user_id' => $item->id,
-                                'customer_code' => $customer['customer_code'],
-                                'customer_name' => $customer['customer'] ? $customer['customer']['name'] : "",
+                                // 'salesman_name' => $item->name,
+                                'code' => $customer['customer_code'],
+                                'name' => $customer['customer'] ? $customer['customer']['name'] : "",
                                 'address' => $customer['customer'] ? $customer['customer']['city'] : "",
                             );
                             array_push($tsr_customer_arr, $data);
@@ -172,13 +174,15 @@ class GenerateVirtualVisitInitial extends Command
                         $schedule->save();
                     }
 
+
                     $this->output->progressAdvance();
+                     $this->counter + 1;
                 }
 
                 $this->output->progressFinish();
             });
 
-            $this->info("Generate Done" . "\n");
+            $this->info("Generate Done: " . $this->counter. "\n");
 
     }
 
@@ -191,7 +195,7 @@ class GenerateVirtualVisitInitial extends Command
     public function handle()
     {
         $this->fetchSAPApi();
-        // dd($this->finalArray);
-        $this->genearateInitialVisit();
+        dd(count($this->finalArray));
+        // $this->genearateInitialVisit();
     }
 }

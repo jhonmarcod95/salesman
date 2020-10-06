@@ -22,7 +22,7 @@ class TsrCustomerControllerApi extends Controller
         // $tsr = User::where('id',$data['user_id'])->get(['id','name','tsr_customer_code_pfmc','tsr_customer_code_lfug'])->first();
         $tsr = User::whereNotNull('tsr_customer_code_pfmc')
         ->orWhereNotNull('tsr_customer_code_lfug')
-        ->take(1)
+        // ->take(1)
         ->get(['id','name','tsr_customer_code_pfmc','tsr_customer_code_lfug']);
 
         $tsr_customer_arr = [];
@@ -39,6 +39,7 @@ class TsrCustomerControllerApi extends Controller
                         foreach ($get_customer_pfmc as $customer) {
                             $data = array(
                                 'user_id' => $item->id,
+                                // 'salesman_name' => $item->name,
                                 'code' => $customer['customer_code'],
                                 'name' => $customer['customer'] ? $customer['customer']['name'] : "",
                                 'address' => $customer['customer'] ? $customer['customer']['city'] : "",
@@ -59,8 +60,9 @@ class TsrCustomerControllerApi extends Controller
                         foreach ($get_customer_pfmc as $customer) {
                             $data = array(
                                 'user_id' => $item->id,
-                                'customer_code' => $customer['customer_code'],
-                                'customer_name' => $customer['customer'] ? $customer['customer']['name'] : "",
+                                'salesman_name' => $item->name,
+                                'code' => $customer['customer_code'],
+                                'name' => $customer['customer'] ? $customer['customer']['name'] : "",
                                 'address' => $customer['customer'] ? $customer['customer']['city'] : "",
                             );
                             array_push($tsr_customer_arr, $data);
@@ -70,8 +72,6 @@ class TsrCustomerControllerApi extends Controller
             }
 
         }
-
-        // return $tsr_customer_arr;
 
         return collect($tsr_customer_arr)
                ->groupBy('user_id')
