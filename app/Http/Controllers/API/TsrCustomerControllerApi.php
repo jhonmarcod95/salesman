@@ -41,7 +41,8 @@ class TsrCustomerControllerApi extends Controller
                             $street =$customer['customer'] ? $customer['customer']['street'] . " " : "";
                             $city = $customer['customer'] ? $customer['customer']['city'] : "";
                             $tsr_customer_arr[$k]['address'] = $street . $city;
-                            $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
+                            // $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
+                            // $tsr_customer_arr[$k]['customer_validity'] =$customer['customer_validity'];
                             $k++;
                         }
                     }
@@ -62,7 +63,8 @@ class TsrCustomerControllerApi extends Controller
                             $street =$customer['customer'] ? $customer['customer']['street'] . " " : "";
                             $city = $customer['customer'] ? $customer['customer']['city'] : "";
                             $tsr_customer_arr[$k]['address'] = $street . $city;
-                            $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
+                            // $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
+                            // $tsr_customer_arr[$k]['customer_validity'] =$customer['customer_validity'];
                             $k++;
                         }
                     }
@@ -75,33 +77,37 @@ class TsrCustomerControllerApi extends Controller
     }
 
     public function getCustomers($tsr_customer_code){
-        $customer_lists = TsrSapCustomer::with('customer')
+        return $customer_lists = TsrSapCustomer::with('customer','customer_validity')
                                                 ->where('tsr_customer_code',$tsr_customer_code)
                                                 ->where('customer_code','!=',$tsr_customer_code)
                                                 ->whereHas('customer',function($q){
                                                     $q->where('name','not like','%X:%');
                                                     $q->where('name','not like','%XXX%');
                                                 })
+                                                ->whereHas('customer_validity',function($q){
+                                                    $q->whereNotNull('sales_organization');
+                                                    $q->whereNotNull('deletion_flag');
+                                                })
                                                 ->get();
 
-        //Check if Valid Customer Status //Not Deleted //Not Block
-        $customer_arr = [];
-        if($customer_lists){
-            foreach($customer_lists as $k => $item){
-                $validate_customer = TsrValidCustomer::where('customer_code',$item['customer_code'])
-                                                        ->where('sales_organization',$item['sales_organization'])
-                                                        ->where('common_division',$item['common_division'])
-                                                        ->first();
-                if($validate_customer){
-                    if($validate_customer['customer_order_block'] == "" && $validate_customer['deletion_flag'] == ""){
-                        $customer_arr[$k] = $item;
-                    }
-                }else{
-                    $customer_arr[$k] = $item;
-                }
-            }
-        }
+        // //Check if Valid Customer Status //Not Deleted //Not Block
+        // $customer_arr = [];
+        // if($customer_lists){
+        //     foreach($customer_lists as $k => $item){
+        //         $validate_customer = TsrValidCustomer::where('customer_code',$item['customer_code'])
+        //                                                 ->where('sales_organization',$item['sales_organization'])
+        //                                                 ->where('common_division',$item['common_division'])
+        //                                                 ->first();
+        //         if($validate_customer){
+        //             if($validate_customer['customer_order_block'] == "" && $validate_customer['deletion_flag'] == ""){
+        //                 $customer_arr[$k] = $item;
+        //             }
+        //         }else{
+        //             $customer_arr[$k] = $item;
+        //         }
+        //     }
+        // }
 
-        return $customer_arr;
+        // return $customer_arr;
     }
 }
