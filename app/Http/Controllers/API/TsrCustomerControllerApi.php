@@ -79,7 +79,7 @@ class TsrCustomerControllerApi extends Controller
                                                 ->where('customer_code','!=',$tsr_customer_code)
                                                 ->whereHas('customer',function($q){
                                                     $q->where('name','not like','%X:%');
-                                                    // $q->orWhere('name','not like','%XXX_%');
+                                                    $q->where('name','not like','%XXX%');
                                                 })
                                                 ->get();
     }
