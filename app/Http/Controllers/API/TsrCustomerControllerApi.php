@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\TechnicalSalesRepresentative;
 use App\TsrSapCustomer;
+use App\TsrValidCustomer;
 use Auth;
 use App\User;
 
@@ -40,7 +41,7 @@ class TsrCustomerControllerApi extends Controller
                             $street =$customer['customer'] ? $customer['customer']['street'] . " " : "";
                             $city = $customer['customer'] ? $customer['customer']['city'] : "";
                             $tsr_customer_arr[$k]['address'] = $street . $city;
-                            // $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
+                            $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
                             $k++;
                         }
                     }
@@ -61,7 +62,7 @@ class TsrCustomerControllerApi extends Controller
                             $street =$customer['customer'] ? $customer['customer']['street'] . " " : "";
                             $city = $customer['customer'] ? $customer['customer']['city'] : "";
                             $tsr_customer_arr[$k]['address'] = $street . $city;
-                            // $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
+                            $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
                             $k++;
                         }
                     }
@@ -74,7 +75,7 @@ class TsrCustomerControllerApi extends Controller
     }
 
     public function getCustomers($tsr_customer_code){
-       return $customer_list = TsrSapCustomer::with('customer')
+        $customer_lists = TsrSapCustomer::with('customer')
                                                 ->where('tsr_customer_code',$tsr_customer_code)
                                                 ->where('customer_code','!=',$tsr_customer_code)
                                                 ->whereHas('customer',function($q){
@@ -82,5 +83,25 @@ class TsrCustomerControllerApi extends Controller
                                                     $q->where('name','not like','%XXX%');
                                                 })
                                                 ->get();
+
+        //Check if Valid Customer Status //Not Deleted //Not Block
+        $customer_arr = [];
+        if($customer_lists){
+            foreach($customer_lists as $k => $item){
+                $validate_customer = TsrValidCustomer::where('customer_code',$item['customer_code'])
+                                                        ->where('sales_organization',$item['sales_organization'])
+                                                        ->where('common_division',$item['common_division'])
+                                                        ->first();
+                if($validate_customer){
+                    if($validate_customer['customer_order_block'] == "" && $validate_customer['deletion_flag'] == ""){
+                        $customer_arr[$k] = $item;
+                    }
+                }else{
+                    $customer_arr[$k] = $item;
+                }
+            }
+        }
+
+        return $customer_arr;
     }
 }
