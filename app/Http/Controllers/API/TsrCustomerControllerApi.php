@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use App\Http\Controllers\Controller;
 use App\TechnicalSalesRepresentative;
 use App\TsrSapCustomer;
 use Auth;
 use App\User;
+use App\TsrValidCustomer;
+use DB;
 
 class TsrCustomerControllerApi extends Controller
 {
@@ -18,6 +22,8 @@ class TsrCustomerControllerApi extends Controller
      */
     public function tsrCustomers(Request $request)
     {
+        ini_set('max_execution_time', 300);
+
         $data = $request->all();
         // $tsr = User::where('id',$data['user_id'])->get(['id','name','tsr_customer_code_pfmc','tsr_customer_code_lfug'])->first();
         $tsr = User::whereNotNull('tsr_customer_code_pfmc')
@@ -39,10 +45,16 @@ class TsrCustomerControllerApi extends Controller
                         foreach ($get_customer_pfmc as $customer) {
                             $data = array(
                                 'user_id' => $item->id,
-                                // 'salesman_name' => $item->name,
-                                'code' => $customer['customer_code'],
-                                'name' => $customer['customer'] ? $customer['customer']['name'] : "",
-                                'address' => $customer['customer'] ? $customer['customer']['city'] : "",
+                                'salesman_name' => $item->name,
+                                'code' => $customer->customer_code,
+                                'name' => $customer ? $customer->name : "",
+                                'address' => $customer ? $customer->city : "",
+                                'sales_organization' => $customer->sales_organization,
+                                'common_division' => $customer->common_division,
+                                'division' => $customer->division,
+                                'customer_order_block' => $customer->customer_order_block,
+                                'deletion_flag' => $customer->deletion_flag,
+                                "server" => "PFMC"
                             );
                             array_push($tsr_customer_arr, $data);
                         }
@@ -61,9 +73,15 @@ class TsrCustomerControllerApi extends Controller
                             $data = array(
                                 'user_id' => $item->id,
                                 'salesman_name' => $item->name,
-                                'code' => $customer['customer_code'],
-                                'name' => $customer['customer'] ? $customer['customer']['name'] : "",
-                                'address' => $customer['customer'] ? $customer['customer']['city'] : "",
+                                'code' => $customer->customer_code,
+                                'name' => $customer ? $customer->name : "",
+                                'address' => $customer ? $customer->city : "",
+                                'sales_organization' => $customer->sales_organization,
+                                'common_division' => $customer->common_division,
+                                'division' => $customer->division,
+                                'customer_order_block' => $customer->customer_order_block,
+                                'deletion_flag' => $customer->deletion_flag,
+                                "server" => "LFUG"
                             );
                             array_push($tsr_customer_arr, $data);
                         }
@@ -75,6 +93,9 @@ class TsrCustomerControllerApi extends Controller
 
         return collect($tsr_customer_arr)
                ->groupBy('user_id')
+               ->map(function ($item, $key) {
+                   return collect($item)->unique('code')->values();
+               })
                ->values();
 
 
@@ -128,14 +149,83 @@ class TsrCustomerControllerApi extends Controller
         // return count($tsr_customer_arr);
     }
 
-    public function getCustomers($tsr_customer_code){
-       return  TsrSapCustomer::with('customer')
-                ->where('tsr_customer_code',$tsr_customer_code)
-                ->where('customer_code','!=',$tsr_customer_code)
-                ->whereHas('customer',function($q){
-                    $q->where('name','not like','%X:%');
-                    // $q->orWhere('name','not like','%XXX_%');
-                })
-                ->get();
+    // public function getCustomers($tsr_customer_code){
+    //     return TsrSapCustomer::with('customer', 'customer_validity')
+    //         ->where('tsr_customer_code', $tsr_customer_code)
+    //         ->where('customer_code', '!=', $tsr_customer_code)
+    //         ->whereHas('customer', function ($q) {
+    //             $q->where('name', 'not like', '%X:%');
+    //             $q->where('name', c);
+    //         })
+    //         ->whereHas('customer_validity', function ($q) {
+    //             $q->whereNotNull('sales_organization');
+    //             $q->whereNotNull('deletion_flag');
+    //         })
+    //         ->get();
+    // }
+
+    // public function getCustomers($tsr_customer_code)
+    // {
+    //     return $customer_lists = DB::select(DB::raw("
+    //                     SELECT
+    //                     tsr_sap_customers.id,
+    //                     tsr_sap_customers.customer_code,
+    //                     tsr_sap_customers.tsr_customer_code,
+    //                     tsr_sap_customers.sales_organization,
+    //                     tsr_sap_customers.common_division,
+    //                     tsr_sap_customers.division,
+    //                     tsr_sap_customers.partner_function,
+    //                     tsr_sap_customers.`server`,
+    //                     tsr_sap_customers.created_at,
+    //                     tsr_sap_customers.updated_at,
+    //                     tsr_valid_customers.deletion_flag,
+    //                     tsr_valid_customers.customer_order_block,
+    //                     customer_codes.`name`,
+    //                     customer_codes.street,
+    //                     customer_codes.city
+    //                     FROM
+    //                     tsr_sap_customers
+    //                     INNER JOIN tsr_valid_customers ON tsr_sap_customers.customer_code = tsr_valid_customers.customer_code AND tsr_sap_customers.sales_organization = tsr_valid_customers.sales_organization AND tsr_sap_customers.common_division = tsr_valid_customers.common_division AND tsr_sap_customers.division = tsr_valid_customers.division
+    //                     INNER JOIN customer_codes ON tsr_sap_customers.customer_code = customer_codes.customer_code
+    //                     WHERE
+    //                     tsr_valid_customers.deletion_flag = '' AND
+    //                     tsr_valid_customers.customer_order_block = '' AND
+    //                     tsr_sap_customers.tsr_customer_code = '$tsr_customer_code' AND
+    //                     tsr_sap_customers.customer_code != '$tsr_customer_code'
+    //                     "));
+    // }
+
+    public function getCustomers($tsr_customer_code)
+    {
+        return $customer_lists = DB::select(DB::raw("
+                SELECT
+                tsr_sap_customers.id,
+                tsr_sap_customers.customer_code,
+                tsr_sap_customers.tsr_customer_code,
+                tsr_sap_customers.sales_organization,
+                tsr_sap_customers.common_division,
+                tsr_sap_customers.division,
+                tsr_sap_customers.partner_function,
+                tsr_sap_customers.`server`,
+                tsr_sap_customers.created_at,
+                tsr_sap_customers.updated_at,
+                tsr_valid_customers.deletion_flag,
+                tsr_valid_customers.customer_order_block,
+                customer_codes.`name`,
+                customer_codes.street,
+                customer_codes.city
+                FROM
+                tsr_sap_customers
+                INNER JOIN tsr_valid_customers ON tsr_sap_customers.customer_code = tsr_valid_customers.customer_code AND tsr_sap_customers.sales_organization = tsr_valid_customers.sales_organization AND tsr_sap_customers.common_division = tsr_valid_customers.common_division AND tsr_sap_customers.division = tsr_valid_customers.division
+                INNER JOIN customer_codes ON tsr_sap_customers.customer_code = customer_codes.customer_code
+                WHERE
+                tsr_valid_customers.deletion_flag = '' AND
+                tsr_valid_customers.customer_order_block = '' AND
+                customer_codes.`name` NOT LIKE '%X:%' AND
+                customer_codes.`name` NOT LIKE '%XXX%' AND
+                tsr_sap_customers.tsr_customer_code = '$tsr_customer_code' AND
+                tsr_sap_customers.customer_code != '$tsr_customer_code'
+                "));
     }
+
 }
