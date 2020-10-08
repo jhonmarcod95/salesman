@@ -38,25 +38,61 @@ class GenerateVirtualVisitInitial extends Command
         $this->counter = 0;
     }
 
+    // public function getCustomers($tsr_customer_code)
+    // {
+    //     return  TsrSapCustomer::with('customer')
+    //         ->where('tsr_customer_code', $tsr_customer_code)
+    //         ->where('customer_code', '!=', $tsr_customer_code)
+    //         ->whereHas('customer', function ($q) {
+    //             $q->where('name', 'not like', '%X:%');
+    //             // $q->orWhere('name','not like','%XXX_%');
+    //         })
+    //         ->get();
+    // }
+
     public function getCustomers($tsr_customer_code)
     {
-        return  TsrSapCustomer::with('customer')
-            ->where('tsr_customer_code', $tsr_customer_code)
-            ->where('customer_code', '!=', $tsr_customer_code)
-            ->whereHas('customer', function ($q) {
-                $q->where('name', 'not like', '%X:%');
-                // $q->orWhere('name','not like','%XXX_%');
-            })
-            ->get();
+        return $customer_lists = DB::select(DB::raw("
+                SELECT
+                tsr_sap_customers.id,
+                tsr_sap_customers.customer_code,
+                tsr_sap_customers.tsr_customer_code,
+                tsr_sap_customers.sales_organization,
+                tsr_sap_customers.common_division,
+                tsr_sap_customers.division,
+                tsr_sap_customers.partner_function,
+                tsr_sap_customers.`server`,
+                tsr_sap_customers.created_at,
+                tsr_sap_customers.updated_at,
+                tsr_valid_customers.deletion_flag,
+                tsr_valid_customers.customer_order_block,
+                customer_codes.`name`,
+                customer_codes.street,
+                customer_codes.city
+                FROM
+                tsr_sap_customers
+                INNER JOIN tsr_valid_customers ON tsr_sap_customers.customer_code = tsr_valid_customers.customer_code AND tsr_sap_customers.sales_organization = tsr_valid_customers.sales_organization AND tsr_sap_customers.common_division = tsr_valid_customers.common_division AND tsr_sap_customers.division = tsr_valid_customers.division
+                INNER JOIN customer_codes ON tsr_sap_customers.customer_code = customer_codes.customer_code
+                WHERE
+                tsr_valid_customers.deletion_flag = '' AND
+                tsr_valid_customers.customer_order_block = '' AND
+                customer_codes.`name` NOT LIKE '%X:%' AND
+                customer_codes.`name` NOT LIKE '%XXX%' AND
+                customer_codes.`name` NOT LIKE '%ONETIME%' AND
+                tsr_sap_customers.tsr_customer_code = '$tsr_customer_code' AND
+                tsr_sap_customers.customer_code != '$tsr_customer_code'
+                "));
     }
 
     public function fetchSAPApi()
     {
+        ini_set('max_execution_time', 600);
+
         $this->info("\n\n" . "Fetch API SAP First...." . "\n");
 
         $tsr = User::whereNotNull('tsr_customer_code_pfmc')
             ->orWhereNotNull('tsr_customer_code_lfug')
-            ->take(1)
+            // ->take(1)
             ->get(['id', 'name', 'tsr_customer_code_pfmc', 'tsr_customer_code_lfug']);
 
         $tsr_customer_arr = [];
@@ -73,9 +109,10 @@ class GenerateVirtualVisitInitial extends Command
                         foreach ($get_customer_pfmc as $customer) {
                             $data = array(
                                 'user_id' => $item->id,
-                                'code' => $customer['customer_code'],
-                                'name' => $customer['customer'] ? $customer['customer']['name'] : "",
-                                'address' => $customer['customer'] ? $customer['customer']['city'] : "",
+                                'salesman_name' => $item->name,
+                                'code' => $customer->customer_code,
+                                'name' => $customer ? $customer->name : "",
+                                'address' => $customer ? $customer->city : "",
                             );
                             array_push($tsr_customer_arr, $data);
                         }
@@ -93,10 +130,10 @@ class GenerateVirtualVisitInitial extends Command
                         foreach ($get_customer_pfmc as $customer) {
                             $data = array(
                                 'user_id' => $item->id,
-                                // 'salesman_name' => $item->name,
-                                'code' => $customer['customer_code'],
-                                'name' => $customer['customer'] ? $customer['customer']['name'] : "",
-                                'address' => $customer['customer'] ? $customer['customer']['city'] : "",
+                                'salesman_name' => $item->name,
+                                'code' => $customer->customer_code,
+                                'name' => $customer ? $customer->name : "",
+                                'address' => $customer ? $customer->city : "",
                             );
                             array_push($tsr_customer_arr, $data);
                         }
@@ -107,6 +144,9 @@ class GenerateVirtualVisitInitial extends Command
 
         $this->finalArray = collect($tsr_customer_arr)
             ->groupBy('user_id')
+            ->map(function ($item, $key) {
+                return collect($item)->unique('code')->values();
+            })
             ->values();
 
         $this->info("End Fetch API SAP!" . "\n");
@@ -115,6 +155,9 @@ class GenerateVirtualVisitInitial extends Command
 
     public function genearateInitialVisit()
     {
+
+       ini_set('max_execution_time', 600);
+
        collect($this->finalArray)
             ->map(function ($item, $key) {
                 return collect($item)
@@ -182,7 +225,7 @@ class GenerateVirtualVisitInitial extends Command
                 $this->output->progressFinish();
             });
 
-            $this->info("Generate Done: " . $this->counter. "\n");
+            $this->info("Generate Done: " ."\n");
 
     }
 
@@ -195,7 +238,7 @@ class GenerateVirtualVisitInitial extends Command
     public function handle()
     {
         $this->fetchSAPApi();
-        dd(count($this->finalArray));
-        // $this->genearateInitialVisit();
+        // dd(count($this->finalArray));
+        $this->genearateInitialVisit();
     }
 }

@@ -24,8 +24,6 @@ class TsrCustomerControllerApi extends Controller
     {
         ini_set('max_execution_time', 300);
 
-        $data = $request->all();
-        // $tsr = User::where('id',$data['user_id'])->get(['id','name','tsr_customer_code_pfmc','tsr_customer_code_lfug'])->first();
         $tsr = User::whereNotNull('tsr_customer_code_pfmc')
         ->orWhereNotNull('tsr_customer_code_lfug')
         // ->take(1)
@@ -97,56 +95,6 @@ class TsrCustomerControllerApi extends Controller
                    return collect($item)->unique('code')->values();
                })
                ->values();
-
-
-        // if($tsr){
-        //     $k = 0;
-
-        //     //PFMC Server
-            // if($tsr['tsr_customer_code_pfmc']){
-            //     $tsr_customer_code_pfmc = explode(',',$tsr['tsr_customer_code_pfmc']);
-            //     for($x=0;$x < count($tsr_customer_code_pfmc) ;$x++){
-            //         $get_customer_pfmc = $this->getCustomers($tsr_customer_code_pfmc[$x]);
-            //         if($get_customer_pfmc){
-            //             foreach($get_customer_pfmc as $customer){
-            //                 $tsr_customer_arr[$k]['user_id'] = $tsr['id'];
-            //                 // $tsr_customer_arr[$k]['tsr_customer_code'] = $tsr_customer_code_pfmc[$x];
-            //                 $tsr_customer_arr[$k]['customer_code'] = $customer['customer_code'];
-            //                 $tsr_customer_arr[$k]['customer_name'] = $customer['customer'] ? $customer['customer']['name'] : "";
-            //                 $street =$customer['customer'] ? $customer['customer']['street'] . " " : "";
-            //                 $city = $customer['customer'] ? $customer['customer']['city'] : "";
-            //                 $tsr_customer_arr[$k]['address'] = $street . $city;
-            //                 // $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
-            //                 $k++;
-            //             }
-            //         }
-            //     }
-            // }
-
-        //     //LFUG Server
-        //     if($tsr['tsr_customer_code_lfug']){
-        //         $tsr_customer_code_lfug = explode(',',$tsr['tsr_customer_code_lfug']);
-        //         for($x=0;$x < count($tsr_customer_code_lfug) ;$x++){
-        //             $get_customer_lfug = $this->getCustomers($tsr_customer_code_lfug[$x]);
-        //             if($get_customer_lfug){
-        //                 foreach($get_customer_lfug as $customer){
-        //                     $tsr_customer_arr[$k]['user_id'] = $tsr['id'];
-        //                     // $tsr_customer_arr[$k]['tsr_customer_code'] = $tsr_customer_code_lfug[$x];
-        //                     $tsr_customer_arr[$k]['customer_code'] = $customer['customer_code'];
-        //                     $tsr_customer_arr[$k]['customer_name'] = $customer['customer'] ? $customer['customer']['name'] : "";
-        //                     $street =$customer['customer'] ? $customer['customer']['street'] . " " : "";
-        //                     $city = $customer['customer'] ? $customer['customer']['city'] : "";
-        //                     $tsr_customer_arr[$k]['address'] = $street . $city;
-        //                     // $tsr_customer_arr[$k]['server'] =$customer['customer'] ? $customer['customer']['server'] : "";
-        //                     $k++;
-        //                 }
-        //             }
-        //         }
-        //     }
-
-        // }
-
-        // return count($tsr_customer_arr);
     }
 
     // public function getCustomers($tsr_customer_code){
@@ -164,36 +112,6 @@ class TsrCustomerControllerApi extends Controller
     //         ->get();
     // }
 
-    // public function getCustomers($tsr_customer_code)
-    // {
-    //     return $customer_lists = DB::select(DB::raw("
-    //                     SELECT
-    //                     tsr_sap_customers.id,
-    //                     tsr_sap_customers.customer_code,
-    //                     tsr_sap_customers.tsr_customer_code,
-    //                     tsr_sap_customers.sales_organization,
-    //                     tsr_sap_customers.common_division,
-    //                     tsr_sap_customers.division,
-    //                     tsr_sap_customers.partner_function,
-    //                     tsr_sap_customers.`server`,
-    //                     tsr_sap_customers.created_at,
-    //                     tsr_sap_customers.updated_at,
-    //                     tsr_valid_customers.deletion_flag,
-    //                     tsr_valid_customers.customer_order_block,
-    //                     customer_codes.`name`,
-    //                     customer_codes.street,
-    //                     customer_codes.city
-    //                     FROM
-    //                     tsr_sap_customers
-    //                     INNER JOIN tsr_valid_customers ON tsr_sap_customers.customer_code = tsr_valid_customers.customer_code AND tsr_sap_customers.sales_organization = tsr_valid_customers.sales_organization AND tsr_sap_customers.common_division = tsr_valid_customers.common_division AND tsr_sap_customers.division = tsr_valid_customers.division
-    //                     INNER JOIN customer_codes ON tsr_sap_customers.customer_code = customer_codes.customer_code
-    //                     WHERE
-    //                     tsr_valid_customers.deletion_flag = '' AND
-    //                     tsr_valid_customers.customer_order_block = '' AND
-    //                     tsr_sap_customers.tsr_customer_code = '$tsr_customer_code' AND
-    //                     tsr_sap_customers.customer_code != '$tsr_customer_code'
-    //                     "));
-    // }
 
     public function getCustomers($tsr_customer_code)
     {
@@ -223,6 +141,7 @@ class TsrCustomerControllerApi extends Controller
                 tsr_valid_customers.customer_order_block = '' AND
                 customer_codes.`name` NOT LIKE '%X:%' AND
                 customer_codes.`name` NOT LIKE '%XXX%' AND
+                customer_codes.`name` NOT LIKE '%ONETIME%' AND
                 tsr_sap_customers.tsr_customer_code = '$tsr_customer_code' AND
                 tsr_sap_customers.customer_code != '$tsr_customer_code'
                 "));
