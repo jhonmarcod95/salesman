@@ -73,9 +73,7 @@ class GetSapTsrCustomer extends Command
                                             'PARVW' => 'partner_function',
                                         ],
                                         'options' => [
-                                            ['TEXT' => "PARVW ='Z1' OR "],
-                                            ['TEXT' => "PARVW ='Z3' OR "],
-                                            ['TEXT' => "PARVW ='ZS'"],
+                                            ['TEXT' => "PARVW ='Z1'"]
                                         ]
                                     ]
                                 ]
@@ -140,9 +138,7 @@ class GetSapTsrCustomer extends Command
                                             'PARVW' => 'partner_function',
                                         ],
                                         'options' => [
-                                            ['TEXT' => "PARVW ='Z1' OR "],
-                                            ['TEXT' => "PARVW ='Z3' OR "],
-                                            ['TEXT' => "PARVW ='ZS'"],
+                                            ['TEXT' => "PARVW ='ZS'"]
                                         ]
                                     ]
                                 ]
@@ -168,14 +164,17 @@ class GetSapTsrCustomer extends Command
                                 ->first();
                                 
                 if(empty($validate)){
-                    $tsr_customer_arr['customer_code'] = $data['customer_code'];
-                    $tsr_customer_arr['tsr_customer_code'] = $data['tsr_customer_code'];
-                    $tsr_customer_arr['sales_organization'] = $data['sales_organization'];
-                    $tsr_customer_arr['common_division'] = $data['common_division'];
-                    $tsr_customer_arr['division'] = $data['division'];
-                    $tsr_customer_arr['partner_function'] = $data['partner_function'];
-                    TsrSapCustomer::create($tsr_customer_arr);
-                    $x++;
+                    //LFUG if not same customer
+                    if($data['customer_code'] != $data['tsr_customer_code']){
+                        $tsr_customer_arr['customer_code'] = $data['customer_code'];
+                        $tsr_customer_arr['tsr_customer_code'] = $data['tsr_customer_code'];
+                        $tsr_customer_arr['sales_organization'] = $data['sales_organization'];
+                        $tsr_customer_arr['common_division'] = $data['common_division'];
+                        $tsr_customer_arr['division'] = $data['division'];
+                        $tsr_customer_arr['partner_function'] = $data['partner_function'];
+                        TsrSapCustomer::create($tsr_customer_arr);
+                        $x++;
+                    }                    
                 }
             }
             return $x;

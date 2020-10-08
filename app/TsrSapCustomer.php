@@ -20,7 +20,11 @@ class TsrSapCustomer extends Model
         return $this->hasOne(CustomerCode::class,'customer_code','customer_code');
     }
 
-    public function customer_validity(){
-        return $this->hasOne(TsrValidCustomer::class,'customer_code','customer_code');
-    }
+    // public function customer_validity(){
+    //     return $this->hasOne(TsrValidCustomer::class,'customer_code','customer_code');
+    // }
+
+    // public function customer_validity(){
+    //     return $this->hasOne(TsrValidCustomer::class,'customer_code','customer_code');
+    // }
 }
