@@ -45,13 +45,15 @@ class TsrCustomerControllerApi extends Controller
                                 'user_id' => $item->id,
                                 'salesman_name' => $item->name,
                                 'code' => $customer->customer_code,
-                                'name' => $customer ? $customer->name : "",
+                                'name' => $customer->name,
+                                'tsr_customer_code' =>  $customer->tsr_customer_code,
                                 'address' => $customer ? $customer->city : "",
                                 'sales_organization' => $customer->sales_organization,
                                 'common_division' => $customer->common_division,
                                 'division' => $customer->division,
                                 'customer_order_block' => $customer->customer_order_block,
                                 'deletion_flag' => $customer->deletion_flag,
+                                'partner_function' => $customer->partner_function,
                                 "server" => "PFMC"
                             );
                             array_push($tsr_customer_arr, $data);
@@ -72,13 +74,15 @@ class TsrCustomerControllerApi extends Controller
                                 'user_id' => $item->id,
                                 'salesman_name' => $item->name,
                                 'code' => $customer->customer_code,
-                                'name' => $customer ? $customer->name : "",
+                                'name' => $customer->name,
+                                'tsr_customer_code' =>  $customer->tsr_customer_code,
                                 'address' => $customer ? $customer->city : "",
                                 'sales_organization' => $customer->sales_organization,
                                 'common_division' => $customer->common_division,
                                 'division' => $customer->division,
                                 'customer_order_block' => $customer->customer_order_block,
                                 'deletion_flag' => $customer->deletion_flag,
+                                'partner_function' => $customer->partner_function,
                                 "server" => "LFUG"
                             );
                             array_push($tsr_customer_arr, $data);
