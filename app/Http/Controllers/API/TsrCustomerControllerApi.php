@@ -146,6 +146,7 @@ class TsrCustomerControllerApi extends Controller
                 customer_codes.`name` NOT LIKE '%X:%' AND
                 customer_codes.`name` NOT LIKE '%XXX%' AND
                 customer_codes.`name` NOT LIKE '%ONETIME%' AND
+                customer_codes.`name` NOT LIKE '%XX_%' AND
                 tsr_sap_customers.tsr_customer_code = '$tsr_customer_code' AND
                 tsr_sap_customers.customer_code != '$tsr_customer_code'
                 "));
