@@ -11,6 +11,7 @@ class CustomerCode extends Model
         'server',
         'name',
         'street',
-        'city'
+        'city',
+        'account_group'
     ];
 }

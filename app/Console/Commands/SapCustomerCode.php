@@ -69,11 +69,12 @@ class SapCustomerCode extends Command
                                             'KUNNR' => 'customer_code',
                                             'NAME1' => 'name',
                                             'STRAS' => 'street',
-                                            'ORT01' => 'city'
+                                            'ORT01' => 'city',
+                                            'KTOKD' => 'account_group'
                                         ],
-                                        'options' => [
-                                            ['TEXT' => "ERDAT = '$date'"]
-                                        ],
+                                        // 'options' => [
+                                        //     ['TEXT' => "ERDAT = '$date'"]
+                                        // ],
                                     ]
                                 ]
                             ],
@@ -99,6 +100,7 @@ class SapCustomerCode extends Command
                             'name'=>$customer_code['name'],
                             'street'=>$customer_code['street'],
                             'city'=>$customer_code['city'],
+                            'account_group'=>$customer_code['account_group'],
                         ];
                         //Create DO Number
                         CustomerCode::create($data);
@@ -109,6 +111,7 @@ class SapCustomerCode extends Command
                                 'name'=>$customer_code['name'],
                                 'street'=>$customer_code['street'],
                                 'city'=>$customer_code['city'],
+                                'account_group'=>$customer_code['account_group'],
                             ];
                             $validate_customer_code->update($data);
                             $x++;
@@ -149,11 +152,12 @@ class SapCustomerCode extends Command
                                             'KUNNR' => 'customer_code',
                                             'NAME1' => 'name',
                                             'STRAS' => 'street',
-                                            'ORT01' => 'city'
+                                            'ORT01' => 'city',
+                                            'KTOKD' => 'account_group'
                                         ],
-                                        'options' => [
-                                            ['TEXT' => "ERDAT = '$date'"]
-                                        ],
+                                        // 'options' => [
+                                        //     ['TEXT' => "ERDAT = '$date'"]
+                                        // ],
                                     ]
                                 ]
                             ],
@@ -179,6 +183,7 @@ class SapCustomerCode extends Command
                             'server'=>'PFMC',
                             'street'=>$customer_code['street'],
                             'city'=>$customer_code['city'],
+                            'account_group'=>$customer_code['account_group'],
                         ];
                         //Create DO Number
                         CustomerCode::create($data);
@@ -189,6 +194,7 @@ class SapCustomerCode extends Command
                                 'name'=>$customer_code['name'],
                                 'street'=>$customer_code['street'],
                                 'city'=>$customer_code['city'],
+                                'account_group'=>$customer_code['account_group'],
                             ];
                             $validate_customer_code->update($data);
                             $x++;
