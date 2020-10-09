@@ -29,6 +29,8 @@ Vue.component('request-schedule-index', require('./components/Schedule/RequestSc
 
 Vue.component('missed-itineraries', require('./components/Schedule/MissedItineraries.vue'));
 
+Vue.component('change-planned-schedules', require('./components/Schedule/ChangePlannedSchedules.vue'));
+
 Vue.component('virtual-schedule-report', require('./components/Schedule/VirtualScheduleReport.vue'));
 
 // Payment

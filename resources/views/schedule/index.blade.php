@@ -39,6 +39,7 @@
                             <div class="col text-right">
                                 <a href="/virtual-schedule-report" class="btn btn-sm btn-primary"> Virtual Schedule</a>
                                 <a href="/missed_itineraries" class="btn btn-sm btn-warning"> Missed Itineraries</a>
+                                <a href="/change_planned_schedules" class="btn btn-sm btn-info"> Change Schedules</a>
                             </div>
                         </div>
                         <div id='calendar'></div>
