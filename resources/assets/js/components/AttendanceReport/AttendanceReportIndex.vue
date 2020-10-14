@@ -89,6 +89,7 @@
                                     <th scope="col">Schedule</th> -->
                                     <th scope="col">In / Out</th>
                                     <th scope="col">Rendered</th>
+                                    <th scope="col">Short Time Status</th>
                                     <th scope="col">Status</th>
                                 </tr>
                                 </thead>
@@ -133,6 +134,11 @@
                                         <td>
                                             <span v-if="schedule.attendances && schedule.attendances.sign_out !== null">
                                                 {{ rendered(schedule.attendances.sign_out, schedule.attendances.sign_in) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span v-if="schedule.attendances && schedule.attendances.sign_out !== null">
+                                                {{ checkRendereShorTime(schedule.attendances.sign_out, schedule.attendances.sign_in) }}
                                             </span>
                                         </td>
                                         <td></td>
@@ -335,6 +341,20 @@ export default {
                             return '';
                         }
                     }
+                },
+                'SHORT TIME STATUS':{
+                     callback: (value) => {
+                        if(value.attendances){
+                            if(value.attendances.sign_in && value.attendances.sign_out){
+                                // return moment(value.attendances.sign_out).format('lll');
+                                return this.checkRendereShorTime(value.attendances.sign_out, value.attendances.sign_in)
+                            }else{
+                                return '';
+                            }
+                        }else{
+                            return '';
+                        }
+                    }
                 }
             },
             regionIds:[],
@@ -422,8 +442,20 @@ export default {
                 var d = moment.duration(ms);
                 var hours = Math.floor(d.asHours());
                 var minutes = moment.utc(ms).format("mm");
-
                 return hours + 'h '+ minutes+' min.';
+             }else{
+                return "";
+            }                            
+        },
+        checkRendereShorTime(endTime, startTime){ 
+            if(endTime && startTime){
+                var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
+                var short_time_status="";
+                if(ms <= 300000){
+                    short_time_status = "Short time @ fieldwork"
+                }
+
+                return short_time_status;
              }else{
                 return "";
             }                            

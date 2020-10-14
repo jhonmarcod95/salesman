@@ -414,6 +414,9 @@ Route::get('/customer-codes-all', 'CustomerController@getCustomerCodesAll');
 Route::get('/missed_itineraries', 'ScheduleController@missedItineraries');
 Route::post('/missed-itineraries-data', 'ScheduleController@missedItinerariesData');
 
+Route::get('/change-planned-schedules-data', 'ScheduleController@changePlannedSchedulesData');
+Route::get('/change_planned_schedules', 'ScheduleController@changePlannedSchedules');
+
 Route::get('/virtual-schedule-report', 'ScheduleController@virtualScheduleReport');
 Route::get('/virtual-schedule-report-data-today', 'ScheduleController@virtualScheduleReportDataToday');
 Route::post('/virtual-schedule-report-data-filter', 'ScheduleController@virtualScheduleReportDataFilter');

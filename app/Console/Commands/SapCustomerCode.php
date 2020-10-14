@@ -67,11 +67,14 @@ class SapCustomerCode extends Command
                                         'table' => ['KNA1' => 'do_headers'],
                                         'fields' => [
                                             'KUNNR' => 'customer_code',
-                                            'NAME1' => 'name'
+                                            'NAME1' => 'name',
+                                            'STRAS' => 'street',
+                                            'ORT01' => 'city',
+                                            'KTOKD' => 'account_group'
                                         ],
-                                        'options' => [
-                                            ['TEXT' => "ERDAT = '$date'"]
-                                        ],
+                                        // 'options' => [
+                                        //     ['TEXT' => "ERDAT = '$date'"]
+                                        // ],
                                     ]
                                 ]
                             ],
@@ -95,6 +98,9 @@ class SapCustomerCode extends Command
                             'customer_code'=>$customer_code['customer_code'],
                             'server'=>'LFUG',
                             'name'=>$customer_code['name'],
+                            'street'=>$customer_code['street'],
+                            'city'=>$customer_code['city'],
+                            'account_group'=>$customer_code['account_group'],
                         ];
                         //Create DO Number
                         CustomerCode::create($data);
@@ -103,6 +109,9 @@ class SapCustomerCode extends Command
                         try{
                             $data = [
                                 'name'=>$customer_code['name'],
+                                'street'=>$customer_code['street'],
+                                'city'=>$customer_code['city'],
+                                'account_group'=>$customer_code['account_group'],
                             ];
                             $validate_customer_code->update($data);
                             $x++;
@@ -141,11 +150,14 @@ class SapCustomerCode extends Command
                                         'table' => ['KNA1' => 'do_headers'],
                                         'fields' => [
                                             'KUNNR' => 'customer_code',
-                                            'NAME1' => 'name'
+                                            'NAME1' => 'name',
+                                            'STRAS' => 'street',
+                                            'ORT01' => 'city',
+                                            'KTOKD' => 'account_group'
                                         ],
-                                        'options' => [
-                                            ['TEXT' => "ERDAT = '$date'"]
-                                        ],
+                                        // 'options' => [
+                                        //     ['TEXT' => "ERDAT = '$date'"]
+                                        // ],
                                     ]
                                 ]
                             ],
@@ -169,6 +181,9 @@ class SapCustomerCode extends Command
                             'customer_code'=>$customer_code['customer_code'],
                             'name'=>$customer_code['name'],
                             'server'=>'PFMC',
+                            'street'=>$customer_code['street'],
+                            'city'=>$customer_code['city'],
+                            'account_group'=>$customer_code['account_group'],
                         ];
                         //Create DO Number
                         CustomerCode::create($data);
@@ -177,6 +192,9 @@ class SapCustomerCode extends Command
                         try{
                             $data = [
                                 'name'=>$customer_code['name'],
+                                'street'=>$customer_code['street'],
+                                'city'=>$customer_code['city'],
+                                'account_group'=>$customer_code['account_group'],
                             ];
                             $validate_customer_code->update($data);
                             $x++;

@@ -9,6 +9,9 @@ class CustomerCode extends Model
     protected $fillable = [
         'customer_code',
         'server',
-        'name'
+        'name',
+        'street',
+        'city',
+        'account_group'
     ];
 }

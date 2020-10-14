@@ -15,6 +15,7 @@ use App\TechnicalSalesRepresentative;
 use App\Message;
 use App\RequestSchedule;
 use App\User;
+use App\Audit;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -516,5 +517,43 @@ class ScheduleController extends Controller
                             ->whereIn('user_id',$selected_user)
                             ->where('type','7')
                             ->get();
+    }
+
+    public function changePlannedSchedules(){
+        return view('schedule.change-planned-schedules');
+    }
+
+    public function changePlannedSchedulesData(Request $request){
+
+        session(['header_text' => 'Schedules']);
+
+
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate'
+        ]);
+
+        $data = $request->all();
+        $startDate = $data['startDate'];
+        $endDate = $data['endDate'];
+        $companyId = $data['company'] ? $data['company'] : Auth::user()->companies[0]->id;
+
+        $users = User::select('id')->where('company_id',$companyId)->get();
+
+        $selected_user = [];
+        foreach($users as $user){
+            array_push($selected_user , $user['id']);
+        }
+
+        return Audit::with('schedule','schedule.user')->where('auditable_type','App\Schedule')
+                        ->where('old_values','like','%date%')
+                        ->where('event','=','updated')
+                        ->whereHas('schedule',function ($q) use($selected_user){
+                            $q->whereIn('user_id',$selected_user);
+                        })
+                        ->where('created_at','>=',$data['startDate'])
+                        ->where('created_at','<=',$data['endDate'])
+                        ->orderBy('auditable_id','ASC')
+                        ->get();
     }
 }
