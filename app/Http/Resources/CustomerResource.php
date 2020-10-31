@@ -17,7 +17,9 @@ class CustomerResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name . '-' . $this->street . '-' . $this->town_city,
-            'customer_code' => $this->customer_code
+            'customer_code' => $this->customer_code,
+            'address' => $this->street . '-' . $this->town_city,
+            'customer_name' => $this->name
         ];
     }
 }

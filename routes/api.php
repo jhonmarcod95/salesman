@@ -18,6 +18,8 @@ Route::get('tsr_sap_customers','API\TsrCustomerControllerApi@tsrCustomers');
 Route::post('register', 'AuthController@register');
 Route::post('login', 'AuthController@login');
 
+// fetch hacienda from SAP
+// Route::get('hacienda/sap', 'API\PlanterHaciendaApiController@fetchHacienda');
 
 // Route API setup for Mobile Client
 Route::group(['middleware' => 'auth:api'], function() {
@@ -128,6 +130,22 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('surveys','API\SurveyControllerApi@store');
     Route::get('surveys/{survey}','API\SurveyControllerApi@show');
     Route::post('surveys/attach/{survey}','API\SurveyControllerApi@uploadSurveyPhoto');
+
+    // Planters Haciendas API
+    Route::get('haciendas','API\PlanterHaciendaApiController@index');
+    Route::post('haciendas/search', 'API\PlanterHaciendaApiController@search');
+
+    //Planters API
+    Route::get('planters','API\PlanterVisitControllerApi@index');
+    Route::get('planters-area-types', 'API\PlanterVisitControllerApi@getPlanterAreaTypes');
+    Route::get('planters-customers','API\PlanterVisitControllerApi@getPlanterCustomer');
+    Route::get('planters/soil-types','API\PlanterVisitControllerApi@soilTypes');
+    Route::get('planters/soil-conditions','API\PlanterVisitControllerApi@soilConditions');
+    Route::get('planters/crop-types', 'API\PlanterVisitControllerApi@getPlanterCropTypes');
+    Route::post('planters','API\PlanterVisitControllerApi@store');
+    Route::post('planters/bir/{planter}','API\PlanterVisitControllerApi@uploadBirIdPhoto');
+    Route::post('planters/photo/{planter}','API\PlanterVisitControllerApi@uploadPlanterPhoto');
+    Route::post('planters/parcellary/{planter}','API\PlanterVisitControllerApi@uploadParcellaryPhoto');
 
     //Grassroots
     Route::get('grassroots/types','API\GrassrootsController@grassrootsExpenseTypes');
