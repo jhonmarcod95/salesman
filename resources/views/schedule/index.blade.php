@@ -515,6 +515,7 @@
         });
 
         geocoder.on('results', function(results) {
+
             let lat = results.features[0].center[0];
             let lng = results.features[0].center[1];
             place_name = results.config.query;
@@ -522,8 +523,10 @@
             marker.setLngLat([lat, lng]).addTo(map);
 
             map.flyTo({
-                center: [lat, lng]
+                center: [lat, lng],
+                zoom: 15
             });
+
         });
 
         // geocoder.addTo('#geocoder');
