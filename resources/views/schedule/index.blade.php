@@ -96,6 +96,8 @@
             $("#updateScheduleErrorList").html('');
 
             $('.addScheduleModalSel2').val(null).trigger('change');
+
+            place_name = null;
         }
         /*------------------------------------------------------------------------------------*/
 
@@ -179,7 +181,16 @@
 
         function storeSchedule(){
 
-            var data = $('#formAddSchedule').serialize() + '&date=' + selectedDate;
+            // map box params
+            let lat = typeof marker.getLngLat() !== 'undefined' ? marker.getLngLat().lat : null;
+            let lng = typeof marker.getLngLat() !== 'undefined' ? marker.getLngLat().lng : null;
+            let address = place_name;
+            let map_params = '';
+            if (address != null){
+                map_params = '&lat=' + lat + '&lng=' + lng + '&address=' + address;
+            }
+
+            var data = $('#formAddSchedule').serialize() + '&date=' + selectedDate + map_params;
 
             $('#btn_save').prop('disabled', true);
 
@@ -208,7 +219,17 @@
         }
 
         function updateSchedule() {
-            var data = $('#formUpdateSchedule').serialize() + '&date=' + selectedDate;
+
+            // map box params
+            let lat = typeof marker.getLngLat() !== 'undefined' ? marker.getLngLat().lat : null;
+            let lng = typeof marker.getLngLat() !== 'undefined' ? marker.getLngLat().lng : null;
+            let address = place_name;
+            let map_params = '';
+            if (address != null){
+                map_params = '&lat=' + lat + '&lng=' + lng + '&address=' + address;
+            }
+
+            var data = $('#formUpdateSchedule').serialize() + '&date=' + selectedDate + map_params;
 
             $('#btn_save_change').prop('disabled', true);
 
@@ -369,6 +390,8 @@
                     $('#addModalLabel').text(date.format('MMMM D, Y'));
                     $('#addScheduleModal').modal('show');
 
+                    $('#geocoder').html('');
+                    geocoder.addTo('#geocoder');
                 },
                 /*----------- click event to update & delete schedule -----------*/
                 eventClick: function(calEvent, jsEvent, view) {
@@ -408,7 +431,7 @@
                     setModalElementVisibility(calEvent.type);
 
                     $('#schedule_name').val(calEvent.name);
-                    $('#address').val(calEvent.address);
+                    $('#add-address').html(calEvent.address);
 
                     $('#start_time').val(calEvent.start_time);
                     $('#end_time').val(calEvent.end_time);
@@ -419,6 +442,9 @@
 
                     $('#updateModalLabel').text(calEvent.start.format('MMMM D, Y'));
                     $('#updateScheduleModal').modal('show');
+
+                    $('#geocoder-edit').html('');
+                    geocoder.addTo('#geocoder-edit');
                 },
 
                 /*------------ drag event to another to change date -------------*/
@@ -448,6 +474,61 @@
 
             // retrieveSchedules(currentDate);
         });
+
+
+
+        // map box
+        mapboxgl.accessToken = '{{ env('MAP_BOX_API') }}';
+
+        // map
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [120.9842, 14.5995],
+            zoom: 15
+        });
+
+        // geocoder
+        var geocoder = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            countries: 'ph'
+        });
+
+        // marker
+        var marker = new mapboxgl.Marker({
+            draggable: true
+        });
+
+        // geocoder event
+        let place_name = null;
+
+        geocoder.on('result', function(results) {
+            let lat = results.result.center[0];
+            let lng = results.result.center[1];
+            place_name = results.result.place_name;
+
+            marker.setLngLat([lat, lng]).addTo(map);
+
+            map.flyTo({
+                center: [lat, lng]
+            });
+        });
+
+        geocoder.on('results', function(results) {
+            let lat = results.features[0].center[0];
+            let lng = results.features[0].center[1];
+            place_name = results.config.query;
+
+            marker.setLngLat([lat, lng]).addTo(map);
+
+            map.flyTo({
+                center: [lat, lng]
+            });
+        });
+
+        // geocoder.addTo('#geocoder');
+        // geocoder.addTo('#geocoder-edit');
+
 
     </script>
 

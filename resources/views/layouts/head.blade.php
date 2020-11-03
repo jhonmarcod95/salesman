@@ -36,6 +36,9 @@
 <!-- Mapbox GL DRAW CSS -->
 <link rel='stylesheet' href="{{ url('css/mapbox-gl-draw.css') }}" type='text/css'/>
 
+<!-- Mapbox GL GEOCODER CSS -->
+<link href="{{ url('css/mapbox-gl-geocoder.css') }}" rel="stylesheet"/>
+
 
 {{-- Loading Screen --}}
 <style>
@@ -49,10 +52,20 @@
         height: 100%;
         display: none;
     }
+    #geocoder {
+        z-index: 1;
+        width: 100%;
+        text-align: center;
+        top: 20px;
+    }
+    .mapboxgl-ctrl-geocoder {
+        min-width: 100%;
+    }
 </style>
 
 <script src="{{ url('js/turf.min.js') }}"></script>
 <script src="{{ url('js/mapbox-gl-draw.js') }}"></script>
+<script src="{{ url('js/mapbox-gl-geocoder.min.js') }}"></script>
 
 {{-- Use to show maps autocomplete in bootstrap modal --}}
 <style>

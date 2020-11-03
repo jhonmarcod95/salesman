@@ -52,10 +52,17 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-10">
                             <div class="form-group">
                                 <h5>Address</h5>
-                                {!! Form::text('address', null, ['id' => 'add-address', 'class' => 'form-control', 'rows' => '2', 'maxlength' => '150']) !!}
+                                <div id="geocoder"></div>
+{{--                                {!! Form::text('address', null, ['id' => 'add-address', 'class' => 'form-control', 'rows' => '2', 'maxlength' => '150']) !!}--}}
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <br>
+                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#map-modal">Show Map</button>
                             </div>
                         </div>
                     </div>
@@ -176,11 +183,28 @@
                         </div>
                     </div>
 
+                    {{-- Current Address display --}}
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <h5>Address</h5>
-                                {!! Form::text('address', null, ['id' => 'address', 'class' => 'form-control', 'rows' => '2', 'maxlength' => '150']) !!}
+                                <h5>Current Address</h5>
+                                <label id="add-address"></label>
+                                <a id="a-map-preview" href="#" target="_blank">(Map preview)</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="form-group">
+                                <h5>Update Address</h5>
+                                <div id="geocoder-edit"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <br>
+                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#map-modal">Show Map</button>
                             </div>
                         </div>
                     </div>
@@ -214,9 +238,6 @@
                             <h5>Remarks</h5>
                             {!! Form::textarea('remarks', null, ['id' => 'remarks', 'class' => 'form-control', 'rows' => '3', 'maxlength' => '1000']) !!}
                         </div>
-                        <div class="form-group">
-                            <a id="a-map-preview" href="#" target="_blank">Map preview</a>
-                        </div>
                     </div>
                 </div>
 
@@ -231,6 +252,33 @@
                 {!! Form::button('Close', ['class' => 'btn btn-secondary', 'data-dismiss' => 'modal']) !!}
                 {!! Form::button('Save Changes', ['id' => 'btn_save_changes', 'class' => 'btn btn-primary', 'onclick' => 'updateSchedule()']) !!}
                 {!! Form::button('Delete', ['id' => 'btn_delete', 'class' => 'btn btn-warning', 'onclick' => 'destroySchedule()']) !!}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="map-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Plot Coordinates Here</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="map" style="height: 300px; width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {!! Form::button('Close', ['class' => 'btn btn-secondary', 'data-dismiss' => 'modal']) !!}
             </div>
         </div>
     </div>
