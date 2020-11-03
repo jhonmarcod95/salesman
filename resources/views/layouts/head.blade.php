@@ -54,24 +54,6 @@
 <script src="{{ url('js/turf.min.js') }}"></script>
 <script src="{{ url('js/mapbox-gl-draw.js') }}"></script>
 
-{{-- Map Autocomplete --}}
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyBVLmW1RxKWUE37XG5j0zPqMqAF1RzIWnE"></script>
-<script>
-    function initMap(){
-        let mapAutocomplete = new google.maps.places.Autocomplete((document.getElementById('add-address')),
-            {
-                componentRestrictions: {country: 'ph'}
-            });
-            google.maps.event.addListener(mapAutocomplete, 'place_changed', function() {
-        });
-        mapAutocomplete = new google.maps.places.Autocomplete((document.getElementById('address')),
-            {
-                componentRestrictions: {country: 'ph'}
-            });
-        google.maps.event.addListener(mapAutocomplete, 'place_changed', function() {
-        });
-    }
-</script>
 {{-- Use to show maps autocomplete in bootstrap modal --}}
 <style>
     .modal{
