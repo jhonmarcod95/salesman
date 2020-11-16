@@ -14,5 +14,6 @@ class ExpenseSapIoBudget extends Model
         'planned_budget',
         'budget_balance',
         'status',
+        'server'
     ];
 }
