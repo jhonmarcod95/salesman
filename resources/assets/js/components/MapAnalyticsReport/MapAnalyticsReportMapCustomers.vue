@@ -877,6 +877,144 @@
                                 return 'default-subdealer';
                             }
                         }
+
+                        //Farm
+                        if(classification_id == '17'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-end-user-distributor';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-end-user-distributor';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-end-user-distributor';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-end-user-distributor';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-end-user-distributor';
+                            }
+                        }
+
+                        //Feedmill
+                        if(classification_id == '18'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-change-name';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-change-name';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-change-name';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-change-name';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-change-name';
+                            }
+                        }
+
+                        //Trader
+                        if(classification_id == '19'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-end-user-subdealer';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-end-user-subdealer';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-end-user-subdealer';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-end-user-subdealer';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-end-user-subdealer';
+                            }
+                        }
+
+                        //Industrial
+                        if(classification_id == '20'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        //Government
+                        if(classification_id == '21'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        //Plantation
+                        if(classification_id == '22'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
                     }
                    
                 } else {
