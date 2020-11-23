@@ -44,39 +44,57 @@ class FetchHaciendaFromSap extends Command
         $sap_server = SapServer::where('sap_server', 'PFMC')->first();
         $sap_user = SapUser::where('user_id', 175)->where('sap_server', 'PFMC')->first();
 
+        // $connection = [
+        //     'ashost' => $sap_server->app_server,
+        //     'sysnr' => $sap_server->system_number,
+        //     'client' => $sap_server->client,
+        //     'user' => $sap_user->sap_id,
+        //     'passwd' => $sap_user->sap_password,
+        // ];
         $connection = [
-            'ashost' => $sap_server->app_server,
-            'sysnr' => $sap_server->system_number,
-            'client' => $sap_server->client,
-            'user' => $sap_user->sap_id,
-            'passwd' => $sap_user->sap_password,
+            'ashost' => "172.17.1.34",
+            'sysnr' => "00",
+            'client' => "778",
+            'user' => "payproject",
+            'passwd' => "welcome69+",
         ];
 
         $planters = APIController::executeSapFunction($connection, 'ZFM_CMS', [], null);
 
-        $collecPlanters = collect($planters['CMS_OUT'])
-                    ->take(100);
+        $collecPlanters = collect($planters['CMS_OUT'])->sortBy('PL_ID', SORT_NATURAL)->take(100);
+
+        $this->info("Storing planter hacienda" . "\n");
+        $this->output->progressStart(count($collecPlanters));
 
         foreach ($collecPlanters as $planter) {
-            DB::table('planter_haciendas')->insert([
-                array(
-                    'planter_id' => 0,
+            sleep(1);
+
+            // $this->info(dd($planter));
+
+            $planterHacienda = PlanterHacienda::firstOrCreate(
+                [
                     'planter_code' => $planter->PL_CODE,
                     'name' => $planter->PL_SNAME,
+                ],
+                [
+                    // 'planter_id' => 0,
                     'mobile_number' => $planter->PL_MOBILE,
                     'hacienda_code' => $planter->H_HCODE,
                     'planter_audit_no' => $planter->H_PAN,
-                    'address' =>  $planter->BG_NAME." ".$planter->DI_NAME." ".$planter->PR_NAME,
+                    'address' =>  $planter->BG_NAME . " " . $planter->DI_NAME . " " . $planter->PR_NAME,
                     'area' => $planter->H_AREA,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
-                )
-            ]);
+                ]
+            );
+
+            $planterHacienda->save();
+
+            $this->output->progressAdvance();
         }
 
-        $checkLastSave = PlanterHacienda::orderBy('id','desc')->first();
-
-        return $checkLastSave;
+        $this->output->progressFinish();
+        $this->info("Storing Done: " . "\n");
 
     }
 
@@ -89,6 +107,7 @@ class FetchHaciendaFromSap extends Command
     {
         $this->info('Fetch from sap dev server');
         // dd($this->fetchFromSap());
-        $this->info($this->fetchFromSap());
+        // $this->info($this->fetchFromSap());
+        $this->fetchFromSap();
     }
 }
