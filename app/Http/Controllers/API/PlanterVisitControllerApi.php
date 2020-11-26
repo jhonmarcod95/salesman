@@ -112,6 +112,7 @@ class PlanterVisitControllerApi extends Controller
                 'planter_soil_type_id' => $request->planter_soil_type_id == '' ? 0 :$request->planter_soil_type_id,
                 'planter_soil_condition_id' => $request->planter_soil_condition_id == '' ? 0 :$request->planter_soil_condition_id,
                 'planter_crop_type_id' => $request->planter_crop_type_id == '' ? 0 :$request->planter_crop_type_id,
+                'isSync' => 1,
             ]);
 
         return new PlanterVisitResource($planter);

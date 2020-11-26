@@ -61,7 +61,7 @@ class FetchHaciendaFromSap extends Command
 
         $planters = APIController::executeSapFunction($connection, 'ZFM_CMS', [], null);
 
-        $collecPlanters = collect($planters['CMS_OUT'])->sortBy('PL_ID', SORT_NATURAL)->take(100);
+        $collecPlanters = collect($planters['CMS_OUT'])->sortBy('PL_ID', SORT_NATURAL);
 
         $this->info("Storing planter hacienda" . "\n");
         $this->output->progressStart(count($collecPlanters));
@@ -71,23 +71,31 @@ class FetchHaciendaFromSap extends Command
 
             // $this->info(dd($planter));
 
-            $planterHacienda = PlanterHacienda::firstOrCreate(
-                [
-                    'planter_code' => $planter->PL_CODE,
-                    'name' => $planter->PL_SNAME,
-                ],
-                [
-                    // 'planter_id' => 0,
-                    'mobile_number' => $planter->PL_MOBILE,
-                    'hacienda_code' => $planter->H_HCODE,
-                    'planter_audit_no' => $planter->H_PAN,
-                    'address' =>  $planter->BG_NAME . " " . $planter->DI_NAME . " " . $planter->PR_NAME,
-                    'area' => $planter->H_AREA,
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now()
-                ]
-            );
+            // $planterHacienda = PlanterHacienda::firstOrCreate(
+            //     [
+            //         'hacienda_code' => $planter->H_HCODE,
+            //     ],
+            //     [
+            //         // 'planter_id' => 0,
+            //         'mobile_number' => $planter->PL_MOBILE,
+            //         'planter_code' => $planter->PL_CODE,
+            //         'name' => $planter->PL_SNAME,
+            //         'planter_audit_no' => $planter->H_PAN,
+            //         'address' =>  $planter->BG_NAME . " " . $planter->DI_NAME . " " . $planter->PR_NAME,
+            //         'area' => $planter->H_AREA,
+            //         'created_at' => Carbon::now(),
+            //         'updated_at' => Carbon::now()
+            //     ]
+            // );
 
+            $planterHacienda = new PlanterHacienda;
+            $planterHacienda->mobile_number = $planter->PL_MOBILE;
+            $planterHacienda->planter_code = $planter->PL_CODE;
+            $planterHacienda->hacienda_code = $planter->H_HCODE;
+            $planterHacienda->name = $planter->PL_SNAME;
+            $planterHacienda->planter_audit_no = $planter->H_PAN;
+            $planterHacienda->address =  $planter->BG_NAME . " " . $planter->DI_NAME . " " . $planter->PR_NAME;
+            $planterHacienda->area = $planter->H_AREA;
             $planterHacienda->save();
 
             $this->output->progressAdvance();

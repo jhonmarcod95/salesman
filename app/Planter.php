@@ -29,6 +29,8 @@ class Planter extends Model
         'crop_tech_remarks',
         'variety',
         'planter_code',
+        'isSync',
+        'planter_audit_no'
     ];
 
     protected $casts = [
