@@ -104,15 +104,23 @@ class PlanterHaciendaApiController extends Controller
      */
     public function fetchHacienda()
     {
-        $sap_server = SapServer::where('sap_server', 'PFMC')->first();
-        $sap_user = SapUser::where('user_id', 175)->where('sap_server', 'PFMC')->first();
+        // $sap_server = SapServer::where('sap_server', 'PFMC')->first();
+        // $sap_user = SapUser::where('user_id', 175)->where('sap_server', 'PFMC')->first();
+
+        // $connection = [
+        //     'ashost' => $sap_server->app_server,
+        //     'sysnr' => $sap_server->system_number,
+        //     'client' => $sap_server->client,
+        //     'user' => $sap_user->sap_id,
+        //     'passwd' => $sap_user->sap_password,
+        // ];
 
         $connection = [
-            'ashost' => $sap_server->app_server,
-            'sysnr' => $sap_server->system_number,
-            'client' => $sap_server->client,
-            'user' => $sap_user->sap_id,
-            'passwd' => $sap_user->sap_password,
+            'ashost' => "172.17.1.34",
+            'sysnr' => "00",
+            'client' => "778",
+            'user' => "payproject",
+            'passwd' => "welcome69+",
         ];
 
         $planters = APIController::executeSapFunction($connection, 'ZFM_CMS', [], null);

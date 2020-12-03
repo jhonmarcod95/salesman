@@ -7,7 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class PlanterHacienda extends Model
 {
     protected $fillable = [
-        'hacienda_location'
+        'planter_code',
+        'name',
+        'mobile_number',
+        'hacienda_code',
+        'planter_audit_no',
+        'address',
+        'area',
+        'created_at',
+        'updated_at'
     ];
 
     public function planter()
