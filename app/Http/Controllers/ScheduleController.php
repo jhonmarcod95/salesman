@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\CustomerClassification;
+use App\Rules\AllowedScheduler;
 use App\Rules\GeocodeCustomerRule;
 use App\Rules\GeocodeEventRule;
 use Auth;
@@ -21,6 +22,7 @@ use DatePeriod;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Geocoder\Facades\Geocoder;
 
 class ScheduleController extends Controller
@@ -101,7 +103,7 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required',
+            'user_id' => ['required', new AllowedScheduler()],
             'type' => 'required',
             'start_date' => 'required',
             'radius' => 'required',
@@ -191,7 +193,7 @@ class ScheduleController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'user_id' => 'required',
+            'user_id' => ['required', new AllowedScheduler()],
             'date' => 'required',
             'radius' => 'required',
             'start_time' => [new TimeRule($request->start_time, $request->end_time), 'required'],
@@ -254,6 +256,9 @@ class ScheduleController extends Controller
 
     public function change(Request $request, $id){
         $schedule = Schedule::find($id);
+
+        Validator::make([$schedule->user_id], [new AllowedScheduler()])->validate();
+
         $schedule->date = $request->date;
         $schedule->save();
         return $schedule;
@@ -262,6 +267,9 @@ class ScheduleController extends Controller
     public function destroy($id)
     {
         $schedule = Schedule::find($id);
+
+        Validator::make([$schedule->user_id], [new AllowedScheduler()])->validate();
+
         $schedule->delete();
         return $schedule;
     }

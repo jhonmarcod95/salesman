@@ -254,6 +254,11 @@
                 url:'{{ url('/schedules/change') }}/' + event.id,
                 data: '_token={{ csrf_token() }}&date=' + event.start.format(),
                 success: function(data){}
+                ,
+                error: function(data){
+                    alert('Change not successful.');
+
+                }
             });
         }
 
@@ -272,6 +277,11 @@
                     $('#updateScheduleModal').modal('hide');
                     /*------------------------------------------------*/
                     // console.log(data);
+                },
+                error: function(data){
+                    $("#updateScheduleErrorList").html(showErrorAlert(data));
+                    $('#btn_delete').prop('disabled', false);
+                    // console.log(errors);
                 }
             });
         }
