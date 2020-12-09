@@ -73,6 +73,7 @@ class PaymentAutoPosting extends Command
                     });
                 })->whereDate('created_at', '>=',  $dateFrom)
                 ->whereDate('created_at' ,'<=', $dateTo)
+                ->where('user_id', 317)
                 ->where('expenses_entry_id', '!=', 0)
                 ->get()
                 ->groupBy('user.id');
