@@ -18,7 +18,7 @@
                             <div class="row ml-2 mr-2">
                                 <div class="col-md-3 float-left">
                                     <div class="form-group">
-                                        <label for="name" class="form-control-label">Search TSR</label> 
+                                        <label for="name" class="form-control-label">Search TSR</label>
                                         <input type="text" class="form-control" placeholder="Search TSR" v-model="keywords" id="name">
                                     </div>
                                 </div>
@@ -33,14 +33,14 @@
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label for="start_date" class="form-control-label">Start Date</label> 
+                                        <label for="start_date" class="form-control-label">Start Date</label>
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label for="end_date" class="form-control-label">End Date</label> 
+                                        <label for="end_date" class="form-control-label">End Date</label>
                                         <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
                                         <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
                                     </div>
@@ -49,7 +49,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
 
-                                        <label for="customerSelect" class="form-control-label">Select Region</label> 
+                                        <label for="customerSelect" class="form-control-label">Select Region</label>
                                         <multiselect
                                                 v-model="regionIds"
                                                 :options="regionOptions"
@@ -90,6 +90,7 @@
                                     <th scope="col">In / Out</th>
                                     <th scope="col">Rendered</th>
                                     <th scope="col">Short Time Status</th>
+                                    <th scope="col">Schedule Type</th>
                                     <th scope="col">Status</th>
                                 </tr>
                                 </thead>
@@ -116,20 +117,20 @@
                                             Location: {{  schedule.address  }} <br>
                                             <div v-if="schedule.customer">
                                                 <p v-if="schedule.customer.provinces">
-                                                     Region: {{  schedule.customer.provinces.regions ? schedule.customer.provinces.regions.name : ""  }} 
+                                                     Region: {{  schedule.customer.provinces.regions ? schedule.customer.provinces.regions.name : ""  }}
                                                 </p>
                                             </div>
                                         </td>
                                         <td>
                                             <div v-if="schedule.attendances">
                                                 <span v-if="schedule.attendances"> IN: {{ moment(schedule.attendances.sign_in ).format('lll') }}</span> <br>
-                                                <span v-if="schedule.attendances && schedule.attendances.sign_out !== null"> OUT: {{ moment(schedule.attendances.sign_out).format('lll') }} </span>   
+                                                <span v-if="schedule.attendances && schedule.attendances.sign_out !== null"> OUT: {{ moment(schedule.attendances.sign_out).format('lll') }} </span>
                                             </div>
                                             <div v-else>
                                                 <span v-if="schedule.signinwithoutout"> IN: {{ moment(schedule.signinwithoutout.sign_in ).format('lll') }}</span> <br>
-                                                <span v-if="schedule.signinwithoutout"> OUT: </span>  
+                                                <span v-if="schedule.signinwithoutout"> OUT: </span>
                                             </div>
-                                            
+
                                         </td>
                                         <td>
                                             <span v-if="schedule.attendances && schedule.attendances.sign_out !== null">
@@ -141,8 +142,10 @@
                                                 {{ checkRendereShorTime(schedule.attendances.sign_out, schedule.attendances.sign_in) }}
                                             </span>
                                         </td>
-                                        <td></td>
-                                        <td></td>
+                                        <!-- <td></td> -->
+                                        <td>
+                                            {{ schedule.schedule_type.description }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -209,7 +212,7 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
 </template>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
@@ -371,7 +374,7 @@ export default {
         moment,
         fetchRegion(){
             axios.get('/regions')
-            .then(response => { 
+            .then(response => {
                 this.regionOptions = response.data;
             })
             .catch(error =>{
@@ -384,14 +387,14 @@ export default {
                 }else{
                     return '';
                 }
-                
+
         },
         fetchCompanies(){
             axios.get('/companies-all')
             .then(response => {
                 this.companies = response.data;
             })
-            .catch(error => { 
+            .catch(error => {
                 this.errors = error.response.data.errors;
             })
         },
@@ -400,7 +403,7 @@ export default {
             axios.get('/attendance-report-today')
             .then(response => {
                 this.schedules = response.data;
-                this.errors = []; 
+                this.errors = [];
                 this.loading = false;
             })
             .catch(error => {
@@ -419,7 +422,7 @@ export default {
             })
             .then(response => {
                 this.schedules = response.data;
-                this.errors = []; 
+                this.errors = [];
                  this.loading = false;
             })
             .catch(error => {
@@ -436,7 +439,7 @@ export default {
         //         this.errors = error.response.data.errors;
         //     })
         // },
-        rendered(endTime, startTime){ 
+        rendered(endTime, startTime){
             if(endTime && startTime){
                 var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
                 var d = moment.duration(ms);
@@ -445,9 +448,9 @@ export default {
                 return hours + 'h '+ minutes+' min.';
              }else{
                 return "";
-            }                            
+            }
         },
-        checkRendereShorTime(endTime, startTime){ 
+        checkRendereShorTime(endTime, startTime){
             if(endTime && startTime){
                 var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
                 var short_time_status="";
@@ -458,7 +461,7 @@ export default {
                 return short_time_status;
              }else{
                 return "";
-            }                            
+            }
         },
         getImage(schedule){
             this.image = window.location.origin+'/storage/'+schedule.attendances.sign_out_image;
@@ -497,7 +500,7 @@ export default {
             return self.schedules.filter(schedule => {
                 if(schedule.user){
                     return schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())
-                }   
+                }
             });
         },
         totalPages() {
