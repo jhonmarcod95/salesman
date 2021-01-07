@@ -12,14 +12,33 @@
                                 <div class="col">
                                     <h3 class="mb-0">Attendance Report</h3>
                                 </div>
+                                <div class="col-3 text-right">
+                                    <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
+                                    <download-excel
+                                        :data   = "schedules"
+                                        :fields = "json_fields"
+                                        class   = "btn btn-sm btn-default"
+                                        name    = "Salesforce Attendance report.xls">
+                                            Export to excel
+                                    </download-excel>
+                                </div>
                             </div>
                         </div>
                         <div class="mb-3">
                             <div class="row ml-2 mr-2">
-                                <div class="col-md-3 float-left">
+                                <!-- <div class="col-md-3 float-left">
                                     <div class="form-group">
                                         <label for="name" class="form-control-label">Search TSR</label>
                                         <input type="text" class="form-control" placeholder="Search TSR" v-model="keywords" id="name">
+                                    </div>
+                                </div> -->
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="role">Schedule Type</label>
+                                        <select class="form-control" v-model="selectedSchduleType">
+                                            <option v-for="(schedule,c) in schedule_types" v-bind:key="c" :value="schedule.id"> {{ schedule.description }}</option>
+                                        </select>
+                                        <span class="text-danger" v-if="errors.schedule_type  ">{{ errors.schedule_type[0] }}</span>
                                     </div>
                                 </div>
                                 <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
@@ -63,18 +82,16 @@
                                         <span class="text-danger small" v-if="errors.selectedRegion">{{ errors.selectedRegion[0] }}</span>
                                     </div>
                                 </div>
-
-                                <div class="col-md-12 text-right">
-                                    <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
-                                    <download-excel
-                                        :data   = "schedules"
-                                        :fields = "json_fields"
-                                        class   = "btn btn-sm btn-default"
-                                        name    = "Salesforce Attendance report.xls">
-                                            Export to excel
-                                    </download-excel>
-                                </div>
                             </div>
+
+                             <div class="row ml-2 mr-2 pt-1">
+                                <div class="col float-left">
+                                    <div class="form-group">
+                                        <label for="name" class="form-control-label">Search TSR</label>
+                                        <input type="text" class="form-control" placeholder="Search TSR" v-model="keywords" id="name">
+                                    </div>
+                                </div>
+                             </div>
                         </div>
                         <div class="table-responsive">
                             <h4 class="ml-3" v-if="loading"><i>Please wait. Loading...</i></h4>
@@ -145,6 +162,7 @@
                                         <!-- <td></td> -->
                                         <td>
                                             {{ schedule.schedule_type.description }}
+                                            <!-- {{ schedule.type }} -->
                                         </td>
                                     </tr>
                                 </tbody>
@@ -363,12 +381,20 @@ export default {
             regionIds:[],
             regionOptions : [],
             loading : false,
+            selectedSchduleType: '',
+            schedule_types: []
         }
     },
     created(){
         this.fetchCompanies();
         this.fetchTodaySchedules();
         this.fetchRegion();
+        this.getScheduleTypes();
+    },
+    watch: {
+        selectedSchduleType() {
+            console.log('check schedule type: ', this.selectedSchduleType)
+        }
     },
     methods:{
         moment,
@@ -388,6 +414,15 @@ export default {
                     return '';
                 }
 
+        },
+        getScheduleTypes(){
+            axios.get('/schedule-types-all')
+            .then(response => {
+                this.schedule_types = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
         },
         fetchCompanies(){
             axios.get('/companies-all')
@@ -419,6 +454,7 @@ export default {
                 endDate: this.endDate,
                 company: this.company,
                 selectedRegion: this.regionIds,
+                schedule_type: this.selectedSchduleType,
             })
             .then(response => {
                 this.schedules = response.data;
@@ -496,13 +532,16 @@ export default {
     },
     computed:{
         filteredSchedules(){
-            let self = this;
-            return self.schedules.filter(schedule => {
-                if(schedule.user){
-                    return schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+            if(!this.keywords) {
+                return this.schedules
+            }
+            return this.schedules.filter(schedule => {
+                if(schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())) {
+                    return schedule;
                 }
             });
         },
+
         totalPages() {
             return Math.ceil(this.filteredSchedules.length / this.itemsPerPage)
         },

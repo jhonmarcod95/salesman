@@ -63,6 +63,8 @@ class AttendanceReportController extends Controller
             'endDate' => 'required|after_or_equal:startDate'
         ]);
 
+        $selectedSchedulType = $request->schedule_type;
+
         if($request->company){
             $company = $request->company;
         }else{
@@ -90,6 +92,9 @@ class AttendanceReportController extends Controller
                     });
                 });
             })
+            ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
+                return $query->where('type', $selectedSchedulType);
+            })
             ->whereDate('date', '>=',  $request->startDate)
             ->whereDate('date' ,'<=', $request->endDate)
             ->orderBy('date', 'desc')->get();
@@ -108,6 +113,9 @@ class AttendanceReportController extends Controller
                         $q->whereIn('region_id', $regions);
                     });
                 });
+            })
+            ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
+                return $query->where('type', $selectedSchedulType);
             })
             ->whereDate('date', '>=',  $request->startDate)
             ->whereDate('date' ,'<=', $request->endDate)
