@@ -509,9 +509,11 @@ export default {
             this.signImage = window.location.origin+'/storage/'+schedule.attendances.sign_in_image;
             this.tsrName = schedule.user ? schedule.user.name : "";
             this.signInLink = 'https://www.google.com/maps/place/'+schedule.attendances.sign_in_latitude+','+schedule.attendances.sign_in_longitude;
+            // console.log('check sales call image sign ini: ', this.signImage)
         },
         getSalesCallAttachment(schedule) {
-            this.salesCallAttachment = window.location.origin+'/storage/'+schedule.salesmanAttachement.attachment;
+            this.salesCallAttachment = window.location.origin+'/storage/'+schedule.salesman_attachement.attachment;
+            // console.log('check sales call attachement official: ', this.salesCallAttachment)
             this.tsrName = schedule.user.name;
         },
         setPage(pageNumber) {
