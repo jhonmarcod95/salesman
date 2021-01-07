@@ -404,7 +404,7 @@
                             return value.visits.length;
                         }
                     },
-                    // 'CUSTOMER CODE' : 'customer_code',
+                    'CUSTOMER CODE' : 'customer_code',
                     // 'NAME' : 'name',
                     'CLASSIFICATION': {
                         callback: (value) => {
