@@ -43,7 +43,7 @@ class PaymentAutoCv extends Command
      */
     public function handle()
     {
-        $thisMonday = '2020-12-01';
+        $thisMonday = date("Y-m-d", strtotime("last monday"));
         $thisSunday = date("Y-m-d", strtotime("this sunday"));
 
         $payment_headers = PaymentHeader::with('company.sapServers', 'company.bankGls')
