@@ -20,6 +20,31 @@ function get_google_map_coordinates($url_str){
 
     return [
         'status' => $status,
-        'coordinates' => $coordinates
+        'coordinates' => [
+            'lat' => $coordinates[0],
+            'lng' => $coordinates[1],
+        ]
+    ];
+}
+
+function get_google_map_place($url_str){
+    $status = 'E';
+
+    $map_string = $url_str;
+    $map_strings = explode('/', $map_string);
+
+    $place = '';
+    foreach ($map_strings as $k => $map_string){
+        if ($map_string == 'place') {
+            $place = $map_strings[$k + 1];
+            $place = str_replace('+', ' ', $place);
+            $status = 'S';
+            break;
+        }
+    }
+
+    return [
+        'status' => $status,
+        'place' => $place
     ];
 }
