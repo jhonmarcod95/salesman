@@ -92,7 +92,7 @@
                                         <span v-if="totalCustomerSpendSortby=='ASC'"> (Highest to Lowest) <i class="fas fa-sort"></i></span>
                                         <span v-else>(Lowest to Highest) <i class="fas fa-sort"></i></span>
                                     </th>
-                                    <th>Monthly Qouta</th>
+                                    <th>Monthly Quota</th>
                                 </tr>
                                 </thead>
                                 <tbody>

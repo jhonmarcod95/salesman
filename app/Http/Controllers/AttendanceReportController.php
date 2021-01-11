@@ -21,7 +21,7 @@ class AttendanceReportController extends Controller
     {
         session(['header_text' => 'Attendance Report']);
         $message = Message::where('user_id', '!=', Auth::user()->id)->get();
-        $notification = 0;  
+        $notification = 0;
         foreach($message as $notif){
 
             $ids = collect(json_decode($notif->seen, true))->pluck('id');
@@ -33,7 +33,7 @@ class AttendanceReportController extends Controller
         return view('attendance-report.index',compact('notification'));
     }
 
-    
+
     /**
      * Get all Attendance Report
      *
@@ -62,7 +62,9 @@ class AttendanceReportController extends Controller
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
-        
+
+        $selectedSchedulType = $request->schedule_type;
+
         if($request->company){
             $company = $request->company;
         }else{
@@ -90,6 +92,9 @@ class AttendanceReportController extends Controller
                     });
                 });
             })
+            ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
+                return $query->where('type', $selectedSchedulType);
+            })
             ->whereDate('date', '>=',  $request->startDate)
             ->whereDate('date' ,'<=', $request->endDate)
             ->orderBy('date', 'desc')->get();
@@ -98,7 +103,7 @@ class AttendanceReportController extends Controller
             ->when($company, function ($query) use ($company) {
                 $query->whereHas('user', function($q) use ($company){
                     $q->whereHas('companies', function ($q) use ($company){
-                        $q->where('company_id', $company);   
+                        $q->where('company_id', $company);
                     });
                 });
             })
@@ -109,6 +114,9 @@ class AttendanceReportController extends Controller
                     });
                 });
             })
+            ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
+                return $query->where('type', $selectedSchedulType);
+            })
             ->whereDate('date', '>=',  $request->startDate)
             ->whereDate('date' ,'<=', $request->endDate)
             ->orderBy('date', 'desc')->get();
@@ -118,16 +126,16 @@ class AttendanceReportController extends Controller
         if(!Auth::user()->hasRole('hr')){
             // Executive and VP Roles
             if(Auth::user()->level() >= 6){
-                $new_schedule = $schedule; 
+                $new_schedule = $schedule;
             }else{
                 foreach($schedule->pluck('user') as $key => $value){
                     // AVP and Coordinator  roles
                     if(Auth::user()->level() < 6){
                         if($value->roles[0]['level'] < 6){
-                            $new_schedule[] = $schedule[$key]; 
+                            $new_schedule[] = $schedule[$key];
                         }
                     }else{
-                        $new_schedule = []; 
+                        $new_schedule = [];
                     }
                 }
             }
@@ -138,8 +146,8 @@ class AttendanceReportController extends Controller
     public function generateByToday(){
         $today = date('Y-m-d');
 
-        
-        $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type')
+
+        $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
@@ -153,21 +161,21 @@ class AttendanceReportController extends Controller
         if(!Auth::user()->hasRole('hr')){
             // Executive and VP Roles
             if(Auth::user()->level() >= 6){
-                $new_schedule = $schedule; 
+                $new_schedule = $schedule;
             }else{
                 foreach($schedule->pluck('user') as $key => $value){
                     // AVP and Coordinator  roles
                     if(Auth::user()->level() < 6){
                         if($value->roles[0]['level'] < 6){
-                            $new_schedule[] = $schedule[$key]; 
+                            $new_schedule[] = $schedule[$key];
                         }
                     }else{
-                        $new_schedule = []; 
+                        $new_schedule = [];
                     }
                 }
             }
-        }else {  
-            $new_schedule = $schedule; 
+        }else {
+            $new_schedule = $schedule;
         }
 
         return $new_schedule;
@@ -189,7 +197,7 @@ class AttendanceReportController extends Controller
                 $q->whereNotIn('type', [4,5]);
             })->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
             ->whereNull('sign_out')->orderBy('id','desc')->get();
-    
+
         }
 
         return Attendance::with('user', 'schedule')
@@ -217,9 +225,9 @@ class AttendanceReportController extends Controller
             })
             ->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
             ->whereNotNull('sign_out')->orderBy('id','desc')->get();
-    
+
         }
-        
+
         return Attendance::with('user', 'schedule')->whereDate('sign_in', Carbon\Carbon::now()->toDateString())
             ->whereHas('schedule', function ($q){
                 $q->whereNotIn('type', [4,5]);

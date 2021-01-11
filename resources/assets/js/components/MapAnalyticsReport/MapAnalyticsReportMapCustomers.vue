@@ -162,8 +162,9 @@
                         <label for="name" class="form-control-label">Search</label> 
                         <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                     </div>
-
+                    
                     <json-excel class = "btn btn-sm btn-default mb-3" :data= "customers" :fields = "json_fields" name= "Map Customers List.xls">Export to Excel</json-excel> 
+                
                 </div>
                 <div class="table-responsive">
                     <table class="table align-items-center table-flush">
@@ -403,8 +404,8 @@
                             return value.visits.length;
                         }
                     },
-                    'CUSTOMER CODE' : 'customer_code',
-                    'NAME' : 'name',
+                    // 'CUSTOMER CODE' : 'customer_code',
+                    // 'NAME' : 'name',
                     'CLASSIFICATION': {
                         callback: (value) => {
                             if(value.classifications){
@@ -418,19 +419,19 @@
                             }
                         }
                     },
-                    'ADDRESS' : 'google_address',
-                    'TOWN OR CITY' : 'town_city',
-                    'PROVINCE' : {
-                        callback: (value) => {
-                            if(value.provinces){
-                                return value.provinces.name;
-                            }else{
-                                return '';
-                            }
-                        }
-                    },
-                    'TELEPHONE 1' : 'telephone_1',
-                    'TELEPHONE 2' : 'telephone_2',
+                    // 'ADDRESS' : 'google_address',
+                    // 'TOWN OR CITY' : 'town_city',
+                    // 'PROVINCE' : {
+                    //     callback: (value) => {
+                    //         if(value.provinces){
+                    //             return value.provinces.name;
+                    //         }else{
+                    //             return '';
+                    //         }
+                    //     }
+                    // },
+                    // 'TELEPHONE 1' : 'telephone_1',
+                    // 'TELEPHONE 2' : 'telephone_2',
                     'STATUS' : {
                         callback: (value) => {
                             if(value.statuses){
