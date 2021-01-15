@@ -304,4 +304,17 @@ class ExpensesTest extends TestCase
             echo json_encode('Expense type is not restricted', JSON_PRETTY_PRINT);
         }
     }
+
+    /**
+     * @test
+     */
+    public function check_expense_types()
+    {
+        $response = $this->actingAs($this->defaultUser(), 'api')
+                    ->json('GET', '/api/expenses/types');
+
+        $response->assertStatus(200);
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
+    }
 }

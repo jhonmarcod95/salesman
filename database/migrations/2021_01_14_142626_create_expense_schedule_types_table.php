@@ -16,9 +16,10 @@ class CreateExpenseScheduleTypesTable extends Migration
         Schema::create('expense_schedule_types', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('salesman_id')->unsigned();
-            $table->integer('schedule_id')->unsigned();
-            $table->string('internal_order');
-            $table->integer('expense_type_id');
+            $table->text('default_expense_types');
+            $table->text('expense_hide');
+            $table->text('expense_display');
+            $table->text('scheduletype_condition');
             $table->timestamps();
         });
     }

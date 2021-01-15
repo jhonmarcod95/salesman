@@ -26,6 +26,7 @@ use App\CloseVisit;
 use App\Customer;
 use App\Payment;
 use App\ExpenseExclusive;
+use App\ExpenseScheduleType;
 use DB;
 
 
@@ -53,7 +54,41 @@ class AppAPIController extends Controller
      * @return json
      */
     public function getExpensesType() {
-        $expensesType = ExpensesType::whereStatus(1)->get();
+
+        $filterIoCondition = "";
+        // check first if included to expense schedule type for ristricting same expense type IOs
+        $checkIfConditionIO = ExpenseScheduleType::where('salesman_id', Auth::user()->id)
+        ->whereNotNull('default_expense_types')
+        ->whereNotNull('expense_hide')
+        ->whereNotNull('expense_display')
+        ->whereNotNull('scheduletype_condition');
+
+        // check current schedule
+        $checkCurrentSchedule = Schedule::orderBy('id', 'DESC')
+            ->whereDate('date', Carbon::today())
+            ->where('user_id', Auth::user()->id)
+            ->where('isCurrent', 1);
+
+        if ($checkIfConditionIO->exists() == true) {
+            // default to remove from schedule condition
+            $filterIoCondition = json_decode($checkIfConditionIO->first()->default_expense_types, true);
+        }
+
+        if($checkIfConditionIO->exists() == true && $checkCurrentSchedule->exists() == true) {
+               // check if has BGC schedule
+            if ($checkCurrentSchedule->where('type', $checkIfConditionIO->first()->scheduletype_condition)->where('name', 'LIKE', '%BGC%')->exists() == true) { // if office is true and BGC ONLY
+                $filterIoCondition = json_decode($checkIfConditionIO->first()->expense_hide, true); // normal parking will be remove
+            } else {
+                $filterIoCondition = json_decode($checkIfConditionIO->first()->expense_display, true); // default not to hide expense type;
+            }
+        }
+
+        $expensesType = ExpensesType::whereStatus(1)
+                    ->when($filterIoCondition, function ($query, $filterIoCondition) {
+                        return $query->whereNotIn('id', $filterIoCondition);
+                    })
+                    ->get();
+
         return $expensesType;
     }
 
