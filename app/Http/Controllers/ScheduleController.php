@@ -160,21 +160,22 @@ class ScheduleController extends Controller
                     'address' => ['required', 'max:191', new GeocodeEventRule()],
                 ]);
 
-                $geocode = Geocoder::getCoordinatesForAddress($request->address);
+                $place = get_google_map_place($request->address)['place'];
+                $coordinates = get_google_map_coordinates($request->address)['coordinates'];
 
                 $schedule = new Schedule();
                 $schedule->user_id = $request->user_id;
                 $schedule->type = $schedule_type;
                 $schedule->code = $schedule_code;
                 $schedule->name = $request->name;
-                $schedule->address = $request->address;
+                $schedule->address = $place;
                 $schedule->date = $date;
                 $schedule->start_time = $request->start_time;
                 $schedule->end_time = $request->end_time;
                 $schedule->status = '2';
                 $schedule->remarks = $request->remarks;
-                $schedule->lat = $geocode['lat'];
-                $schedule->lng = $geocode['lng'];
+                $schedule->lat = $coordinates['lat'];
+                $schedule->lng = $coordinates['lng'];
                 $schedule->km_distance = $request->radius;
                 $schedule->save();
 
@@ -232,20 +233,21 @@ class ScheduleController extends Controller
                 'address' => ['required', 'max:191', new GeocodeEventRule()],
             ]);
 
-            $geocode = Geocoder::getCoordinatesForAddress($request->address);
+            $place = get_google_map_place($request->address)['place'];
+            $coordinates = get_google_map_coordinates($request->address)['coordinates'];
 
             $schedule = Schedule::find($id);
             $schedule->user_id = $request->user_id;
             $schedule->type = $request->type;
             $schedule->code = Schedule::createScheduleCode($schedule_type);
             $schedule->name = $request->name;
-            $schedule->address = $request->address;
+            $schedule->address = $place;
             $schedule->start_time = $request->start_time;
             $schedule->end_time = $request->end_time;
             $schedule->status = '2';
             $schedule->remarks = $request->remarks;
-            $schedule->lat = $geocode['lat'];
-            $schedule->lng = $geocode['lng'];
+            $schedule->lat = $coordinates['lat'];
+            $schedule->lng = $coordinates['lng'];
             $schedule->km_distance = $request->radius;
             $schedule->save();
         }
