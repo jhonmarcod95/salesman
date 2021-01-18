@@ -157,7 +157,7 @@ class ScheduleController extends Controller
 
                 $request->validate([
                     'name' => 'required|max:191',
-                    'address' => ['required', 'max:191', new GeocodeEventRule()],
+                    'address' => ['required', 'max:191'],
                 ]);
 
                 $place = get_google_map_place($request->address)['place'];
@@ -230,7 +230,7 @@ class ScheduleController extends Controller
         else{
             $request->validate([
                 'name' => 'required|max:191',
-                'address' => ['required', 'max:191', new GeocodeEventRule()],
+                'address' => ['required', 'max:191'],
             ]);
 
             $place = get_google_map_place($request->address)['place'];
