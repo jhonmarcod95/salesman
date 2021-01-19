@@ -10,7 +10,7 @@
                         <div class="card-header border-0">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h3 class="mb-0">Change Shedule</h3>
+                                    <h3 class="mb-0">Change Schedule</h3>
                                 </div>
                             </div>
                         </div>
@@ -144,6 +144,13 @@
                                     </div>
                                 </div>
                             </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <div class="form-group">
+                                <input class="form-control" type="text" maxlength="255" placeholder="Input Google Map URL address" v-model="request.google_map_url">
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div class="modal-footer">
                             <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
@@ -223,6 +230,7 @@ export default {
            return this.request = request;
         },
         approveSched(request){
+
             axios.post('/schedules/store', {
                 id: request.id,
                 user_id: request.user_id,
@@ -234,7 +242,7 @@ export default {
                 end_time: request.end_time,
                 customer_codes: [request.code],
                 name: request.name,
-                address: request.address
+                address: request.google_map_url == '' ? request.address : request.google_map_url,
             })
             .then(response => {
                 var index = this.requests.findIndex(item => item.id == this.request.id);
@@ -244,6 +252,7 @@ export default {
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
+                alert('Google Map URL address cannot be recognized');
             })
         },
         disApproveSched(request){
