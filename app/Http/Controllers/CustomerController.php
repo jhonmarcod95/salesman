@@ -13,6 +13,8 @@ use App\Attendance;
 use Illuminate\Http\Request;
 use Spatie\Geocoder\Facades\Geocoder;
 
+use Illuminate\Validation\Rule; 
+
 use App\CustomerCode;
 
 use GuzzleHttp\Client;
@@ -161,8 +163,15 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
+
+        $company_id = Auth::user()->companies->pluck('id')[0];
         $request->validate([
-            'customer_code' => 'required|unique:customers,customer_code',
+            // 'customer_code' => 'required|unique:customers,customer_code',
+            'customer_code' => [
+                'required',Rule::unique('customers')->where(function($query) use($company_id) {
+                  $query->where('company_id', '=', $company_id);
+              })
+            ],
             'name' => 'required',
             'classification' => 'required',
             'street' => 'required',
@@ -604,7 +613,10 @@ class CustomerController extends Controller
     }
 
     public function getCustomerCodesAll(){
-        $customer_code_within = Customer::select('customer_code')->get();
+
+        $company_id = Auth::user()->companies->pluck('id')[0];
+
+        $customer_code_within = Customer::select('customer_code')->where('company_id',$company_id)->get();
 
         $customer_codes_not = [];
         if($customer_code_within){
