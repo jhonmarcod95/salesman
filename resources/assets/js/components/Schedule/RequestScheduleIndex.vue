@@ -230,7 +230,7 @@ export default {
            return this.request = request;
         },
         approveSched(request){
-
+            console.log(request.google_map_url);
             axios.post('/schedules/store', {
                 id: request.id,
                 user_id: request.user_id,
@@ -242,7 +242,7 @@ export default {
                 end_time: request.end_time,
                 customer_codes: [request.code],
                 name: request.name,
-                address: request.google_map_url == '' ? request.address : request.google_map_url,
+                address: request.google_map_url == null ? request.address : request.google_map_url,
             })
             .then(response => {
                 var index = this.requests.findIndex(item => item.id == this.request.id);
