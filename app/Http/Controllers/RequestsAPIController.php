@@ -65,8 +65,8 @@ class RequestsAPIController extends Controller
         // Mapping and Event Condition
         else {
             $this->validate($request, [
-                'name' => 'required|max:191',
-                'address' => 'required|max:191',
+                'name' => 'required',
+                'address' => 'required',
             ]);
         }
 
@@ -126,8 +126,8 @@ class RequestsAPIController extends Controller
         // Mapping and Event Condition
         else {
             $this->validate($request, [
-                'name' => 'required|max:191',
-                'address' => 'required|max:191',
+                'name' => 'required',
+                'address' => 'required',
             ]);
         }
 
