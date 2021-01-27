@@ -73,6 +73,7 @@
                                     <th scope="col">Question</th>
                                     <th scope="col">Rating</th>
                                     <th scope="col">Remarks</th>
+                                    <th scope="col">Classification</th>
                                     <th scope="col">Survey Date</th>
                                 </tr>
                                 </thead>
@@ -133,6 +134,9 @@
                                                    {{ item.remarks }}
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td> 
+                                            {{ item.customer }}
                                         </td>
                                         <td> {{ item.created_at }}</td>
                                     </tr>
