@@ -19,7 +19,7 @@
                         </div>
                         <div class="mb-3">
                             <div class="row pl-2 pr-2">
-                             
+
                                 <div class="col-md-3" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
                                     <div class="form-group">
                                         <label class="form-control-label" for="role">Company</label>
@@ -31,29 +31,42 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="start_date" class="form-control-label">Start Date</label> 
+                                        <label for="start_date" class="form-control-label">Start Date</label>
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="end_date" class="form-control-label">End Date</label> 
+                                        <label for="end_date" class="form-control-label">End Date</label>
                                         <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
                                         <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group">
-                                         <label for="end_date" class="form-control-label">&nbsp;</label> 
-                                         <button type="button" class="btn btn-primary btn-lg btn-block" :class="{ ' disabled' : loading === true }" :disabled="loading === true"  @click="fetchSchedules">Filter</button>                                    
+                                         <label for="end_date" class="form-control-label">&nbsp;</label>
+                                         <button type="button" class="btn btn-primary btn-lg btn-block" :class="{ ' disabled' : loading === true }" :disabled="loading === true"  @click="fetchSchedules">Filter</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                         <label for="end_date" class="form-control-label">&nbsp;</label>
+                                         <download-excel
+                                            :data   = "flattenSurvey"
+                                            :fields = "json_fields"
+                                            class   = "btn btn-default btn-lg btn-block"
+                                            name    = "Salesforce Survey report.xls">
+                                                Export
+                                        </download-excel>
+                                         <!-- <button type="button" class="btn btn-default btn-lg btn-block" :class="{ ' disabled' : loading === true }" :disabled="loading === true"  @click="fetchSchedules">Export</button> -->
                                     </div>
                                 </div>
                             </div>
                         </div>
 
 
-                        <graph-survey :surveys="filteredSurveys" 
+                        <graph-survey :surveys="filteredSurveys"
                                       :startDate="startDate"
                                       :endDate="endDate"
                                       :company="company.toString()"
@@ -67,6 +80,7 @@
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Customer</th>
+                                    <th scope="col">Classification</th>
                                     <!-- <th scope="col">Date</th>
                                     <th scope="col">Schedule</th> -->
                                     <th scope="col">Brands</th>
@@ -84,11 +98,11 @@
                                             <div class="center-align py-3" style="display: flex; align-items: center; justify-content: center;">
                                                 <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
                                                     <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
-                                                </svg>	
+                                                </svg>
                                             </div>
 
                                         </td>
-                                    </tr>   
+                                    </tr>
                                 </tbody>
 
                                 <tbody v-else v-for="(schedule, s) in filteredSurveys" :key="s"  class="list">
@@ -111,6 +125,7 @@
                                             Customer: {{ item.customer.name }} <br>
                                             Address: {{ item.customer.area }} <br>
                                         </td>
+                                        <td>{{ item.classification }}</td>
                                         <td>
                                             <span v-for="(brand, b) in item.brands" :key="b">
                                                 <span>{{ brand.name }}</span> <br/>
@@ -199,7 +214,7 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
 </template>
 
@@ -209,8 +224,8 @@ import JsonExcel from 'vue-json-excel'
 import GraphSurvey from './GraphSurvey';
 
 export default {
-    components: 
-    { 
+    components:
+    {
         'downloadExcel': JsonExcel,
         GraphSurvey
     },
@@ -221,6 +236,7 @@ export default {
             switchView: false,
             tsrs: [],
             schedules: [],
+            json_data: [],
             startDate: '',
             endDate: '',
             tsrName: '',
@@ -236,83 +252,96 @@ export default {
             currentPage: 0,
             itemsPerPage: 10,
             json_fields: {
-                'TYPE': {
+                'TSR': 'user.name',
+                'CUSTOMER': 'customer.name',
+                'CLASSIFICATION' : 'classification',
+                'BRANDS': {
                     callback: (value) => {
-                        if(value.type == 1){
-                            return 'Customer';
-                        }else if(value.type == 2){
-                           return 'Mapping';
-                        }else{
-                            return 'Event';
-                        }
+                        return value.brands.map(item => item.name)
                     }
                 },
-                'NAME': 'name',
-                'ADDRESS': 'address',
-                'DATE': 'date',
-                'START TIME': 'start_time',
-                'END TIME': 'end_time',
-                'STATUS': {
+                'QUESTIONS': {
                     callback: (value) => {
-                        if(value.status == 1){
-                            return 'Visited';
-                        }else if(value.status == 2){
-                           return 'Pending';
-                        }else{
-                            return 'Absent';
-                        }
+                        return value.ranks.map(item => {
+                            return item.questions.map(x => {
+                                return `${x.question} - ${x.rating}`
+                            })
+                        })
                     }
                 },
-                'REMARKS': {
+                'RATING': {
                     callback: (value) => {
-                        if(value.attendances){
-                            return value.attendances.remarks;
-                        }else{
-                            return '';
-                        }
+                        return this.questionnaireTotal(value.ranks[0].questions.map(item => item.rating))
                     }
                 },
-                'SALES PERSONNEL': {
-                    callback: (value) => {
-                        return value.user.name;
-                    }
-                },
-                'IN': {
-                    callback: (value) => {
-                        if(value.attendances){
-                            return moment(value.attendances.sign_in).format('lll');
-                        }else{
-                            return '';
-                        }
-                    }
-                },
-                'OUT':{
-                      callback: (value) => {
-                        if(value.attendances){
-                            if(value.attendances.sign_out){
-                                return moment(value.attendances.sign_out).format('lll');
-                            }else{
-                                return '';
-                            }
-                        }else{
-                            return '';
-                        }
-                    }
-                },
-                'RENDERED':{
-                     callback: (value) => {
-                        if(value.attendances){
-                            if(value.attendances.sign_in && value.attendances.sign_out){
-                                // return moment(value.attendances.sign_out).format('lll');
-                                return this.rendered(value.attendances.sign_out, value.attendances.sign_in)
-                            }else{
-                                return '';
-                            }
-                        }else{
-                            return '';
-                        }
-                    }
-                }
+                'REMARKS': 'remarks',
+                'SURVEY_DATE': 'created_at'
+                // 'NAME': 'name',
+                // 'ADDRESS': 'address',
+                // 'DATE': 'date',
+                // 'START TIME': 'start_time',
+                // 'END TIME': 'end_time',
+                // 'STATUS': {
+                //     callback: (value) => {
+                //         if(value.status == 1){
+                //             return 'Visited';
+                //         }else if(value.status == 2){
+                //            return 'Pending';
+                //         }else{
+                //             return 'Absent';
+                //         }
+                //     }
+                // },
+                // 'REMARKS': {
+                //     callback: (value) => {
+                //         if(value.attendances){
+                //             return value.attendances.remarks;
+                //         }else{
+                //             return '';
+                //         }
+                //     }
+                // },
+                // 'SALES PERSONNEL': {
+                //     callback: (value) => {
+                //         return value.user.name;
+                //     }
+                // },
+                // 'IN': {
+                //     callback: (value) => {
+                //         if(value.attendances){
+                //             return moment(value.attendances.sign_in).format('lll');
+                //         }else{
+                //             return '';
+                //         }
+                //     }
+                // },
+                // 'OUT':{
+                //       callback: (value) => {
+                //         if(value.attendances){
+                //             if(value.attendances.sign_out){
+                //                 return moment(value.attendances.sign_out).format('lll');
+                //             }else{
+                //                 return '';
+                //             }
+                //         }else{
+                //             return '';
+                //         }
+                //     }
+                // },
+                // 'RENDERED':{
+                //      callback: (value) => {
+                //         if(value.attendances){
+                //             if(value.attendances.sign_in && value.attendances.sign_out){
+                //                 // return moment(value.attendances.sign_out).format('lll');
+                //                 return this.rendered(value.attendances.sign_out, value.attendances.sign_in)
+                //             }else{
+                //                 return '';
+                //             }
+                //         }else{
+                //             return '';
+                //         }
+                //     }
+                // }
             }
         }
     },
@@ -326,7 +355,7 @@ export default {
             .then(response => {
                 this.companies = response.data;
             })
-            .catch(error => { 
+            .catch(error => {
                 this.errors = error.response.data.errors;
             })
         },
@@ -340,8 +369,10 @@ export default {
             .then(response => {
                 console.log('check result: ', response.status)
                 if(response.status === 200) {
+                    console.log('check survey data: ', response.data)
+                    console.log('check survey data flat: ', response.data.flat())
                     this.schedules = response.data;
-                    this.errors = []; 
+                    this.errors = [];
                     this.loading = false
                 }
             })
@@ -354,8 +385,8 @@ export default {
         },
         aveScheduleRanks(array) {
             let ranks = array.map(item => item.ranks.map(rank => rank.questions.map(item => item.rating )));
-            let getTotalRating = this.questionnaireTotal(ranks.flat(2)); 
-            let getTotallength = ranks.flat(2).length / 2; 
+            let getTotalRating = this.questionnaireTotal(ranks.flat(2));
+            let getTotallength = ranks.flat(2).length / 2;
             let ave = getTotalRating / getTotallength;
 
             return ave.toFixed(2);
@@ -369,14 +400,14 @@ export default {
         //         this.errors = error.response.data.errors;
         //     })
         // },
-        rendered(endTime, startTime){ 
+        rendered(endTime, startTime){
             var ms = moment(endTime,"YYYY/MM/DD HH:mm a").diff(moment(startTime,"YYYY/MM/DD HH:mm a"));
             var d = moment.duration(ms);
             var hours = Math.floor(d.asHours());
             var minutes = moment.utc(ms).format("mm");
 
             return hours + 'h '+ minutes+' min.';
-                                            
+
         },
         getImage(schedule){
             this.image = window.location.origin+'/storage/'+schedule.attendances.sign_out_image;
@@ -419,6 +450,9 @@ export default {
         // },
         totalPages() {
             return Math.ceil(this.schedules.length / this.itemsPerPage)
+        },
+        flattenSurvey() {
+            return this.schedules.flat();
         },
         filteredSurveys() {
             var index = this.currentPage * this.itemsPerPage;
