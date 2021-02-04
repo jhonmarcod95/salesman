@@ -180,7 +180,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <hr/>
+                                     <hr class="my-4" />
+                                <!-- Address -->
+                                <h6 class="heading-small text-muted mb-4">Optional Fields</h6>
                                     <div class="row">
                                           <div class="col-lg-6">
                                             <div class="form-group">
