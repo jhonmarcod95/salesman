@@ -13,7 +13,7 @@ use App\Attendance;
 use Illuminate\Http\Request;
 use Spatie\Geocoder\Facades\Geocoder;
 
-use Illuminate\Validation\Rule; 
+use Illuminate\Validation\Rule;
 
 use App\CustomerCode;
 
@@ -31,7 +31,7 @@ class CustomerController extends Controller
         session(['header_text' => 'Customers']);
 
         $message = Message::where('user_id', '!=', Auth::user()->id)->get();
-        $notification = 0;  
+        $notification = 0;
         foreach($message as $notif){
 
             $ids = collect(json_decode($notif->seen, true))->pluck('id');
@@ -94,7 +94,7 @@ class CustomerController extends Controller
             $verified_status = [0,1];
         }else{
             $verified_status = [1];
-        }       
+        }
         return  Customer::orderBy('customers.id', 'desc')
             ->when(Auth::user()->level() < 8, function($q){
                 $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
@@ -125,15 +125,15 @@ class CustomerController extends Controller
                 'customers.verified_status',
             ]);
     }
-    
+
     public function changeVerifiedStatus(Request $request, Customer $customer){
        $customer->verified_status = $request->verified_status;
         if($customer->save()){
             return Customer::where('id',$customer->id)->first();
         }else{
             return $customer;
-        }   
-       
+        }
+
     }
 
     /**
@@ -144,7 +144,7 @@ class CustomerController extends Controller
     public function create(){
 
         $message = Message::where('user_id', '!=', Auth::user()->id)->get();
-        $notification = 0;  
+        $notification = 0;
         foreach($message as $notif){
 
             $ids = collect(json_decode($notif->seen, true))->pluck('id');
@@ -181,7 +181,7 @@ class CustomerController extends Controller
         ]);
 
         // $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
-        
+
         $customers = new Customer;
 
         $customers->company_id = Auth::user()->companies->pluck('id')[0];
@@ -200,7 +200,11 @@ class CustomerController extends Controller
         $customers->fax_number = $request->fax_number;
         $customers->remarks = $request->remarks;
         $customers->check_customer_code = $request->check_customer_code;
-        
+        $customers->distributor_name = $request->distributor_name;
+        $customers->brand_used = $request->brand_used;
+        $customers->monthly_volume = $request->monthly_volume;
+        $customers->date_converted = $request->date_converted;
+
         // return $customers;
 
         if($customers->save()){
@@ -216,7 +220,7 @@ class CustomerController extends Controller
     public function edit($id)
     {
         $message = Message::where('user_id', '!=', Auth::user()->id)->get();
-        $notification = 0;  
+        $notification = 0;
         foreach($message as $notif){
 
             $ids = collect(json_decode($notif->seen, true))->pluck('id');
@@ -272,6 +276,10 @@ class CustomerController extends Controller
         $customer->telephone_2 = $request->telephone_2;
         $customer->fax_number = $request->fax_number;
         $customer->remarks = $request->remarks;
+        $customer->distributor_name = $request->distributor_name;
+        $customer->brand_used = $request->brand_used;
+        $customer->monthly_volume = $request->monthly_volume;
+        $customer->date_converted = $request->date_converted;
 
         // apply changes in schedule
         $date_now = Carbon::now();
@@ -331,7 +339,7 @@ class CustomerController extends Controller
             if($get_count_customer_code > 0){
                 $customer_code = $customer_code + $get_count_customer_code + 1;
             }
-        
+
             return $customer_code;
         }
     }
@@ -352,7 +360,7 @@ class CustomerController extends Controller
 
         return $geocode['lat'].','.$geocode['lng'];
     }
-    
+
     /**
      * Remove the specified resource from storage.
      *
@@ -376,7 +384,7 @@ class CustomerController extends Controller
         session(['header_text' => 'Visited Customer']);
 
         $message = Message::where('user_id', '!=', Auth::user()->id)->get();
-        $notification = 0;  
+        $notification = 0;
         foreach($message as $notif){
 
             $ids = collect(json_decode($notif->seen, true))->pluck('id');
@@ -387,11 +395,11 @@ class CustomerController extends Controller
 
         return view('customer.visited', compact('notification'));
     }
-    
+
 
     /**
      * Fetch all customer visited
-     * 
+     *
      * @return \Illuminate\Http\Response
      */
     public function customerVisitedIndexData(Request $request){
@@ -399,7 +407,7 @@ class CustomerController extends Controller
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
-    
+
         $startDate = $request->startDate;
         $endDate = $request->endDate;
 
@@ -434,7 +442,7 @@ class CustomerController extends Controller
     public function customerVisitedToday(){
         $startDate = date('Y-m-d');
         $endDate = date('Y-m-d');
-        
+
         $companyId = Auth::user()->companies[0]->id;
         $users = User::select('id')->where('company_id',$companyId)->get();
         $selected_user = [];
@@ -499,13 +507,13 @@ class CustomerController extends Controller
     public function customersSalesReportData(Request $request){
 
         $companyId = Auth::user()->companies[0]->id;
-        $params = $request->all(); 
+        $params = $request->all();
 
         $request->validate([
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
-       
+
         return $customers = Customer::with(['schedules' => function ($query) use($params) {
                         $query->where('date', '>=', $params['startDate']);
                         $query->where('date', '<=', $params['endDate']);
@@ -529,7 +537,7 @@ class CustomerController extends Controller
 
     public function customerAppointmentDurationReportData(Request $request){
 
-        $params = $request->all(); 
+        $params = $request->all();
 
         $request->validate([
             'startDate' => 'required',
@@ -560,7 +568,7 @@ class CustomerController extends Controller
                                 ->get();
 
         return $users_schedules_data;
-                                  
+
     }
 
 
@@ -578,7 +586,7 @@ class CustomerController extends Controller
         ];
         $date = date('Ymd');
         $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
-                            ['query' => 
+                            ['query' =>
                                 ['connection' => $connection,
                                     'table' => [
                                         'table' => ['KNA1' => 'do_headers'],
@@ -594,7 +602,7 @@ class CustomerController extends Controller
                             ['timeout' => 60],
                             ['delay' => 10000]
                         );
-                        
+
         return $customers_data = json_decode($customers->getBody(), true);
 
 

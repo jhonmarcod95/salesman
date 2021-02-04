@@ -102,7 +102,7 @@
                                                 <label class="form-control-label" for="google_address">Google Map Address</label>
                                                 <input id="google_address" class="form-control form-control-alternative" type="text" v-model="customers.google_address" placeholder="Enter a Location">
                                                 <span class="text-danger small" v-if="errors.google_address">{{ errors.google_address[0] }}</span>
-                                                
+
                                                 <button type="button" :disabled="showMap" class="btn btn-sm btn-primary mt-2" data-toggle="modal" data-target="#showMap">Show Map</button>
                                             </div>
                                         </div>
@@ -139,6 +139,41 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <hr class="my-4" />
+                                <!-- Address -->
+                                <h6 class="heading-small text-muted mb-4">Optional Fields</h6>
+                                    <div class="row">
+                                          <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="distributor_name">Distributor Name</label>
+                                                <input type="text" id="distributor_name" class="form-control form-control-alternative" v-model="customers.distributor_name">
+                                                <span class="text-danger small" v-if="errors.distributor_name">{{ errors.distributor_name[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="brand_used">Brand Use</label>
+                                                <input type="text" id="brand_used" class="form-control form-control-alternative" v-model="customers.brand_used">
+                                                <span class="text-danger small" v-if="errors.brand_used">{{ errors.brand_used[0] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                          <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="monthly_volume">Monthly Volume</label>
+                                                <input type="number" id="monthly_volume" class="form-control form-control-alternative" v-model="customers.monthly_volume">
+                                                <span class="text-danger small" v-if="errors.monthly_volume">{{ errors.monthly_volume[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="date_converted">Date Converted</label>
+                                                <input type="date" id="date_converted" class="form-control form-control-alternative" v-model="customers.date_converted">
+                                                <span class="text-danger small" v-if="errors.date_converted">{{ errors.date_converted[0] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <div class="text">
                                             <button @click="updateCustomer(customers)" type="button" class="btn btn-primary mt-4">Save</button>
@@ -163,8 +198,8 @@
                     </button>
                 </div>
                 <div class="mapContainer" style="width:100%;height:300px;">
-                    <Mapbox 
-                        :accessToken="accessToken" 
+                    <Mapbox
+                        :accessToken="accessToken"
                         :map-options="{
                             style: mapStyle,
                             center: mapCenter,
@@ -181,7 +216,7 @@
                             show: true,
                             position: 'top-left'
                         }"
-                    /> 
+                    />
                     <pre id='coordinates' class='coordinates'></pre>
                 </div>
                 <div class="modal-footer">
@@ -238,7 +273,7 @@
             var searchBox = new google.maps.places.Autocomplete(input, {
                  componentRestrictions: {country: 'ph'}
             });
-    
+
             searchBox.addListener('place_changed', function() {
                 var place = searchBox.getPlace();
 
@@ -256,13 +291,13 @@
                 //Map
                 vm.customers.google_address = document.getElementById("google_address").value;
                 vm.getGeocodeCustomerEdit(vm.customers.google_address);
-                
-                
+
+
 
             });
         },
         methods:{
-            updateCustomer(customers){  
+            updateCustomer(customers){
                 axios.patch(`/customers/${customers.id}`,{
                     classification : customers.classification,
                     status : customers.status,
@@ -279,7 +314,11 @@
                     telephone_1: customers.telephone_1,
                     telephone_2: customers.telephone_2,
                     fax_number: customers.fax_number,
-                    remarks: customers.remarks
+                    remarks: customers.remarks,
+                    distributor_name: customers.distributor_name,
+                    brand_used: customers.brand_used,
+                    monthly_volume: customers.monthly_volume,
+                    date_converted: customers.date_converted,
                 })
                 .then(response => {
                     window.location.href = response.data.redirect;
@@ -290,7 +329,7 @@
             },
             fetchStatus(){
                 axios.get('/customers-status-options')
-                .then(response => { 
+                .then(response => {
                     this.statuses = response.data;
                 })
                 .catch(error =>{
@@ -316,7 +355,7 @@
             },
             fetchRegion(){
                 axios.get('/regions')
-                .then(response => { 
+                .then(response => {
                     this.regions = response.data;
                 })
                 .catch(error => {
@@ -325,7 +364,7 @@
             },
             fetchProvince(){
                 axios.get('/provinces')
-                .then(response => { 
+                .then(response => {
                     this.provinces = response.data;
                 })
                 .catch(error => {
@@ -334,7 +373,7 @@
             },
             fetchClassification(){
                 axios.get('/customers-classification-options')
-                .then(response => { 
+                .then(response => {
                     this.classifications = response.data;
                 })
                 .catch(error =>{
@@ -401,7 +440,7 @@
                 let v = this;
                 v.loading = true;
                 axios.get(`/customers-geocode-json/${address.replace(/[/#]/g, '')}`)
-                .then(response => { 
+                .then(response => {
                     const mapcontainer = document.getElementById("map");
                     mapcontainer.innerHTML = '';
                     v.customers.lat = response.data.lat;
@@ -412,7 +451,7 @@
                         v.showMap = false;
                         v.loading = false;
                     }
-                    
+
                     var map = new mapboxgl.Map({
                         container: 'map',
                         style: v.mapStyle,
@@ -423,17 +462,17 @@
                         maxBounds: [[110.446227,2.949317], [131.509814,21.637444 ]],
                         height:100
                     });
-                    
+
                     map.addControl(new mapboxgl.NavigationControl());
                     map.addControl(new mapboxgl.FullscreenControl());
-                
+
                     var marker = new mapboxgl.Marker({
                         draggable: true
                     })
                     .setLngLat([v.customers.lng,v.customers.lat])
                     .addTo(map);
                     coordinates.style.display = 'none';
-                    function onDragEnd() {   
+                    function onDragEnd() {
                         var lngLat = marker.getLngLat();
                         coordinates.style.display = 'block';
                         coordinates.innerHTML = 'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
@@ -442,7 +481,7 @@
 
                         // map.flyTo({center: [v.customers.lng,v.customers.lat], zoom: 17});
                     }
-                    
+
                     marker.on('dragend', onDragEnd)
                 })
                 .catch(error => {
@@ -465,18 +504,18 @@
                         maxBounds: [[110.446227,2.949317], [131.509814,21.637444 ]],
                         height:100
                     });
-                    
+
                     map.addControl(new mapboxgl.NavigationControl());
                     map.addControl(new mapboxgl.FullscreenControl());
-                
+
                     var marker = new mapboxgl.Marker({
                         draggable: true
                     })
                     .setLngLat([v.customers.lng,v.customers.lat])
                     .addTo(map);
-                    
+
                      coordinates.style.display = 'none';
-                    function onDragEnd() {   
+                    function onDragEnd() {
                         var lngLat = marker.getLngLat();
                         coordinates.style.display = 'block';
                         coordinates.innerHTML = 'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
@@ -485,7 +524,7 @@
 
                         // map.flyTo({center: [v.customers.lng,v.customers.lat], zoom: 17});
                     }
-                    
+
                     marker.on('dragend', onDragEnd)
                     v.showMap = false;
                 }
@@ -495,7 +534,7 @@
 </script>
 
 <style>
-    
+
      #map{
         position: relative;
         height: 100%;

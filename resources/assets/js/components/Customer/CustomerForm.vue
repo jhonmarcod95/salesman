@@ -63,9 +63,9 @@
                                                     <input type="text" id="customer_code" class="form-control form-control-alternative" v-model="customer.customer_code">
                                                     <span class="text-danger small" v-if="errors.customer_code">{{ errors.customer_code[0] }}</span>
                                                 </div>
-                                                
+
                                             </div>
-                                            
+
                                         </div>
                                         <div class="col-lg-6  mb-2">
                                             <div class="form-group">
@@ -145,7 +145,7 @@
                                                 <button type="button" :disabled="showMap" class="btn btn-sm btn-primary mt-2" data-toggle="modal" data-target="#showMap">Show Map</button>
                                             </div>
 
-                                            
+
                                         </div>
                                     </div>
                                     <div class="row">
@@ -177,6 +177,39 @@
                                                 <label class="form-control-label" for="remarks">Remarks</label>
                                                 <input type="text" id="remarks" class="form-control form-control-alternative" v-model="customer.remarks">
                                                 <span class="text-danger small" v-if="errors.remarks">{{ errors.remarks[0] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr/>
+                                    <div class="row">
+                                          <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="distributor_name">Distributor Name</label>
+                                                <input type="text" id="distributor_name" class="form-control form-control-alternative" v-model="customer.distributor_name">
+                                                <span class="text-danger small" v-if="errors.distributor_name">{{ errors.distributor_name[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="brand_used">Brand Use</label>
+                                                <input type="text" id="brand_used" class="form-control form-control-alternative" v-model="customer.brand_used">
+                                                <span class="text-danger small" v-if="errors.brand_used">{{ errors.brand_used[0] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                          <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="monthly_volume">Monthly Volume</label>
+                                                <input type="number" id="monthly_volume" class="form-control form-control-alternative" v-model="customer.monthly_volume">
+                                                <span class="text-danger small" v-if="errors.monthly_volume">{{ errors.monthly_volume[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="date_converted">Date Converted</label>
+                                                <input type="date" id="date_converted" class="form-control form-control-alternative" v-model="customer.date_converted">
+                                                <span class="text-danger small" v-if="errors.date_converted">{{ errors.date_converted[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -245,6 +278,10 @@
                     remarks: '',
                     lat: '',
                     lng: '',
+                    distributor_name: '',
+                    brand_used: '',
+                    monthly_volume: '',
+                    date_converted: '',
                 },
                 accessToken: 'pk.eyJ1IjoiamF5LWx1bWFnZG9uZzEyMyIsImEiOiJjazFxNm5wZGwxNG02M2dtaXF2dHE1YzluIn0.SHUJTfNTrhGoyacA8H7Tbw',
                 mapStyle: 'mapbox://styles/mapbox/streets-v11',
@@ -260,7 +297,7 @@
                 customer_codes : [],
                 customercodeSelect : '',
                 checkCustomerCodeSAP : true
-            }   
+            }
         },
         created(){
             this.fetchCustomerCodes();
@@ -276,7 +313,7 @@
             var searchBox = new google.maps.places.Autocomplete(input, {
                  componentRestrictions: {country: 'ph'}
             });
-    
+
             searchBox.addListener('place_changed', function() {
                 var place = searchBox.getPlace();
 
@@ -326,7 +363,7 @@
             },
             statusCustomerCode(){
                 if(this.customer.status == 1 || this.customer.status == 2){
-                   this.customercodeSelect = '';    
+                   this.customercodeSelect = '';
                 }else{
                      this.checkCustomerCode();
                 }
@@ -336,7 +373,7 @@
             },
             fetchCustomerCodes(){
                 axios.get('/customer-codes-all')
-                .then(response => { 
+                .then(response => {
                     this.customer_codes = response.data;
                 })
                 .catch(error => {
@@ -371,9 +408,13 @@
                     telephone_2: customer.telephone_2,
                     fax_number: customer.fax_number,
                     remarks: customer.remarks,
-                    check_customer_code : this.checkCustomerCodeSAP
+                    check_customer_code : this.checkCustomerCodeSAP,
+                    distributor_name: customer.distributor_name,
+                    brand_used: customer.brand_used,
+                    monthly_volume: customer.monthly_volume,
+                    date_converted: customer.date_converted,
                 })
-                .then(response => { 
+                .then(response => {
                     if(confirm('Customer Successful Added')){
                         window.location.href = response.data.redirect;
                     }
@@ -384,7 +425,7 @@
             },
             fetchRegion(){
                 axios.get('/regions')
-                .then(response => { 
+                .then(response => {
                     this.regions = response.data;
                 })
                 .catch(error => {
@@ -393,7 +434,7 @@
             },
             fetchProvince(){
                 axios.get('/provinces')
-                .then(response => { 
+                .then(response => {
                     this.provinces = response.data;
                 })
                 .catch(error => {
@@ -402,7 +443,7 @@
             },
             fetchStatus(){
                 axios.get('/customers-status-options')
-                .then(response => { 
+                .then(response => {
                     this.statuses = response.data;
                 })
                 .catch(error =>{
@@ -411,7 +452,7 @@
             },
             fetchClassification(){
                 axios.get('/customers-classification-options')
-                .then(response => { 
+                .then(response => {
                     this.classifications = response.data;
                 })
                 .catch(error =>{
@@ -424,7 +465,7 @@
                     axios.post('/check-customer-code',{
                         classification: this.customer.classification,
                         company_id: this.companyId
-                        
+
                     })
                     .then(response => {
                         this.customer.customer_code = '';
@@ -472,7 +513,7 @@
             getGeocodeCustomer(address){
                 let v = this;
                 axios.get(`/customers-geocode-json/${address.replace(/[/#]/g, '')}`)
-                .then(response => { 
+                .then(response => {
                     const mapcontainer = document.getElementById("map");
                     mapcontainer.innerHTML = '';
                     v.customer.lat = response.data.lat;
@@ -488,7 +529,7 @@
                         maxBounds: [[110.446227,2.949317], [131.509814,21.637444 ]],
                         height:100
                     });
-                    
+
                     map.resize();
 
                     map.addControl(new mapboxgl.NavigationControl());
@@ -499,9 +540,9 @@
                     })
                     .setLngLat([v.customer.lng,v.customer.lat])
                     .addTo(map);
-                    
+
                     coordinates.style.display = 'none';
-                    function onDragEnd() {   
+                    function onDragEnd() {
                         var lngLat = marker.getLngLat();
                         coordinates.style.display = 'block';
                         coordinates.innerHTML = 'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
@@ -510,10 +551,10 @@
 
                         // map.flyTo({center: [v.customer.lng,v.customer.lat], zoom: 17})
                     }
-                    
+
                     marker.on('dragend', onDragEnd)
-                
-                   
+
+
                 })
                 .catch(error => {
                     this.errors = error.response.data.errors;
@@ -524,7 +565,7 @@
 </script>
 
 <style>
-    
+
      #map{
         position: relative;
         height: 100%;
