@@ -84,11 +84,14 @@
                             <i class="ni ni-tv-2 text-primary"></i> Dashboard
                         </a>
                     </li>
+
+                    @if(!Auth::user()->hasRole(['finance-gl']))
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('/schedules') }}">
                             <i class="ni ni-calendar-grid-58 text-orange"></i> Schedules
                         </a>
                     </li>
+                    @endif
                     {{-- <li class="nav-item">
                         <a class="nav-link" href="{{ url('/announcements') }}">
                             <i class="ni ni-notification-70 text-purple"></i> Announcements
@@ -188,7 +191,7 @@
                             </ul>
                         </div>
                     </li>
-                    @if(!Auth::user()->hasRole('manager'))
+                    @if(!Auth::user()->hasRole(['manager', 'finance-gl']))
                     <li>
                         <a data-toggle="collapse" href="#MasterData" class="collapsed" aria-expanded="false">
                             <div class="nav-link">
@@ -253,7 +256,7 @@
                 @endif
             </ul>
             @endif
-            @if(Auth::user()->hasRole(['tax','audit']))
+            @if(Auth::user()->hasRole(['tax','audit', 'finance-gl']))
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/expense-posted') }}">
@@ -295,7 +298,7 @@
                     </li>
                 @endif
             </ul>
-            @if(Auth::user()->hasRole('it'))
+            @if(Auth::user()->hasRole(['it', 'finance-gl']))
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/internal-order') }}">

@@ -54,7 +54,7 @@ Route::group(['middleware' => 'auth'], function(){
 
 
 // Admin Routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|approver|tax']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|approver|tax|finance-gl']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
@@ -247,7 +247,7 @@ Route::group(['middleware' => ['auth', 'role:ap|tax|audit']], function(){
 });
 
 // Hr routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit|finance-gl']], function () {
     // Attendance Report
     Route::get('/attendance-report', 'AttendanceReportController@index')->name('report_list');
     // fetch all Attendance Report
@@ -270,7 +270,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 });
 
 //Audit routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit|finance-gl']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
@@ -294,7 +294,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver']], fu
 });
 
 
-Route::group(['middleware' => ['auth', 'role:it']], function () {
+Route::group(['middleware' => ['auth', 'role:it|finance-gl']], function () {
     Route::get('/internal-order', 'SalesmanInternalOrderController@index')->name('internal-order');
     Route::post('/internal-order', 'SalesmanInternalOrderController@store');
     Route::patch('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@update');
@@ -303,7 +303,7 @@ Route::group(['middleware' => ['auth', 'role:it']], function () {
 });
 
 //Customer Master Role
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|customer-master']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|customer-master|finance-gl']], function () {
     //Customer
     // show customer page
     Route::get('/customers', 'CustomerController@index')->name('customers_list');
