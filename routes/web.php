@@ -49,6 +49,10 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/user/change-password', 'UserController@changePasswordIndex')->name('change_password');
     // Fetch all companies
     Route::get('/companies-all', 'CompanyController@indexData');
+    // fetch allowed companies to view / filter
+    Route::get('/companies-allowed', function (){
+        return \Illuminate\Support\Facades\Auth::user()->companies;
+    });
 });
 
 
@@ -213,7 +217,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 });
 
 // AP Routes
-Route::group(['middleware' => ['auth', 'role:ap|tax|audit']], function(){
+Route::group(['middleware' => ['auth', 'role:ap|tax|audit|finance-gl']], function(){
     // Payments
     Route::get('/payments', 'PaymentController@index');
     // Store payment expense

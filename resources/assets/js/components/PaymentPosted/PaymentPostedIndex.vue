@@ -375,7 +375,7 @@ export default {
             this.copiedObject = Object.assign({}, paymentHeader)
         },
         fetchCompanies(){
-            axios.get('/companies-all')
+            axios.get('/companies-allowed')
             .then(response => {
                 this.companies = response.data;
             })
