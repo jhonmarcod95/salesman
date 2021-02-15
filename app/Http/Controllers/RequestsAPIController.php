@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\RequesetScheduleResource as RequesetScheduleResource;
 use App\Http\Resources\CustomerResource as CustomerResource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\RequestSchedule;
 use App\Rules\TimeRule;
 use Carbon\Carbon;
 use App\Schedule;
 use App\Customer;
-use Auth;
 use DB;
 
 class RequestsAPIController extends Controller
@@ -40,6 +40,21 @@ class RequestsAPIController extends Controller
     }
 
     /**
+     * Calculate daily schedule completion
+     */
+    public function dailySchedulePercent()
+    {
+        $schedule = Schedule::orderBy('id', 'DESC')
+            ->whereDate('date', Carbon::today())
+            ->where('user_id', Auth::user()->id);
+
+        $totalSched = $schedule->count();
+        $totalVisited = $schedule->where('status', 1)->count();
+
+        return floor( ($totalVisited / $totalSched) * 100);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -47,6 +62,13 @@ class RequestsAPIController extends Controller
      */
     public function store(Request $request)
     {
+        if($this->dailySchedulePercent() <= 90)
+        {
+            $this->validate($request, [
+                'completion' => 'Your current schedule requires at least 90% completed in order to request for a new schedule'
+            ]);
+        }
+
         $this->validate($request, [
             'type' => 'required',
             'date' => 'required',

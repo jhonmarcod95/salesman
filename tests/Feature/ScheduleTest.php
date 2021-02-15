@@ -10,7 +10,7 @@ use Carbon\Carbon;
 
 class ScheduleTest extends TestCase
 {
-    
+
     /**
      * @test
      */
@@ -22,7 +22,7 @@ class ScheduleTest extends TestCase
 
         //then
         $response->assertStatus(200);
-        
+
         echo "\n\n".json_encode($response, JSON_PRETTY_PRINT);
 
     }
@@ -47,8 +47,21 @@ class ScheduleTest extends TestCase
 
         //then
         $response->assertStatus(200);
-        
+
         echo "\n\n".json_encode($response, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * @test
+     */
+    public function check_schedule_percent()
+    {
+        $response = $this->actingAs($this->defaultUser(), 'api')
+                ->json('GET', '/api/sched-completion');
+
+        $response->assertStatus(200);
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
     }
 
 }
