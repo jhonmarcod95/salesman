@@ -183,7 +183,9 @@ class MapAnalyticsReportController extends Controller
     }
 
     public function customerLocations(Request $request){
-    
+        
+        ini_set('memory_limit','1024M');
+
         $request->validate([
             'selectedCompanies' => 'required',
         ]);
