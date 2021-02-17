@@ -88,11 +88,28 @@
 
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                            </div>
+
+                            <div class="row col-sm-12">
+
+                                <div class="col-md-12 row">
+                                    <div class="col-md-3 float-left">
+                                        <div class="form-group">
+                                            <label for="customerSelect" class="form-control-label">Select Period From</label> 
+                                            <input type="date" class="form-control" v-model="date_period_from">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 float-left">
+                                        <div class="form-group">
+                                            <label for="customerSelect" class="form-control-label">Select Period To</label> 
+                                            <input type="date" class="form-control" v-model="date_period_to">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
                                     <button class="btn btn-sm btn-primary" @click="getCustomerLocations"> Apply Filter</button>
                                     <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#showCustomerList"> Show List ({{ Object.keys(customersList).length }})</button>
                                 </div>
-
                             </div>
 
                             <div class="row ml-3 mt-3 mb-3 pl-3">
@@ -385,6 +402,10 @@
                 customer_visits : [],
                 usersList : [],
                 keywords : '',
+
+                date_period_from : '',
+                date_period_to : '',
+
                 currentPage: 0,
                 itemsPerPage: 10,
                 visit_keywords : '',
@@ -485,6 +506,8 @@
                     selectedCompanies: this.companyIds,
                     selectedStatuses: this.statusIds,
                     selectedProvince: this.provinceId,
+                    date_period_from: this.date_period_from,
+                    date_period_to: this.date_period_to,
                 })
                 .then(response =>{
                     this.customers = response.data ? response.data : [];

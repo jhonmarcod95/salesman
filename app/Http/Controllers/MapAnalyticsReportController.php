@@ -209,9 +209,15 @@ class MapAnalyticsReportController extends Controller
              }
         }
 
+        $date_period['date_from'] = $request->date_period_from ? date('Y-m-d',strtotime($request->date_period_from)) : date('Y-m-d');
+        $date_period['date_to'] =  $request->date_period_to ? date('Y-m-d',strtotime($request->date_period_to)) : date('Y-m-d');
+
         $selected_province_id = $request->selectedProvince ? $request->selectedProvince['id'] : '';
        
-        $customers = Customer::with('classifications','statuses','provinces','visits')
+        $customers = Customer::with(array('classifications','statuses','provinces','visits' => function($q) use($date_period){
+                            $q->where('date','<=' , $date_period['date_from']);
+                            $q->where('date','>=' , $date_period['date_to']);
+                    }))
                     ->when(!empty($request->selectedClassifications), function($q) use($selected_classification_ids) {
                         $q->whereIn('classification',  $selected_classification_ids);
                     })
