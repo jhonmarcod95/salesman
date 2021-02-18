@@ -106,6 +106,7 @@ class SurveyControllerApi extends Controller
     {
         $surveys = Survey::orderBy('id','DESC')
                         ->where('user_id', Auth::user()->id)
+                        ->take(20)
                         ->get();
 
         return SurveyResource::collection($surveys);
