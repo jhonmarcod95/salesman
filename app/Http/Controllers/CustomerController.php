@@ -261,7 +261,7 @@ class CustomerController extends Controller
             'google_address' => 'required',
         ]);
 
-        $customer->company_id = Auth::user()->companies->pluck('id')[0];
+        // $customer->company_id = Auth::user()->companies->pluck('id')[0];
         $customer->classification = $request->classification;
         $customer->status = $request->status;
         $customer->customer_code = $request->customer_code;
