@@ -514,19 +514,18 @@ class CustomerController extends Controller
             'endDate' => 'required|after_or_equal:startDate'
         ]);
 
-        return $customers = Customer::with(['schedules' => function ($query) use($params) {
-                        $query->where('date', '>=', $params['startDate']);
-                        $query->where('date', '<=', $params['endDate']);
-                        $query->where('type', '1');
-                        $query->where('status', '1');
-                        $query->orderBy('date', 'DESC');
-                        $query->with('attendances','user');
-                    }
-                    ])
-                    ->with('last_visited')
-                    ->where('company_id',$companyId)
-                    ->orderBy('id', 'DESC')
-                    ->get();
+        return $customers = Customer::where('company_id',$companyId)
+                                    ->with(['schedules' => function ($query) use($params) {
+                                            $query->where('date', '>=', $params['startDate']);
+                                            $query->where('date', '<=', $params['endDate']);
+                                            $query->where('type', '1');
+                                            $query->where('status', '1');
+                                            $query->orderBy('date', 'DESC');
+                                            $query->with('attendances','user');
+                                        }
+                                    ])
+                                    ->orderBy('id', 'DESC')
+                                    ->get();
 
     }
 
