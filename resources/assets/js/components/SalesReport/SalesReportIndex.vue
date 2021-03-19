@@ -95,7 +95,11 @@
                                             <button class="btn btn-sm btn-outline-success" @click="customerDetailsModal(customer)">{{ customer.schedules.length + ' visit(s)' }}</button>
                                         </td>
                                         <td v-else style="color:#f5365c">Non Visited</td>
-                                        <td>{{ customer.last_visited.length > 0 ? customer.last_visited[0].date : '' }}</td>
+                                        <td>
+                                            <div v-if="customer.schedules.length > 0">
+                                                {{ customer.schedules[0].attendances ? customer.schedules[0].date : "" }}
+                                            </div>
+                                        </td>
                                     </tr>
                                 </tbody>
                                 
