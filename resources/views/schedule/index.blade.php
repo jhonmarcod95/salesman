@@ -57,24 +57,24 @@
     <script>
 
         /*------------------------- fetch customers to select elem -------------------------*/
-        function retrieveCustomers(selectId, classification) {
-            $.ajax({
-                type:'GET',
-                url: 'schedule-customer/' + classification,
-                dataType: 'json',
-                success: function(data){
-                    var customers = $(selectId);
-                    customers.empty();
-                    $(selectId).empty();
-
-                    for(let customer of data){
-                        customers.append('<option value=' + customer.customer_code + '>' + customer.name + '</option>');
-                    }
-                    customers.change();
-                    customers.select2();
-                }
-            });
-        }
+        // function retrieveCustomers(selectId, classification) {
+        //     $.ajax({
+        //         type:'GET',
+        //         url: 'schedule-customer/' + classification,
+        //         dataType: 'json',
+        //         success: function(data){
+        //             var customers = $(selectId);
+        //             customers.empty();
+        //             $(selectId).empty();
+        //
+        //             for(let customer of data){
+        //                 customers.append('<option value=' + customer.customer_code + '>' + customer.name + '</option>');
+        //             }
+        //             customers.change();
+        //             customers.select2();
+        //         }
+        //     });
+        // }
         /*------------------------------------------------------------------------------------*/
 
         /*-------------------------- reset modal and its contents ----------------------------*/
@@ -340,6 +340,7 @@
         });
         /*-----------------------------------------------------------------------------------*/
 
+
         /****************************************************
          * ************* CALENDAR EVENTS ***************
          * ********************************************/
@@ -455,9 +456,43 @@
                 editable: true,
                 eventLimit: 3,
             });
-
-            // retrieveSchedules(currentDate);
         });
+
+
+        function retrieveCustomers(selectId, classification){
+            $(selectId).empty();
+
+            $(selectId).select2({
+                ajax: {
+                    url: 'schedule-customer/' + classification, // set classification to office else null or all
+                    dataType: 'json',
+                    delay: 400,
+                    data: function(params) {
+                        return {
+                            q: params.term // search term
+                        };
+                    },
+                    processResults: function(data, params) {
+                        let resData = [];
+                        data.forEach(function(value) {
+                            if (value.name.toUpperCase().indexOf(params.term.toUpperCase()) != -1)
+                                resData.push(value)
+                        });
+                        return {
+                            results: $.map(resData, function(item) {
+                                return {
+                                    text: item.name,
+                                    id: item.customer_code
+                                }
+                            })
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+                // closeOnSelect: false
+            })
+        }
 
     </script>
 

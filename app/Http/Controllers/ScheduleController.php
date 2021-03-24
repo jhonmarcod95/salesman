@@ -430,21 +430,24 @@ class ScheduleController extends Controller
         return $angle * $earthRadius;
     }
 
-    function scheduleCustomerData($classification){
+    function scheduleCustomerData(Request $request, $classification){
+
+        $searchKey = $request->q;
 
         $company_id = Auth::user()->companies->first()->id; //filter by auth company
 
-        ################################
+
         $customers = Customer::select(DB::raw("CONCAT(name, ' - ', street) AS name"), 'customer_code')
             ->when($classification != 'null', function ($q) use($classification){
                 $q->where('classification', $classification);
             })
             ->where('company_id', $company_id)
+            ->where(DB::raw("CONCAT(name, ' - ', street)"), 'LIKE', "%$searchKey%")
             ->get([
                 'name',
                 'customer_code'
-            ]);
-        ################################
+            ])->take(10);
+
 
         return $customers;
 
