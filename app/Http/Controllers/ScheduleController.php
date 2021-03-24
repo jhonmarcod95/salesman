@@ -73,6 +73,7 @@ class ScheduleController extends Controller
     }
 
     public function indexData(Request $request, $date_from, $date_to){
+        ini_set('memory_limit', '2048M'); // revise this
 
         /* search specific user ***********************************/
         if($request->exists('tsrs')){
@@ -230,7 +231,7 @@ class ScheduleController extends Controller
         else{
             $request->validate([
                 'name' => 'required|max:191',
-                'address' => ['required', 'max:191'],
+                'address' => ['required'],
             ]);
 
             $place = get_google_map_place($request->address)['place'];
