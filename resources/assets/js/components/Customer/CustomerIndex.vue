@@ -316,9 +316,17 @@ export default {
     computed:{
         filteredCustomers(){
             let self = this;
-
             return self.customers.filter(customer => {
-                return customer.name.toLowerCase().includes(this.keywords.toLowerCase()) || customer.customer_code.toLowerCase().includes(this.keywords.toLowerCase())
+                if(customer){
+                    if(customer.name && customer.customer_code){
+                        return customer.name.toLowerCase().includes(this.keywords.toLowerCase()) || customer.customer_code.toLowerCase().includes(this.keywords.toLowerCase())
+                    }else if(customer.name){
+                        return customer.name.toLowerCase().includes(this.keywords.toLowerCase());
+                    }else if(customer.customer_code){
+                        return customer.customer_code.toLowerCase().includes(this.keywords.toLowerCase());
+                    }   
+                }
+                
             });
         },
         totalPages() {
