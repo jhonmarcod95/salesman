@@ -25,6 +25,7 @@ use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
 
 use DB;
+use ZipArchive;
 
 class ExpenseController extends Controller
 {

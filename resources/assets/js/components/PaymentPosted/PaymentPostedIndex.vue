@@ -52,7 +52,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label class="form-control-label">Date Filter</label>
                                         <select class="form-control" v-model="week_filter">
@@ -62,7 +62,7 @@
                                         <span class="text-danger" v-if="errors.weekFilter  ">{{ errors.weekFilter[0] }}</span>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-12">
                                     <button class="btn btn-sm btn-primary" @click="fetchPaymentHeaders"> Filter</button>
                                     <download-excel
                                         :data   = "paymentHeaders"
@@ -71,6 +71,8 @@
                                         name    = "Posted Expense report.xls">
                                             Export to excel
                                     </download-excel>
+
+                                    <button class="btn btn-sm btn-warning" @click="downloadImages" :disabled="exportDisable">Export Images</button>
                                 </div>
                             </div>
                         </div>
@@ -319,6 +321,9 @@ import moment from 'moment';
 import loader from '../Loader';
 import JsonExcel from 'vue-json-excel';
 import computation from '../../artisans';
+import JSZip from 'jszip'
+import JSZipUtils from 'jszip-utils'
+import { saveAs } from 'file-saver';
 
 export default {
     components: { loader, 'downloadExcel': JsonExcel },
@@ -359,7 +364,9 @@ export default {
                 'DOCUMENT DATE': 'document_date',
                 'POSTING DATE': 'posting_date',
                 'BASELINE DATE': 'baseline_date',
-            }
+            },
+            imageFiles : [],
+            exportDisable : false,
         }
     },
     created(){
@@ -367,6 +374,74 @@ export default {
         this.populateWeeks();
     },
     methods:{
+        downloadImages(){
+            let v = this;
+            v.exportDisable = true;
+            function urlToPromise(url) {
+                return new Promise(function(resolve, reject) {
+                   
+                        JSZipUtils.getBinaryContent(url, function (err, data) {
+                            try {
+                                if(err) {
+                                    reject(err);
+                                } else {
+                                    resolve(data);
+                                }
+                            }catch(e){
+
+                            }
+                    });
+                   
+                   
+                });
+            }
+            var zip = new JSZip();
+            var img = zip.folder("Export Images");
+           
+            if(v.filteredPaymentHeaders){
+                v.filteredPaymentHeaders.forEach(function(item) {
+                    v.getAttachment(item,item.payments);
+                });
+                var count = v.imageFiles.length;
+                v.imageFiles.forEach(function(item , key) {
+                   var k = key + 1;
+                    try {
+                        JSZipUtils.getBinaryContent('storage/' + item.attachment, function (err, data) {
+                            if(err) {
+                                // throw err; // or handle the error
+                            }else{
+                                 img.file(item.document_code + '_' + item.item_no + '.jpg', data, {binary:true});
+                            }
+
+                            if(k == count){
+                                zip.generateAsync({type:"blob"})
+                                .then(function callback(blob) {
+                                    // see FileSaver.js
+                                    saveAs(blob, "Export Images.zip");
+                                });
+                                v.exportDisable = false;
+                            }
+                        });
+                    } catch (err) {
+                        console.log(err);
+                    }
+                })
+
+                
+            }
+         
+        },
+        getAttachment(header,paymentsData){
+            let v = this;
+            paymentsData.forEach(function(item , key) {
+                v.imageFiles.push({
+                    'item_no' : key + 1,
+                    'document_code' : item.document_code,
+                    'attachment' : item.expense.attachment ? item.expense.attachment : "",
+                    'expsense_id' : item.expense ? item.expense.id : "",
+                })
+            });
+        },
         moment,
         noImage(event){
             event.target.src = window.location.origin+'/img/brand/no-image.png';
@@ -387,7 +462,7 @@ export default {
             var dates = this.week.split('-');
             var start_date  = moment(dates[0]).format('YYYY-MM-DD');
             var end_date = moment(dates[1]).format('YYYY-MM-DD');
-
+            this.exportDisable = true;
             axios.post('/expense-posteds',{
                 company: this.company,
                 startDate: start_date,
@@ -395,8 +470,10 @@ export default {
                 weekFilter: this.week_filter
             })
             .then(response => { 
+                this.imageFiles = [];
                 this.paymentHeaders = response.data;
                 this.getPaymentHeadersTotalAmount();
+                this.exportDisable = false;
             })
             .catch(error => { 
                 this.errors = error.response.data.errors;
@@ -442,6 +519,11 @@ export default {
         }
     },
     computed:{
+        filteredImageFiles(){
+            let v = this;
+            
+          
+        },
         filteredPaymentHeaders(){
             let self = this;
             return self.paymentHeaders.filter(paymentHeader => {
@@ -466,7 +548,8 @@ export default {
             return queues_array;
         },
         imageLink(){
-            return window.location.origin+'/storage/';
+            // return window.location.origin+'/storage/';
+            return 'http://salesforce.lafilgroup.net:8666/storage/';
         }
     },
 }
