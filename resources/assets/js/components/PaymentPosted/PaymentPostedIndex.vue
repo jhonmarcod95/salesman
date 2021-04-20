@@ -65,11 +65,19 @@
                                 <div class="col-md-12">
                                     <button class="btn btn-sm btn-primary" @click="fetchPaymentHeaders"> Filter</button>
                                     <download-excel
+                                        :data   = "paymentHeaderItems"
+                                        :fields = "json_field_items"
+                                        class   = "btn btn-sm btn-default"
+                                        name    = "Posted Expense Items report.xls">
+                                            Export to excel ({{paymentHeaderItems.length}})
+                                    </download-excel>
+
+                                    <download-excel
                                         :data   = "paymentHeaders"
                                         :fields = "json_fields"
                                         class   = "btn btn-sm btn-default"
                                         name    = "Posted Expense report.xls">
-                                            Export to excel
+                                            Export to excel ({{paymentHeaders.length}})
                                     </download-excel>
 
                                     <button class="btn btn-sm btn-warning" @click="downloadImages" :disabled="exportDisable">Export Images</button>
@@ -365,6 +373,40 @@ export default {
                 'POSTING DATE': 'posting_date',
                 'BASELINE DATE': 'baseline_date',
             },
+            paymentHeaderItems : [],
+            json_field_items : {  
+                //Header Details  
+                'Document Code' : 'document_code',
+                'Company Code' : 'company_code',
+                'AP User' : 'ap_user',
+                'Document Type' : 'document_type',
+                'Document Date' : 'document_date',
+                'Company Name' : 'company_name',
+                'Vendor Code' : 'vendor_code',
+                'Payment Terms' : 'payment_terms',
+                'Posting Date' : 'posting_date',
+                'Reference Number' : 'reference_number',
+                'Vendor Name' : 'vendor_name',
+                'Header Text' : 'header_text',
+                'Baseline Date' : 'baseline_date',
+                //Item Details
+                'Item' : 'item',
+                'Item Text' : 'item_text',
+                'GL Account' : 'gl_account',
+                'Description' : 'description',
+                'Assignment' : 'assignment',
+                'Input Tax Code' : 'input_tax_code',
+                'Internal Order' : 'internal_order',
+                'Amount' : 'amount',
+                'Charge Type' : 'charge_type',
+                'Business Area' : 'business_area',
+                'OR Number' : 'or_number',
+                'Supplier Name' : 'supplier_name',
+                'Supplier Address' : 'supplier_address',
+                'Supplier Tin Number' : 'supplier_tin_number',
+
+
+            },
             imageFiles : [],
             exportDisable : false,
         }
@@ -473,10 +515,49 @@ export default {
                 this.imageFiles = [];
                 this.paymentHeaders = response.data;
                 this.getPaymentHeadersTotalAmount();
+                this.filterPaymentHeaderItems();
                 this.exportDisable = false;
             })
             .catch(error => { 
                 this.errors = error.response.data.errors;
+            })
+        },
+        filterPaymentHeaderItems(){
+            let v = this;
+            v.paymentHeaders.forEach(item => {
+                var payment_detail = item.payment_detail;
+                payment_detail.forEach(item_payment_detail => {
+                    v.paymentHeaderItems.push({
+                        'document_code' : item.document_code,
+                        'company_code' : item.company_code,
+                        'ap_user' : item.ap_user,
+                        'document_type' : item.document_type,
+                        'document_date' : item.document_date,
+                        'company_name' : item.company_name,
+                        'vendor_code' : item.vendor_code,
+                        'payment_terms' : item.payment_terms,
+                        'posting_date' : item.posting_date,
+                        'reference_number' : item.reference_number,
+                        'vendor_name' : item.vendor_name,
+                        'header_text' : item.header_text,
+                        'baseline_date' : item.baseline_date,
+
+                        'item' : item_payment_detail.item,
+                        'item_text' : item_payment_detail.item_text,
+                        'gl_account' : item_payment_detail.gl_account,
+                        'description' : item_payment_detail.description,
+                        'assignment' : item_payment_detail.assignment,
+                        'input_tax_code' : item_payment_detail.input_tax_code,
+                        'internal_order' : item_payment_detail.internal_order,
+                        'amount' : item_payment_detail.amount,
+                        'charge_type' : item_payment_detail.charge_type,
+                        'business_area' : item_payment_detail.business_area,
+                        'or_number' : item_payment_detail.or_number,
+                        'supplier_name' : item_payment_detail.supplier_name,
+                        'supplier_address' : item_payment_detail.supplier_address,
+                        'supplier_tin_number' : item_payment_detail.supplier_tin_number,
+                    });
+                })
             })
         },
         setPage(pageNumber) {
@@ -519,11 +600,6 @@ export default {
         }
     },
     computed:{
-        filteredImageFiles(){
-            let v = this;
-            
-          
-        },
         filteredPaymentHeaders(){
             let self = this;
             return self.paymentHeaders.filter(paymentHeader => {
