@@ -69,7 +69,7 @@
                                         :fields = "json_field_items"
                                         class   = "btn btn-sm btn-default"
                                         name    = "Posted Expense Items report.xls">
-                                            Export to excel ({{paymentHeaderItems.length}})
+                                            Export Headers ({{paymentHeaderItems.length}})
                                     </download-excel>
 
                                     <download-excel
@@ -77,7 +77,7 @@
                                         :fields = "json_fields"
                                         class   = "btn btn-sm btn-default"
                                         name    = "Posted Expense report.xls">
-                                            Export to excel ({{paymentHeaders.length}})
+                                            Export Items ({{paymentHeaders.length}})
                                     </download-excel>
 
                                     <button class="btn btn-sm btn-warning" @click="downloadImages" :disabled="exportDisable">Export Images</button>
