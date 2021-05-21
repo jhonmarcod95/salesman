@@ -64,21 +64,24 @@
                                 </div>
                                 <div class="col-md-12">
                                     <button class="btn btn-sm btn-primary" @click="fetchPaymentHeaders"> Filter</button>
+
+                                     <download-excel
+                                        :data   = "paymentHeaders"
+                                        :fields = "json_fields"
+                                        class   = "btn btn-sm btn-default"
+                                        name    = "Posted Expense Headers report.xls">
+                                            Export Headers ({{paymentHeaders.length}})
+                                    </download-excel>
+
                                     <download-excel
                                         :data   = "paymentHeaderItems"
                                         :fields = "json_field_items"
                                         class   = "btn btn-sm btn-default"
                                         name    = "Posted Expense Items report.xls">
-                                            Export Headers ({{paymentHeaderItems.length}})
+                                            Export Items ({{paymentHeaderItems.length}})
                                     </download-excel>
 
-                                    <download-excel
-                                        :data   = "paymentHeaders"
-                                        :fields = "json_fields"
-                                        class   = "btn btn-sm btn-default"
-                                        name    = "Posted Expense report.xls">
-                                            Export Items ({{paymentHeaders.length}})
-                                    </download-excel>
+                                   
 
                                     <button class="btn btn-sm btn-warning" @click="downloadImages" :disabled="exportDisable">Export Images</button>
                                 </div>
