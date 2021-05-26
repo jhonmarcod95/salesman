@@ -335,9 +335,12 @@ class ExpenseController extends Controller
                     $q->whereDate('created_at', '>=',  $request->startDate)
                         ->whereDate('created_at' ,'<=', $request->endDate);
                 }
-                else{ //expense date
+                else if ($request->weekFilter == '2') { //expense date
                     $q->whereDate('expense_from', '>=',  $request->startDate)
                         ->whereDate('expense_to' ,'<=', $request->endDate);
+                }
+                else{ // all
+                    $q->where('vendor_name', 'LIKE', '%' . $request->search . '%');
                 }
 
             })

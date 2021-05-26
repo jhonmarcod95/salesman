@@ -58,6 +58,7 @@
                                         <select class="form-control" v-model="week_filter">
                                             <option value="1">Posting</option>
                                             <option value="2">Expense</option>
+                                            <option value="3">All</option>
                                         </select>
                                         <span class="text-danger" v-if="errors.weekFilter  ">{{ errors.weekFilter[0] }}</span>
                                     </div>
@@ -512,7 +513,8 @@ export default {
                 company: this.company,
                 startDate: start_date,
                 endDate: end_date,
-                weekFilter: this.week_filter
+                weekFilter: this.week_filter,
+                search: this.keywords,
             })
             .then(response => { 
                 this.imageFiles = [];
