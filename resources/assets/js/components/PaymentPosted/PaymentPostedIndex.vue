@@ -445,7 +445,7 @@ export default {
            
             if(v.filteredPaymentHeaders){
                 v.filteredPaymentHeaders.forEach(function(item) {
-                    v.getAttachment(item,item.payments);
+                    v.getAttachment(item,item.payments,item.payment_detail);
                 });
                 var count = v.imageFiles.length;
                 v.imageFiles.forEach(function(item , key) {
@@ -476,15 +476,18 @@ export default {
             }
          
         },
-        getAttachment(header,paymentsData){
+        getAttachment(header,paymentsData,paymentDetail){
             let v = this;
-            paymentsData.forEach(function(item , key) {
-                v.imageFiles.push({
-                    'item_no' : key + 1,
-                    'document_code' : item.document_code,
-                    'attachment' : item.expense.attachment ? item.expense.attachment : "",
-                    'expsense_id' : item.expense ? item.expense.id : "",
-                })
+            paymentDetail.forEach(function(item , key) {
+                if(item.internal_order && item.internal_order !== '~'){
+                     v.imageFiles.push({
+                        'item_no' : item.item,
+                        'document_code' : header.document_code,
+                        'attachment' : paymentsData[key - 1].expense.attachment,
+                        'expsense_id' : paymentsData[key - 1].expense.id,
+                    })
+                }
+               
             });
         },
         moment,
