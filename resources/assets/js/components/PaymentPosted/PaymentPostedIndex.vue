@@ -530,6 +530,7 @@ export default {
         },
         filterPaymentHeaderItems(){
             let v = this;
+            v.paymentHeaderItems = [];
             v.paymentHeaders.forEach(item => {
                 var payment_detail = item.payment_detail;
                 payment_detail.forEach(item_payment_detail => {
