@@ -130,6 +130,11 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('surveys','API\SurveyControllerApi@store');
     Route::get('surveys/{survey}','API\SurveyControllerApi@show');
     Route::post('surveys/attach/{survey}','API\SurveyControllerApi@uploadSurveyPhoto');
+    
+    // Survey Input API
+    Route::post('surveys-inputs','API\SurveryInputsApiController@store');
+    Route::post('surveys-inputs/attach/{surveyInput}','API\SurveryInputsApiController@uploadSurveyPhoto');
+    Route::get('surveys-inputs/questionnaires','API\SurveryInputsApiController@questionnaires');
 
     // Planters Haciendas API
     Route::get('haciendas','API\PlanterHaciendaApiController@index');
