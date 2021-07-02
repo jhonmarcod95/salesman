@@ -508,6 +508,9 @@ export default {
             })
         },
         fetchPaymentHeaders(){
+            this.paymentHeaders = [];
+            this.paymentHeaderItems = [];
+            this.imageFiles = [];
             var dates = this.week.split('-');
             var start_date  = moment(dates[0]).format('YYYY-MM-DD');
             var end_date = moment(dates[1]).format('YYYY-MM-DD');
