@@ -902,6 +902,29 @@
                             }
                         }
 
+                        //Dealer
+                        if(classification_id == '16'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
                         //Farm
                         if(classification_id == '17'){
                             if(status == '1'){
@@ -1039,6 +1062,192 @@
                                 return 'default-office';
                             }
                         }
+
+                        //Distributor
+                        if(classification_id == '23'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        //Wholesaler
+                        if(classification_id == '24'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        //LKA (Local Key Accounts)
+                        if(classification_id == '25'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        //Tertiary
+                        if(classification_id == '26'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        //LGU
+                        if(classification_id == '27'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        //On Premise
+                        if(classification_id == '28'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        //NKAG Head Office
+                        if(classification_id == '29'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        //NKAG Branches
+                        if(classification_id == '30'){
+                            if(status == '1'){
+                                v.countActive +=1;
+                                return 'active-office';
+                            }
+                            else if(status == '3'){
+                                v.countProspect +=1;
+                                return 'prospect-office';
+                            }
+                            else if(status == '2'){
+                                v.countInactive +=1;
+                                return 'inactive-office';
+                            }
+                            else if(status == '4'){
+                                v.countBlocklist +=1;
+                                return 'blocklist-office';
+                            }else{  
+                                v.countDefault +=1;
+                                return 'default-office';
+                            }
+                        }
+
+                        
                     }
                    
                 } else {
