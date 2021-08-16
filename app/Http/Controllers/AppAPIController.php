@@ -387,7 +387,7 @@ class AppAPIController extends Controller
     public function storeExpenses(Request $request)
     {
         // determine if has success visit
-        if($this->checkHasSuccessVisit() == false){
+        if($this->checkHasSuccessVisit() == 'false'){
             $this->validate($request, [
                 'no_success_visit' => 'required'
             ],[
@@ -584,9 +584,9 @@ class AppAPIController extends Controller
                             ->whereDate('date', Carbon::today())
                             ->where('user_id', Auth::user()->id)
                             ->where('status',1)
-                            ->exists();
+                            ->count();
 
-        return response()->json($hasVisited);
+        return $hasVisited > 0 ? 'true' : 'false';
     }
 
     public function dailySchedule()
