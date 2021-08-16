@@ -288,6 +288,20 @@ class ExpensesTest extends TestCase
     /**
      * @test
      */
+    public function check_if_has_visited_schedule()
+    {
+        $response = $this->actingAs($this->defaultUser(),'api')
+            ->json('GET','api/schedules/has-visited');
+
+        $response->assertStatus(200);
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
+    }
+
+
+    /**
+     * @test
+     */
     public function check_expense_restriction()
     {
         $expense_type = 20;

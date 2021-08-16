@@ -386,6 +386,15 @@ class AppAPIController extends Controller
      */
     public function storeExpenses(Request $request)
     {
+        // determine if has success visit
+        if($this->checkHasSuccessVisit() == false){
+            $this->validate($request, [
+                'no_success_visit' => 'required'
+            ],[
+                'no_success_vist.required' => 'Invalid: You should have a completed customer visit to claim.'
+            ]);
+        }
+
         $this->validate($request, [
             'types' => 'required',
             'amount' => [new AmountLimit($request->input('types'), 0, $this->checkBudget($request->input('types'))), 'required'],
@@ -566,6 +575,18 @@ class AppAPIController extends Controller
 
         return response()->json($dailySchedule);
 
+    }
+
+    // check if has success sign in + sign out to input reimbursement
+    public function checkHasSuccessVisit()
+    {
+        $hasVisited = Schedule::orderBy('id','DESC')
+                            ->whereDate('date', Carbon::today())
+                            ->where('user_id', Auth::user()->id)
+                            ->where('status',1)
+                            ->exists();
+
+        return response()->json($hasVisited);
     }
 
     public function dailySchedule()
