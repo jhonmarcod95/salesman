@@ -391,7 +391,7 @@ class AppAPIController extends Controller
             $this->validate($request, [
                 'no_success_visit' => 'required'
             ],[
-                'no_success_visit.required' => 'Invalid: You should have a completed customer visit to claim.'
+                'no_success_visit.required' => 'Invalid: You should have at least one completed customer visit to claim.'
             ]);
         }
 
