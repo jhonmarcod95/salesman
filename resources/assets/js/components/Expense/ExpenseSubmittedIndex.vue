@@ -368,7 +368,7 @@ export default {
                         amount = checkedExpense.amount;
                         tax_code = "IX";
                         bol_tax_amount = false;
-                    }else if(checkedExpense.user.companies[0].code == "PFMC" && filteredBusinessArea[0].business_area.substring(0,2) == "FD"){
+                    }else if(checkedExpense.user.companies[0].code == "2100" && filteredBusinessArea[0].business_area.substring(0,2) == "FD"){
                         amount = checkedExpense.amount;
                         tax_code = "IX";
                     }else{

@@ -165,7 +165,7 @@ class PaymentAutoPosting extends Command
                         $amount = $expense->amount;
                         $tax_code = 'IX';
                         $bol_tax_amount = false;
-                    }else if($expense->user->companies[0]->code == 'PFMC' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){
+                    }else if($expense->user->companies[0]->code == '2100' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){
                         $amount = $expense->amount;
                         $tax_code = 'IX';
                     }else{
@@ -439,7 +439,7 @@ class PaymentAutoPosting extends Command
                     'ITEM_TEXT' => $item['item_text'],
                     'PMNTTRMS' => $payment_terms,
                 ];
-                if ($company_code == 'PFMC') $values['BUS_AREA'] = $item['business_area'];
+                if ($company_code == '2100') $values['BUS_AREA'] = $item['business_area'];
                 $accountPayable[] = $values;
 
                 $currencyAmount[] = [
@@ -465,14 +465,14 @@ class PaymentAutoPosting extends Command
                     'ALLOC_NMBR' => $item['assignment'],
                 ], $ref_keys);
 
-                if ($company_code == 'PFMC') $values['BUS_AREA'] = $item['business_area'];
+                if ($company_code == '2100') $values['BUS_AREA'] = $item['business_area'];
                 if (($company_code == '1100' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == '1500' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == '1200' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
-                    ($company_code == 'PFMC' &&
+                    ($company_code == '2100' &&
                         ($item['gl_account'] == '0060082001'))
                 ){
                     $values['QUANTITY:int'] = '1';
