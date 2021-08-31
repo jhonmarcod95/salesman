@@ -17,6 +17,7 @@ use App\{CronLog,
     Payment,
     PaymentHeader,
     PaymentHeaderError};
+use Illuminate\Support\Facades\Storage;
 
 class PaymentAutoPosting extends Command
 {
@@ -72,6 +73,7 @@ class PaymentAutoPosting extends Command
                         $q->where('company_id', $company->id);
                     });
                 })->whereDate('created_at', '>=',  $dateFrom)
+                ->where('user_id' , 9)
                 ->whereDate('created_at' ,'<=', $dateTo)
                 ->where('expenses_entry_id', '!=', 0)
                 ->get()
@@ -439,7 +441,7 @@ class PaymentAutoPosting extends Command
                     'ITEM_TEXT' => $item['item_text'],
                     'PMNTTRMS' => $payment_terms,
                 ];
-                if ($company_code == '2100') $values['BUS_AREA'] = $item['business_area'];
+                if ($company_code == '2100') $values['BUSINESSPLACE'] = 'AP10'; // todo:: should be table
                 $accountPayable[] = $values;
 
                 $currencyAmount[] = [
@@ -465,7 +467,7 @@ class PaymentAutoPosting extends Command
                     'ALLOC_NMBR' => $item['assignment'],
                 ], $ref_keys);
 
-                if ($company_code == '2100') $values['BUS_AREA'] = $item['business_area'];
+                // if ($company_code == '2100') $values['BUSINESSPLACE'] = $item['business_area'];
                 if (($company_code == '1100' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == '1500' &&
@@ -512,7 +514,7 @@ class PaymentAutoPosting extends Command
                     'GL_ACCOUNT' => $item['gl_account'],
                     'TAX_CODE' => $item['input_tax_code'],
                     'TAX_RATE:int' => '12',
-                    'ITEMNO_TAX' => '1',
+                    'ITEMNO_TAX' => '0', // todo:: logic if sap r3 value => 1 and for s4 => 000000
                 ];
 
                 if ($item['input_tax_code'] == 'I7'){
@@ -541,6 +543,7 @@ class PaymentAutoPosting extends Command
 
         //final parameter for posting
         $payment = array_merge($documentHeader, $accountPayable, $accountGL, $currencyAmount, $accountTax);
+//        Storage::prepend('posting-entries-' . Carbon::now()->format('Y-m-d') . '.log', json_encode($payment));
 //        dd($payment);
         try{
             //sap posting
@@ -624,6 +627,7 @@ class PaymentAutoPosting extends Command
 //                            DB::commit();
                         }
                     } catch (Exception $e) {
+                        dd($e);
 //                        DB::rollBack();
                     }
 
