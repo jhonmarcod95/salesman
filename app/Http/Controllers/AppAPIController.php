@@ -66,8 +66,8 @@ class AppAPIController extends Controller
         // check current schedule
         $checkCurrentSchedule = Schedule::orderBy('id', 'DESC')
             ->whereDate('date', Carbon::today())
-            ->where('user_id', Auth::user()->id)
-            ->where('isCurrent', 1);
+            ->where('user_id', Auth::user()->id);
+            // ->where('isCurrent', 1);
 
         if ($checkIfConditionIO->exists() == true) {
             // default to remove from schedule condition
