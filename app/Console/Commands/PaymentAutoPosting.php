@@ -70,10 +70,10 @@ class PaymentAutoPosting extends Command
             $expenses = Expense::doesntHave('payments')->with('user', 'user.companies', 'user.location','user.vendor', 'user.internalOrders', 'user.companies.businessArea', 'user.companies.glTaxcode','expensesType','expensesType.expenseChargeType.chargeType.expenseGl', 'receiptExpenses','receiptExpenses.receiptType')
                 ->whereHas('user' , function($q) use($company){
                     $q->whereHas('companies', function ($q) use($company){
-                        $q->where('company_id', $company->id);
+//                        $q->where('company_id', $company->id);
+                        $q->whereIn('company_id', [1, 2]);
                     });
                 })->whereDate('created_at', '>=',  $dateFrom)
-                ->where('user_id' , 9)
                 ->whereDate('created_at' ,'<=', $dateTo)
                 ->where('expenses_entry_id', '!=', 0)
                 ->get()
@@ -283,6 +283,7 @@ class PaymentAutoPosting extends Command
             'passwd' => $sapCredential[0]['sap_user']->sap_password,
             'BAPI_TRANSACTION_COMMIT'
         ];
+        $sap_server = $sapCredential[0]['sap_user']->sap_server;
 
         $accounting_entry = [
             'posting_type' => $posting_type,
@@ -467,20 +468,22 @@ class PaymentAutoPosting extends Command
                     'ALLOC_NMBR' => $item['assignment'],
                 ], $ref_keys);
 
-                // if ($company_code == '2100') $values['BUSINESSPLACE'] = $item['business_area'];
+                if ($company_code == 'PFMC') $values['BUS_AREA'] = $item['business_area'];
                 if (($company_code == '1100' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == '1500' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == '1200' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
-                    ($company_code == '2100' &&
+                    ($company_code == 'PFMC' &&
                         ($item['gl_account'] == '0060082001'))
                 ){
                     $values['QUANTITY:int'] = '1';
                     $values['BASE_UOM'] = '10';
                 }
                 $accountGL[] = $values;
+
+
 
                 $currencyAmount[] = [
                     'ITEMNO_ACC' => $item['item_no'],
@@ -514,7 +517,7 @@ class PaymentAutoPosting extends Command
                     'GL_ACCOUNT' => $item['gl_account'],
                     'TAX_CODE' => $item['input_tax_code'],
                     'TAX_RATE:int' => '12',
-                    'ITEMNO_TAX' => '0', // todo:: logic if sap r3 value => 1 and for s4 => 000000
+                    'ITEMNO_TAX' => ($sap_server == 'HANA') ?  '0' : '1', // for HANA value is 0, for r3 is 1
                 ];
 
                 if ($item['input_tax_code'] == 'I7'){
@@ -543,8 +546,8 @@ class PaymentAutoPosting extends Command
 
         //final parameter for posting
         $payment = array_merge($documentHeader, $accountPayable, $accountGL, $currencyAmount, $accountTax);
-//        Storage::prepend('posting-entries-' . Carbon::now()->format('Y-m-d') . '.log', json_encode($payment));
-//        dd($payment);
+        Storage::prepend('posting-entries-' . Carbon::now()->format('Y-m-d') . '.log', json_encode($payment));
+//dd($payment);
         try{
             //sap posting
             $paymentPosting = APIController::executeSapFunction($sapConnection, 'BAPI_ACC_DOCUMENT_POST', $payment, null);
