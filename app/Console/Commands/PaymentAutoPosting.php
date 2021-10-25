@@ -442,7 +442,7 @@ class PaymentAutoPosting extends Command
                     'ITEM_TEXT' => $item['item_text'],
                     'PMNTTRMS' => $payment_terms,
                 ];
-                if ($company_code == '2100') $values['BUSINESSPLACE'] = 'AP10'; // todo:: should be table
+                // if ($company_code == '2100') $values['BUSINESSPLACE'] = 'AP10'; // todo:: should be table
                 $accountPayable[] = $values;
 
                 $currencyAmount[] = [
