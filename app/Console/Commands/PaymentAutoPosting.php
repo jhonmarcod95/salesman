@@ -285,6 +285,9 @@ class PaymentAutoPosting extends Command
         ];
         $sap_server = $sapCredential[0]['sap_user']->sap_server;
 
+        if ($sap_server == 'HANA') $document_type = 'VG';
+
+
         $accounting_entry = [
             'posting_type' => $posting_type,
             'header_text' => 'REIMBURSEMENT',
