@@ -43,6 +43,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('schedules/status','AppAPIController@completedToday');
     Route::get('schedules/daily','AppAPIController@dailySchedule');
     Route::get('schedules/exists','AppAPIController@checkHasSchedule');
+    Route::get('schedules/has-visited','AppAPIController@checkHasSuccessVisit');
     Route::get('schedules/visited/{schedule}','AppAPIController@markedVisited');
     Route::get('schedules/current','AppAPIController@getCurrentSchedule');
 
