@@ -69,7 +69,7 @@ class PaymentAutoPosting extends Command
             $expenses = Expense::doesntHave('payments')->with('user', 'user.companies', 'user.location','user.vendor', 'user.internalOrders', 'user.companies.businessArea', 'user.companies.glTaxcode','expensesType','expensesType.expenseChargeType.chargeType.expenseGl', 'receiptExpenses','receiptExpenses.receiptType')
                 ->whereHas('user' , function($q) use($company){
                     $q->whereHas('companies', function ($q) use($company){
-                        $q->where('company_id', $company->id);
+                        $q->whereIn('company_id', [1, 2]);
                     });
                 })->whereDate('created_at', '>=',  $dateFrom)
                 ->whereDate('created_at' ,'<=', $dateTo)
