@@ -177,10 +177,23 @@ export default {
             json_fields: {
                 'CUSTOMER CODE' : 'customer_code',
                 'CUSTOMER NAME': 'name',
+                'Telephone 1' : 'telephone_1',
+                'Telephone 2' : 'telephone_2',
                 'ADDRESS': 'google_address',
-                'PROVINCE' : 'province',
                 'REGION CODE' : 'region_code',
                 'REGION' : 'region',
+                'PROVINCE' : 'province',
+                'SUB REGION': {
+                    callback: (value) => {
+                        if(value.province == 'CALOOCAN' || value.province == 'MALABON' || value.province == 'MANDALUYONG' || value.province == 'MANILA' || value.province == 'MARIKINA' || value.province == 'METRO MANILA' || value.province == 'NAVOTAS' || value.province == 'PASIG' || value.province == 'QUEZON CITY' || value.province == 'SAN JUAN' || value.province == 'VALENZUELA'){
+                            return 'NORTH';
+                        }else if(value.province == 'LAS PINAS' || value.province == 'MAKATI' || value.province == 'MUNTINLUPA' || value.province == 'PARANAQUE' || value.province == 'PASAY CITY' || value.province == 'PATEROS' || value.province == 'TAGUIG'){
+                           return 'SOUTH';
+                        }else{
+                            return '';
+                        }
+                    }
+                },
                 'CLASSIFICATION': {
                     callback: (value) => {
                         if(value.classification == 10 || value.classification == 16){
@@ -208,6 +221,7 @@ export default {
                         }
                     }
                 },
+                'REMARKS' : 'remarks',
                 'CREATION DATE': 'created_at',
             }
         }
