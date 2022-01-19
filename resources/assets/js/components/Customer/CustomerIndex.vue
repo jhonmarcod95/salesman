@@ -222,6 +222,10 @@ export default {
                     }
                 },
                 'REMARKS' : 'remarks',
+                'Distributor' : 'distributor_name',
+                'Brand Use' : 'brand_used',
+                'Monthly Volume' : 'monthly_volume',
+                'Date Converted' : 'date_converted',
                 'CREATION DATE': 'created_at',
             }
         }
