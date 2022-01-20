@@ -151,9 +151,21 @@ class ExpensesTest extends TestCase
 
     public function testFindExpense()
     {
-        $expense_id = 100;
-        $expense = Expense::whereId($expense_id)->whereNotIn('expenses_type_id',[1,3]); // Food, Lodging
+        $expense_id = 159348;
+        $tin = '';
+
+        $expense = Expense::whereId($expense_id)
+                    ->whereHas('receiptExpenses', function($q) use ($tin) {
+                        $q->where('tin_number', $tin);
+                    })
+                    ->whereNotIn('expenses_type_id',[1,3]); // Food, Lodging
+
+        // $expense = Expense::whereId($expense_id)->whereNotIn('expenses_type_id',[1,3])->first(); // Food, Lodging
+
+        // $this->assertFalse(false);
         $this->assertFalse($expense->exists());
+
+        echo json_encode($expense->first(), JSON_PRETTY_PRINT);
     }
 
     /**

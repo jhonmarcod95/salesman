@@ -876,7 +876,12 @@ class AppAPIController extends Controller
                 ]);
         }
 
-        $findExpense = Expense::whereId($request->input('expense_id'))->whereNotIn('expenses_type_id',[1,3]);
+        $findExpense = Expense::whereId($request->input('expense_id'))
+                        ->whereHas('receiptExpenses', function($q) {
+                            $q->where('tin_number', $request->input('tin_number'));
+                        })
+                        ->whereNotIn('expenses_type_id',[1,3]);
+
         if($findExpense->exists()) {
             $this->validate($request,[
                 'receipt_number' => 'required|unique:receipt_expenses',
@@ -916,7 +921,12 @@ class AppAPIController extends Controller
     public function updateReceiptExpense(Request $request, ReceiptExpense $receiptExpense)
     {
 
-        $findExpense = Expense::whereId($request->input('expense_id'))->whereNotIn('expenses_type_id',[1,3]);
+        $findExpense = Expense::whereId($request->input('expense_id'))
+                        ->whereHas('receiptExpenses', function($q) {
+                            $q->where('tin_number', $request->input('tin_number'));
+                        })
+                        ->whereNotIn('expenses_type_id',[1,3]);
+        
         if($findExpense->exists()) {
             $this->validate($request,[
                 'receipt_number' => 'required|unique:receipt_expenses,receipt_number,'.$receiptExpense->id, // OR# or SI#
