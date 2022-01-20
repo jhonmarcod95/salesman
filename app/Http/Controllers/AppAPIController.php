@@ -877,9 +877,9 @@ class AppAPIController extends Controller
         }
 
         $findExpense = Expense::whereId($request->input('expense_id'))
-                        ->whereHas('receiptExpenses', function($q) {
-                            $q->where('tin_number', $request->input('tin_number'));
-                        })
+                        // ->whereHas('receiptExpenses', function($q) {
+                        //     $q->where('tin_number', $request->input('tin_number'));
+                        // })
                         ->whereNotIn('expenses_type_id',[1,3]);
 
         if($findExpense->exists()) {
@@ -922,9 +922,9 @@ class AppAPIController extends Controller
     {
 
         $findExpense = Expense::whereId($request->input('expense_id'))
-                        ->whereHas('receiptExpenses', function($q) {
-                            $q->where('tin_number', $request->input('tin_number'));
-                        })
+                        // ->whereHas('receiptExpenses', function($q) {
+                        //     $q->where('tin_number', $request->input('tin_number'));
+                        // })
                         ->whereNotIn('expenses_type_id',[1,3]);
         
         if($findExpense->exists()) {
