@@ -9,6 +9,7 @@ use App\PaymentHeader;
 use App\SapUser;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentAutoCv extends Command
 {
@@ -69,12 +70,13 @@ class PaymentAutoCv extends Command
             $header_text = $payment_header->header_text;
             $bank_account = $payment_header->company->bankGls->where('bank_id', '1')->first()->gl_account; //revise bank id 1 = BPI
             $amount = $payment_header->payable->amount * -1;
-            $business_area = $payment_header->payable->business_area;
+//            $business_area = $payment_header->payable->business_area;
+            $business_area = ''; // todo:: should be table
             $vendor_code = $payment_header->vendor_code;
             $document_code = $payment_header->document_code;
 
             //api cv posting
-            $posted_cv = APIController::executeSapFunction($connection, 'ZFI_SF_CV_POST', [
+            $posted_cv = APIController::executeSapFunction($connection, 'ZFI_SF_CV_POST', $params = [
                 'COMP_CODE' => $company_code,
                 'DOC_DATE' => $date_today,
                 'POST_DATE' => $date_today,

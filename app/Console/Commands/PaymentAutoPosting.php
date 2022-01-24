@@ -17,6 +17,7 @@ use App\{CronLog,
     Payment,
     PaymentHeader,
     PaymentHeaderError};
+use Illuminate\Support\Facades\Storage;
 
 class PaymentAutoPosting extends Command
 {
@@ -165,7 +166,7 @@ class PaymentAutoPosting extends Command
                         $amount = $expense->amount;
                         $tax_code = 'IX';
                         $bol_tax_amount = false;
-                    }else if($expense->user->companies[0]->code == 'PFMC' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){
+                    }else if($expense->user->companies[0]->code == '2100' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){
                         $amount = $expense->amount;
                         $tax_code = 'IX';
                     }else{
@@ -281,6 +282,10 @@ class PaymentAutoPosting extends Command
             'passwd' => $sapCredential[0]['sap_user']->sap_password,
             'BAPI_TRANSACTION_COMMIT'
         ];
+        $sap_server = $sapCredential[0]['sap_user']->sap_server;
+
+        if ($sap_server == 'HANA') $document_type = 'VG';
+
 
         $accounting_entry = [
             'posting_type' => $posting_type,
@@ -439,7 +444,7 @@ class PaymentAutoPosting extends Command
                     'ITEM_TEXT' => $item['item_text'],
                     'PMNTTRMS' => $payment_terms,
                 ];
-                if ($company_code == 'PFMC') $values['BUS_AREA'] = $item['business_area'];
+                // if ($company_code == '2100') $values['BUSINESSPLACE'] = 'AP10'; // todo:: should be table
                 $accountPayable[] = $values;
 
                 $currencyAmount[] = [
@@ -480,6 +485,8 @@ class PaymentAutoPosting extends Command
                 }
                 $accountGL[] = $values;
 
+
+
                 $currencyAmount[] = [
                     'ITEMNO_ACC' => $item['item_no'],
                     'CURRENCY' => 'PHP',
@@ -512,7 +519,7 @@ class PaymentAutoPosting extends Command
                     'GL_ACCOUNT' => $item['gl_account'],
                     'TAX_CODE' => $item['input_tax_code'],
                     'TAX_RATE:int' => '12',
-                    'ITEMNO_TAX' => '1',
+                    'ITEMNO_TAX' => ($sap_server == 'HANA') ?  '0' : '1', // for HANA value is 0, for r3 is 1
                 ];
 
                 if ($item['input_tax_code'] == 'I7'){
@@ -541,7 +548,8 @@ class PaymentAutoPosting extends Command
 
         //final parameter for posting
         $payment = array_merge($documentHeader, $accountPayable, $accountGL, $currencyAmount, $accountTax);
-//        dd($payment);
+        Storage::prepend('posting-entries-' . Carbon::now()->format('Y-m-d') . '.log', json_encode($payment));
+
         try{
             //sap posting
             $paymentPosting = APIController::executeSapFunction($sapConnection, 'BAPI_ACC_DOCUMENT_POST', $payment, null);
