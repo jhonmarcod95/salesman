@@ -138,6 +138,7 @@ class PaymentAutoPosting extends Command
                     'assignment' => '',
                     'input_tax_code' => '',
                     'internal_order' => '',
+                    'uom' => '',
                     'amount' => '',
                     'charge_type' => '',
                     'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
@@ -184,6 +185,7 @@ class PaymentAutoPosting extends Command
                     $acc_amount_first_index = $acc_amount_first_index + $amount;
 
                     $internal_order = $filteredInternalOrders ? $filteredInternalOrders->internal_order : '';
+                    $uom = $filteredInternalOrders ? $filteredInternalOrders->uom : '';
 
                     array_push($items, [
                         'item_no' =>  $item = $item + 1,
@@ -193,6 +195,7 @@ class PaymentAutoPosting extends Command
                         'assignment' => '',
                         'input_tax_code' => $tax_code,
                         'internal_order' =>  $internal_order,
+                        'uom' => $uom,
                         'amount' => $amount,
                         'charge_type' => $expense->expensesType->expenseChargeType->chargeType->name,
                         'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
@@ -223,6 +226,7 @@ class PaymentAutoPosting extends Command
                         'assignment' => '',
                         'input_tax_code' => 'I7',
                         'internal_order' => '',
+                        'uom' => '',
                         'amount' => $tax_amountI7,
                         'charge_type' => '',
                         'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
@@ -245,6 +249,7 @@ class PaymentAutoPosting extends Command
                         'assignment' => '',
                         'input_tax_code' => 'I3',
                         'internal_order' => '',
+                        'uom' => '',
                         'amount' => $tax_amountI3,
                         'charge_type' => '',
                         'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
@@ -471,6 +476,7 @@ class PaymentAutoPosting extends Command
                 ], $ref_keys);
 
                 if ($company_code == 'PFMC') $values['BUS_AREA'] = $item['business_area'];
+
                 if (($company_code == '1100' &&
                         ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
                     ($company_code == '1500' &&
@@ -483,6 +489,15 @@ class PaymentAutoPosting extends Command
                     $values['QUANTITY:int'] = '1';
                     $values['BASE_UOM'] = '10';
                 }
+
+                if ($company_code == '2100'){
+                    if ($item['uom']){ // has UOM, will post UOM and QTY
+                        $values['QUANTITY:int'] = '1';
+                        $values['BASE_UOM'] = $item['uom'];
+                    }
+                }
+
+
                 $accountGL[] = $values;
 
 
