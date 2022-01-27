@@ -26,7 +26,7 @@ class PaymentAutoPosting extends Command
      *
      * @var string
      */
-    protected $signature = 'payment:autoposting';
+    protected $signature = 'payment:autoposting {sap_server}';
 
     /**
      * The console command description.
@@ -52,18 +52,27 @@ class PaymentAutoPosting extends Command
      */
     public function handle()
     {
-//        CronLog::create(['name' => $this->signature]);
+        CronLog::create(['name' => $this->signature]);
 //        RunningCommand::create(['name' => $this->signature]); // this will force error if command runs at the same time
 
         $lastWeekMonday = date("Y-m-d", strtotime("last week monday"));
         $lastWeekSunday = date("Y-m-d", strtotime("last sunday"));
-        $this->generateExpense($lastWeekMonday, $lastWeekSunday);
+        $sap_server = $this->argument('sap_server');
+
+        $this->generateExpense($lastWeekMonday, $lastWeekSunday, $sap_server);
 
 //        RunningCommand::where('name', $this->signature)->delete();
     }
 
-    public function generateExpense($dateFrom, $dateTo){
-        $companies = Company::where('hasSAP', 1)->orderBy('id', 'desc')->get();
+    public function generateExpense($dateFrom, $dateTo, $sap_server){
+
+        $companies = Company::whereHas('sapServers', function ($q) use ($sap_server) {
+                $q->where('sap_server', $sap_server);
+            })
+            ->where('hasSAP', 1)
+            ->orderBy('id', 'desc')
+            ->get();
+
         $coveredWeek = Carbon::parse($dateFrom)->format('m/d/Y') . ' to ' .Carbon::parse($dateTo)->format('m/d/Y');
 
         foreach($companies as $company){
@@ -75,7 +84,6 @@ class PaymentAutoPosting extends Command
                 })->whereDate('created_at', '>=',  $dateFrom)
                 ->whereDate('created_at' ,'<=', $dateTo)
                 ->where('expenses_entry_id', '!=', 0)
-                ->where('user_id', 17)
                 ->get()
                 ->groupBy('user.id');
 
@@ -577,8 +585,9 @@ class PaymentAutoPosting extends Command
 
         //final parameter for posting
         $payment = array_merge($documentHeader, $accountPayable, $accountGL, $currencyAmount, $accountTax);
-dd($payment);
-        Storage::prepend('posting-entries-' . Carbon::now()->format('Y-m-d') . '.log', json_encode($payment));
+        Storage::prepend('posting-entries-' . Carbon::now()->format('Y-m-d') . '.log', Carbon::now() . ' : ' . json_encode($payment));
+
+//        dd($payment);
 
         try{
             //sap posting

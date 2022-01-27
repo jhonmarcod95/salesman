@@ -30,28 +30,63 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        //auto posting
-        $schedule->command('payment:autoposting')
-            ->weekly()->tuesdays()->at('00:01');
 
-        //auto cv
+        /* begin:: every tuesday *******************/
+
+        // auto posting
+        $schedule->command('payment:autoposting LFUG')
+            ->weekly()
+            ->tuesdays()
+            ->at('00:01');
+
+        $schedule->command('payment:autoposting HANA')
+            ->weekly()
+            ->tuesdays()
+            ->at('00:15');
+
+
+        // auto cv
         $schedule->command('payment:autocv')
-            ->weekly()->tuesdays()->at('00:21');
+            ->weekly()
+            ->tuesdays()
+            ->at('00:30');
 
-        //auto cv
+        // auto check
         $schedule->command('payment:autocheck')
-            ->weekly()->tuesdays()->at('00:31');
+            ->weekly()
+            ->tuesdays()
+            ->at('00:35');
 
-        //auto posting month end
-        $schedule->command('payment:autopostingmonthend')->monthlyOn(date('t'), '23:00');
-        $schedule->command('payment:autocv')->monthlyOn(date('t'), '23:21');
-        $schedule->command('payment:autocheck')->monthlyOn(date('t'), '23:31');
+        /* end:: every tuesday **********************/
+
+
+        /* begin:: every month end *******************/
+
+        $schedule->command('payment:autopostingmonthend HANA')
+            ->monthlyOn(date('t'), '23:15');
+
+        $schedule->command('payment:autopostingmonthend LFUG')
+            ->monthlyOn(date('t'), '23:30');
+
+        $schedule->command('payment:autocv')
+            ->monthlyOn(date('t'), '23:45');
+
+        $schedule->command('payment:autocheck')
+            ->monthlyOn(date('t'), '23:50');
+
+        /* end:: every month end *********************/
+
+
+        /* begin:: daily *****************************/
 
         //Get Customer Order
         $schedule->command('command:customer_order')->dailyAt('6:00');
 
         //Get Customer Order
         $schedule->command('command:sap_customer_codes')->dailyAt('23:59');
+
+        /* end:: daily *******************************/
+
 
     }
 

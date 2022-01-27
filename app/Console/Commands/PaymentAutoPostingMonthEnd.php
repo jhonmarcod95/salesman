@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\CronLog;
 use Illuminate\Console\Command;
 
 class PaymentAutoPostingMonthEnd extends Command
@@ -11,7 +12,7 @@ class PaymentAutoPostingMonthEnd extends Command
      *
      * @var string
      */
-    protected $signature = 'payment:autopostingmonthend';
+    protected $signature = 'payment:autopostingmonthend {sap_server}';
 
     /**
      * The console command description.
@@ -37,10 +38,13 @@ class PaymentAutoPostingMonthEnd extends Command
      */
     public function handle()
     {
+        CronLog::create(['name' => $this->signature]);
+
         $thisMonday = date("Y-m-d", strtotime("last monday"));
         $lastDayMonth = date("Y-m-d", strtotime("last day of this month"));
+        $sap_server = $this->argument('sap_server');
 
         $paymentAutoPosting = new PaymentAutoPosting();
-        $paymentAutoPosting->generateExpense($thisMonday, $lastDayMonth);
+        $paymentAutoPosting->generateExpense($thisMonday, $lastDayMonth, $sap_server);
     }
 }
