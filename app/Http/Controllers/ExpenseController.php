@@ -284,7 +284,7 @@ class ExpenseController extends Controller
             $data = [
                 'sap_user' => $sap_user,
                 'sap_server' => $sap_server,
-                'reference_number' => Auth::user()->id . $reference_number + 1
+                'reference_number' => Auth::user()->id . ($reference_number + 1)
             ];
 
             return array ($data);

@@ -29,4 +29,8 @@ class SalesmanInternalOrder extends Model implements Auditable
     {
         return $this->hasMany(BalanceHistory::class,'internal_order','internal_order');
     }
+
+    public function gl_account(){
+        return $this->belongsTo(GlAccount::class);
+    }
 }

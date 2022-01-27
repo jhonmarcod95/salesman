@@ -52,14 +52,14 @@ class PaymentAutoPosting extends Command
      */
     public function handle()
     {
-        CronLog::create(['name' => $this->signature]);
-        RunningCommand::create(['name' => $this->signature]); // this will force error if command runs at the same time
+//        CronLog::create(['name' => $this->signature]);
+//        RunningCommand::create(['name' => $this->signature]); // this will force error if command runs at the same time
 
         $lastWeekMonday = date("Y-m-d", strtotime("last week monday"));
         $lastWeekSunday = date("Y-m-d", strtotime("last sunday"));
         $this->generateExpense($lastWeekMonday, $lastWeekSunday);
 
-        RunningCommand::where('name', $this->signature)->delete();
+//        RunningCommand::where('name', $this->signature)->delete();
     }
 
     public function generateExpense($dateFrom, $dateTo){
@@ -75,6 +75,7 @@ class PaymentAutoPosting extends Command
                 })->whereDate('created_at', '>=',  $dateFrom)
                 ->whereDate('created_at' ,'<=', $dateTo)
                 ->where('expenses_entry_id', '!=', 0)
+                ->where('user_id', 17)
                 ->get()
                 ->groupBy('user.id');
 
@@ -150,6 +151,9 @@ class PaymentAutoPosting extends Command
                 ]);
 
                 foreach($groupedExpenses as $expense){ // Loop entry per month. This will generate line 2 to the nth line
+
+                    $company_code = $expense->user->companies[0]->code;
+
                     array_push($expense_ids,$expense->id);
                     $filteredGL = $expense->expensesType->expenseChargeType->chargeType->expenseGl->where('charge_type', $expense->expensesType->expenseChargeType->chargeType->name)
                         ->where('company_code', $expense->user->companies[0]->code)->first(); //Loop to get correct GL base on the charge type and user company code
@@ -163,17 +167,17 @@ class PaymentAutoPosting extends Command
                     $supplier_address = '';
                     $bol_tax_amount = false;
 
-                    if($expense->user->companies[0]->code == '1100' || $expense->user->companies[0]->code == 'CSCI'){
+                    if($company_code == '1100' || $company_code == 'CSCI'){ // NON-VAT
                         $amount = $expense->amount;
                         $tax_code = 'IX';
                         $bol_tax_amount = false;
-                    }else if($expense->user->companies[0]->code == '2100' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){
+                    }else if($company_code == '2100' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){ // NON-VAT
                         $amount = $expense->amount;
                         $tax_code = 'IX';
                     }else{
                         $tax_code = $expense->receiptExpenses ? $expense->receiptExpenses->receiptType->tax_code : 'IX';
 
-                        if($tax_code  == 'IX'){
+                        if($tax_code  == 'IX'){ // NON-VAT
                             $amount = number_format($expense->amount, 2, '.', "");
                             $tax_amount = number_format($expense->amount, 2, '.', "");
                         }else{
@@ -187,11 +191,21 @@ class PaymentAutoPosting extends Command
                     $internal_order = $filteredInternalOrders ? $filteredInternalOrders->internal_order : '';
                     $uom = $filteredInternalOrders ? $filteredInternalOrders->uom : '';
 
+                    // populate gl account
+                    if ($company_code == '2100'){
+                        $gl_account_code = $filteredInternalOrders->gl_account->code; // gl from IO master
+                        $gl_account_name = $filteredInternalOrders->gl_account->name;
+                    }
+                    else{
+                        $gl_account_code = $filteredGL->gl_account; // gl from expense master
+                        $gl_account_name = $filteredGL->gl_description;
+                    }
+
                     array_push($items, [
                         'item_no' =>  $item = $item + 1,
                         'item_text' => 'SALESFORCE ' . strtoupper($expense->expensesType->name . ' ' . $expense->created_at->format('m/d/Y')),
-                        'gl_account' => $filteredGL->gl_account,
-                        'gl_description' => $filteredGL->gl_description,
+                        'gl_account' =>  $gl_account_code,
+                        'gl_description' => $gl_account_name,
                         'assignment' => '',
                         'input_tax_code' => $tax_code,
                         'internal_order' =>  $internal_order,
@@ -491,7 +505,7 @@ class PaymentAutoPosting extends Command
                 }
 
                 if ($company_code == '2100'){
-                    if ($item['uom']){ // has UOM, will post UOM and QTY
+                    if ($item['uom']){ // has UOM, will post cUOM and QTY
                         $values['QUANTITY:int'] = '1';
                         $values['BASE_UOM'] = $item['uom'];
                     }
@@ -563,6 +577,7 @@ class PaymentAutoPosting extends Command
 
         //final parameter for posting
         $payment = array_merge($documentHeader, $accountPayable, $accountGL, $currencyAmount, $accountTax);
+dd($payment);
         Storage::prepend('posting-entries-' . Carbon::now()->format('Y-m-d') . '.log', json_encode($payment));
 
         try{
