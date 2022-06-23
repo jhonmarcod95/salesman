@@ -75,10 +75,7 @@ class UpdateIODetails extends Command
                 $update_io->gl_account_id = $gl_account_id;
                 $update_io->uom = $uom;
                 $update_io->save();
-                dd($update_io);
             }
-
-
         }
 
     }
