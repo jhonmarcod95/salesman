@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
         Commands\GetCustomerOrder::class,
         Commands\SapCustomerCode::class,
         Commands\FetchHaciendaFromSap::class,
+        Commands\UpdateIODetails::class,
     ];
 
     /**
@@ -87,7 +88,10 @@ class Kernel extends ConsoleKernel
 
         /* end:: daily *******************************/
 
-
+        // update IO details
+        $schedule->command('update:IODetails')
+            ->weekly()
+            ->mondays();
     }
 
     /**
