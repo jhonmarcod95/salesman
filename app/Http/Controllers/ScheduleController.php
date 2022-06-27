@@ -103,7 +103,7 @@ class ScheduleController extends Controller
 
     public function store(Request $request)
     {
-        $company_id = Auth::user()->companies->pluck(['id']); //used to filter with same company
+        $company_ids = Auth::user()->companies->pluck(['id']); //used to filter with same company
 
         $request->validate([
             'user_id' => ['required', new AllowedScheduler()],
@@ -135,7 +135,7 @@ class ScheduleController extends Controller
 
                 foreach ($customer_codes as $customer_code){
                     $customer = Customer::where('customer_code', $customer_code)
-                        ->where('company_id', $company_id)
+                        ->whereIn('company_id', $company_ids)
                         ->first();
 
                     $schedule = new Schedule();
