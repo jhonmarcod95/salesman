@@ -47,7 +47,7 @@ class PaymentAutoCheck extends Command
         $thisSunday = date("Y-m-d", strtotime("this sunday"));
 
         $check_vouchers = CheckVoucher::with('company.sapServers', 'company.bankChecks')
-            ->whereBetween('created_at', [$thisMonday, $thisSunday])
+            ->whereBetween('created_at', [$thisMonday, $thisSunday . ' 23:59:59'])
             ->whereDoesntHave('checkInfo') // CV without check number
             ->get();
 
