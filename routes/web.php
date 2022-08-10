@@ -216,6 +216,10 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
 });
 
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|tsr']], function () {
+    Route::get('/surveys/home','SurveysController@surveyHome');
+});
+
 // AP Routes
 Route::group(['middleware' => ['auth', 'role:ap|tax|audit|finance-gl']], function(){
     // Payments

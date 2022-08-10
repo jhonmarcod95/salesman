@@ -152,6 +152,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('grassroots/types','API\GrassrootsController@grassrootsExpenseTypes');
     Route::post('grassroots','API\GrassrootsController@store');
 
-    
+    //Survey Checking 
+    Route::get('surveys/customer-visited/{customer_id}','SurveysController@checkIfAlreadySurveyed');
 
 });
