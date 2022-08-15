@@ -327,24 +327,28 @@ class ExpenseController extends Controller
             'endDate' => 'required',
             'weekFilter' => 'required'
         ]);
-
-        return PaymentHeader::with('paymentDetail', 'payments.expense', 'checkVoucher.checkInfo')
-            ->where('company_name', $request->company)
-            ->where(function ($q) use ($request){
-                if ($request->weekFilter == '1'){ //posting date
+        
+        return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request){
+                $q->whereHas('expense',function($q) use($request){
                     $q->whereDate('created_at', '>=',  $request->startDate)
-                        ->whereDate('created_at' ,'<=', $request->endDate);
-                }
-                else if ($request->weekFilter == '2') { //expense date
-                    $q->whereDate('expense_from', '>=',  $request->startDate)
-                        ->whereDate('expense_to' ,'<=', $request->endDate);
-                }
-                else{ // all
-                    $q->where('vendor_name', 'LIKE', '%' . $request->search . '%');
-                }
-
+                    ->whereDate('created_at' ,'<=', $request->endDate);
+                })
+                ->with('expense');
+            }])
+            ->where('company_name', $request->company)
+            ->when($request->weekFilter == '1', function($q) use($request){//posting date
+                $q->whereDate('created_at', '>=',  $request->startDate)
+                ->whereDate('created_at' ,'<=', $request->endDate);
             })
-            ->orderBy('id', 'desc')->get();
+            ->when($request->weekFilter == '2', function($q) use($request){//expense date
+                $q->whereDate('expense_from', '>=',  $request->startDate)
+                ->whereDate('expense_to' ,'<=', $request->endDate);
+            })
+            ->when($request->weekFilter == '3', function($q) use($request){//all
+                $q->where('vendor_name', 'LIKE', '%' . $request->search . '%');
+            })
+            ->orderBy('id', 'desc')
+            ->get();
     }
 
     /**
