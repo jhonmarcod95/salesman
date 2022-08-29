@@ -201,8 +201,8 @@ class PaymentAutoPosting extends Command
 
                     // populate gl account
                     if ($company_code == '2100'){
-                        $gl_account_code = $filteredInternalOrders->gl_account->code; // gl from IO master
-                        $gl_account_name = $filteredInternalOrders->gl_account->name;
+                        $gl_account_code = $filteredInternalOrders->gl_account->code ?? null; // gl from IO master
+                        $gl_account_name = $filteredInternalOrders->gl_account->name ?? null;
                     }
                     else{
                         $gl_account_code = $filteredGL->gl_account; // gl from expense master
