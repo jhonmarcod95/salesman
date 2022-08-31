@@ -31,16 +31,12 @@ class Schedule extends Model implements Auditable
     }
 
     public static function filter($from, $to, $uids, $codes){
-        $login_level = Auth::user()->roles->first()->level; //this is used to control the filter level of each user
         $company_ids = Auth::user()->companies->pluck('id'); //used to filter with same company
 
         return Schedule::join('schedule_types', 'schedule_types.id', 'schedules.type')
             ->join('users', 'users.id', 'schedules.user_id')
             ->join('background_colors', 'background_colors.id', 'schedule_types.color')
-            ->join('role_user', 'role_user.user_id', 'users.id')
-            ->join('roles', 'roles.id', 'role_user.role_id')
             ->join('company_user', 'company_user.user_id', 'users.id')
-            ->where('roles.level', '<=', $login_level)
             ->whereIn('company_user.company_id', $company_ids)
             ->whereBetween('date', [$from, $to])
             ->whereIn('schedules.user_id', $uids)
