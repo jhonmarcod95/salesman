@@ -143,7 +143,7 @@ class AttendanceReportController extends Controller
         return $new_schedule;
     }
 
-    public function generateByToday(){
+    /* public function generateByToday(){
         $today = date('Y-m-d');
 
 
@@ -166,10 +166,10 @@ class AttendanceReportController extends Controller
             ->paginate(10);
 
         return $schedule;
-    }
+    } */
 
     //ORIGINAL FUNCTION
-    /* public function generateByToday(){
+    public function generateByToday(){
         $today = date('Y-m-d');
 
 
@@ -193,6 +193,7 @@ class AttendanceReportController extends Controller
             }else{
                 foreach($schedule->pluck('user') as $key => $value){
                     // AVP and Coordinator  roles
+                    dd($value->roles[0]['level']);
                     if(Auth::user()->level() < 6){
                         if($value->roles[0]['level'] < 6){
                             $new_schedule[] = $schedule[$key];
@@ -208,7 +209,7 @@ class AttendanceReportController extends Controller
 
         // return $schedule;
         return $new_schedule;
-    } */
+    }
 
      /**
      * Get all area that is current visiting

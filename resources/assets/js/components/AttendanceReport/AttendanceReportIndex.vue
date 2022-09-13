@@ -159,29 +159,14 @@
                                                 {{ checkRendereShorTime(schedule.attendances.sign_out, schedule.attendances.sign_in) }}
                                             </span>
                                         </td>
-                                        <!-- <td></td> -->
                                         <td>
                                             {{ schedule.schedule_type.description }}
-                                            <!-- {{ schedule.type }} -->
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                        <div class="card-footer py-4">
-                            <!-- <nav aria-label="...">
-                                <ul class="pagination justify-content-end mb-0">
-                                    <li class="page-item">
-                                        <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
-                                    </li>
-                                    <li class="page-item">
-                                        Page {{ currentPage + 1 }} of {{ totalPages }}
-                                    </li>
-                                    <li class="page-item">
-                                        <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
-                                    </li>
-                                </ul>
-                            </nav> -->
                             <pagination 
                                 :data="schedules" 
                                 :limit="10"
