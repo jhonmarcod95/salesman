@@ -187,8 +187,6 @@
                                 :limit="10"
                                 :show-disabled="true"
                                 @pagination-change-page="fetchTodaySchedules">
-                                <!-- <span slot="prev-nav">&lt; Previous</span>
-	                            <span slot="next-nav">Next &gt;</span> -->
                             </pagination>
                         </div>
                     </div>

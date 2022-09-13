@@ -149,6 +149,32 @@ class AttendanceReportController extends Controller
 
         $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
             ->whereHas('user' , function($q){
+                if (!Auth::user()->hasRole('hr')) {
+                    if (Auth::user()->level() >= 6) {
+                        $q->whereHas('companies', function ($q){
+                            $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                        });
+                    } else {
+                        $q->whereHas('companies', function ($q){
+                            $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                        });
+                    }
+                }
+            })
+            ->whereDate('date', '=', $today)
+            ->orderBy('date', 'desc')
+            ->paginate(10);
+
+        return $schedule;
+    }
+
+    //ORIGINAL FUNCTION
+    /* public function generateByToday(){
+        $today = date('Y-m-d');
+
+
+        $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
+            ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                 });
@@ -182,7 +208,7 @@ class AttendanceReportController extends Controller
 
         // return $schedule;
         return $new_schedule;
-    }
+    } */
 
      /**
      * Get all area that is current visiting
