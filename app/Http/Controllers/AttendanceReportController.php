@@ -154,7 +154,9 @@ class AttendanceReportController extends Controller
                 });
             })
             ->whereDate('date', '=', $today)
-            ->orderBy('date', 'desc')->get();
+            ->orderBy('date', 'desc')
+            ->paginate(10);
+            // ->get();
 
         $new_schedule = [];
 
@@ -178,6 +180,7 @@ class AttendanceReportController extends Controller
             $new_schedule = $schedule;
         }
 
+        // return $schedule;
         return $new_schedule;
     }
 

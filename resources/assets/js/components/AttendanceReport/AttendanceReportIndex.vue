@@ -112,7 +112,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(schedule, s) in filteredQueues" v-bind:key="s">
+                                    <tr v-for="(schedule, s) in schedules.data" v-bind:key="s">
                                     <td class="text-right">
                                             <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
@@ -169,7 +169,7 @@
                             </table>
                         </div>
                        <div class="card-footer py-4">
-                            <nav aria-label="...">
+                            <!-- <nav aria-label="...">
                                 <ul class="pagination justify-content-end mb-0">
                                     <li class="page-item">
                                         <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
@@ -181,7 +181,15 @@
                                         <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
                                     </li>
                                 </ul>
-                            </nav>
+                            </nav> -->
+                            <pagination 
+                                :data="schedules" 
+                                :limit="10"
+                                :show-disabled="true"
+                                @pagination-change-page="fetchTodaySchedules">
+                                <!-- <span slot="prev-nav">&lt; Previous</span>
+	                            <span slot="next-nav">Next &gt;</span> -->
+                            </pagination>
                         </div>
                     </div>
                 </div>
@@ -238,6 +246,8 @@
 import moment from 'moment';
 import JsonExcel from 'vue-json-excel'
 import Multiselect from 'vue-multiselect';
+
+Vue.component('pagination', require('laravel-vue-pagination'));
 
 export default {
     components: { 'downloadExcel': JsonExcel, Multiselect },
@@ -433,9 +443,9 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        fetchTodaySchedules(){
+        fetchTodaySchedules(page = 1){
             this.loading = true;
-            axios.get('/attendance-report-today')
+            axios.get('/attendance-report-today?page=' + page)
             .then(response => {
                 this.schedules = response.data;
                 this.errors = [];
