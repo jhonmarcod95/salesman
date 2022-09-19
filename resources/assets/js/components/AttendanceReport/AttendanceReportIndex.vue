@@ -15,7 +15,7 @@
                                 <div class="col-3 text-right">
                                     <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
                                     <download-excel
-                                        :data   = "schedules"
+                                        :data   = "exportSchedules"
                                         :fields = "json_fields"
                                         class   = "btn btn-sm btn-default"
                                         name    = "Salesforce Attendance report.xls">
@@ -113,7 +113,7 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="(schedule, s) in schedules.data" v-bind:key="s">
-                                    <td class="text-right">
+                                        <td class="text-right">
                                             <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -159,8 +159,10 @@
                                                 {{ checkRendereShorTime(schedule.attendances.sign_out, schedule.attendances.sign_in) }}
                                             </span>
                                         </td>
+                                        <!-- <td></td> -->
                                         <td>
                                             {{ schedule.schedule_type.description }}
+                                            <!-- {{ schedule.type }} -->
                                         </td>
                                     </tr>
                                 </tbody>
@@ -169,7 +171,7 @@
                        <div class="card-footer py-4">
                             <pagination 
                                 :data="schedules" 
-                                :limit="10"
+                                :limit="5"
                                 :show-disabled="true"
                                 @pagination-change-page="fetchTodaySchedules">
                             </pagination>
@@ -238,6 +240,7 @@ export default {
     data(){
         return{
             tsrs: [],
+            exportSchedules: [],
             schedules: [],
             startDate: '',
             endDate: '',
@@ -428,6 +431,7 @@ export default {
         },
         fetchTodaySchedules(page = 1){
             this.loading = true;
+            this.selectedPage = page;
             axios.get('/attendance-report-today?page=' + page)
             .then(response => {
                 this.schedules = response.data;
@@ -441,7 +445,7 @@ export default {
         },
         fetchSchedules(){
             this.loading = true;
-            this.schedules = [];
+            this.exportSchedules = [];
             axios.post('/attendance-report-bydate', {
                 startDate: this.startDate,
                 endDate: this.endDate,
@@ -450,7 +454,7 @@ export default {
                 schedule_type: this.selectedSchduleType,
             })
             .then(response => {
-                this.schedules = response.data;
+                this.exportSchedules = response.data;
                 this.errors = [];
                  this.loading = false;
             })
@@ -528,9 +532,9 @@ export default {
     computed:{
         filteredSchedules(){
             if(!this.keywords) {
-                return this.schedules
+                return this.schedules.data
             }
-            return this.schedules.filter(schedule => {
+            return this.schedules.data.filter(schedule => {
                 if(schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())) {
                     return schedule;
                 }

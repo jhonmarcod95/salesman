@@ -145,15 +145,23 @@ class AttendanceReportController extends Controller
 
     /* public function generateByToday(){
         $today = date('Y-m-d');
-
-
-        $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
+        
+        $schedule = Schedule::with([
+                'user',
+                'customer.provinces.regions',
+                'attendances',
+                'signinwithoutout',
+                'schedule_type', 
+                'salesmanAttachement'
+            ])
             ->whereHas('user' , function($q){
                 if (!Auth::user()->hasRole('hr')) {
+                    // $q->where('company_id', '!=', null);
                     if (Auth::user()->level() >= 6) {
-                        $q->whereHas('companies', function ($q){
-                            $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
-                        });
+                        $q
+                            ->whereHas('companies', function ($q){
+                                $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                            });
                     } else {
                         $q->whereHas('companies', function ($q){
                             $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
@@ -161,9 +169,9 @@ class AttendanceReportController extends Controller
                     }
                 }
             })
-            ->whereDate('date', '=', $today)
+            ->where('date', $today)
             ->orderBy('date', 'desc')
-            ->paginate(10);
+            ->paginate(5);
 
         return $schedule;
     } */
@@ -179,9 +187,9 @@ class AttendanceReportController extends Controller
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                 });
             })
-            ->whereDate('date', '=', $today)
+            ->where('date',$today)
             ->orderBy('date', 'desc')
-            ->paginate(10);
+            ->paginate(5);
             // ->get();
 
         $new_schedule = [];
@@ -193,7 +201,6 @@ class AttendanceReportController extends Controller
             }else{
                 foreach($schedule->pluck('user') as $key => $value){
                     // AVP and Coordinator  roles
-                    dd($value->roles[0]['level']);
                     if(Auth::user()->level() < 6){
                         if($value->roles[0]['level'] < 6){
                             $new_schedule[] = $schedule[$key];
