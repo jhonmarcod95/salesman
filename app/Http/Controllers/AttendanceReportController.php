@@ -95,9 +95,11 @@ class AttendanceReportController extends Controller
             ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
                 return $query->where('type', $selectedSchedulType);
             })
-            ->whereDate('date', '>=',  $request->startDate)
-            ->whereDate('date' ,'<=', $request->endDate)
-            ->orderBy('date', 'desc')->get();
+            /* ->whereDate('date', '>=',  $request->startDate)
+            ->whereDate('date' ,'<=', $request->endDate) */
+            ->whereBetween('date',[$request->startDate,$request->endDate])
+            ->orderBy('date', 'desc')
+            ->paginate(10);
         }else{
             $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
             ->when($company, function ($query) use ($company) {
@@ -117,9 +119,11 @@ class AttendanceReportController extends Controller
             ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
                 return $query->where('type', $selectedSchedulType);
             })
-            ->whereDate('date', '>=',  $request->startDate)
-            ->whereDate('date' ,'<=', $request->endDate)
-            ->orderBy('date', 'desc')->get();
+            /* ->whereDate('date', '>=',  $request->startDate)
+            ->whereDate('date' ,'<=', $request->endDate) */
+            ->whereBetween('date',[$request->startDate,$request->endDate])
+            ->orderBy('date', 'desc')
+            ->paginate(10);
         }
 
         $new_schedule = [];
@@ -189,7 +193,7 @@ class AttendanceReportController extends Controller
             })
             ->where('date',$today)
             ->orderBy('date', 'desc')
-            ->paginate(5);
+            ->paginate(10);
             // ->get();
 
         $new_schedule = [];

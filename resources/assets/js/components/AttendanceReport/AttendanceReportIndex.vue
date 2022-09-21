@@ -532,9 +532,9 @@ export default {
     computed:{
         filteredSchedules(){
             if(!this.keywords) {
-                return this.schedules.data
+                return this.schedules
             }
-            return this.schedules.data.filter(schedule => {
+            return this.schedules.filter(schedule => {
                 if(schedule.user.name.toLowerCase().includes(this.keywords.toLowerCase())) {
                     return schedule;
                 }
