@@ -585,4 +585,43 @@ Route::get('/get-all-customer-lfug', function () {
 
 });
 
+//Get SAP Customer with sales LFUG
+Route::get('/get-all-customer-hana', function () {
+
+    $client = new Client();
+
+    $connection = [
+        'ashost' => '172.17.5.24',
+        'sysnr' => '01',
+        'client' => '888',
+        'user' => 'app_user',
+        'passwd' => '{iamprogrammer}'
+    ];
+
+
+    $hana = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+                    ['query' => 
+                        ['connection' => $connection,
+                            'table' => [
+                                'table' => ['KNA1' => 'do_headers'],
+                                'fields' => [
+                                    'KUNNR' => 'customer_code',
+                                    'NAME1' => 'name',
+                                    'STRAS' => 'street',
+                                    'ORT01' => 'city',
+                                    'KTOKD' => 'account_group'
+                                ],
+                            ]
+                        ]
+                    ],
+                    ['timeout' => 60],
+                    ['delay' => 10000]
+                );
+
+    $hana_data = json_decode($hana->getBody(), true); 
+
+    return $hana_data;
+
+});
+
 
