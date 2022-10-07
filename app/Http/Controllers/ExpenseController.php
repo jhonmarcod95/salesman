@@ -336,9 +336,15 @@ class ExpenseController extends Controller
         }
 
         return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request, $end_date){
-                $q->whereHas('expense',function($q) use($request,$end_date){
+                $q->when($request->weekFilter == '1', function($q) use($request, $end_date){//Posting
                     $q->whereDate('created_at', '>=',  $request->startDate)
                     ->whereDate('created_at' ,'<=', $end_date);
+                })
+                ->when($request->weekFilter == '2', function($q) use($request, $end_date){//Expense
+                    $q->whereHas('expense',function($q) use($request,$end_date){
+                        $q->whereDate('created_at', '>=',  $request->startDate)
+                        ->whereDate('created_at' ,'<=', $end_date);
+                    });
                 })
                 ->with('expense');
             }])
