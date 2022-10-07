@@ -327,22 +327,29 @@ class ExpenseController extends Controller
             'endDate' => 'required',
             'weekFilter' => 'required'
         ]);
-        
-        return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request){
-                $q->whereHas('expense',function($q) use($request){
+        // Work around to set end date for remaining days of the month
+        $end_date = Carbon::parse($request->endDate);
+        $last_day = Carbon::parse($request->endDate)->endOfMonth();
+        // If remaining days is less than a week, set last day of the month as end date
+        if($last_day->diffInDays($end_date) < 7){
+            $end_date = $last_day;
+        }
+
+        return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request, $end_date){
+                $q->whereHas('expense',function($q) use($request,$end_date){
                     $q->whereDate('created_at', '>=',  $request->startDate)
-                    ->whereDate('created_at' ,'<=', $request->endDate);
+                    ->whereDate('created_at' ,'<=', $end_date);
                 })
                 ->with('expense');
             }])
             ->where('company_name', $request->company)
-            ->when($request->weekFilter == '1', function($q) use($request){//posting date
+            ->when($request->weekFilter == '1', function($q) use($request, $end_date){//posting date
                 $q->whereDate('created_at', '>=',  $request->startDate)
-                ->whereDate('created_at' ,'<=', $request->endDate);
+                ->whereDate('created_at' ,'<=', $end_date);
             })
-            ->when($request->weekFilter == '2', function($q) use($request){//expense date
+            ->when($request->weekFilter == '2', function($q) use($request,$end_date){//expense date
                 $q->whereDate('expense_from', '>=',  $request->startDate)
-                ->whereDate('expense_to' ,'<=', $request->endDate);
+                ->whereDate('expense_to' ,'<=', $end_date);
             })
             ->when($request->weekFilter == '3', function($q) use($request){//all
                 $q->where('vendor_name', 'LIKE', '%' . $request->search . '%');
