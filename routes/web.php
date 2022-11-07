@@ -65,10 +65,10 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     Route::get('/schedule-customer/{classification}', 'ScheduleController@scheduleCustomerData');
 
-    Route::post('/schedules/store', 'ScheduleController@store');
-    Route::patch('/schedules/update/{id}', 'ScheduleController@update');
-    Route::patch('/schedules/change/{id}', 'ScheduleController@change');
-    Route::delete('/schedules/destroy/{id}', 'ScheduleController@destroy');
+    Route::post('/schedules/store', 'ScheduleController@store')->middleware('permission:create.schedule');
+    Route::patch('/schedules/update/{id}', 'ScheduleController@update')->middleware('permission:create.schedule');
+    Route::patch('/schedules/change/{id}', 'ScheduleController@change')->middleware('permission:create.schedule');
+    Route::delete('/schedules/destroy/{id}', 'ScheduleController@destroy')->middleware('permission:create.schedule');
 
     //Announcements
     Route::get('/announcements', 'AnnouncementController@index')->name('announcements_list');
