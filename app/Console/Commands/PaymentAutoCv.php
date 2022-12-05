@@ -48,7 +48,7 @@ class PaymentAutoCv extends Command
         $thisSunday = date("Y-m-d", strtotime("this sunday"));
 
         $payment_headers = PaymentHeader::with('company.sapServers', 'company.bankGls')
-            ->whereBetween('created_at', ['2022-11-28', $thisSunday . ' 23:59:59'])
+            ->whereBetween('created_at', [$thisMonday, $thisSunday . ' 23:59:59'])
             ->whereDoesntHave('checkVoucher') // payment header without CV
             ->get();
 

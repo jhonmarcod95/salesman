@@ -10,7 +10,6 @@ class PaymentHeader extends Model implements Auditable
 {
 
     use \OwenIt\Auditing\Auditable;
-    use \Awobaz\Compoships\Compoships;
 
     protected $fillable = [
         'company_code',
@@ -47,6 +46,6 @@ class PaymentHeader extends Model implements Auditable
     }
 
     public function checkVoucher(){
-        return $this->hasOne(CheckVoucher::class, ['reference_number', 'company_code'], ['reference_number', 'company_code']);
+        return $this->hasOne(CheckVoucher::class, 'reference_number', 'reference_number');
     }
 }
