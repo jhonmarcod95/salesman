@@ -161,7 +161,7 @@
                                         </td>
                                         <!-- <td></td> -->
                                         <td>
-                                            {{ schedule.schedule_type.description }}
+                                            {{ schedule.schedule_type ? schedule.schedule_type.description : '' }}
                                             <!-- {{ schedule.type }} -->
                                         </td>
                                     </tr>
@@ -386,6 +386,7 @@ export default {
         this.fetchTodaySchedules();
         this.fetchRegion();
         this.getScheduleTypes();
+        this.fetchExportData();
     },
     watch: {
         selectedSchduleType() {
@@ -432,7 +433,7 @@ export default {
         fetchTodaySchedules(page = 1){
             this.loading = true;
             this.selectedPage = page;
-            axios.get('/attendance-report-today?page=' + page)
+            axios.get('/attendance-report-today?page=' + page +'&startDate=' + this.startDate + '&endDate=' + this.endDate + '&company=' + this.company + '&selectedRegion=' + this.regionIds + '&schedule_type=' + this.selectedSchduleType)
             .then(response => {
                 this.schedules = response.data;
                 this.errors = [];
@@ -445,8 +446,30 @@ export default {
         },
         fetchSchedules(){
             this.loading = true;
-            this.exportSchedules = [];
+            // this.schedules = [];
             axios.post('/attendance-report-bydate', {
+                startDate: this.startDate,
+                endDate: this.endDate,
+                company: this.company,
+                selectedRegion: this.regionIds,
+                schedule_type: this.selectedSchduleType,
+            })
+            .then(response => {
+                this.schedules = response.data;
+                this.errors = [];
+                this.loading = false;
+
+                this.fetchExportData();
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+                this.loading = false;
+            })
+        },
+        fetchExportData(){
+            this.loading = true;
+            this.exportSchedules = [];
+            axios.post('/fetch-export', {
                 startDate: this.startDate,
                 endDate: this.endDate,
                 company: this.company,
