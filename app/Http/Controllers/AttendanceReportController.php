@@ -62,6 +62,7 @@ class AttendanceReportController extends Controller
         ini_set('memory_limit', '2048M');
 
         $selectedSchedulType = $request->schedule_type;
+        $keyword = $request->keywords;
 
         if($request->company){
             $company = $request->company;
@@ -76,50 +77,115 @@ class AttendanceReportController extends Controller
             }
         }
 
-        if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
-            $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
-            ->whereHas('user' , function($q){
-                $q->whereHas('companies', function ($q){
-                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
-                });
-            })
-            ->when(!empty($regions), function($q) use ($regions) {
-                $q->whereHas('customer' , function($q) use ($regions) {
-                    $q->whereHas('provinces', function ($q) use ($regions){
-                        $q->whereIn('region_id', $regions);
+        if ($request->keywords == '' || $request->keywords == null) {
+            if ($request->startDate == date('Y-m-d') && $request->endDate == date('Y-m-d')) {
+                $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
+                    ->whereHas('user' , function($q){
+                        $q->whereHas('companies', function ($q){
+                            $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                        });
+                    })
+                    ->whereBetween('date',[$request->startDate,$request->endDate])
+                    ->orderBy('date', 'desc')
+                    ->paginate(10);
+            }
+            else{
+                if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
+                    $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
+                    ->whereHas('user' , function($q){
+                        $q->whereHas('companies', function ($q){
+                            $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                        });
+                    })
+                    ->when(!empty($regions), function($q) use ($regions) {
+                        $q->whereHas('customer' , function($q) use ($regions) {
+                            $q->whereHas('provinces', function ($q) use ($regions){
+                                $q->whereIn('region_id', $regions);
+                            });
+                        });
+                    })
+                    ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
+                        return $query->where('type', $selectedSchedulType);
+                    })
+                    ->whereBetween('date',[$request->startDate,$request->endDate])
+                    ->orderBy('date', 'desc')
+                    ->paginate(10);
+                }else{
+                    $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
+                    ->when($company, function ($query) use ($company) {
+                        $query->whereHas('user', function($q) use ($company){
+                            $q->whereHas('companies', function ($q) use ($company){
+                                $q->where('company_id', $company);
+                            });
+                        });
+                    })
+                    ->when(!empty($regions), function($q) use ($regions) {
+                        $q->whereHas('customer' , function($q) use ($regions) {
+                            $q->whereHas('provinces', function ($q) use ($regions){
+                                $q->whereIn('region_id', $regions);
+                            });
+                        });
+                    })
+                    ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
+                        return $query->where('type', $selectedSchedulType);
+                    })
+                    /* ->whereDate('date', '>=',  $request->startDate)
+                    ->whereDate('date' ,'<=', $request->endDate) */
+                    ->whereBetween('date',[$request->startDate,$request->endDate])
+                    ->orderBy('date', 'desc')
+                    ->paginate(10);
+                }
+            }
+        } else {
+            if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
+                $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
+                ->whereHas('user' , function($q){
+                    $q->whereHas('companies', function ($q){
+                        $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                     });
-                });
-            })
-            ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
-                return $query->where('type', $selectedSchedulType);
-            })
-            /* ->whereDate('date', '>=',  $request->startDate)
-            ->whereDate('date' ,'<=', $request->endDate) */
-            ->whereBetween('date',[$request->startDate,$request->endDate])
-            ->orderBy('date', 'desc')
-            ->paginate(10);
-        }else{
-            $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
-            ->when($company, function ($query) use ($company) {
-                $query->whereHas('user', function($q) use ($company){
-                    $q->whereHas('companies', function ($q) use ($company){
-                        $q->where('company_id', $company);
+                })
+                ->when(!empty($regions), function($q) use ($regions) {
+                    $q->whereHas('customer' , function($q) use ($regions) {
+                        $q->whereHas('provinces', function ($q) use ($regions){
+                            $q->whereIn('region_id', $regions);
+                        });
                     });
-                });
-            })
-            ->when(!empty($regions), function($q) use ($regions) {
-                $q->whereHas('customer' , function($q) use ($regions) {
-                    $q->whereHas('provinces', function ($q) use ($regions){
-                        $q->whereIn('region_id', $regions);
+                })
+                ->whereHas('user', function($q) use ($keyword){
+                    $q->where('name', 'LIKE', '%'.$keyword.'%');
+                })
+                ->whereBetween('date',[$request->startDate,$request->endDate])
+                ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
+                    return $query->where('type', $selectedSchedulType);
+                })
+                ->orderBy('date', 'desc')
+                ->paginate(10);
+            }else{
+                $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
+                ->when($company, function ($query) use ($company) {
+                    $query->whereHas('user', function($q) use ($company){
+                        $q->whereHas('companies', function ($q) use ($company){
+                            $q->where('company_id', $company);
+                        });
                     });
-                });
-            })
-            ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
-                return $query->where('type', $selectedSchedulType);
-            })
-            ->whereBetween('date',[$request->startDate,$request->endDate])
-            ->orderBy('date', 'desc')
-            ->paginate(10);
+                })
+                ->when(!empty($regions), function($q) use ($regions) {
+                    $q->whereHas('customer' , function($q) use ($regions) {
+                        $q->whereHas('provinces', function ($q) use ($regions){
+                            $q->whereIn('region_id', $regions);
+                        });
+                    });
+                })
+                ->whereHas('user', function($q) use ($keyword){
+                    $q->where('name', 'LIKE', '%'.$keyword.'%');
+                })
+                ->whereBetween('date',[$request->startDate,$request->endDate])
+                ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
+                    return $query->where('type', $selectedSchedulType);
+                })
+                ->orderBy('date', 'desc')
+                ->paginate(10);
+            }
         }
 
         $new_schedule = [];
@@ -244,6 +310,33 @@ class AttendanceReportController extends Controller
         return $new_schedule;
     }
 
+    /* public function tsrFilter(Request $request){
+        return $request->all();
+        $keyword = $request->keywords;
+
+        
+
+        $new_schedule = [];
+        if(!Auth::user()->hasRole('hr')){
+            // Executive and VP Roles
+            if(Auth::user()->level() >= 6){
+                $new_schedule = $schedule;
+            }else{
+                foreach($schedule->pluck('user') as $key => $value){
+                    // AVP and Coordinator  roles
+                    if(Auth::user()->level() < 6){
+                        if($value->roles[0]['level'] < 6){
+                            $new_schedule[] = $schedule[$key];
+                        }
+                    }else{
+                        $new_schedule = [];
+                    }
+                }
+            }
+        }else {  $new_schedule = $schedule; }
+        return $new_schedule;
+    } */
+
     //ORIGINAL FUNCTION
     /* public function generateByToday(Request $request){
         if (($request->startDate == '' || $request->startDate == null) || ($request->endDate == '' || $request->endDate == null)) {
@@ -287,11 +380,15 @@ class AttendanceReportController extends Controller
     } */
 
     public function exportData(Request $request){
-        if (($request->startDate == '' || $request->startDate == null) || ($request->endDate == '' || $request->endDate == null)) {
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'after_or_equal:start_date'
+        ]);
+
+        /* if (($request->startDate == '' || $request->startDate == null) || ($request->endDate == '' || $request->endDate == null)) {
             $request->startDate = date('Y-m-d');
             $request->endDate = date('Y-m-d');
-        }
-
+        }  */
         $selectedSchedulType = $request->schedule_type;
 
         if($request->company){
@@ -326,7 +423,7 @@ class AttendanceReportController extends Controller
             })
             ->whereBetween('date',[$request->startDate,$request->endDate])
             ->orderBy('date', 'desc')
-            ->paginate(10);
+            ->get();
         }else{
             $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
             ->when($company, function ($query) use ($company) {
@@ -344,11 +441,12 @@ class AttendanceReportController extends Controller
                 });
             })
             ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
-                return $query->where('type', $selectedSchedulType);
+                $query->where('type', $selectedSchedulType);
             })
-            ->whereBetween('date',[$request->startDate,$request->endDate])
+            ->whereDate('date', '>=', $request->startDate)
+            ->whereDate('date' ,'<=', $request->endDate)
             ->orderBy('date', 'desc')
-            ->paginate(10);
+            ->get();
         }
 
         $new_schedule = [];

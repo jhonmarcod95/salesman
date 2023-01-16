@@ -14,6 +14,7 @@
                                 </div>
                                 <div class="col-3 text-right">
                                     <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
+
                                     <download-excel
                                         :data   = "exportSchedules"
                                         :fields = "json_fields"
@@ -56,11 +57,12 @@
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
+                                    
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">End Date</label>
-                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
+                                        <input type="date" id="end_date" class="form-control form-control-alternative" :max="maxDate" v-model="endDate">
                                         <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
                                     </div>
                                 </div>
@@ -255,6 +257,7 @@ export default {
             companies: [],
             company: '',
             keywords: '',
+            keyTimeout: null,
             currentPage: 0,
             itemsPerPage: 10,
             totalFilterSchedule : 0,
@@ -391,6 +394,12 @@ export default {
     watch: {
         selectedSchduleType() {
             console.log('check schedule type: ', this.selectedSchduleType)
+        },
+
+        keywords(val) {
+            if(_.trim(val).length >= 3){
+                this.searchKeyUp();
+            }
         }
     },
     methods:{
@@ -402,6 +411,24 @@ export default {
             })
             .catch(error =>{
                 this.errors = error.response.data.errors;
+            })
+        },
+        searchKeyUp(){
+            clearTimeout(this.keyTimeout);
+            this.keyTimeout = setTimeout(() => {
+                this.searchFilter();
+            }, 500);
+        },
+        searchFilter(){
+            axios.get('/tsr-filter?startDate=' + this.startDate + '&endDate=' + this.endDate + '&company=' + this.company + '&selectedRegion=' + this.regionIds + '&schedule_type=' + this.selectedSchduleType + '&keywords=' + this.keywords)
+            .then(response => {
+                this.schedules = response.data;
+                this.errors = [];
+                this.loading = false;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+                this.loading = false;
             })
         },
         customLabelRegion(region) {
@@ -468,7 +495,10 @@ export default {
         },
         fetchExportData(){
             this.loading = true;
-            this.exportSchedules = [];
+            if (this.exportSchedules !== null) {
+                this.exportSchedules = [];
+            }
+            
             axios.post('/fetch-export', {
                 startDate: this.startDate,
                 endDate: this.endDate,
@@ -563,7 +593,12 @@ export default {
                 }
             });
         },
-
+        maxDate(){
+            let start = this.startDate;
+            if (start != null) {
+                return moment(start).add(1, 'M').format('YYYY-MM-DD');
+            }
+        },
         totalPages() {
             return Math.ceil(this.filteredSchedules.length / this.itemsPerPage)
         },
