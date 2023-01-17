@@ -72,7 +72,7 @@ class AttendanceReportController extends Controller
             }
         }
 
-        if ($request->keywords == '' || $request->keywords == null) {
+        if ($keyword == '' || $keyword == null) {
             if ($request->startDate == date('Y-m-d') && $request->endDate == date('Y-m-d') && ($request->company == null && $regions == null)) {
                 $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
                     ->whereHas('user' , function($q){
@@ -124,8 +124,6 @@ class AttendanceReportController extends Controller
                     ->when(!empty($selectedSchedulType), function ($query, $selectedSchedulType) {
                         return $query->where('type', $selectedSchedulType);
                     })
-                    /* ->whereDate('date', '>=',  $request->startDate)
-                    ->whereDate('date' ,'<=', $request->endDate) */
                     ->whereBetween('date',[$request->startDate,$request->endDate])
                     ->orderBy('date', 'desc')
                     ->paginate(10);
@@ -153,9 +151,12 @@ class AttendanceReportController extends Controller
                 ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
                     return $query->where('type', $selectedSchedulType);
                 })
+                ->whereHas('user', function($q) use ($keyword){
+                    $q->where('name', 'LIKE', '%'.$keyword.'%');
+                })
                 ->orderBy('date', 'desc')
                 ->paginate(10);
-            }else{
+            } else {
                 $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                 ->when($company, function ($query) use ($company) {
                     $query->whereHas('user', function($q) use ($company){
@@ -396,7 +397,7 @@ class AttendanceReportController extends Controller
             }
         }
 
-        if ($request->keywords == '' || $request->keywords == null) {
+        if ($keyword == '' || $keyword == null) {
             if ($request->startDate == date('Y-m-d') && $request->endDate == date('Y-m-d') && ($request->company == null && $regions == null)) {
                 $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
                     ->whereHas('user' , function($q){
@@ -448,8 +449,6 @@ class AttendanceReportController extends Controller
                     ->when(!empty($selectedSchedulType), function ($query, $selectedSchedulType) {
                         return $query->where('type', $selectedSchedulType);
                     })
-                    /* ->whereDate('date', '>=',  $request->startDate)
-                    ->whereDate('date' ,'<=', $request->endDate) */
                     ->whereBetween('date',[$request->startDate,$request->endDate])
                     ->orderBy('date', 'desc')
                     ->get();
@@ -477,9 +476,12 @@ class AttendanceReportController extends Controller
                 ->when($selectedSchedulType, function ($query, $selectedSchedulType) {
                     return $query->where('type', $selectedSchedulType);
                 })
+                ->whereHas('user', function($q) use ($keyword){
+                    $q->where('name', 'LIKE', '%'.$keyword.'%');
+                })
                 ->orderBy('date', 'desc')
                 ->get();
-            }else{
+            } else {
                 $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                 ->when($company, function ($query) use ($company) {
                     $query->whereHas('user', function($q) use ($company){

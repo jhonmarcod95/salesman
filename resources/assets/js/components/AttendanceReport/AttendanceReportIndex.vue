@@ -176,7 +176,7 @@
                                 :data="schedules" 
                                 :limit="5"
                                 :show-disabled="true"
-                                @pagination-change-page="fetchSchedules">
+                                @pagination-change-page="fetchPaginationSchedules">
                             </pagination>
                         </div>
                     </div>
@@ -259,6 +259,7 @@ export default {
             company: '',
             keywords: '',
             keyTimeout: null,
+            pFooter: 0,
             currentPage: 0,
             itemsPerPage: 10,
             totalFilterSchedule : 0,
@@ -403,6 +404,8 @@ export default {
         keywords(val) {
             if(_.trim(val).length >= 3){
                 this.searchKeyUp();
+            } else {
+                this.searchKeyUp();
             }
         }
     },
@@ -432,17 +435,22 @@ export default {
         DateFormat(d){
             return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0"+(d.getDate())).slice(-2);
         },
-        searchFilter(){
-            axios.get('/tsr-filter?startDate=' + this.startDate + '&endDate=' + this.endDate + '&company=' + this.company + '&selectedRegion=' + this.regionIds + '&schedule_type=' + this.selectedSchduleType + '&keywords=' + this.keywords)
+        searchFilter(page = 1){
+            axios.get('/tsr-filter?page=' + page +'&startDate=' + this.startDate + '&endDate=' + this.endDate + '&company=' + this.company + '&selectedRegion=' + this.regionIds + '&schedule_type=' + this.selectedSchduleType + '&keywords=' + this.keywords)
             .then(response => {
                 this.schedules = response.data;
                 this.errors = [];
                 this.loading = false;
+                
+                this.fetchExportData();
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
                 this.loading = false;
             })
+        },
+        paginationFooter(){
+            this.pFooter = 1;
         },
         customLabelRegion(region) {
                 if(region){
@@ -486,7 +494,8 @@ export default {
         },
         fetchSchedules(page = 1){
             this.loading = true;
-            // this.schedules = [];
+            this.keywords = '';
+            
             axios.post('/attendance-report-bydate', {
                 page: page,
                 startDate: this.startDate,
@@ -494,12 +503,35 @@ export default {
                 company: this.company,
                 selectedRegion: this.regionIds,
                 schedule_type: this.selectedSchduleType,
+                keywords: this.keywords,
             })
             .then(response => {
                 this.schedules = response.data;
                 this.errors = [];
                 this.loading = false;
-
+                this.fetchExportData();
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+                this.loading = false;
+            })
+        },
+        fetchPaginationSchedules(page = 1){
+            this.loading = true;
+            
+            axios.post('/attendance-report-bydate', {
+                page: page,
+                startDate: this.startDate,
+                endDate: this.endDate,
+                company: this.company,
+                selectedRegion: this.regionIds,
+                schedule_type: this.selectedSchduleType,
+                keywords: this.keywords,
+            })
+            .then(response => {
+                this.schedules = response.data;
+                this.errors = [];
+                this.loading = false;
                 this.fetchExportData();
             })
             .catch(error => {
@@ -519,6 +551,7 @@ export default {
                 company: this.company,
                 selectedRegion: this.regionIds,
                 schedule_type: this.selectedSchduleType,
+                keywords: this.keywords,
             })
             .then(response => {
                 this.exportSchedules = response.data;
