@@ -16,6 +16,7 @@
                                     <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
 
                                     <download-excel
+                                        v-if="exportSchedules != ''"
                                         :data   = "exportSchedules"
                                         :fields = "json_fields"
                                         class   = "btn btn-sm btn-default"
@@ -175,7 +176,7 @@
                                 :data="schedules" 
                                 :limit="5"
                                 :show-disabled="true"
-                                @pagination-change-page="fetchTodaySchedules">
+                                @pagination-change-page="fetchSchedules">
                             </pagination>
                         </div>
                     </div>
@@ -385,11 +386,14 @@ export default {
         }
     },
     created(){
+        this.setDate();
         this.fetchCompanies();
-        this.fetchTodaySchedules();
+        // this.fetchTodaySchedules();
+        this.fetchSchedules();
         this.fetchRegion();
         this.getScheduleTypes();
-        this.fetchExportData();
+        // this.fetchExportData();
+        
     },
     watch: {
         selectedSchduleType() {
@@ -418,6 +422,15 @@ export default {
             this.keyTimeout = setTimeout(() => {
                 this.searchFilter();
             }, 500);
+        },
+        setDate(){
+            var date = new Date(Date.now());
+            var tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
+            this.startDate = this.DateFormat(date);
+            this.endDate = this.DateFormat(date);
+        },
+        DateFormat(d){
+            return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0"+(d.getDate())).slice(-2);
         },
         searchFilter(){
             axios.get('/tsr-filter?startDate=' + this.startDate + '&endDate=' + this.endDate + '&company=' + this.company + '&selectedRegion=' + this.regionIds + '&schedule_type=' + this.selectedSchduleType + '&keywords=' + this.keywords)
@@ -471,10 +484,11 @@ export default {
                 this.loading = false;
             })
         },
-        fetchSchedules(){
+        fetchSchedules(page = 1){
             this.loading = true;
             // this.schedules = [];
             axios.post('/attendance-report-bydate', {
+                page: page,
                 startDate: this.startDate,
                 endDate: this.endDate,
                 company: this.company,
