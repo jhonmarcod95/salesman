@@ -49,10 +49,18 @@ class SurveysController extends Controller
         $questionnaire = json_decode($request->questionnaire);
 
         DB::beginTransaction();
-        $checkStatus = SurveyHeader::where('company_id',$company)->orderBy('id','desc')->first();
-        $updateQuestionnaire = SurveyQuestionnaire::where('survey_header_id',$checkStatus->id)->update([
-            'status' => 0
-        ]);
+        $checkStatus = SurveyHeader::where('company_id',$company)
+            ->whereHas('surveyQuestionnaires', function ($q){
+                $q->where('status', 1);
+            })
+            ->orderBy('id','desc')->first();
+
+        if ($checkStatus != '' || $checkStatus != null) {
+            $updateQuestionnaire = SurveyQuestionnaire::with('surveyHeader')->where('survey_header_id',$checkStatus->id)
+                ->update([
+                    'status' => 0
+                ]);
+        }
 
         $saveHeader = new SurveyHeader;
         $saveHeader->header = $header;
@@ -95,6 +103,19 @@ class SurveysController extends Controller
         $saveHeader->company_id = $company;
         $saveHeader->save();
 
+        $checkStatus = SurveyHeader::where('company_id',$company)
+            ->whereHas('surveyQuestionnaires', function ($q){
+                $q->where('status', 1);
+            })
+            ->orderBy('id','desc')->first();
+
+        if ($checkStatus != '' || $checkStatus != null) {
+            $updateQuestionnaire = SurveyQuestionnaire::with('surveyHeader')->where('survey_header_id',$checkStatus->id)
+                ->update([
+                    'status' => 0
+                ]);
+        }
+
         $deleteSurvey = SurveyQuestionnaire::where('survey_header_id',$id)->delete();
         
         foreach ($questionnaire as $q) {
@@ -115,8 +136,8 @@ class SurveysController extends Controller
     public function deleteQuestionnaire(Request $request)
     {
         DB::beginTransaction();
-        $deleteHeader = SurveyHeader::where('id',$id)->delete();
-        $deleteQuestion = SurveyQuestionnaire::where('survey_header_id',$id)->delete();
+        $deleteHeader = SurveyHeader::where('id',$request->id)->delete();
+        $deleteQuestion = SurveyQuestionnaire::where('survey_header_id',$request->id)->delete();
         DB::commit();
 
         return 'Survey Successfully Deleted';

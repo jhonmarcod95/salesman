@@ -70,7 +70,7 @@
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                 <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#questionaireEditModal" @click="generatEdit(survey.id)">Edit</a>
-                                                <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#questionaireDeleteModal">Delete</a>
+                                                <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#questionaireDeleteModal" @click="generatEdit(survey.id)">Delete</a>
                                                 <!-- <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule)">Sign out Photo</a> -->
                                             </div>
                                         </div>
@@ -173,7 +173,7 @@
 
         <!-- Questionaire Edit Modal -->
         <div class="modal fade" id="questionaireEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <span class="closed" data-dismiss="modal" id="closedQuestionnaireModal">&times;</span>
+            <span class="closed" data-dismiss="modal" id="closedEditQuestionnaireModal">&times;</span>
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-body">
@@ -227,7 +227,7 @@
 
         <!-- Questionaire Delete Modal -->
         <div class="modal fade" id="questionaireDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <span class="closed" data-dismiss="modal" id="closedQuestionnaireModal">&times;</span>
+            <span class="closed" data-dismiss="modal" id="closedDeleteQuestionnaireModal">&times;</span>
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-body">
@@ -352,8 +352,9 @@ export default {
                 if(response.status === 200) {
                     this.errors = [];
                     this.loading = false;
+                    this.fetchQuestionnaire();
                     this.cancelQuestionnaire();
-                    document.getElementById('closedQuestionnaireModal').click();
+                    document.getElementById('closedEditQuestionnaireModal').click();
                 }
             })
             .catch(error => {
@@ -371,6 +372,9 @@ export default {
                 if(response.status === 200) {
                     this.errors = [];
                     this.loading = false;
+                    this.fetchQuestionnaire();
+                    this.cancelQuestionnaire();
+                    document.getElementById('closedDeleteQuestionnaireModal').click();
                 }
             })
             .catch(error => {
