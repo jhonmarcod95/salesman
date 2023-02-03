@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Survey;
+use App\SurveyHeader;
+use App\SurveyQuestionnaire;
+use DB;
 
 class SurveysController extends Controller
 {
@@ -33,5 +36,114 @@ class SurveysController extends Controller
         return 0;
     }
 
-    
+    public function createQuestionnaire(Request $request)
+    {
+        $request->validate([
+            'company'=> 'required',
+            'header'=> 'required',
+            'questionnaire'=> 'required',
+        ]);
+
+        $company = $request->company;
+        $header = $request->header;
+        $questionnaire = json_decode($request->questionnaire);
+
+        DB::beginTransaction();
+        $checkStatus = SurveyHeader::where('company_id',$company)->orderBy('id','desc')->first();
+        $updateQuestionnaire = SurveyQuestionnaire::where('survey_header_id',$checkStatus->id)->update([
+            'status' => 0
+        ]);
+
+        $saveHeader = new SurveyHeader;
+        $saveHeader->header = $header;
+        $saveHeader->company_id = $company;
+        $saveHeader->save();
+
+        foreach ($questionnaire as $q) {
+            $saveQuestion = new SurveyQuestionnaire;
+            $saveQuestion->status = 1;
+            $saveQuestion->question = $q->quest;
+            $saveQuestion->user_id = auth()->user()->id;
+            $saveQuestion->survey_header_id = $saveHeader->id;
+            $saveQuestion->rating = 1;
+            $saveQuestion->save();
+        }
+
+        DB::commit();
+
+        return 'Survey Successfully Created';
+    }
+
+    public function editQuestionnaire(Request $request)
+    {
+        $request->validate([
+            'id'=> 'required',
+            'company'=> 'required',
+            'header'=> 'required',
+            'questionnaire'=> 'required',
+        ]);
+
+        $id = $request->id;
+        $company = $request->company;
+        $header = $request->header;
+        $questionnaire = json_decode($request->questionnaire);
+
+        DB::beginTransaction();
+
+        $saveHeader = SurveyHeader::with('surveyQuestionnaires')->where('id',$id)->first();
+        $saveHeader->header = $header;
+        $saveHeader->company_id = $company;
+        $saveHeader->save();
+
+        $deleteSurvey = SurveyQuestionnaire::where('survey_header_id',$id)->delete();
+        
+        foreach ($questionnaire as $q) {
+            $saveQuestion = new SurveyQuestionnaire;
+            $saveQuestion->rating = 1;
+            $saveQuestion->status = 1;
+            $saveQuestion->survey_header_id = $id;
+            $saveQuestion->question = $q->quest;
+            $saveQuestion->user_id = auth()->user()->id;
+            $saveQuestion->save();
+        }
+
+        DB::commit();
+
+        return 'Survey Successfully Updated';
+    }
+
+    public function deleteQuestionnaire(Request $request)
+    {
+        DB::beginTransaction();
+        $deleteHeader = SurveyHeader::where('id',$id)->delete();
+        $deleteQuestion = SurveyQuestionnaire::where('survey_header_id',$id)->delete();
+        DB::commit();
+
+        return 'Survey Successfully Deleted';
+    }
+
+    public function displayQuestionnaire(Request $request)
+    {
+        session(['header_text' => 'Created Survey']);
+        return view('surveys.created_survey');
+    }
+
+    public function fetchQuestionnaire(Request $request)
+    {
+        $request->validate([
+            'startDate' => 'required',
+            'endDate' => 'required|after_or_equal:startDate',
+            // 'company' => 'required'
+        ]);
+
+        $company = $request->company != "" ? $request->company : Auth::user()->company->id;
+
+        $survey = SurveyHeader::with(['company', 'surveyQuestionnaires'])->where('company_id', $company)
+        ->whereDate('created_at', '>=',  $request->startDate)
+        ->whereDate('created_at' ,'<=', $request->endDate)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        return $survey;
+    }
 }

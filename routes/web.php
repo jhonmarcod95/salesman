@@ -55,7 +55,11 @@ Route::group(['middleware' => 'auth'], function(){
     });
 });
 
-
+//Surver Creation
+Route::post('surveys/create','SurveysController@createQuestionnaire');
+Route::get('surveys/display','SurveysController@displayQuestionnaire');
+Route::post('surveys/fetch','SurveysController@fetchQuestionnaire');
+Route::post('surveys/edit-questionnaire','SurveysController@editQuestionnaire');
 
 // Admin Routes
 Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|approver|tax|finance-gl']], function () {
@@ -219,6 +223,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|tsr']], function () {
     Route::get('/surveys/home','SurveysController@surveyHome');
 });
+
+
 
 // AP Routes
 Route::group(['middleware' => ['auth', 'role:ap|tax|audit|finance-gl']], function(){

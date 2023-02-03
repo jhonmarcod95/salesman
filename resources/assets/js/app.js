@@ -108,6 +108,9 @@ Vue.component('appointment-duration-report-index', require('./components/Appoint
 // Survey Report Component
 Vue.component('survey-index', require('./components/Survey/SurveyIndex.vue'));
 
+// Survey Display List
+Vue.component('survey-display', require('./components/Survey/CreatedSurvey.vue'));
+
 // Web Based survey
 Vue.component('survey-start', require('./components/Survey/SurveyStart.vue'));
 

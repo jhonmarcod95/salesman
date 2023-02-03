@@ -216,6 +216,11 @@
                                         <i class="ni ni-money-coins text-yellow"></i> Expenses
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="nav-link" href="{{ url('/surveys/display') }}">
+                                        <i class="ni ni-paper-diploma text-green"></i> Survey
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </li>
