@@ -154,7 +154,6 @@ class SurveysController extends Controller
         $request->validate([
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate',
-            // 'company' => 'required'
         ]);
 
         $company = $request->company != "" ? $request->company : Auth::user()->company->id;

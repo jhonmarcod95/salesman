@@ -314,6 +314,8 @@ export default {
                 }
             })
             .catch(error => {
+                this.loading = false
+                console.log(error.response.data.errors);
                 this.errors = error.response.data.errors;
             })
         },
@@ -335,6 +337,7 @@ export default {
                 }
             })
             .catch(error => {
+                this.loading = false
                 this.errors = error.response.data.errors;
             })
         },
@@ -358,6 +361,7 @@ export default {
                 }
             })
             .catch(error => {
+                this.loading = false
                 this.errors = error.response.data.errors;
             })
         },
@@ -378,6 +382,7 @@ export default {
                 }
             })
             .catch(error => {
+                this.loading = false
                 this.errors = error.response.data.errors;
             })
         },
