@@ -79,7 +79,9 @@ class SurveysController extends Controller
 
         DB::commit();
 
-        return 'Survey Successfully Created';
+        $dataResult = SurveyHeader::with(['company', 'surveyQuestionnaires'])->where('id', $saveHeader->id)->first();
+
+        return $dataResult;
     }
 
     public function editQuestionnaire(Request $request)
@@ -147,6 +149,11 @@ class SurveysController extends Controller
     {
         session(['header_text' => 'Created Survey']);
         return view('surveys.created_survey');
+    }
+
+    public function dataQuestionnaire(){
+        $survey = SurveyHeader::with(['company', 'surveyQuestionnaires'])->orderBy('created_at', 'desc')->get();
+        return $survey;
     }
 
     public function fetchQuestionnaire(Request $request)

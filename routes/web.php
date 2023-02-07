@@ -59,6 +59,7 @@ Route::group(['middleware' => 'auth'], function(){
 Route::post('surveys/create','SurveysController@createQuestionnaire');
 Route::get('surveys/display','SurveysController@displayQuestionnaire');
 Route::post('surveys/fetch','SurveysController@fetchQuestionnaire');
+Route::post('surveys/display','SurveysController@dataQuestionnaire');
 Route::post('surveys/edit-questionnaire','SurveysController@editQuestionnaire');
 
 // Admin Routes

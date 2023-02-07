@@ -61,7 +61,7 @@
                                     <th scope="col">Question</th>
                                     <th scope="col">Status</th>
                                 </thead>
-                                <tbody v-for="(survey,i) in filteredSurveys" :key="i" class="list">
+                                <tbody v-for="(survey,i) in filteredSurveys" :key="i" :feedContent="survey" class="list">
                                     <td class="text-right">
                                         <div class="dropdown">
                                             <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
@@ -285,6 +285,7 @@ export default {
     props: ['userRole'],
     created(){
         this.fetchCompanies();
+        this.displayQuestionnaire();
     },
     methods:{
         moment,
@@ -294,6 +295,24 @@ export default {
                 this.companies = response.data;
             })
             .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
+
+        displayQuestionnaire(){
+            this.loading = true
+            axios.post('/surveys/display')
+            .then(response => {
+                console.log('check result: ', response.status)
+                if(response.status === 200) {
+                    this.questionnaire = response.data;
+                    this.errors = [];
+                    this.loading = false
+                }
+            })
+            .catch(error => {
+                this.loading = false
+                console.log(error.response.data.errors);
                 this.errors = error.response.data.errors;
             })
         },
@@ -332,6 +351,9 @@ export default {
                 if(response.status === 200) {
                     this.errors = [];
                     this.loading = false;
+
+                    this.questionnaire.unshift(response.data);
+
                     this.cancelQuestionnaire();
                     document.getElementById('closedQuestionnaireModal').click();
                 }
