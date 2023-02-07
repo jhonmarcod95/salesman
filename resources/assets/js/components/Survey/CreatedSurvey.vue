@@ -69,8 +69,8 @@
                                                 <i class="fas fa-ellipsis-v"></i>
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#questionaireEditModal" @click="generatEdit(survey.id)">Edit</a>
-                                                <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#questionaireDeleteModal" @click="generatEdit(survey.id)">Delete</a>
+                                                <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#questionaireEditModal" @click="generatEdit(survey.id, i)">Edit</a>
+                                                <a class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#questionaireDeleteModal" @click="generatEdit(survey.id, i)">Delete</a>
                                                 <!-- <a v-if="schedule.attendances && schedule.attendances.sign_out !== null" class="dropdown-item" href="javascript:void(0)"  data-toggle="modal" data-target="#photoModal" @click="getImage(schedule)">Sign out Photo</a> -->
                                             </div>
                                         </div>
@@ -270,6 +270,7 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            indexRange: '',
 
             questionaire_company: '',
             questionaire_header: '',
@@ -377,7 +378,7 @@ export default {
                 if(response.status === 200) {
                     this.errors = [];
                     this.loading = false;
-                    this.fetchQuestionnaire();
+                    this.questionnaire.splice(this.indexRange, 1, response.data);
                     this.cancelQuestionnaire();
                     document.getElementById('closedEditQuestionnaireModal').click();
                 }
@@ -398,7 +399,7 @@ export default {
                 if(response.status === 200) {
                     this.errors = [];
                     this.loading = false;
-                    this.fetchQuestionnaire();
+                    this.questionnaire.splice(this.indexRange,1);
                     this.cancelQuestionnaire();
                     document.getElementById('closedDeleteQuestionnaireModal').click();
                 }
@@ -409,7 +410,8 @@ export default {
             })
         },
 
-        generatEdit(ID){
+        generatEdit(ID, index){
+            this.indexRange = index;
             this.questionnaire_id = ID;
             this.questionnaire.forEach(element => {
                 if (parseFloat(ID) == parseFloat(element.id)) {

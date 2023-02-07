@@ -132,7 +132,9 @@ class SurveysController extends Controller
 
         DB::commit();
 
-        return 'Survey Successfully Updated';
+        $dataResult = SurveyHeader::with(['company', 'surveyQuestionnaires'])->where('id', $id)->first();
+
+        return $dataResult;
     }
 
     public function deleteQuestionnaire(Request $request)
