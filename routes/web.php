@@ -264,6 +264,12 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::post('/attendance-report-bydate', 'AttendanceReportController@generateBydate');
     Route::get('/attendance-report-today', 'AttendanceReportController@generateByToday');
 
+    // fetch searched TSR
+    Route::get('/tsr-filter', 'AttendanceReportController@generateBydate');
+
+    // fetch export data
+    Route::post('/fetch-export', 'AttendanceReportController@exportData');
+
     // Companies
     Route::get('/companies', 'CompanyController@index');
     // Add company  

@@ -14,8 +14,10 @@
                                 </div>
                                 <div class="col-3 text-right">
                                     <button class="btn btn-sm btn-primary" @click="fetchSchedules"> Filter</button>
+
                                     <download-excel
-                                        :data   = "schedules"
+                                        v-if="exportSchedules != ''"
+                                        :data   = "exportSchedules"
                                         :fields = "json_fields"
                                         class   = "btn btn-sm btn-default"
                                         name    = "Salesforce Attendance report.xls">
@@ -56,11 +58,12 @@
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
+                                    
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">End Date</label>
-                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
+                                        <input type="date" id="end_date" class="form-control form-control-alternative" :max="maxDate" v-model="endDate">
                                         <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
                                     </div>
                                 </div>
@@ -112,8 +115,8 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(schedule, s) in filteredQueues" v-bind:key="s">
-                                    <td class="text-right">
+                                    <tr v-for="(schedule, s) in schedules.data" v-bind:key="s">
+                                        <td class="text-right">
                                             <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -161,7 +164,7 @@
                                         </td>
                                         <!-- <td></td> -->
                                         <td>
-                                            {{ schedule.schedule_type.description }}
+                                            {{ schedule.schedule_type ? schedule.schedule_type.description : '' }}
                                             <!-- {{ schedule.type }} -->
                                         </td>
                                     </tr>
@@ -169,19 +172,12 @@
                             </table>
                         </div>
                        <div class="card-footer py-4">
-                            <nav aria-label="...">
-                                <ul class="pagination justify-content-end mb-0">
-                                    <li class="page-item">
-                                        <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
-                                    </li>
-                                    <li class="page-item">
-                                        Page {{ currentPage + 1 }} of {{ totalPages }}
-                                    </li>
-                                    <li class="page-item">
-                                        <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
-                                    </li>
-                                </ul>
-                            </nav>
+                            <pagination 
+                                :data="schedules" 
+                                :limit="5"
+                                :show-disabled="true"
+                                @pagination-change-page="fetchPaginationSchedules">
+                            </pagination>
                         </div>
                     </div>
                 </div>
@@ -239,12 +235,15 @@ import moment from 'moment';
 import JsonExcel from 'vue-json-excel'
 import Multiselect from 'vue-multiselect';
 
+Vue.component('pagination', require('laravel-vue-pagination'));
+
 export default {
     components: { 'downloadExcel': JsonExcel, Multiselect },
     props: ['userRole'],
     data(){
         return{
             tsrs: [],
+            exportSchedules: [],
             schedules: [],
             startDate: '',
             endDate: '',
@@ -259,6 +258,8 @@ export default {
             companies: [],
             company: '',
             keywords: '',
+            keyTimeout: null,
+            pFooter: 0,
             currentPage: 0,
             itemsPerPage: 10,
             totalFilterSchedule : 0,
@@ -386,14 +387,26 @@ export default {
         }
     },
     created(){
+        this.setDate();
         this.fetchCompanies();
-        this.fetchTodaySchedules();
+        // this.fetchTodaySchedules();
+        this.fetchSchedules();
         this.fetchRegion();
         this.getScheduleTypes();
+        // this.fetchExportData();
+        
     },
     watch: {
         selectedSchduleType() {
             console.log('check schedule type: ', this.selectedSchduleType)
+        },
+
+        keywords(val) {
+            if(_.trim(val).length >= 3){
+                this.searchKeyUp();
+            } else {
+                this.searchKeyUp();
+            }
         }
     },
     methods:{
@@ -406,6 +419,38 @@ export default {
             .catch(error =>{
                 this.errors = error.response.data.errors;
             })
+        },
+        searchKeyUp(){
+            clearTimeout(this.keyTimeout);
+            this.keyTimeout = setTimeout(() => {
+                this.searchFilter();
+            }, 500);
+        },
+        setDate(){
+            var date = new Date(Date.now());
+            var tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
+            this.startDate = this.DateFormat(date);
+            this.endDate = this.DateFormat(date);
+        },
+        DateFormat(d){
+            return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0"+(d.getDate())).slice(-2);
+        },
+        searchFilter(page = 1){
+            axios.get('/tsr-filter?page=' + page +'&startDate=' + this.startDate + '&endDate=' + this.endDate + '&company=' + this.company + '&selectedRegion=' + this.regionIds + '&schedule_type=' + this.selectedSchduleType + '&keywords=' + this.keywords)
+            .then(response => {
+                this.schedules = response.data;
+                this.errors = [];
+                this.loading = false;
+                
+                this.fetchExportData();
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+                this.loading = false;
+            })
+        },
+        paginationFooter(){
+            this.pFooter = 1;
         },
         customLabelRegion(region) {
                 if(region){
@@ -433,9 +478,10 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        fetchTodaySchedules(){
+        fetchTodaySchedules(page = 1){
             this.loading = true;
-            axios.get('/attendance-report-today')
+            this.selectedPage = page;
+            axios.get('/attendance-report-today?page=' + page +'&startDate=' + this.startDate + '&endDate=' + this.endDate + '&company=' + this.company + '&selectedRegion=' + this.regionIds + '&schedule_type=' + this.selectedSchduleType)
             .then(response => {
                 this.schedules = response.data;
                 this.errors = [];
@@ -446,18 +492,69 @@ export default {
                 this.loading = false;
             })
         },
-        fetchSchedules(){
+        fetchSchedules(page = 1){
             this.loading = true;
-            this.schedules = [];
+            this.keywords = '';
+            
             axios.post('/attendance-report-bydate', {
+                page: page,
                 startDate: this.startDate,
                 endDate: this.endDate,
                 company: this.company,
                 selectedRegion: this.regionIds,
                 schedule_type: this.selectedSchduleType,
+                keywords: this.keywords,
             })
             .then(response => {
                 this.schedules = response.data;
+                this.errors = [];
+                this.loading = false;
+                this.fetchExportData();
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+                this.loading = false;
+            })
+        },
+        fetchPaginationSchedules(page = 1){
+            this.loading = true;
+            
+            axios.post('/attendance-report-bydate', {
+                page: page,
+                startDate: this.startDate,
+                endDate: this.endDate,
+                company: this.company,
+                selectedRegion: this.regionIds,
+                schedule_type: this.selectedSchduleType,
+                keywords: this.keywords,
+            })
+            .then(response => {
+                this.schedules = response.data;
+                this.errors = [];
+                this.loading = false;
+                this.fetchExportData();
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+                this.loading = false;
+            })
+        },
+        fetchExportData(){
+            this.loading = true;
+            if (this.exportSchedules !== null) {
+                this.exportSchedules = [];
+            }
+            
+            axios.post('/fetch-export', {
+                startDate: this.startDate,
+                endDate: this.endDate,
+                company: this.company,
+                selectedRegion: this.regionIds,
+                schedule_type: this.selectedSchduleType,
+                keywords: this.keywords,
+            })
+            .then(response => {
+                this.exportSchedules = response.data;
                 this.errors = [];
                  this.loading = false;
             })
@@ -543,7 +640,12 @@ export default {
                 }
             });
         },
-
+        maxDate(){
+            let start = this.startDate;
+            if (start != null) {
+                return moment(start).add(1, 'M').format('YYYY-MM-DD');
+            }
+        },
         totalPages() {
             return Math.ceil(this.filteredSchedules.length / this.itemsPerPage)
         },

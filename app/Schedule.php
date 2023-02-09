@@ -64,7 +64,7 @@ class Schedule extends Model implements Auditable
     }
 
     public function user() {
-        return $this->belongsTo(User::class)->withTrashed();
+        return $this->belongsTo(User::class)->select('id','name','email','company_id')->withTrashed();
     }
 
     public function attendances(){
