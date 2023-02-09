@@ -154,5 +154,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 
     //Survey Checking 
     Route::get('surveys/customer-visited/{customer_id}','SurveysController@checkIfAlreadySurveyed');
-
+    Route::post('surveys/create','SurveysController@createQuestionnaire');
+    Route::post('surveys/edit-questionnaire','SurveysController@editQuestionnaire');
+    Route::post('surveys/delete-questionnaire','SurveysController@deleteQuestionnaire');
 });

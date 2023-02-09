@@ -13,6 +13,7 @@
                                     <h3 class="mb-0">Survey Report</h3>
                                 </div>
                                  <div class="col-4 text-right">
+                                    <!-- <a class="btn btn-outline-primary mb-2" data-toggle="modal" data-target="#questionaireModal">New</a> -->
                                     <button type="submit" @click="switchView = !switchView" class="btn btn-outline-primary mb-2">{{ switchView === false ? 'Switch to Graph' : 'Switch to Table' }}</button>
                                 </div>
                             </div>
@@ -154,7 +155,6 @@
 
                                      <tr class="table-success">
                                         <td colSpan="5"></td>
-                                        <td>
                                         <span class="font-weight-bold text-danger">
                                             {{ aveScheduleRanks(schedule) }} (Average)
                                         </span>
@@ -211,6 +211,74 @@
                     <h1 class="mt-3"> {{ tsrName }} </h1>
                     <a :href="signInLink" target="__blank">Sign In link</a>
                 </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questionaire Modal -->
+        <div class="modal fade" id="questionaireModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <span class="closed" data-dismiss="modal" id="closedQuestionnaireModal">&times;</span>
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <h3>Create Questionnaire/Survey</h3>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="role">Company</label>
+                                    <select class="form-control" v-model="questionaire_company">
+                                        <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
+                                    </select>
+                                    <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" v-if="questionaire_company != ''">
+                            <div class="col-xl-12">
+                                <label class="form-control-label" for="header">Header</label>
+                                <input type="text" class="form-control" placeholder="Header" v-model="questionaire_header">
+                            </div>
+                        </div>
+                        <div class="row mt-3" v-if="questionaire_company != ''">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="start_date" class="form-control-label">Start Date</label>
+                                    <input type="date" id="start_date" class="form-control form-control-alternative" v-model="questionaire_startDate">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="end_date" class="form-control-label">End Date</label>
+                                    <input type="date" id="end_date" class="form-control form-control-alternative" v-model="questionaire_endDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="questionaire_company != ''">
+                            <div class="row mt-3">
+                                <div class="col-xl-12">
+                                    <label for="item">Question/Survey</label>
+                                    <textarea name="" rows="10" cols="5" style="height: 40px" class="form-control" v-model="questionaire_form[0].quest"></textarea>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-xl-12">
+                                    <label for="item">Question/Survey</label>
+                                    <textarea name="" rows="10" style="height: 40px" class="form-control" v-model="questionaire_form[1].quest"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3 text-right">
+                            <div class="col-xl-12">
+                                <button class="btn btn-primary" v-if="questionaire_company != ''" @click="postQuestionnaire">Save</button>
+                                <button class="btn btn-danger" data-dismiss="modal" @click="cancelQuestionnaire">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -342,7 +410,18 @@ export default {
                 //         }
                 //     }
                 // }
-            }
+            },
+
+            questionaire_company: '',
+            questionaire_startDate: '',
+            questionaire_endDate: '',
+            questionaire_header: '',
+
+            questionaire_form: [{
+                quest: '',
+            },{
+                quest: '',
+            },],
         }
     },
     created(){
@@ -439,7 +518,59 @@ export default {
 
         showNextLink() {
             return this.currentPage == (this.totalPages - 1) ? false : true;
-        }
+        },
+
+        addToolLine(){
+            if (this.questionaire_form.length == 2) {
+                alert('Max row reach.');
+            } else {
+                this.questionaire_form.push({
+                    quest:[],
+                });
+            }
+        },
+
+        removedToolLine(index){
+            if (this.questionaire_form.length == 1) {
+                alert('Cannot removed 1 input field.');
+            } else {
+                this.questionaire_form.splice(index,1);
+            }
+        },
+
+        cancelQuestionnaire(){
+            this.questionaire_company = '';
+            this.questionaire_startDate = '';
+            this.questionaire_endDate = '';
+            this.questionaire_header = '';
+
+            this.questionaire_form = [{
+                quest: '',
+            }];
+        },
+
+        postQuestionnaire(){
+            this.loading = true
+            axios.post('/api/surveys/create', {
+                startDate: this.questionaire_startDate,
+                endDate: this.questionaire_endDate,
+                company: this.questionaire_company,
+                header: this.questionaire_header,
+                questionnaire: JSON.stringify(this.questionaire_form),
+            })
+            .then(response => {
+                console.log('check result: ', response.status)
+                if(response.status === 200) {
+                    this.errors = [];
+                    this.loading = false;
+                    this.cancelQuestionnaire();
+                    document.getElementById('closedQuestionnaireModal').click();
+                }
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
     },
     computed:{
         // filteredSchedules(){
