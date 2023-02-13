@@ -72,10 +72,17 @@ class AttendanceReportController extends Controller
             }
         }
 
+        // return auth()->user();
+
         if ($keyword == '' || $keyword == null) {
             if ($request->startDate == date('Y-m-d') && $request->endDate == date('Y-m-d') && ($request->company == null && $regions == null)) {
                 $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
                     ->whereHas('user' , function($q){
+                        /* $q->when(Auth::user()->level() < 6, function($query) use ($q) {
+                            $query->whereHas($q->roles[0]['level'], function($result){
+                                return $result->where('level','<',6);
+                            });
+                        }); */
                         $q->whereHas('companies', function ($q){
                             $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                         });
@@ -83,6 +90,8 @@ class AttendanceReportController extends Controller
                     ->whereBetween('date',[$request->startDate,$request->endDate])
                     ->orderBy('date', 'desc')
                     ->paginate(10);
+
+                    return $schedule;
             }
             else{
                 if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
@@ -106,6 +115,7 @@ class AttendanceReportController extends Controller
                     ->orderBy('date', 'desc')
                     ->paginate(10);
                 }else{
+                    
                     $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                     ->when($company, function ($query) use ($company) {
                         $query->whereHas('user', function($q) use ($company){
@@ -120,9 +130,6 @@ class AttendanceReportController extends Controller
                                 $q->whereIn('region_id', $regions);
                             });
                         });
-                    })
-                    ->when(!empty($selectedSchedulType), function ($query, $selectedSchedulType) {
-                        return $query->where('type', $selectedSchedulType);
                     })
                     ->whereBetween('date',[$request->startDate,$request->endDate])
                     ->orderBy('date', 'desc')
@@ -184,7 +191,9 @@ class AttendanceReportController extends Controller
             }
         }
 
-        $new_schedule = [];
+        return $schedule;
+
+        /* $new_schedule = [];
         if(!Auth::user()->hasRole('hr')){
             // Executive and VP Roles
             if(Auth::user()->level() >= 6){
@@ -201,8 +210,9 @@ class AttendanceReportController extends Controller
                     }
                 }
             }
-        }else {  $new_schedule = $schedule; }
-        return $new_schedule;
+        }else {  $new_schedule = $schedule; } */
+        
+        // return $new_schedule;
     }
 
     public function generateByToday(Request $request){
