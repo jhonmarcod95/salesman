@@ -88,8 +88,6 @@ class AttendanceReportController extends Controller
                     ->whereBetween('date',[$request->startDate,$request->endDate])
                     ->orderBy('date', 'desc')
                     ->paginate(10);
-
-                    return $schedule;
             }
             else{
                 if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
