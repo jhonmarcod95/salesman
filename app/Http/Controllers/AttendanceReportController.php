@@ -71,16 +71,17 @@ class AttendanceReportController extends Controller
                 array_push($regions, $region_data['id']);
             }
         }
-
+        
         if ($keyword == '' || $keyword == null) {
             if ($request->startDate == date('Y-m-d') && $request->endDate == date('Y-m-d') && ($request->company == null && $regions == null)) {
+                return "HELLO";
                 $schedule = Schedule::with('user','user.roles','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
                     ->whereHas('user' , function($q){
-                        $q->when(Auth::user()->level() < 6, function($query){
+                        /* $q->when(Auth::user()->level() < 6, function($query){
                             $query->wherehas('roles', function ($q){
                                 $q->where('level','<',6);
                             });
-                        });
+                        }); */
                         $q->whereHas('companies', function ($q){
                             $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                         });
@@ -93,11 +94,11 @@ class AttendanceReportController extends Controller
                 if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
                     $schedule = Schedule::with('user','user.roles', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                     ->whereHas('user' , function($q){
-                        $q->when(Auth::user()->level() < 6, function($query){
+                        /* $q->when(Auth::user()->level() < 6, function($query){
                             $query->wherehas('roles', function ($q){
                                 $q->where('level','<',6);
                             });
-                        });
+                        }); */
                         $q->whereHas('companies', function ($q){
                             $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                         });
@@ -120,11 +121,11 @@ class AttendanceReportController extends Controller
                     $schedule = Schedule::with('user','user.roles', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                     ->when($company, function ($query) use ($company) {
                         $query->whereHas('user', function($q) use ($company){
-                            $q->when(Auth::user()->level() < 6, function($query){
+                            /* $q->when(Auth::user()->level() < 6, function($query){
                                 $query->wherehas('roles', function ($q){
                                     $q->where('level','<',6);
                                 });
-                            });
+                            }); */
                             $q->whereHas('companies', function ($q) use ($company){
                                 $q->where('company_id', $company);
                             });
@@ -146,11 +147,11 @@ class AttendanceReportController extends Controller
             if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
                 $schedule = Schedule::with('user','user.roles', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                 ->whereHas('user' , function($q){
-                    $q->when(Auth::user()->level() < 6, function($query){
+                    /* $q->when(Auth::user()->level() < 6, function($query){
                         $query->wherehas('roles', function ($q){
                             $q->where('level','<',6);
                         });
-                    });
+                    }); */
                     $q->whereHas('companies', function ($q){
                         $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                     });
@@ -178,11 +179,11 @@ class AttendanceReportController extends Controller
                 $schedule = Schedule::with('user','user.roles', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                 ->when($company, function ($query) use ($company) {
                     $query->whereHas('user', function($q) use ($company){
-                        $q->when(Auth::user()->level() < 6, function($query){
+                        /* $q->when(Auth::user()->level() < 6, function($query){
                             $query->wherehas('roles', function ($q){
                                 $q->where('level','<',6);
                             });
-                        });
+                        }); */
                         $q->whereHas('companies', function ($q) use ($company){
                             $q->where('company_id', $company);
                         });
@@ -225,10 +226,11 @@ class AttendanceReportController extends Controller
                         $new_schedule = [];
                     }
                 }
+                return $new_schedule->paginate(10);
             }
-        }else {  $new_schedule = $schedule; } */
+        }else {  $new_schedule = $schedule; }
         
-        // return $new_schedule;
+        return $new_schedule; */
 
         /* $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
             ->whereHas('user' , function($q){
