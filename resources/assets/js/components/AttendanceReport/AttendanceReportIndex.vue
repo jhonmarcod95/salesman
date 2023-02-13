@@ -98,7 +98,7 @@
                         </div>
                         <div class="table-responsive">
                             <h4 class="ml-3" v-if="loading"><i>Please wait. Loading...</i></h4>
-                            <h4 class="ml-3" v-else>Total Filtered Attendance : {{ totalFilterSchedule }}</h4>
+                            <!-- <h4 class="ml-3" v-else>Total Filtered Attendance : {{ schedules.data.length }}</h4> -->
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>

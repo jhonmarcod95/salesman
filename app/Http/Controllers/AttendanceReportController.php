@@ -72,17 +72,15 @@ class AttendanceReportController extends Controller
             }
         }
 
-        // return auth()->user();
-
         if ($keyword == '' || $keyword == null) {
             if ($request->startDate == date('Y-m-d') && $request->endDate == date('Y-m-d') && ($request->company == null && $regions == null)) {
-                $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
+                $schedule = Schedule::with('user','user.roles','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
                     ->whereHas('user' , function($q){
-                        /* $q->when(Auth::user()->level() < 6, function($query) use ($q) {
-                            $query->whereHas($q->roles[0]['level'], function($result){
-                                return $result->where('level','<',6);
+                        $q->when(Auth::user()->level() < 6, function($query){
+                            $query->wherehas('roles', function ($q){
+                                $q->where('level','<',6);
                             });
-                        }); */
+                        });
                         $q->whereHas('companies', function ($q){
                             $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                         });
@@ -95,8 +93,13 @@ class AttendanceReportController extends Controller
             }
             else{
                 if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
-                    $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
+                    $schedule = Schedule::with('user','user.roles', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                     ->whereHas('user' , function($q){
+                        $q->when(Auth::user()->level() < 6, function($query){
+                            $query->wherehas('roles', function ($q){
+                                $q->where('level','<',6);
+                            });
+                        });
                         $q->whereHas('companies', function ($q){
                             $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                         });
@@ -116,9 +119,14 @@ class AttendanceReportController extends Controller
                     ->paginate(10);
                 }else{
                     
-                    $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
+                    $schedule = Schedule::with('user','user.roles', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                     ->when($company, function ($query) use ($company) {
                         $query->whereHas('user', function($q) use ($company){
+                            $q->when(Auth::user()->level() < 6, function($query){
+                                $query->wherehas('roles', function ($q){
+                                    $q->where('level','<',6);
+                                });
+                            });
                             $q->whereHas('companies', function ($q) use ($company){
                                 $q->where('company_id', $company);
                             });
@@ -138,8 +146,13 @@ class AttendanceReportController extends Controller
             }
         } else {
             if(Auth::user()->level() < 8 && !Auth::user()->hasRole(['hr', 'audit'])){
-                $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
+                $schedule = Schedule::with('user','user.roles', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                 ->whereHas('user' , function($q){
+                    $q->when(Auth::user()->level() < 6, function($query){
+                        $query->wherehas('roles', function ($q){
+                            $q->where('level','<',6);
+                        });
+                    });
                     $q->whereHas('companies', function ($q){
                         $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
                     });
@@ -164,9 +177,14 @@ class AttendanceReportController extends Controller
                 ->orderBy('date', 'desc')
                 ->paginate(10);
             } else {
-                $schedule = Schedule::with('user', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
+                $schedule = Schedule::with('user','user.roles', 'customer.provinces.regions', 'attendances','signinwithoutout','schedule_type','salesmanAttachement')
                 ->when($company, function ($query) use ($company) {
                     $query->whereHas('user', function($q) use ($company){
+                        $q->when(Auth::user()->level() < 6, function($query){
+                            $query->wherehas('roles', function ($q){
+                                $q->where('level','<',6);
+                            });
+                        });
                         $q->whereHas('companies', function ($q) use ($company){
                             $q->where('company_id', $company);
                         });
@@ -213,6 +231,40 @@ class AttendanceReportController extends Controller
         }else {  $new_schedule = $schedule; } */
         
         // return $new_schedule;
+
+        /* $schedule = Schedule::with('user','customer.provinces.regions','attendances','signinwithoutout','schedule_type', 'salesmanAttachement')
+            ->whereHas('user' , function($q){
+                $q->whereHas('companies', function ($q){
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                });
+            })
+            ->whereBetween('date',[$request->startDate,$request->endDate])
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $new_schedule = [];
+
+        if(!Auth::user()->hasRole('hr')){
+            // Executive and VP Roles
+            if(Auth::user()->level() >= 6){
+                $new_schedule = $schedule;
+            }else{
+                foreach($schedule->pluck('user') as $key => $value){
+                    // AVP and Coordinator  roles
+                    if(Auth::user()->level() < 6){
+                        if($value->roles[0]['level'] < 6){
+                            $new_schedule[] = $schedule[$key];
+                        }
+                    }else{
+                        $new_schedule = [];
+                    }
+                }
+            }
+        }else {
+            $new_schedule = $schedule;
+        }
+
+        return $new_schedule; */
     }
 
     public function generateByToday(Request $request){
@@ -316,33 +368,6 @@ class AttendanceReportController extends Controller
         return $new_schedule;
     }
 
-    /* public function tsrFilter(Request $request){
-        return $request->all();
-        $keyword = $request->keywords;
-
-        
-
-        $new_schedule = [];
-        if(!Auth::user()->hasRole('hr')){
-            // Executive and VP Roles
-            if(Auth::user()->level() >= 6){
-                $new_schedule = $schedule;
-            }else{
-                foreach($schedule->pluck('user') as $key => $value){
-                    // AVP and Coordinator  roles
-                    if(Auth::user()->level() < 6){
-                        if($value->roles[0]['level'] < 6){
-                            $new_schedule[] = $schedule[$key];
-                        }
-                    }else{
-                        $new_schedule = [];
-                    }
-                }
-            }
-        }else {  $new_schedule = $schedule; }
-        return $new_schedule;
-    } */
-
     //ORIGINAL FUNCTION
     /* public function generateByToday(Request $request){
         if (($request->startDate == '' || $request->startDate == null) || ($request->endDate == '' || $request->endDate == null)) {
@@ -358,7 +383,7 @@ class AttendanceReportController extends Controller
             })
             ->whereBetween('date',[$request->startDate,$request->endDate])
             ->orderBy('date', 'desc')
-            ->paginate(10);
+            ->get();
 
         $new_schedule = [];
 
