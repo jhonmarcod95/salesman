@@ -98,7 +98,7 @@
                         </div>
                         <div class="table-responsive">
                             <h4 class="ml-3" v-if="loading"><i>Please wait. Loading...</i></h4>
-                            <h4 class="ml-3" v-else>Total Filtered Attendance : {{ totalFilterSchedule }}</h4>
+                            <!-- <h4 class="ml-3" v-else>Total Filtered Attendance : {{ schedules.data.length }}</h4> -->
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
@@ -389,12 +389,9 @@ export default {
     created(){
         this.setDate();
         this.fetchCompanies();
-        // this.fetchTodaySchedules();
         this.fetchSchedules();
         this.fetchRegion();
         this.getScheduleTypes();
-        // this.fetchExportData();
-        
     },
     watch: {
         selectedSchduleType() {
@@ -430,7 +427,7 @@ export default {
             var date = new Date(Date.now());
             var tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
             this.startDate = this.DateFormat(date);
-            this.endDate = this.DateFormat(date);
+            this.endDate = this.DateFormat(tomorrow);
         },
         DateFormat(d){
             return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0"+(d.getDate())).slice(-2);
@@ -493,27 +490,28 @@ export default {
             })
         },
         fetchSchedules(page = 1){
-            this.loading = true;
-            this.keywords = '';
+            let self = this;
+            self.loading = true;
+            self.keywords = '';
             
             axios.post('/attendance-report-bydate', {
                 page: page,
-                startDate: this.startDate,
-                endDate: this.endDate,
-                company: this.company,
-                selectedRegion: this.regionIds,
-                schedule_type: this.selectedSchduleType,
-                keywords: this.keywords,
+                startDate: self.startDate,
+                endDate: self.endDate,
+                company: self.company,
+                selectedRegion: self.regionIds,
+                schedule_type: self.selectedSchduleType,
+                keywords: self.keywords,
             })
             .then(response => {
-                this.schedules = response.data;
-                this.errors = [];
-                this.loading = false;
-                this.fetchExportData();
+                self.schedules = response.data;
+                self.errors = [];
+                self.loading = false;
+                self.fetchExportData();
             })
             .catch(error => {
-                this.errors = error.response.data.errors;
-                this.loading = false;
+                self.errors = error.response.data.errors;
+                self.loading = false;
             })
         },
         fetchPaginationSchedules(page = 1){
@@ -630,7 +628,7 @@ export default {
         }
     },
     computed:{
-        filteredSchedules(){
+        /* filteredSchedules(){
             if(!this.keywords) {
                 return this.schedules
             }
@@ -639,12 +637,6 @@ export default {
                     return schedule;
                 }
             });
-        },
-        maxDate(){
-            let start = this.startDate;
-            if (start != null) {
-                return moment(start).add(1, 'M').format('YYYY-MM-DD');
-            }
         },
         totalPages() {
             return Math.ceil(this.filteredSchedules.length / this.itemsPerPage)
@@ -663,7 +655,13 @@ export default {
             }
 
             return queues_array;
-        }
+        }, */    
+        maxDate(){
+            let start = this.startDate;
+            if (start != null) {
+                return moment(start).add(1, 'M').format('YYYY-MM-DD');
+            }
+        },
     }
 }
 </script>
