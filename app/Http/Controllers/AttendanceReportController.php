@@ -544,7 +544,7 @@ class AttendanceReportController extends Controller
             }
         }
 
-        $new_schedule = [];
+       /*  $new_schedule = [];
         if(!Auth::user()->hasRole('hr')){
             // Executive and VP Roles
             if(Auth::user()->level() >= 6){
@@ -561,8 +561,8 @@ class AttendanceReportController extends Controller
                     }
                 }
             }
-        }else {  $new_schedule = $schedule; }
-        return $new_schedule;
+        }else {  $new_schedule = $schedule; } */
+        return $schedule;
     }
 
      /**
