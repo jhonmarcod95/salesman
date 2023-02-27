@@ -68,13 +68,16 @@ class SurveysController extends Controller
         $saveHeader->save();
 
         foreach ($questionnaire as $q) {
-            $saveQuestion = new SurveyQuestionnaire;
-            $saveQuestion->status = 1;
-            $saveQuestion->question = $q->quest;
-            $saveQuestion->user_id = auth()->user()->id;
-            $saveQuestion->survey_header_id = $saveHeader->id;
-            $saveQuestion->rating = 1;
-            $saveQuestion->save();
+            if ($q->quest == '' || $q->quest == null) {}
+            else {
+                $saveQuestion = new SurveyQuestionnaire;
+                $saveQuestion->rating = 1;
+                $saveQuestion->status = 1;
+                $saveQuestion->survey_header_id = $saveHeader->id;
+                $saveQuestion->question = $q->quest;
+                $saveQuestion->user_id = auth()->user()->id;
+                $saveQuestion->save();
+            }
         }
 
         DB::commit();
@@ -90,7 +93,7 @@ class SurveysController extends Controller
             'id'=> 'required',
             'company'=> 'required',
             'header'=> 'required',
-            'questionnaire'=> 'required',
+            'questionnaire'=> 'nullable|min:6',
         ]);
 
         $id = $request->id;
@@ -110,8 +113,15 @@ class SurveysController extends Controller
                 $q->where('status', 1);
             })
             ->orderBy('id','desc')->first();
-
+            return $checkStatus ;
         if ($checkStatus != '' || $checkStatus != null) {
+            // $getQuestionnaire = SurveyQuestionnaire::with('surveyHeader')->where('survey_header_id',$checkStatus->id)->get();
+            // foreach ($getQuestionnaire as $q) {
+            //     $updateQuestionnaire = SurveyQuestionnaire::with('surveyHeader')->where('id',$q->id)
+            //     ->update([
+            //         'status' => 0
+            //     ]);
+            // }
             $updateQuestionnaire = SurveyQuestionnaire::with('surveyHeader')->where('survey_header_id',$checkStatus->id)
                 ->update([
                     'status' => 0
@@ -121,13 +131,16 @@ class SurveysController extends Controller
         $deleteSurvey = SurveyQuestionnaire::where('survey_header_id',$id)->delete();
         
         foreach ($questionnaire as $q) {
-            $saveQuestion = new SurveyQuestionnaire;
-            $saveQuestion->rating = 1;
-            $saveQuestion->status = 1;
-            $saveQuestion->survey_header_id = $id;
-            $saveQuestion->question = $q->quest;
-            $saveQuestion->user_id = auth()->user()->id;
-            $saveQuestion->save();
+            if ($q->quest == '' || $q->quest == null) {}
+            else {
+                $saveQuestion = new SurveyQuestionnaire;
+                $saveQuestion->rating = 1;
+                $saveQuestion->status = 1;
+                $saveQuestion->survey_header_id = $id;
+                $saveQuestion->question = $q->quest;
+                $saveQuestion->user_id = auth()->user()->id;
+                $saveQuestion->save();
+            }
         }
 
         DB::commit();
