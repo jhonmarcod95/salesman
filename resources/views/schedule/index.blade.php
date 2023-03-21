@@ -326,8 +326,8 @@
                 retrieveCustomers('#sel-customer-codes', null);
             }
             else if(type == '5'){ // office
-                $("#radius-add").val('1');
-                $("#radius-update").val('1');
+                $("#radius-add").val('0.1');
+                $("#radius-update").val('0.1');
 
                 retrieveCustomers('#sel-customer-codes', 6);
             }
