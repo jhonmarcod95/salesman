@@ -132,7 +132,7 @@ class AppAPIController extends Controller
 
                 $response = Curl::to('http://10.97.70.51/salesforcepaymentservice/api/sap_budget_checking')
                 ->withContentType('application/x-www-form-urlencoded')
-                ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+                ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('Y-m-d'), 'company_server'=> $internalOrder->sap_server ))
                 ->post();
 
                 $toJson = json_decode($response, true);
@@ -233,7 +233,7 @@ class AppAPIController extends Controller
             // SAP API
             $response = Curl::to('http://10.97.70.51/salesforcepaymentservice/api/sap_budget_checking')
             ->withContentType('application/x-www-form-urlencoded')
-            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('Y-m-d'), 'company_server'=> $internalOrder->sap_server ))
             ->post();
 
             $toJson = json_decode($response, true);
@@ -296,7 +296,7 @@ class AppAPIController extends Controller
             // SAP API
             $response = Curl::to('http://10.97.70.51/salesforcepaymentservice/api/sap_budget_checking')
             ->withContentType('application/x-www-form-urlencoded')
-            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
+            ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('Y-m-d'), 'company_server'=> $internalOrder->sap_server ))
             ->post();
 
             $toJson = json_decode($response, true);
