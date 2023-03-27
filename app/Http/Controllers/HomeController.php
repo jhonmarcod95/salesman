@@ -485,7 +485,7 @@ class HomeController extends Controller
             'passwd' => 'welcome69+'
         ];
 
-        $available_budget_headers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+        $available_budget_headers = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
             ['query' => 
                 ['connection' => $connection,
                     'table' => [
@@ -537,7 +537,7 @@ class HomeController extends Controller
             'passwd' => 'welcome69+'
         ];
 
-        $available_budget_headers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+        $available_budget_headers = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
             ['query' => 
                 ['connection' => $connection,
                     'table' => [

@@ -455,7 +455,7 @@ Route::get('/get-sap-customer', function () {
         'passwd' => 'P@ssw0rd4',
     ];
 
-    $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+    $customers = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                             ['query' => 
                                 ['connection' => $connection_pfmc,
                                     'table' => [
@@ -533,7 +533,7 @@ Route::get('/get-all-customer-pfmc', function () {
         'passwd' => 'P@ssw0rd4'
     ];
 
-    $tsr_pfmc = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+    $tsr_pfmc = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                     ['query' => 
                         ['connection' => $connection_pfmc,
                             'table' => [
@@ -572,7 +572,7 @@ Route::get('/get-all-customer-lfug', function () {
         'passwd' => 'P@ssw0rd4'
     ];
 
-    $tsr_lfug = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+    $tsr_lfug = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                     ['query' => 
                         ['connection' => $connection_lfug,
                             'table' => [
@@ -612,7 +612,7 @@ Route::get('/get-all-customer-hana', function () {
     ];
 
 
-    $hana = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+    $hana = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                     ['query' => 
                         ['connection' => $connection,
                             'table' => [

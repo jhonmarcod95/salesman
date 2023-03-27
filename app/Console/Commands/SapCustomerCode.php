@@ -62,7 +62,7 @@ class SapCustomerCode extends Command
         ];
 
         $date = date('Ymd');
-        $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+        $customers = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                             ['query' => 
                                 ['connection' => $connection,
                                     'table' => [
@@ -145,7 +145,7 @@ class SapCustomerCode extends Command
         ];
 
         $date = date('Ymd');
-        $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+        $customers = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                             ['query' => 
                                 ['connection' => $connection,
                                     'table' => [
@@ -229,7 +229,7 @@ class SapCustomerCode extends Command
         ];
 
         $date = date('Ymd');
-        $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+        $customers = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                             ['query' => 
                                 ['connection' => $connection,
                                     'table' => [

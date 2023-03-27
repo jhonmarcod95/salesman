@@ -100,7 +100,7 @@ class ExpensesTest extends TestCase
          foreach($internalOrders->get() as $internalOrder) {
 
             // SAP API
-            $response = Curl::to('http://10.96.4.39/salesforcepaymentservice/api/sap_budget_checking')
+            $response = Curl::to('http://10.97.70.51/salesforcepaymentservice/api/sap_budget_checking')
             ->withContentType('application/x-www-form-urlencoded')
             ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('m/d/Y'), 'company_server'=> $internalOrder->sap_server ))
             ->post();

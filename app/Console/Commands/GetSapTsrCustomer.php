@@ -59,7 +59,7 @@ class GetSapTsrCustomer extends Command
             'passwd' => 'P@ssw0rd4',
         ];
 
-        $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+        $customers = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                             ['query' => 
                                 ['connection' => $connection_pfmc,
                                     'table' => [
@@ -124,7 +124,7 @@ class GetSapTsrCustomer extends Command
             'passwd' => 'P@ssw0rd4'
         ];
 
-        $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+        $customers = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                             ['query' => 
                                 ['connection' => $connection_pfmc,
                                     'table' => [

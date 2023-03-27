@@ -143,7 +143,7 @@ class PaymentController extends Controller
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "http://10.96.4.39/salesforcepaymentservice/api/sap_payment_posting",
+            CURLOPT_URL => "http://10.97.70.51/salesforcepaymentservice/api/sap_payment_posting",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,

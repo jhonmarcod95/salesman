@@ -588,7 +588,7 @@ class CustomerController extends Controller
             'passwd' => 'P@ssw0rd4'
         ];
         $date = date('Ymd');
-        $customers = $client->request('GET', 'http://10.96.4.39:8012/api/read-table',
+        $customers = $client->request('GET', 'http://10.97.70.51:8012/api/read-table',
                             ['query' =>
                                 ['connection' => $connection,
                                     'table' => [
