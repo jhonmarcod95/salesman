@@ -130,17 +130,25 @@ class AppAPIController extends Controller
 
                 $internalOrder = $this->checkInternalOrder($expense_type);
 
-                $response = Curl::to('http://10.97.70.51/salesforcepaymentservice/api/sap_budget_checking')
-                ->withContentType('application/x-www-form-urlencoded')
-                ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('Y-m-d'), 'company_server'=> $internalOrder->sap_server ))
-                ->post();
+                // temporary condition
+                $response = [];
+
+                if($internalOrder->sap_server != 'HANA') {
+
+                    $response = Curl::to('http://10.97.70.51/salesforcepaymentservice/api/sap_budget_checking')
+                    ->withContentType('application/x-www-form-urlencoded')
+                    ->withData(array( 'budget_line' => $internalOrder->internal_order, 'posting_date' => Carbon::today()->format('Y-m-d'), 'company_server'=> $internalOrder->sap_server ))
+                    ->post();
+
+                }
+                
 
                 $toJson = json_decode($response, true);
 
                 // Expense Charge Type
                 $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
 
-                $simulatedBalancedReturn = (float) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id);
+                $simulatedBalancedReturn = $internalOrder->sap_server != 'HANA' ? (float) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id) : 0;
 
                 $zeroOrResult = $simulatedBalancedReturn < 0 ? 0 : $simulatedBalancedReturn;
 
