@@ -131,7 +131,7 @@ class AppAPIController extends Controller
                 $internalOrder = $this->checkInternalOrder($expense_type);
 
                 // temporary condition
-                $response = [];
+                $response = '[]';
 
                 if($internalOrder->sap_server != 'HANA') {
 
@@ -141,10 +141,9 @@ class AppAPIController extends Controller
                     ->post();
 
                 }
-                
 
                 $toJson = json_decode($response, true);
-
+                
                 // Expense Charge Type
                 $expenseChargeType = ExpenseChargeType::where('charge_type_id', $internalOrder->chargeType->id);
 
