@@ -393,13 +393,21 @@ class AppAPIController extends Controller
      */
     public function storeExpenses(Request $request)
     {
-        // determine if has success visit
-        if($this->checkHasSuccessVisit() == 'false'){
-            $this->validate($request, [
-                'no_success_visit' => 'required'
-            ],[
-                'no_success_visit.required' => 'Invalid: You should have at least one completed customer visit to claim.'
-            ]);
+        // verify if user is PRSI
+        $check_prsi = Auth::user()->company_id;
+
+        // enable to check has completed visit if not == to 14 or PRSI
+        if($check_prsi != 14) {
+            
+            // determine if has success visit
+            if($this->checkHasSuccessVisit() == 'false'){
+                $this->validate($request, [
+                    'no_success_visit' => 'required'
+                ],[
+                    'no_success_visit.required' => 'Invalid: You should have at least one completed customer visit to claim.'
+                ]);
+            }
+
         }
 
         $this->validate($request, [
