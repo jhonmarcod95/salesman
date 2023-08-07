@@ -46,7 +46,7 @@ class UpdateIODetails extends Command
     {
         //
 
-        $salesman_ios = SalesmanInternalOrder::where('sap_server', 'HANA')->get();
+        $salesman_ios = SalesmanInternalOrder::get();
         foreach ($salesman_ios as $salesman_io){
 
             $sap_server = SapServer::where('sap_server', $salesman_io->sap_server)->first();

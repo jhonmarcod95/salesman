@@ -387,33 +387,6 @@ class PaymentAutoPosting extends Command
                 if ($keys['REF_KEY_' . $keyCount] >= $versionCount) break;
             }
 
-//            //key to be used
-//            foreach ($refKeyCombinations as $refKeyCombination){
-//                $ioTotalBalance = $ioBalances['versions'][0]->amount;
-//                $keyToUsed = [];
-//                $isSatisfied = false;
-//
-//                if ($ioTotalBalance > $ioTotalExpense) break; // if version zero is enough, no ref keys needed
-//
-//                foreach ($refKeyCombination as $k => $v){
-//                    $ioTotalBalance += $ioBalances['versions'][$v]->amount;
-//
-//                    $keyToUsed[$k] = $v;
-//                    if ($ioTotalBalance > $ioTotalExpense) {
-//                        $isSatisfied = true;
-//                        break;
-//                    };
-//                }
-//
-//                if ($isSatisfied){
-//                    $io_ref_keys[] = array_merge([
-//                        'internal_order' => $io,
-//                    ], $keyToUsed);
-//                }
-//
-//                $ioTotalBalance = 0; //set to reset for next combination
-//            }
-
             //keys to be used
             foreach ($refKeyCombinations as $refKeyCombination){
                 $ioTotalBalance = $ioBalanceVersions[0]->amount;
@@ -422,7 +395,7 @@ class PaymentAutoPosting extends Command
                     $ioTotalBalance += $ioBalanceVersions[$v]->amount;
                 }
 
-                if ($ioTotalBalance > $ioTotalExpense){
+                if ($ioTotalBalance >= $ioTotalExpense){
                     $io_ref_keys[] = array_merge([
                         'internal_order' => $io,
                     ], $refKeyCombination);
@@ -495,34 +468,11 @@ class PaymentAutoPosting extends Command
                     'ORDERID' => $item['internal_order'],
                     'ITEM_TEXT' => $item['item_text'],
                     'ALLOC_NMBR' => $item['assignment'],
+                    'QUANTITY:int' => '1',
+                    'BASE_UOM' => $item['uom'],
                 ], $ref_keys);
 
-                if ($company_code == 'PFMC') $values['BUS_AREA'] = $item['business_area'];
-
-                if (($company_code == '1100' &&
-                        ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
-                    ($company_code == '1500' &&
-                        ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
-                    ($company_code == '1200' &&
-                        ($item['gl_account'] == '0060010007' || $item['gl_account'] == '0070090010' || $item['gl_account'] == '0060010006')) ||
-                    ($company_code == 'PFMC' &&
-                        ($item['gl_account'] == '0060082001'))
-                ){
-                    $values['QUANTITY:int'] = '1';
-                    $values['BASE_UOM'] = '10';
-                }
-
-                if ($company_code == '2100'){
-                    if ($item['uom']){ // has UOM, will post cUOM and QTY
-                        $values['QUANTITY:int'] = '1';
-                        $values['BASE_UOM'] = $item['uom'];
-                    }
-                }
-
-
                 $accountGL[] = $values;
-
-
 
                 $currencyAmount[] = [
                     'ITEMNO_ACC' => $item['item_no'],
