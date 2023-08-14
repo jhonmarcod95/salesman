@@ -200,14 +200,8 @@ class PaymentAutoPosting extends Command
                     $uom = $filteredInternalOrders ? $filteredInternalOrders->uom : '';
 
                     // populate gl account
-                    if ($company_code == '2100'){
-                        $gl_account_code = $filteredInternalOrders->gl_account->code ?? null; // gl from IO master
-                        $gl_account_name = $filteredInternalOrders->gl_account->name ?? null;
-                    }
-                    else{
-                        $gl_account_code = $filteredGL->gl_account; // gl from expense master
-                        $gl_account_name = $filteredGL->gl_description;
-                    }
+                    $gl_account_code = $filteredInternalOrders->gl_account->code ?? null; // gl from IO master
+                    $gl_account_name = $filteredInternalOrders->gl_account->name ?? null;
 
                     array_push($items, [
                         'item_no' =>  $item = $item + 1,
