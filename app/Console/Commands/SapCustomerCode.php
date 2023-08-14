@@ -221,7 +221,7 @@ class SapCustomerCode extends Command
         $client = new Client();
 
         $connection = [
-            'ashost' => '172.17.5.24',
+            'ashost' => '172.17.28.19',
             'sysnr' => '01',
             'client' => '888',
             'user' => 'app_user',
