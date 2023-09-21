@@ -33,7 +33,7 @@ class SalesmanInternalOrderController extends Controller
     {
         return SalesmanInternalOrder::with('user', 'user.expenseRate', 'chargeType.expenseChargeType.expenseType')
             ->whereHas('user', function ($q){
-                $q->where('company_id', Auth::user()->companies->pluck('id'));
+                $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
             })
             ->orderBy('id', 'desc')->get();
     }
