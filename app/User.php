@@ -119,4 +119,9 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(CloseVisit::class);
     }
+
+    public function farmerMeetings()
+    {
+        return $this->hasMany(FarmerMeeting::class);
+    }
 }

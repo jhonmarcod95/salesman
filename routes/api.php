@@ -157,4 +157,12 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('surveys/create','SurveysController@createQuestionnaire');
     Route::post('surveys/edit-questionnaire','SurveysController@editQuestionnaire');
     Route::post('surveys/delete-questionnaire','SurveysController@deleteQuestionnaire');
+    
+    // store aapc farmer meeting
+    Route::get('aapc-regions','API\AapcFarmerSurveyControllerApi@aapcRegion');
+    Route::get('aapc-crops','API\AapcFarmerSurveyControllerApi@aapcCrops');
+    Route::get('aapc-vegetable','API\AapcFarmerSurveyControllerApi@aapcVegetable');
+    Route::get('aapc-insect-types','API\AapcFarmerSurveyControllerApi@aapcInsectTypes');
+    Route::get('aapc-disease-types','API\AapcFarmerSurveyControllerApi@aapcDiseaseTypes');
+    Route::post('aapc-farmer-survey','API\AapcFarmerSurveyControllerApi@store');
 });

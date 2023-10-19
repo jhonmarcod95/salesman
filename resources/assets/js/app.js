@@ -120,6 +120,10 @@ Vue.component('individual-performance', require('./components/IndividualPerforma
 // Expense per IO
 Vue.component('expense-io-report-index', require('./components/Expense/ExpenseIoReportIndex.vue'));
 
+// AAPC Farmer meeting
+Vue.component('aapc-farmer-create', require('./components/AapcFarmer/AapcFarmerCreate.vue'));
+
+
 const app = new Vue({
     el: '#app',
 });
