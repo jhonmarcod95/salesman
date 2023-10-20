@@ -123,6 +123,8 @@ Vue.component('expense-io-report-index', require('./components/Expense/ExpenseIo
 // AAPC Farmer meeting
 Vue.component('aapc-farmer-create', require('./components/AapcFarmer/AapcFarmerCreate.vue'));
 
+Vue.component('aapc-farmer-index', require('./components/AapcFarmer/AapcFarmerIndex.vue'));
+
 
 const app = new Vue({
     el: '#app',

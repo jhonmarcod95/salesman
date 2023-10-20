@@ -20,6 +20,13 @@ use DB;
 
 class AapcFarmerSurveyControllerApi extends Controller
 {
+    public function index()
+    {
+        return AapcFarmerMeeting::orderBy('id','desc')
+                    ->with('region','farmer','vegetable','tindahan','farmerCrops','bumos','user')
+                    ->paginate(10);
+    }
+
     public function aapcRegion()
     {
         return AapcRegion::orderBy('id','asc')->get();
