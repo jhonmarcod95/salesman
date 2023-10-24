@@ -202,7 +202,6 @@ export default {
       this.loading = true;
       axios.get(`/api/aapc-farmer-survey`).then((res) => {
         this.surveys = res.data;
-        console.log('survyes: ', res.data)
         this.loading = false;
       });
     },
