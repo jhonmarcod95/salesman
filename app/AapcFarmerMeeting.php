@@ -55,11 +55,22 @@ class AapcFarmerMeeting extends Model
 
     public function farmerCrops()
     {
-        return $this->belongsToMany(AapcCrop::class, 'crop_farmer_meeting','farmer_meeting_id','crop_id');
+        return $this->belongsToMany(AapcCrop::class, 'crop_farmer_meeting','farmer_meeting_id','crop_id')
+                    ->withPivot('others')->withTimestamps();
     }
 
     public function bumos()
     {
         return $this->hasMany(AapcBumo::class);
+    }
+    
+    public function bumoInsects()
+    {
+        return $this->hasMany(AapcBumoInsect::class);
+    }
+
+    public function bumoDiseases()
+    {
+        return $this->hasMany(AapcBumoDisease::class);
     }
 }

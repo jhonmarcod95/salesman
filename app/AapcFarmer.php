@@ -17,4 +17,9 @@ class AapcFarmer extends Model
         'crops_cultivated',
         'land_hectares',
     ];
+
+    public function cultivatedCrops()
+    {
+        return $this->hasMany(AapcCultivatedCrop::class);
+    }
 }

@@ -29,6 +29,9 @@
                     <th scope="col">Target Crops</th>
                     <th scope="col">Farmer Name</th>
                     <th scope="col">Farmer Address</th>
+                    <th scope="col">Farmer Cultivated Crops</th>
+                    <th scope="col">Brands for Insects </th>
+                    <th scope="col">Brands for Diseases </th>
                   </tr>
                 </thead>
 
@@ -97,7 +100,7 @@
                     </td>
                     <td>
                       <span v-for="(crop, b) in survey.farmer_crops" :key="b">
-                        <span>{{ crop.name }}</span> <br />
+                        <span>{{ crop.name }}</span> {{ crop.pivot.others }} <br />
                       </span>
                     </td>
                     <td>
@@ -105,6 +108,36 @@
                     </td>
                     <td>
                       {{ survey.farmer.address }}
+                    </td>
+                    <td>
+                      <template v-if="survey.farmer.cultivated_crops.length > 0">
+                        <span v-for="(cultivated, c) in survey.farmer.cultivated_crops" :key="c">
+                          <span>{{ cultivated.crop_name }}</span> <br />
+                        </span>
+                      </template>
+                      <template v-else>
+                        <span class="text-muted">N/A</span>
+                      </template>
+                    </td>
+                    <td>
+                      <template v-if="survey.bumo_insects.length > 0">
+                        <span v-for="(insect, c) in survey.bumo_insects" :key="c">
+                          <span>{{ insect.insect_brand_name }}</span> <br />
+                        </span>
+                      </template>
+                      <template v-else>
+                        <span class="text-muted">N/A</span>
+                      </template>
+                    </td>
+                    <td>
+                      <template v-if="survey.bumo_diseases.length > 0">
+                        <span v-for="(disease, c) in survey.bumo_diseases" :key="c">
+                          <span>{{ disease.disease_brand_name }}</span> <br />
+                        </span>
+                      </template>
+                      <template v-else>
+                        <span class="text-muted">N/A</span>
+                      </template>
                     </td>
                   </tr>
                 </tbody>
@@ -169,6 +202,7 @@ export default {
       this.loading = true;
       axios.get(`/api/aapc-farmer-survey`).then((res) => {
         this.surveys = res.data;
+        console.log('survyes: ', res.data)
         this.loading = false;
       });
     },

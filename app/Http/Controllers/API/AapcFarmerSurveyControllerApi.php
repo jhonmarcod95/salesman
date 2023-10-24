@@ -16,6 +16,9 @@ use App\AapcDiseaseType;
 use App\AapcBumo;
 use App\AapcBumosType;
 use Carbon\Carbon;
+use App\AapcCultivatedCrop;
+use App\AapcBumoInsect;
+use App\AapcBumoDisease;
 use DB;
 
 class AapcFarmerSurveyControllerApi extends Controller
@@ -23,7 +26,16 @@ class AapcFarmerSurveyControllerApi extends Controller
     public function index()
     {
         return AapcFarmerMeeting::orderBy('id','desc')
-                    ->with('region','farmer','vegetable','tindahan','farmerCrops','bumos','user')
+                    ->with('region',
+                            'farmer',
+                            'farmer.cultivatedCrops',
+                            'vegetable',
+                            'tindahan',
+                            'farmerCrops',
+                            'bumos',
+                            'bumoInsects',
+                            'bumoDiseases',
+                            'user')
                     ->paginate(10);
     }
 
@@ -65,8 +77,8 @@ class AapcFarmerSurveyControllerApi extends Controller
             'farmer_contact_number' => 'required',
             'store_address' => 'required',
             'store_zip_code' => 'required',
-            'crops_cultivated' => 'required',
-            'land_hectares' => 'required',
+            'farmer_crop_cultivated' => 'required',
+            'farmer_hectares' => 'required',
             'bumo_weeds_brand_name' => 'required',
             'bumo_insect_type_id' => 'required',
             'bumo_insect_brand_name' => 'required',
@@ -93,6 +105,8 @@ class AapcFarmerSurveyControllerApi extends Controller
             'c_bumo_disesse_brand_name.required' => "The disease brand name field is required",
         ]);
 
+        \Log::info($request->all());
+
             DB::beginTransaction();
 
             $farmerMeeting = new AapcFarmerMeeting;
@@ -109,7 +123,25 @@ class AapcFarmerSurveyControllerApi extends Controller
 
             // saving selected crop;
             if($request->input('selected_crops')) {
-                $farmerMeeting->farmerCrops()->attach($request->input('selected_crops'));
+
+                $selected_crops = $request->input('selected_crops');
+
+                foreach($selected_crops as $item) {
+                    if($item === 4) {
+                        $farmerMeeting->farmerCrops()->attach($item,
+                            ['others' => $request->lowland_others
+                        ]);
+                    }
+                    if($item === 5) {
+                        $farmerMeeting->farmerCrops()->attach($item,
+                            ['others' => $request->highland_others
+                        ]);
+                    }
+                    if($item <= 3) {
+                        $farmerMeeting->farmerCrops()->attach($item);
+                    }
+                }
+
             }
 
             if($request->vegetable_id) {
@@ -119,10 +151,10 @@ class AapcFarmerSurveyControllerApi extends Controller
             // find if the farmer is existing in the farmers database; else create one
             $farmer = AapcFarmer::where('first_name', $request->farmer_first_name)
                                 ->where('last_name',$request->farmer_last_name)
-                                ->exists();
+                                ->first();
 
-
-            if($farmer === false) {
+            $saved_farmer = array();
+            if(!$farmer) {
 
                 $new_farmer = new AapcFarmer;
                 $new_farmer->first_name = $request->farmer_first_name;
@@ -136,7 +168,25 @@ class AapcFarmerSurveyControllerApi extends Controller
                 $new_farmer->land_hectares = $request->farmer_hectares;
                 $new_farmer->save();
 
+                $saved_farmer = $new_farmer;
+
                 $farmerMeeting->farmer()->associate($new_farmer->id);
+            }
+            
+            if($farmer) {
+                $farmerMeeting->farmer()->associate($farmer->id);
+            }
+            
+            $crops = $request->farmer_all_cultivated_crops;
+            foreach($crops as $crop) {
+                AapcCultivatedCrop::insert([
+                    array(
+                        'aapc_farmer_id' => $farmer ? $farmer->id : $saved_farmer->id,
+                        'crop_name' => $crop['value'],
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    )
+                ]);
             }
 
             // store suking tindahan
@@ -153,15 +203,66 @@ class AapcFarmerSurveyControllerApi extends Controller
             }
 
             // primary
-            $aapcBumo = new AapcBumo;
-            $aapcBumo->bumos_type_id = 1; // primary
-            $aapcBumo->aapc_farmer_meeting_id = $farmerMeeting->id; // primary
-            $aapcBumo->weeds_brand_name = $request->bumo_weeds_brand_name;
-            $aapcBumo->insect_type_id = $request->bumo_insect_type_id;
-            $aapcBumo->insect_brand_name = $request->bumo_insect_brand_name;
-            $aapcBumo->disease_type_id = $request->bumo_disease_type_id;
-            $aapcBumo->disease_brand_name = $request->bumo_disesse_brand_name;
-            $aapcBumo->save();
+
+            $bumo_insects = $request->bumo_for_insects_all;
+            foreach($bumo_insects as $insect) {
+                AapcBumoInsect::insert([
+                    array(
+                        'bumos_type_id' => 1,
+                        'aapc_farmer_meeting_id' => $farmerMeeting->id,
+                        'weeds_brand_name' => $request->bumo_weeds_brand_name,
+                        'insect_type_id' => $insect['bumo_insect_type_id'],
+                        'insect_brand_name' => $insect['bumo_insect_brand_name'],
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    )
+                ]);
+            }
+
+            $bumo_diseases = $request->bumo_for_diseases_all;
+            foreach($bumo_diseases as $disease) {
+                AapcBumoDisease::insert([
+                    array(
+                        'bumos_type_id' => 1,
+                        'aapc_farmer_meeting_id' => $farmerMeeting->id,
+                        'weeds_brand_name' => $request->bumo_weeds_brand_name,
+                        'disease_type_id' => $disease['bumo_disease_type_id'],
+                        'disease_brand_name' => $disease['bumo_disesse_brand_name'],
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    )
+                ]);
+            }
+
+            $cons_bumo_insects = $request->cons_bumo_for_insects_all;
+            foreach($cons_bumo_insects as $insect) {
+                AapcBumoInsect::insert([
+                    array(
+                        'bumos_type_id' => 2,
+                        'aapc_farmer_meeting_id' => $farmerMeeting->id,
+                        'weeds_brand_name' => $request->c_bumo_weeds_brand_name,
+                        'insect_type_id' => $insect['bumo_insect_type_id'],
+                        'insect_brand_name' => $insect['bumo_insect_brand_name'],
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    )
+                ]);
+            }
+
+            $cons_bumo_diseases = $request->cons_bumo_for_diseases_all;
+            foreach($cons_bumo_diseases as $disease) {
+                AapcBumoDisease::insert([
+                    array(
+                        'bumos_type_id' => 2,
+                        'aapc_farmer_meeting_id' => $farmerMeeting->id,
+                        'weeds_brand_name' => $request->c_bumo_weeds_brand_name,
+                        'disease_type_id' => $disease['bumo_disease_type_id'],
+                        'disease_brand_name' => $disease['bumo_disesse_brand_name'],
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    )
+                ]);
+            }
 
             // secondary
             $aapcBumo_consider = new AapcBumo;
