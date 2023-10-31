@@ -9,6 +9,7 @@ use App\AapcFarmerMeeting;
 use App\AapcFarmer;
 use App\AapcRegion;
 use App\AapcCrop;
+use App\AapcRecommendation;
 use App\AapcStore;
 use App\AapcVegetable;
 use App\AapcInsectType;
@@ -19,6 +20,8 @@ use Carbon\Carbon;
 use App\AapcCultivatedCrop;
 use App\AapcBumoInsect;
 use App\AapcBumoDisease;
+use App\AapcActivityType;
+use App\AapcCultivatedCropName;
 use DB;
 
 class AapcFarmerSurveyControllerApi extends Controller
@@ -39,6 +42,16 @@ class AapcFarmerSurveyControllerApi extends Controller
                     ->paginate(10);
     }
 
+    public function aapcCultivatedCropName()
+    {
+        return AapcCultivatedCropName::orderBy('id','desc')->get();
+    }
+
+    public function aapcActivityType()
+    {
+        return AapcActivityType::orderBy('id','desc')->get();
+    }
+
     public function aapcRegion()
     {
         return AapcRegion::orderBy('id','asc')->get();
@@ -47,6 +60,13 @@ class AapcFarmerSurveyControllerApi extends Controller
     public function aapcCrops()
     {
         return AapcCrop::orderBy('id','asc')->get();
+    }
+
+    public function aapcRecommendations()
+    {
+        $recommendations = AapcRecommendation::orderBy('id','asc')->get();
+
+        return collect($recommendations)->groupBy('brand_type')->all();
     }
 
     public function aapcVegetable()
@@ -67,6 +87,7 @@ class AapcFarmerSurveyControllerApi extends Controller
     public function store(Request $request)
     {
         $this->validate($request,[
+            'activity_type_id' => 'required',
             'region_id' => 'required',
             'city' => 'required',
             'barangay' => 'required',
@@ -76,7 +97,7 @@ class AapcFarmerSurveyControllerApi extends Controller
             'farmer_last_name' => 'required',
             'farmer_contact_number' => 'required',
             'store_address' => 'required',
-            'store_zip_code' => 'required',
+            // 'store_zip_code' => 'required',
             'farmer_crop_cultivated' => 'required',
             'farmer_hectares' => 'required',
             'bumo_weeds_brand_name' => 'required',
@@ -89,11 +110,12 @@ class AapcFarmerSurveyControllerApi extends Controller
             'c_bumo_disease_type_id' => 'required',
             'c_bumo_disesse_brand_name' => 'required',
         ],[
+            'activity_type_id.required' => "The activity type field is required",
             'region_id.required' => "The region field is required",
             'barangay.required' => "The venue field is required",
             'selected_crops.required' => "The crop field is required",
             'store_address.required' => "The address field is required",
-            'store_zip_code.required' => "The zip code field is required",
+            // 'store_zip_code.required' => "The zip code field is required",
             'bumo_weeds_brand_name.required' => "The brand name field is required",
             'bumo_insect_type_id.required' => "The insect type field is required",
             'bumo_insect_brand_name.required' => "The insect brand name field is required",
@@ -104,8 +126,6 @@ class AapcFarmerSurveyControllerApi extends Controller
             'c_bumo_disease_type_id.required' => "The disease type field is required",
             'c_bumo_disesse_brand_name.required' => "The disease brand name field is required",
         ]);
-
-        \Log::info($request->all());
 
             DB::beginTransaction();
 
@@ -119,7 +139,13 @@ class AapcFarmerSurveyControllerApi extends Controller
             $farmerMeeting->store_id = 0;
             $farmerMeeting->farmer_id = 0;
             $farmerMeeting->vegestable_id = 0;
+            $farmerMeeting->aapc_activity_type_id = $request->activity_type_id;
             $farmerMeeting->save();
+
+            // saving aapc recommendations
+            if($request->input('selected_recommendations')) {
+                $farmerMeeting->meetingRecommendations()->attach($request->selected_recommendations);
+            }
 
             // saving selected crop;
             if($request->input('selected_crops')) {
@@ -133,8 +159,8 @@ class AapcFarmerSurveyControllerApi extends Controller
                         ]);
                     }
                     if($item === 5) {
-                        $farmerMeeting->farmerCrops()->attach($item,
-                            ['others' => $request->highland_others
+                        $farmerMeeting->farmerCrops()->attach($item,[
+                            'others' => $request->highland_others,
                         ]);
                     }
                     if($item <= 3) {
@@ -143,6 +169,8 @@ class AapcFarmerSurveyControllerApi extends Controller
                 }
 
             }
+
+            // $farmerMeeting->activityType()->associate($request->activity_type_id);
 
             if($request->vegetable_id) {
                 $farmerMeeting->vegetable()->associate($request->vegetable_id);
@@ -163,7 +191,7 @@ class AapcFarmerSurveyControllerApi extends Controller
                 $new_farmer->address = $request->farmer_address;
                 $new_farmer->city = $request->farmer_city;
                 $new_farmer->region_id = $request->farmer_region_id;
-                $new_farmer->zip_code = $request->farmer_zip_code;
+                $new_farmer->zip_code = 'N/A';
                 $new_farmer->crops_cultivated = $request->farmer_crop_cultivated;
                 $new_farmer->land_hectares = $request->farmer_hectares;
                 $new_farmer->save();
@@ -183,6 +211,8 @@ class AapcFarmerSurveyControllerApi extends Controller
                     array(
                         'aapc_farmer_id' => $farmer ? $farmer->id : $saved_farmer->id,
                         'crop_name' => $crop['value'],
+                        'plant_season_start' => $crop['plant_season_start'],
+                        'plant_season_end' => $crop['plant_season_end'],
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now(),
                     )
@@ -191,10 +221,10 @@ class AapcFarmerSurveyControllerApi extends Controller
 
             // store suking tindahan
             $aapcStore = new AapcStore;
-            $aapcStore->name = $request->farmer_first_name.' '.$request->last_name;
+            $aapcStore->name = $request->store_name;
             $aapcStore->address = $request->store_address;
-            $aapcStore->city = $request->store_address.', '.$request->store_state;
-            $aapcStore->zip_code = $request->store_zip_code;
+            $aapcStore->city = $request->store_city;
+            $aapcStore->zip_code = 'N/A';
             $aapcStore->save();
 
             if($aapcStore) {

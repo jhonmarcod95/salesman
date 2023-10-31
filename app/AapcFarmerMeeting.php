@@ -16,6 +16,7 @@ class AapcFarmerMeeting extends Model
         'store_id',
         'farmer_id',
         'vegestable_id',
+        'aapc_activity_type_id'
     ];
 
     public function user()
@@ -56,7 +57,13 @@ class AapcFarmerMeeting extends Model
     public function farmerCrops()
     {
         return $this->belongsToMany(AapcCrop::class, 'crop_farmer_meeting','farmer_meeting_id','crop_id')
-                    ->withPivot('others')->withTimestamps();
+                    ->withPivot(['others','plant_season_start','plant_season_end'])->withTimestamps();
+    }
+
+    public function meetingRecommendations()
+    {
+        return $this->belongsToMany(AapcRecommendation::class, 'aapc_meeting_recommendations','farmer_meeting_id','aapc_recommendation_id')
+                ->withTimestamps();
     }
 
     public function bumos()
@@ -72,5 +79,10 @@ class AapcFarmerMeeting extends Model
     public function bumoDiseases()
     {
         return $this->hasMany(AapcBumoDisease::class);
+    }
+
+    public function activityType()
+    {
+        return $this->belongsTo(AapcActivityType::class,'aapc_activity_type_id');
     }
 }

@@ -160,8 +160,11 @@ Route::group(['middleware' => 'auth:api'], function() {
     
     // store aapc farmer meeting
     Route::get('aapc-farmer-survey','API\AapcFarmerSurveyControllerApi@index');
+    Route::get('aapc-cultivated-crops','API\AapcFarmerSurveyControllerApi@aapcCultivatedCropName');
+    Route::get('aapc-activity-types','API\AapcFarmerSurveyControllerApi@aapcActivityType');
     Route::get('aapc-regions','API\AapcFarmerSurveyControllerApi@aapcRegion');
     Route::get('aapc-crops','API\AapcFarmerSurveyControllerApi@aapcCrops');
+    Route::get('aapc-recommendations','API\AapcFarmerSurveyControllerApi@aapcRecommendations');
     Route::get('aapc-vegetable','API\AapcFarmerSurveyControllerApi@aapcVegetable');
     Route::get('aapc-insect-types','API\AapcFarmerSurveyControllerApi@aapcInsectTypes');
     Route::get('aapc-disease-types','API\AapcFarmerSurveyControllerApi@aapcDiseaseTypes');

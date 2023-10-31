@@ -17,6 +17,35 @@
 
             <div class="mb-3">
               <div class="row pl-2 pr-2">
+                <div class="col-lg-12">
+                  <div class="form-group">
+                    <label class="form-control-label" for="classification"
+                      >Activity</label
+                    >
+                    <select
+                      class="form-control"
+                      v-model="form.activity_type_id"
+                    >
+                      <option
+                        v-for="(activity, c) in activity_types"
+                        v-bind:key="c"
+                        :value="activity.id"
+                      >
+                        {{ activity.name }}
+                      </option>
+                    </select>
+                    <span
+                      class="text-danger small"
+                      v-if="errors.activity_type_id"
+                      >{{ errors.activity_type_id[0] }}</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="row pl-2 pr-2">
                 <div class="col-lg-6">
                   <div class="form-group">
                     <label class="form-control-label" for="classification"
@@ -383,7 +412,7 @@
               </div>
             </div>
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
                 <div class="col-lg-12">
                   <div class="form-group">
@@ -405,12 +434,13 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <div class="mb-3">
               <div class="row pl-2 pr-2">
                 <div class="col-lg-12">
                   <div class="form-group">
+
                     <div class="d-flex justify-content-between">
                       <label
                         class="form-control-label"
@@ -418,54 +448,113 @@
                         >Crop/s Cultivated</label
                       >
                       <div>
-                        <button @click="addCultivatedCrops()" class="btn btn-sm btn-primary mb-3">Add</button>
+                        <button
+                          @click="addCultivatedCrops()"
+                          class="btn btn-sm btn-primary mb-3"
+                        >
+                          Add
+                        </button>
                       </div>
                     </div>
 
-                    <input
-                      type="text"
-                      id="input-crops-cultivated"
-                      placeholder="Crops Cultivated"
-                      class="form-control form-control-alternative"
-                      v-model="form.farmer_crop_cultivated"
-                    />
-                    <span
-                      class="text-danger small"
-                      v-if="errors.farmer_crop_cultivated"
-                      >{{ errors.farmer_crop_cultivated[0] }}</span
-                    >
+                    <div class="row pl-2 pr-2 mb-3">
+                      <div class="col">
+                        <span>Crop Name:</span> <br/>
+                        <select
+                          class="form-control form-control-alternative"
+                          v-model="form.farmer_crop_cultivated"
+                        >
+                          <option
+                            v-for="(crop, c) in cultivated_crops"
+                            v-bind:key="c"
+                            :value="crop.name"
+                          >
+                            {{ crop.name }}
+                          </option>
+                        </select>
+                        <span
+                          class="text-danger small"
+                          v-if="errors.farmer_crop_cultivated"
+                          >{{ errors.farmer_crop_cultivated[0] }}</span
+                        >
+                      </div>
+                    </div>
+                    <div class="row pl-2 pr-2">
+                      <div class="col">
+                        <span>From:</span>
+                        <input
+                          type="date"
+                          id="input-date-start-cul"
+                          class="form-control form-control-alternative"
+                          v-model="form.plant_season_start"
+                        />
+                      </div>
+                      <div class="col">
+                        <span>To:</span>
+                        <input
+                          type="date"
+                          id="input-date-end-cul"
+                          class="form-control form-control-alternative"
+                          v-model="form.plant_season_end"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div
-            v-if="farmer_cultivated_crops.length > 0"
+              v-if="farmer_cultivated_crops.length > 0"
               v-for="(cultivated, c) in farmer_cultivated_crops"
               :key="c"
               class="mb-3"
             >
               <div class="row pl-2 pr-2">
                 <div class="col-10">
+                  <span>Crop Name:</span>
                   <div class="form-group">
-                    <input
-                      type="text"
-                      id="input-crops-cultivated"
-                      placeholder="Crops Cultivated"
-                      class="form-control form-control-alternative"
-                      v-model="cultivated.value"
-                    />
-                    <!-- <span
-                      class="text-danger small"
-                      v-if="errors.farmer_crop_cultivated"
-                      >{{ errors.farmer_crop_cultivated[0] }}</span
-                    > -->
+                    <select class="form-control" v-model="cultivated.value">
+                      <option
+                        v-for="(crop, c) in cultivated_crops"
+                        v-bind:key="c"
+                        :value="crop.name"
+                      >
+                        {{ crop.name }}
+                      </option>
+                    </select>
                   </div>
                 </div>
                 <div class="col-2">
                   <div>
-                    <button @click="removeCultivatedCrops(c)" class="btn btn-block btn-danger"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                    <button
+                      @click="removeCultivatedCrops(c)"
+                      class="btn btn-block btn-danger mt-4"
+                    >
+                      <i class="fa fa-minus" aria-hidden="true"></i>
+                    </button>
                   </div>
+                </div>
+              </div>
+
+              <div class="row pl-2 pr-2">
+                <div class="col">
+                  <span>From:</span>
+                  <input
+                    type="date"
+                    id="input-date-start-cul"
+                    class="form-control form-control-alternative"
+                    v-model="cultivated.plant_season_start"
+                  />
+                </div>
+                <div class="col">
+                  <span>To:</span>
+                  <input
+                    type="date"
+                    id="input-date-end-cul"
+                    class="form-control form-control-alternative"
+                    v-model="cultivated.plant_season_end"
+                  />
                 </div>
               </div>
             </div>
@@ -539,8 +628,13 @@
             <div class="row align-items-center my-3 p-3">
               <div class="col">
                 <div class="d-flex justify-content-between">
-                <h3 class="mb-0">Brands Used for Insects</h3>
-                <button @click="addBumoInsects()" class="btn btn-sm btn-primary mb-3">Add</button>
+                  <h3 class="mb-0">Brands Used for Insects</h3>
+                  <button
+                    @click="addBumoInsects()"
+                    class="btn btn-sm btn-primary mb-3"
+                  >
+                    Add
+                  </button>
                 </div>
               </div>
             </div>
@@ -598,36 +692,36 @@
             </div>
 
             <div
-            v-if="bumo_for_insects.length > 0"
+              v-if="bumo_for_insects.length > 0"
               v-for="(bumo_insects, c) in bumo_for_insects"
               :key="`insect_${c}`"
               class="mb-3"
             >
-              <div class="d-flex justify-content-between align-items-center pl-2 pr-2">
-                  <div class="form-group" style="width: 40%; margin-right: 10px">
-                    <label
-                      class="form-control-label"
-                      for="input-bumo-brand-name"
-                      >Select Type of Insect</label
+              <div
+                class="d-flex justify-content-between align-items-center pl-2 pr-2"
+              >
+                <div class="form-group" style="width: 40%; margin-right: 10px">
+                  <label class="form-control-label" for="input-bumo-brand-name"
+                    >Select Type of Insect</label
+                  >
+                  <select
+                    class="form-control"
+                    v-model="bumo_insects.bumo_insect_type_id"
+                  >
+                    <option
+                      v-for="(insect, c) in insectTypes"
+                      v-bind:key="c"
+                      :value="insect.id"
                     >
-                    <select
-                      class="form-control"
-                      v-model="bumo_insects.bumo_insect_type_id"
-                    >
-                      <option
-                        v-for="(insect, c) in insectTypes"
-                        v-bind:key="c"
-                        :value="insect.id"
-                      >
-                        {{ insect.name }}
-                      </option>
-                    </select>
-                    <!-- <span
+                      {{ insect.name }}
+                    </option>
+                  </select>
+                  <!-- <span
                       class="text-danger small"
                       v-if="errors.bumo_insect_type_id"
                       >{{ errors.bumo_insect_type_id[0] }}</span
                     > -->
-                  </div>
+                </div>
                 <div style="width: 40%; margin-right: 10px">
                   <div class="form-group">
                     <label
@@ -649,8 +743,13 @@
                     > -->
                   </div>
                 </div>
-                <div style="width: 100px;" class="align-items-center">
-                  <button @click="removeBumoInsects(`insect_${c}`)" class="btn btn-danger"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                <div style="width: 100px" class="align-items-center">
+                  <button
+                    @click="removeBumoInsects(`insect_${c}`)"
+                    class="btn btn-danger"
+                  >
+                    <i class="fa fa-minus" aria-hidden="true"></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -658,8 +757,13 @@
             <div class="row align-items-center my-3 p-3">
               <div class="col">
                 <div class="d-flex justify-content-between">
-                <h3 class="mb-0">Brands Used for Diseases</h3>
-                <button @click="addBumoDiseases()" class="btn btn-sm btn-primary mb-3">Add</button>
+                  <h3 class="mb-0">Brands Used for Diseases</h3>
+                  <button
+                    @click="addBumoDiseases()"
+                    class="btn btn-sm btn-primary mb-3"
+                  >
+                    Add
+                  </button>
                 </div>
               </div>
             </div>
@@ -717,12 +821,14 @@
             </div>
 
             <div
-            v-if="bumo_for_diseases.length > 0"
+              v-if="bumo_for_diseases.length > 0"
               v-for="(bumo_disease, c) in bumo_for_diseases"
               :key="`disease_${c}`"
               class="mb-3"
             >
-              <div class="d-flex justify-content-between align-items-center pl-2 pr-2">
+              <div
+                class="d-flex justify-content-between align-items-center pl-2 pr-2"
+              >
                 <div style="width: 40%; margin-right: 10px">
                   <div class="form-group">
                     <label
@@ -760,8 +866,13 @@
                     />
                   </div>
                 </div>
-                <div style="width: 100px;">
-                  <button @click="removeBumoDiseases(`disease_${c}`)" class="btn btn-danger"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                <div style="width: 100px">
+                  <button
+                    @click="removeBumoDiseases(`disease_${c}`)"
+                    class="btn btn-danger"
+                  >
+                    <i class="fa fa-minus" aria-hidden="true"></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -771,6 +882,28 @@
             <div class="row align-items-center text-center p-3">
               <div class="col">
                 <h2 class="mb-0">Store Address/Suking Tindahan</h2>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="row pl-2 pr-2">
+                <div class="col-lg-12">
+                  <div class="form-group">
+                    <label class="form-control-label" for="input-store-name"
+                      >Store Name / Trader Name</label
+                    >
+                    <input
+                      type="text"
+                      id="input-store-name"
+                      placeholder="Address"
+                      class="form-control form-control-alternative"
+                      v-model="form.store_name"
+                    />
+                    <span class="text-danger small" v-if="errors.store_name">{{
+                      errors.store_name[0]
+                    }}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -800,7 +933,7 @@
 
             <div class="mb-3">
               <div class="row pl-2 pr-2">
-                <div class="col-lg-6">
+                <div class="col-lg-12">
                   <div class="form-group">
                     <label class="form-control-label" for="input-store-city"
                       >City</label
@@ -817,27 +950,10 @@
                     }}</span>
                   </div>
                 </div>
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label class="form-control-label" for="input-store-state"
-                      >Complete Address</label
-                    >
-                    <input
-                      type="text"
-                      id="input-store-state"
-                      placeholder="Address"
-                      class="form-control form-control-alternative"
-                      v-model="form.store_state"
-                    />
-                    <span class="text-danger small" v-if="errors.store_state">{{
-                      errors.store_state[0]
-                    }}</span>
-                  </div>
-                </div>
               </div>
             </div>
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
                 <div class="col-lg-12">
                   <div class="form-group">
@@ -859,7 +975,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <hr class="ml-3 mr-3" style="border: 1px dashed #94a3b8" />
 
@@ -904,8 +1020,13 @@
             <div class="row align-items-center my-3 p-3">
               <div class="col">
                 <div class="d-flex justify-content-between">
-                <h3 class="mb-0">Brands to Consider for Insects</h3>
-                <button @click="addConsBumoInsects()" class="btn btn-sm btn-primary mb-3">Add</button>
+                  <h3 class="mb-0">Brands to Consider for Insects</h3>
+                  <button
+                    @click="addConsBumoInsects()"
+                    class="btn btn-sm btn-primary mb-3"
+                  >
+                    Add
+                  </button>
                 </div>
               </div>
             </div>
@@ -963,31 +1084,31 @@
             </div>
 
             <div
-            v-if="cons_bumo_for_insects.length > 0"
+              v-if="cons_bumo_for_insects.length > 0"
               v-for="(bumo_insects, c) in cons_bumo_for_insects"
               :key="`cons_insect_${c}`"
               class="mb-3"
             >
-              <div class="d-flex justify-content-between align-items-center pl-2 pr-2">
-                  <div class="form-group" style="width: 40%; margin-right: 10px">
-                    <label
-                      class="form-control-label"
-                      for="input-bumo-brand-name"
-                      >Select Type of Insect</label
+              <div
+                class="d-flex justify-content-between align-items-center pl-2 pr-2"
+              >
+                <div class="form-group" style="width: 40%; margin-right: 10px">
+                  <label class="form-control-label" for="input-bumo-brand-name"
+                    >Select Type of Insect</label
+                  >
+                  <select
+                    class="form-control"
+                    v-model="bumo_insects.bumo_insect_type_id"
+                  >
+                    <option
+                      v-for="(insect, c) in insectTypes"
+                      v-bind:key="c"
+                      :value="insect.id"
                     >
-                    <select
-                      class="form-control"
-                      v-model="bumo_insects.bumo_insect_type_id"
-                    >
-                      <option
-                        v-for="(insect, c) in insectTypes"
-                        v-bind:key="c"
-                        :value="insect.id"
-                      >
-                        {{ insect.name }}
-                      </option>
-                    </select>
-                  </div>
+                      {{ insect.name }}
+                    </option>
+                  </select>
+                </div>
                 <div style="width: 40%; margin-right: 10px">
                   <div class="form-group">
                     <label
@@ -1004,8 +1125,13 @@
                     />
                   </div>
                 </div>
-                <div style="width: 100px;" class="align-items-center">
-                  <button @click="removeConsBumoInsects(`cons_insect_${c}`)" class="btn btn-danger"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                <div style="width: 100px" class="align-items-center">
+                  <button
+                    @click="removeConsBumoInsects(`cons_insect_${c}`)"
+                    class="btn btn-danger"
+                  >
+                    <i class="fa fa-minus" aria-hidden="true"></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1013,8 +1139,13 @@
             <div class="row align-items-center my-3 p-3">
               <div class="col">
                 <div class="d-flex justify-content-between">
-                <h3 class="mb-0">Brands to Consider for Diseases</h3>
-                <button @click="addConsBumoDiseases()" class="btn btn-sm btn-primary mb-3">Add</button>
+                  <h3 class="mb-0">Brands to Consider for Diseases</h3>
+                  <button
+                    @click="addConsBumoDiseases()"
+                    class="btn btn-sm btn-primary mb-3"
+                  >
+                    Add
+                  </button>
                 </div>
               </div>
             </div>
@@ -1072,12 +1203,14 @@
             </div>
 
             <div
-            v-if="cons_bumo_for_diseases.length > 0"
+              v-if="cons_bumo_for_diseases.length > 0"
               v-for="(bumo_disease, c) in cons_bumo_for_diseases"
               :key="`cons_disease_${c}`"
               class="mb-3"
             >
-              <div class="d-flex justify-content-between align-items-center pl-2 pr-2">
+              <div
+                class="d-flex justify-content-between align-items-center pl-2 pr-2"
+              >
                 <div style="width: 40%; margin-right: 10px">
                   <div class="form-group">
                     <label
@@ -1115,8 +1248,13 @@
                     />
                   </div>
                 </div>
-                <div style="width: 100px;">
-                  <button @click="removeConsBumoDiseases(`cons_disease_${c}`)" class="btn btn-danger"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                <div style="width: 100px">
+                  <button
+                    @click="removeConsBumoDiseases(`cons_disease_${c}`)"
+                    class="btn btn-danger"
+                  >
+                    <i class="fa fa-minus" aria-hidden="true"></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1139,6 +1277,49 @@
                     <span class="text-danger small" v-if="errors.remarks">{{
                       errors.remarks[0]
                     }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row align-items-center my-3 p-3">
+              <div class="col">
+                <h3 class="mb-0">Agrisolutions Product/s to Recommend</h3>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="row pl-2 pr-2">
+                <div class="col-lg-12">
+                  <div v-for="(recommend, r) in recommendations" :key="r">
+                    <label
+                      class="form-control-label mb-3"
+                      for="input-username"
+                      >{{ recommend[0]["brand_type"] }}</label
+                    >
+                    <ul class="list-group list-group-flush">
+                      <li
+                        v-for="(item, b) in recommend"
+                        :key="b"
+                        class="list-group-item"
+                      >
+                        <div class="custom-control custom-checkbox mt-2">
+                          <input
+                            type="checkbox"
+                            :value="item.id"
+                            v-model="form.selected_recommendations"
+                            class="custom-control-input"
+                            :id="`aapc_recommendations_${item.id}`"
+                          />
+                          <label
+                            class="custom-control-label"
+                            :for="`aapc_recommendations_${item.id}`"
+                          >
+                            {{ item.name }}
+                          </label>
+                        </div>
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -1175,8 +1356,11 @@ export default {
   data() {
     return {
       errors: [],
+      activity_types: [],
+      cultivated_crops: [],
       regions: [],
       crops: [],
+      recommendations: [],
       vegetables: [],
       insectTypes: [],
       diseaseTypes: [],
@@ -1186,11 +1370,15 @@ export default {
       cons_bumo_for_insects: [],
       cons_bumo_for_diseases: [],
       form: {
+        activity_type_id: "",
         region_id: "",
         city: "",
         barangay: "",
         date_conducted: "",
         selected_crops: [],
+        selected_recommendations: [],
+        plant_season_end: "",
+        plant_season_start: "",
         vegetable_id: "",
         farmer_first_name: "",
         farmer_last_name: "",
@@ -1198,7 +1386,6 @@ export default {
         farmer_address: "",
         farmer_city: "",
         farmer_region_id: "",
-        farmer_zip_code: "",
         farmer_crop_cultivated: "",
         farmer_all_cultivated_crops: [],
         bumo_for_diseases_all: [],
@@ -1211,10 +1398,10 @@ export default {
         lowland_others: "",
         highland_others: "",
         farmer_hectares: "",
+        store_name: "",
         store_address: "",
         store_city: "",
         store_state: "",
-        store_zip_code: "",
         bumo_weeds_brand_name: "",
         bumo_insect_type_id: "",
         bumo_insect_brand_name: "",
@@ -1231,8 +1418,11 @@ export default {
   },
 
   mounted() {
+    this.fetchCultivatedCropName();
+    this.fetchActivityType();
     this.fetchRegions();
     this.fetchCrops();
+    this.fetchRecommendations();
     this.fetchVegetables();
     this.fetchInsectTypes();
     this.fetchDiseaseTypes();
@@ -1248,58 +1438,109 @@ export default {
   },
 
   methods: {
-
     addCultivatedCrops() {
-      this.farmer_cultivated_crops.push({ value: '' })
+      this.farmer_cultivated_crops.push({ value: "", plant_season_start: "", plant_season_end: ""  });
     },
     removeCultivatedCrops(index) {
-        this.farmer_cultivated_crops.splice(index, 1);
+      this.farmer_cultivated_crops.splice(index, 1);
     },
 
     addBumoInsects() {
-      this.bumo_for_insects.push({ bumo_insect_type_id: '', bumo_insect_brand_name: '' })
+      this.bumo_for_insects.push({
+        bumo_insect_type_id: "",
+        bumo_insect_brand_name: "",
+      });
     },
     removeBumoInsects(index) {
       this.bumo_for_insects.splice(index, 1);
     },
 
     addBumoDiseases() {
-      this.bumo_for_diseases.push({ bumo_disease_type_id: '', bumo_disesse_brand_name: '' })
+      this.bumo_for_diseases.push({
+        bumo_disease_type_id: "",
+        bumo_disesse_brand_name: "",
+      });
     },
     removeBumoDiseases(index) {
       this.bumo_for_diseases.splice(index, 1);
     },
 
     addConsBumoInsects() {
-      this.cons_bumo_for_insects.push({ bumo_insect_type_id: '', bumo_insect_brand_name: '' })
+      this.cons_bumo_for_insects.push({
+        bumo_insect_type_id: "",
+        bumo_insect_brand_name: "",
+      });
     },
     removeConsBumoInsects(index) {
       this.cons_bumo_for_insects.splice(index, 1);
     },
 
     addConsBumoDiseases() {
-      this.cons_bumo_for_diseases.push({ bumo_disease_type_id: '', bumo_disesse_brand_name: '' })
+      this.cons_bumo_for_diseases.push({
+        bumo_disease_type_id: "",
+        bumo_disesse_brand_name: "",
+      });
     },
     removeConsBumoDiseases(index) {
       this.cons_bumo_for_diseases.splice(index, 1);
     },
 
     handleSubmit() {
+      this.form.farmer_all_cultivated_crops = [
+        ...this.farmer_cultivated_crops,
+        { 
+          value: this.form.farmer_crop_cultivated,
+          plant_season_start: this.form.plant_season_start,
+          plant_season_end: this.form.plant_season_end,
+        },
+      ];
 
-      this.form.farmer_all_cultivated_crops = [...this.farmer_cultivated_crops, { value: this.form.farmer_crop_cultivated }];
-      
-      this.form.bumo_for_diseases_all = [...this.bumo_for_diseases, { bumo_disease_type_id: this.form.bumo_disease_type_id, bumo_disesse_brand_name: this.form.bumo_disesse_brand_name }]
-      this.form.bumo_for_insects_all = [...this.bumo_for_insects, { bumo_insect_type_id: this.form.bumo_insect_type_id, bumo_insect_brand_name: this.form.bumo_insect_brand_name }]
-      
-      this.form.cons_bumo_for_diseases_all = [...this.cons_bumo_for_diseases, { bumo_disease_type_id: this.form.c_bumo_disease_type_id, bumo_disesse_brand_name: this.form.c_bumo_disesse_brand_name }]
-      this.form.cons_bumo_for_insects_all = [...this.cons_bumo_for_insects, { bumo_insect_type_id: this.form.c_bumo_insect_type_id, bumo_insect_brand_name: this.form.c_bumo_insect_brand_name }]
+      this.form.bumo_for_diseases_all = [
+        ...this.bumo_for_diseases,
+        {
+          bumo_disease_type_id: this.form.bumo_disease_type_id,
+          bumo_disesse_brand_name: this.form.bumo_disesse_brand_name,
+        },
+      ];
+      this.form.bumo_for_insects_all = [
+        ...this.bumo_for_insects,
+        {
+          bumo_insect_type_id: this.form.bumo_insect_type_id,
+          bumo_insect_brand_name: this.form.bumo_insect_brand_name,
+        },
+      ];
 
-      if(this.form.vegetable_lowland != '' && this.form.lowland_others === '') {
-        const low_other = this.vegetableLowland.find(item => item.id === this.form.vegetable_lowland);
+      this.form.cons_bumo_for_diseases_all = [
+        ...this.cons_bumo_for_diseases,
+        {
+          bumo_disease_type_id: this.form.c_bumo_disease_type_id,
+          bumo_disesse_brand_name: this.form.c_bumo_disesse_brand_name,
+        },
+      ];
+      this.form.cons_bumo_for_insects_all = [
+        ...this.cons_bumo_for_insects,
+        {
+          bumo_insect_type_id: this.form.c_bumo_insect_type_id,
+          bumo_insect_brand_name: this.form.c_bumo_insect_brand_name,
+        },
+      ];
+
+      if (
+        this.form.vegetable_lowland != "" &&
+        this.form.lowland_others === ""
+      ) {
+        const low_other = this.vegetableLowland.find(
+          (item) => item.id === this.form.vegetable_lowland
+        );
         this.form.lowland_others = low_other.name;
       }
-      if(this.form.vegetable_highland != '' && this.form.highland_others === '') {
-        const high_other = this.vegetableHighland.find(item => item.id === this.form.vegetable_highland);
+      if (
+        this.form.vegetable_highland != "" &&
+        this.form.highland_others === ""
+      ) {
+        const high_other = this.vegetableHighland.find(
+          (item) => item.id === this.form.vegetable_highland
+        );
         this.form.highland_others = high_other.name;
       }
 
@@ -1314,7 +1555,7 @@ export default {
               confirmButtonText: "Okay",
             });
 
-            window.location.href = '/aapc-farmer';
+            window.location.href = "/aapc-farmer";
           }
         })
         .catch((err) => {
@@ -1328,6 +1569,26 @@ export default {
               confirmButtonText: "Okay",
             });
           }
+        });
+    },
+    fetchCultivatedCropName() {
+      axios
+        .get(`/api/aapc-cultivated-crops`)
+        .then((res) => {
+          this.cultivated_crops = res.data;
+        })
+        .catch((err) => {
+          console.log("err: ", err.message);
+        });
+    },
+    fetchActivityType() {
+      axios
+        .get(`/api/aapc-activity-types`)
+        .then((res) => {
+          this.activity_types = res.data;
+        })
+        .catch((err) => {
+          console.log("err: ", err.message);
         });
     },
     fetchRegions() {
@@ -1345,6 +1606,17 @@ export default {
         .get(`/api/aapc-crops`)
         .then((res) => {
           this.crops = res.data;
+        })
+        .catch((err) => {
+          console.log("err: ", err.message);
+        });
+    },
+    fetchRecommendations() {
+      axios
+        .get(`/api/aapc-recommendations`)
+        .then((res) => {
+          this.recommendations = res.data;
+          console.log("check recommendations: ", res.data);
         })
         .catch((err) => {
           console.log("err: ", err.message);
