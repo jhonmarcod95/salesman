@@ -51,17 +51,26 @@
                     <label class="form-control-label" for="classification"
                       >Region</label
                     >
-                    <select class="form-control" v-model="form.region_id">
+                    <multiselect
+                          v-model="form.region_name"
+                          :options="getProvinceNames"
+                          :multiple="false"
+                          track-by="id"
+                          placeholder="Select Region/Province"
+                          id="selected_region"
+                    >
+                    </multiselect>
+                    <!-- <select class="form-control" v-model="form.region_name">
                       <option
-                        v-for="(region, c) in regions"
+                        v-for="(province, c) in getProvinceNames"
                         v-bind:key="c"
-                        :value="region.id"
+                        :value="province"
                       >
-                        {{ region.name }}
+                        {{ province }}
                       </option>
-                    </select>
-                    <span class="text-danger small" v-if="errors.region_id">{{
-                      errors.region_id[0]
+                    </select> -->
+                    <span class="text-danger small" v-if="errors.region_name">{{
+                      errors.region_name[0]
                     }}</span>
                   </div>
                 </div>
@@ -70,13 +79,17 @@
                     <label class="form-control-label" for="input-username"
                       >City</label
                     >
-                    <input
-                      type="text"
-                      id="input-city"
-                      placeholder="City"
-                      class="form-control form-control-alternative"
-                      v-model="form.city"
-                    />
+                    <multiselect
+                          v-model="form.city"
+                          :options="municipalities"
+                          :multiple="false"
+                          track-by="id"
+                          :custom-label="customMunicipalities"
+                          placeholder="Select Municipality"
+                          id="selected_municipality"
+                          :disabled="form.region_name === null"
+                    >
+                    </multiselect>
                     <span class="text-danger small" v-if="errors.city">{{
                       errors.city[0]
                     }}</span>
@@ -92,13 +105,23 @@
                     <label class="form-control-label" for="input-username"
                       >Venue/Barangay</label
                     >
-                    <input
+                    <multiselect
+                          v-model="form.barangay"
+                          :options="barangays"
+                          :multiple="false"
+                          track-by="id"
+                          placeholder="Select Barangay"
+                          id="selected_barangay"
+                          :disabled="form.city === null"
+                    >
+                    </multiselect>
+                    <!-- <input
                       type="text"
                       id="input-baranggay"
                       placeholder="Barangay/Venue"
                       class="form-control form-control-alternative"
                       v-model="form.barangay"
-                    />
+                    /> -->
                     <span class="text-danger small" v-if="errors.barangay">{{
                       errors.barangay[0]
                     }}</span>
@@ -373,7 +396,16 @@
                     <label class="form-control-label" for="farmer_region"
                       >Region</label
                     >
-                    <select
+                    <multiselect
+                          v-model="form.farmer_region_name"
+                          :options="getProvinceNames"
+                          :multiple="false"
+                          track-by="id"
+                          placeholder="Select Region/Province"
+                          id="selected_region_farmer"
+                    >
+                    </multiselect>
+                    <!-- <select
                       class="form-control"
                       v-model="form.farmer_region_id"
                     >
@@ -384,11 +416,11 @@
                       >
                         {{ region.name }}
                       </option>
-                    </select>
+                    </select> -->
                     <span
                       class="text-danger small"
-                      v-if="errors.farmer_region_id"
-                      >{{ errors.farmer_region_id[0] }}</span
+                      v-if="errors.farmer_region_name"
+                      >{{ errors.farmer_region_name[0] }}</span
                     >
                   </div>
                 </div>
@@ -397,13 +429,24 @@
                     <label class="form-control-label" for="input-farmer-city"
                       >City</label
                     >
-                    <input
+                    <multiselect
+                          v-model="form.farmer_city"
+                          :options="farmer_municipalities"
+                          :multiple="false"
+                          track-by="id"
+                          :custom-label="customFarmerMunicipalities"
+                          placeholder="Select Municipality"
+                          id="selected_farmer_municipality"
+                          :disabled="form.farmer_region_name === null"
+                    >
+                    </multiselect>
+                    <!-- <input
                       type="text"
                       id="input-city"
                       placeholder="Farmer City"
                       class="form-control form-control-alternative"
                       v-model="form.farmer_city"
-                    />
+                    /> -->
                     <span class="text-danger small" v-if="errors.farmer_city">{{
                       errors.farmer_city[0]
                     }}</span>
@@ -481,7 +524,7 @@
                     </div>
                     <div class="row pl-2 pr-2">
                       <div class="col">
-                        <span>From:</span>
+                        <span>Planting Season From:</span>
                         <input
                           type="date"
                           id="input-date-start-cul"
@@ -490,7 +533,7 @@
                         />
                       </div>
                       <div class="col">
-                        <span>To:</span>
+                        <span>Planting Season To:</span>
                         <input
                           type="date"
                           id="input-date-end-cul"
@@ -539,7 +582,7 @@
 
               <div class="row pl-2 pr-2">
                 <div class="col">
-                  <span>From:</span>
+                  <span>Planting season from:</span>
                   <input
                     type="date"
                     id="input-date-start-cul"
@@ -548,7 +591,7 @@
                   />
                 </div>
                 <div class="col">
-                  <span>To:</span>
+                  <span>Planting season to:</span>
                   <input
                     type="date"
                     id="input-date-end-cul"
@@ -1329,7 +1372,8 @@
               <div class="row pl-2 pr-2">
                 <div class="col-lg-12">
                   <button
-                    @click="handleSubmit()"
+                    :disabled="submitLoading === true"
+                    @click="confirmSubmission()"
                     class="btn btn-primary btn-block"
                   >
                     Submit
@@ -1345,16 +1389,23 @@
     </div>
   </div>
 </template>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+
 <script>
 import Swal from "sweetalert2";
 import MaskedInput from "vue-masked-input";
+import jsonData from '../../services/ph_places.json';
+import Multiselect from 'vue-multiselect';
 
 export default {
   components: {
     MaskedInput,
+    Multiselect
   },
   data() {
     return {
+      places: jsonData,
+      submitLoading: false,
       errors: [],
       activity_types: [],
       cultivated_crops: [],
@@ -1369,11 +1420,19 @@ export default {
       bumo_for_diseases: [],
       cons_bumo_for_insects: [],
       cons_bumo_for_diseases: [],
+      municipalities: [],
+      farmer_municipalities: [],
+      barangays: [],
+      old_region_name: null,
+      old_city: null,
+      old_farmer_region_name: null,
+      old_farmer_city: null,
       form: {
+        region_name: null,
+        city: null,
+        barangay: null,
         activity_type_id: "",
         region_id: "",
-        city: "",
-        barangay: "",
         date_conducted: "",
         selected_crops: [],
         selected_recommendations: [],
@@ -1384,8 +1443,9 @@ export default {
         farmer_last_name: "",
         farmer_contact_number: "",
         farmer_address: "",
-        farmer_city: "",
+        farmer_city: null,
         farmer_region_id: "",
+        farmer_region_name: null,
         farmer_crop_cultivated: "",
         farmer_all_cultivated_crops: [],
         bumo_for_diseases_all: [],
@@ -1435,9 +1495,116 @@ export default {
     vegetableLowland() {
       return this.vegetables.filter((item) => item.vegetable_type === 1);
     },
+    getProvices() {
+      return this.places.map(item => item.provinces);
+    },
+    getRegionNames() {
+      return this.places.map((item) => {
+        return item.regionName
+      })
+    },
+    getProvinceNames() {
+      return this.places.map((item) => {
+        return item.provinces.map(province => {
+          return province.name;
+        })
+      }).flat().sort();
+    },
+    getMunicipalities() {
+      return this.places.map((item) => {
+        return item.provinces.map(province => {
+          return province.municipalities;
+        })
+      }).flat(2)
+    }
+  },
+
+  watch: {
+      form: {
+        handler(val, oldValue){
+          // do stuff 
+
+          console.log('check region name: ', val.region_name)
+          console.log('check city: ', val.city)
+          console.log('check farmer region: ', val.farmer_region_name)
+          console.log('check farmer city: ', val.farmer_city)
+
+          if(this.old_region_name === null) {
+            this.old_region_name = val.region_name
+          }
+
+          if(this.old_farmer_region_name === null) {
+            this.old_farmer_region_name = val.farmer_region_name
+          }
+
+          if(this.form.farmer_city) {
+            if(this.old_farmer_city === null) {
+              this.old_farmer_city = val.farmer_city.name
+            }
+          }
+
+          if(this.form.city) {
+            if(this.old_city === null) {
+              this.old_city = val.city.name
+            }         
+            if(val.city.name != this.old_city) {
+              this.old_city = val.city.name;
+              this.barangays = [];
+              this.form.barangay = null;
+            }
+          }
+
+          if(val.region_name != this.old_region_name) {
+              this.old_region_name = val.region_name
+              this.municipalities = [];
+              this.barangays = [];
+              this.form.city = null;
+              this.form.barangay = null;
+          }
+
+          if(val.farmer_region_name != this.old_farmer_region_name) {
+            this.old_farmer_region_name = val.farmer_region_name;
+            this.farmer_municipalities = [];
+            this.from.farmer_city = null;
+          }
+
+          if(val.farmer_region_name) {
+            const farmerUpdateMunicipalities = this.getMunicipalities.filter(item => item.provinceName === val.farmer_region_name);
+            this.farmer_municipalities = farmerUpdateMunicipalities;
+          }
+
+          if(val.region_name) {
+            const updateMunicipalities = this.getMunicipalities.filter(item => item.provinceName === val.region_name);
+            this.municipalities = updateMunicipalities;
+          }
+
+          if(val.city) {
+            if(val.city != null) {
+              this.barangays = val.city.barangays;
+            }
+          }
+
+        },
+        deep: true
+      },
   },
 
   methods: {
+    customRegionName (region) {
+        return `${region.name  }`
+    },
+    customFarmerMunicipalities (municipality) {
+        return `${municipality.name  }`
+    },
+    customMunicipalities (municipality) {
+        return `${municipality.name  }`
+    },
+    customBarangays (barangay) {
+        return `${barangay.name  }`
+    },
+    fetchMunicipalities(province) {
+      return this.getMunicipalities.find(item => item.provinceName === province);
+    },
     addCultivatedCrops() {
       this.farmer_cultivated_crops.push({ value: "", plant_season_start: "", plant_season_end: ""  });
     },
@@ -1485,7 +1652,41 @@ export default {
       this.cons_bumo_for_diseases.splice(index, 1);
     },
 
+    showLoading() {
+      Swal.fire({
+        title: "Processing...",
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+        showCancelButton: false,
+        showConfirmButton: false,
+        onOpen: () => {
+          Swal.showLoading();
+        },
+      });
+    },
+
+    confirmSubmission() {
+
+      Swal.fire({
+        title: "Are you want to proceed this action?",
+        text: "Submit this form.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Proceed",
+      }).then((result) => {
+        if (result.isConfirmed) {
+            this.showLoading();
+            this.handleSubmit()
+        }
+      });
+    },
+
     handleSubmit() {
+
+      this.submitLoading = true;
+
       this.form.farmer_all_cultivated_crops = [
         ...this.farmer_cultivated_crops,
         { 
@@ -1548,17 +1749,19 @@ export default {
         .post(`/api/aapc-farmer-survey`, this.form)
         .then((res) => {
           if (res.status === 200 || res.status === 201) {
+            Swal.close();
             Swal.fire({
               title: "Success!",
               text: "Farmer quality meeting successfully created!",
               icon: "success",
               confirmButtonText: "Okay",
             });
-
+            this.submitLoading = false;
             window.location.href = "/aapc-farmer";
           }
         })
         .catch((err) => {
+          Swal.close();
           if (err.response.status === 422) {
             this.errors = err.response.data.errors;
           } else {
@@ -1568,6 +1771,7 @@ export default {
               icon: "warning",
               confirmButtonText: "Okay",
             });
+            this.submitLoading = false;
           }
         });
     },

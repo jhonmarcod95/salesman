@@ -16,6 +16,7 @@ class AapcFarmer extends Model
         'zip_code',
         'crops_cultivated',
         'land_hectares',
+        'region_name',
     ];
 
     public function cultivatedCrops()

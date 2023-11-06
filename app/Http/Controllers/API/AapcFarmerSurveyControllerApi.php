@@ -60,7 +60,8 @@ class AapcFarmerSurveyControllerApi extends Controller
                             $q->where('name', 'like', '%'.$store_name.'%');
                         });
                     })
-                    ->with('region',
+                    ->with('activityType',
+                            'region',
                             'farmer',
                             'farmer.cultivatedCrops',
                             'vegetable',
@@ -119,8 +120,11 @@ class AapcFarmerSurveyControllerApi extends Controller
     {
         $this->validate($request,[
             'activity_type_id' => 'required',
-            'region_id' => 'required',
+            'region_name' => 'required',
+            'store_name' => 'required',
             'city' => 'required',
+            'plant_season_start' => 'required',
+            'plant_season_end' => 'required',
             'barangay' => 'required',
             'date_conducted' => 'required',
             'selected_crops' => 'required',
@@ -142,8 +146,11 @@ class AapcFarmerSurveyControllerApi extends Controller
             'c_bumo_disesse_brand_name' => 'required',
         ],[
             'activity_type_id.required' => "The activity type field is required",
-            'region_id.required' => "The region field is required",
+            'region_name.required' => "The region field is required",
+            'store_name.required' => "The store name field is required",
             'barangay.required' => "The venue field is required",
+            'plant_season_start.required' => "The planting season start is required",
+            'plant_season_end.required' => "The planting season end is required",
             'selected_crops.required' => "The crop field is required",
             'store_address.required' => "The address field is required",
             // 'store_zip_code.required' => "The zip code field is required",
@@ -162,8 +169,9 @@ class AapcFarmerSurveyControllerApi extends Controller
 
             $farmerMeeting = new AapcFarmerMeeting;
             $farmerMeeting->user_id = Auth::user()->id;
-            $farmerMeeting->region_id = $request->region_id;
-            $farmerMeeting->city = $request->city;
+            $farmerMeeting->region_name = $request->region_name;
+            $farmerMeeting->region_id = 0;
+            $farmerMeeting->city = $request->city['name'];
             $farmerMeeting->venue = $request->barangay;
             $farmerMeeting->remarks = $request->remarks;
             $farmerMeeting->date_conducted = $request->date_conducted;
@@ -220,8 +228,9 @@ class AapcFarmerSurveyControllerApi extends Controller
                 $new_farmer->last_name = $request->farmer_last_name;
                 $new_farmer->contact_number = $request->farmer_contact_number;
                 $new_farmer->address = $request->farmer_address;
-                $new_farmer->city = $request->farmer_city;
-                $new_farmer->region_id = $request->farmer_region_id;
+                $new_farmer->city = $request->farmer_city['name'];
+                $new_farmer->region_id = 0; // set to default
+                $new_farmer->region_name = $request->farmer_region_name;
                 $new_farmer->zip_code = 'N/A';
                 $new_farmer->crops_cultivated = $request->farmer_crop_cultivated;
                 $new_farmer->land_hectares = $request->farmer_hectares;

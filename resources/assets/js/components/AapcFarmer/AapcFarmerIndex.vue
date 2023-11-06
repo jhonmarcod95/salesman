@@ -12,7 +12,7 @@
                   <h3 class="mb-0">Farmer Quality Meetings</h3>
                 </div>
                 <div class="col-4 text-right">
-                  <a :href="newSurvey" class="btn btn-sm btn-primary"
+                  <a href="/aapc-farmer/create" class="btn btn-sm btn-primary"
                     >Add Survey</a
                   >
                   <!-- <a class="btn btn-outline-primary mb-2" data-toggle="modal" data-target="#questionaireModal">New</a> -->
@@ -132,9 +132,10 @@
                 <thead class="thead-light">
                   <tr>
                     <th scope="col"></th>
+                    <th scope="col">Acitivity Type</th>
                     <th scope="col">TSR</th>
                     <th scope="col">Date Conducted</th>
-                    <th scope="col">Region</th>
+                    <th scope="col">Location</th>
                     <th scope="col">Target Crops</th>
                     <th scope="col">Farmer Name</th>
                     <th scope="col">Farmer Address</th>
@@ -147,7 +148,7 @@
 
                 <tbody v-if="loading === true" class="list">
                   <tr>
-                    <td colspan="10">
+                    <td colspan="11">
                       <div
                         class="center-align py-3"
                         style="
@@ -202,12 +203,31 @@
                         </div>
                       </div>
                     </td>
+                    <td>
+                      <span v-if="survey.activity_type">
+                        {{ survey.activity_type.name }}
+                      </span>
+                      <span v-else>
+                        N/A
+                      </span>
+                    </td>
                     <td>{{ survey.user.name }}</td>
                     <td>
                       {{ survey.date_conducted }}
                     </td>
                     <td>
+                      <span v-if="survey.region">
                       {{ survey.region.name }}
+                      </span>
+                      <span v-else>
+                        {{ survey.region_name }}, 
+                      </span><br/>
+                      <span>
+                        {{ survey.city }} 
+                      </span><br/>
+                      <span>
+                        {{ survey.venue }}
+                      </span>
                     </td>
                     <td>
                       <span v-for="(crop, b) in survey.farmer_crops" :key="b">

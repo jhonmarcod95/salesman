@@ -16,7 +16,8 @@ class AapcFarmerMeeting extends Model
         'store_id',
         'farmer_id',
         'vegestable_id',
-        'aapc_activity_type_id'
+        'aapc_activity_type_id',
+        'region_name',
     ];
 
     public function user()
