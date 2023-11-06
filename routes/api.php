@@ -159,7 +159,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::post('surveys/delete-questionnaire','SurveysController@deleteQuestionnaire');
     
     // store aapc farmer meeting
-    Route::get('aapc-farmer-survey','API\AapcFarmerSurveyControllerApi@index');
+    Route::post('aapc-farmer-survey-list','API\AapcFarmerSurveyControllerApi@index');
     Route::get('aapc-cultivated-crops','API\AapcFarmerSurveyControllerApi@aapcCultivatedCropName');
     Route::get('aapc-activity-types','API\AapcFarmerSurveyControllerApi@aapcActivityType');
     Route::get('aapc-regions','API\AapcFarmerSurveyControllerApi@aapcRegion');

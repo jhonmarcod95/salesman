@@ -85,4 +85,31 @@ class AapcFarmerMeeting extends Model
     {
         return $this->belongsTo(AapcActivityType::class,'aapc_activity_type_id');
     }
+
+    /**
+     * scope
+     */
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when($filters['farmername'] ?? null, function ($query, $farmername) {
+            $query->whereHas('farmer', function($q, $farmername) {
+                $q->where('first_name', 'like', '%'.$farmername.'%')
+                ->orWhere('last_name', 'like', '%'.$farmername.'%');
+            });
+        })->when($filters['cultivated_crops'] ?? null, function ($query, $cultivated_crops) {
+            $query->whereHas('farmer.crops', function($q, $cultivated_crops) {
+                $q->where('crop_name','like', '%'.$cultivated_crops.'%');
+            });
+        })->when($filters['region_id'] ?? null, function ($query, $region_id) {
+            $query->whereHas('region', function($q,$region_id) {
+                $q->where('id',$region_id);
+            });
+        })->when($filters['city'] ?? null, function ($query, $city) {
+            $query->where('city', 'like', '%'.$city.'%');
+        })->when($filters['store_name'] ?? null, function ($query, $store_name) {
+            $query->whereHas('tindahan', function($q,$store_name) {
+                $q->where('name', 'like', '%'.$store_name.'%');
+            });
+        });
+    }
 }

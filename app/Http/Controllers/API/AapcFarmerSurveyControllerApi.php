@@ -26,9 +26,40 @@ use DB;
 
 class AapcFarmerSurveyControllerApi extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // (['farmername','selected_cultivated_crops','region_id','city','store_name']))
+
+        $farmer_name = $request->farmername;
+        $cultivated_crops = $request->cultivated_crops;
+        $region_id = $request->region_id;
+        $city = $request->city;
+        $store_name = $request->store_name;
+
         return AapcFarmerMeeting::orderBy('id','desc')
+                    ->when($farmer_name, function ($query) use ($farmer_name) {
+                        return $query->whereHas('farmer', function($q) use ($farmer_name) {
+                            $q->where('first_name','like', '%'.$farmer_name.'%');
+                        });
+                    })
+                    ->when($cultivated_crops, function ($query) use ($cultivated_crops) {
+                        $query->whereHas('farmer.cultivatedCrops', function($q) use ($cultivated_crops) {
+                            $q->where('crop_name','like', '%'.$cultivated_crops.'%');
+                        });
+                    })
+                    ->when($region_id, function ($query) use ($region_id) {
+                        $query->whereHas('region', function($q) use ($region_id) {
+                            $q->where('id',$region_id);
+                        });
+                    })
+                    ->when($city, function ($query) use ($city) {
+                        $query->where('city', 'like', '%'.$city.'%');
+                    })
+                    ->when($store_name, function ($query) use ($store_name) {
+                        $query->whereHas('tindahan', function($q) use ($store_name) {
+                            $q->where('name', 'like', '%'.$store_name.'%');
+                        });
+                    })
                     ->with('region',
                             'farmer',
                             'farmer.cultivatedCrops',

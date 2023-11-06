@@ -12,8 +12,117 @@
                   <h3 class="mb-0">Farmer Quality Meetings</h3>
                 </div>
                 <div class="col-4 text-right">
+                  <a :href="newSurvey" class="btn btn-sm btn-primary"
+                    >Add Survey</a
+                  >
                   <!-- <a class="btn btn-outline-primary mb-2" data-toggle="modal" data-target="#questionaireModal">New</a> -->
                   <!-- <button type="submit" @click="switchView = !switchView" class="btn btn-outline-primary mb-2">{{ switchView === false ? 'Switch to Graph' : 'Switch to Table' }}</button> -->
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="row pl-2 pr-2">
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label for="start_date" class="form-control-label"
+                      >Farmer Name</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control form-control-alternative"
+                      v-model="farmername"
+                    />
+                    <span class="text-danger" v-if="errors.farmername">
+                      {{ errors.farmername[0] }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label class="form-control-label" for="role">Cultivated Crops</label>
+                    <select
+                      class="form-control"
+                      v-model="selected_cultivated_crops"
+                    >
+                      <option value=""> Select Cultivated Crop </option>
+                      <option
+                        v-for="(cultivated, c) in cultivated_crops"
+                        v-bind:key="c"
+                        :value="cultivated.id"
+                      >
+                        {{ cultivated.name }}
+                      </option>
+                    </select>
+                    <span
+                      class="text-danger"
+                      v-if="errors.selected_cultivated_crops"
+                      >{{ errors.selected_cultivated_crops[0] }}</span
+                    >
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label for="start_date" class="form-control-label"
+                      >Province</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control form-control-alternative"
+                      v-model="region_id"
+                    />
+                    <span class="text-danger" v-if="errors.region_id">
+                      {{ errors.region_id[0] }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label for="end_date" class="form-control-label"
+                      >City</label
+                    >
+                    <input
+                      type="text"
+                      id="end_date"
+                      class="form-control form-control-alternative"
+                      v-model="city"
+                    />
+                    <span class="text-danger" v-if="errors.city">
+                      {{ errors.city[0] }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label for="end_date" class="form-control-label"
+                      >Store Name</label
+                    >
+                    <input
+                      type="text"
+                      id="end_date"
+                      class="form-control form-control-alternative"
+                      v-model="store_name"
+                    />
+                    <span class="text-danger" v-if="errors.store_name">
+                      {{ errors.store_name[0] }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label for="end_date" class="form-control-label"
+                      >&nbsp;</label
+                    >
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-lg btn-block"
+                      :class="{ ' disabled': loading === true }"
+                      :disabled="loading === true"
+                      @click="fetchFarmerMeetings()"
+                    >
+                      Filter
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -30,14 +139,15 @@
                     <th scope="col">Farmer Name</th>
                     <th scope="col">Farmer Address</th>
                     <th scope="col">Farmer Cultivated Crops</th>
-                    <th scope="col">Brands for Insects </th>
-                    <th scope="col">Brands for Diseases </th>
+                    <th scope="col">Store Name</th>
+                    <th scope="col">Brands for Insects</th>
+                    <th scope="col">Brands for Diseases</th>
                   </tr>
                 </thead>
 
                 <tbody v-if="loading === true" class="list">
                   <tr>
-                    <td colspan="8">
+                    <td colspan="10">
                       <div
                         class="center-align py-3"
                         style="
@@ -69,6 +179,7 @@
                 </tbody>
 
                 <tbody class="list">
+                  <template v-if="loading === false">
                   <tr v-for="(survey, s) in surveys.data" v-bind:key="s">
                     <td class="text-right">
                       <div class="dropdown">
@@ -100,18 +211,26 @@
                     </td>
                     <td>
                       <span v-for="(crop, b) in survey.farmer_crops" :key="b">
-                        <span>{{ crop.name }}</span> {{ crop.pivot.others }} <br />
+                        <span>{{ crop.name }}</span> {{ crop.pivot.others }}
+                        <br />
                       </span>
                     </td>
                     <td>
-                      {{ survey.farmer.first_name }} {{ survey.farmer.last_name }}
+                      {{ survey.farmer.first_name }}
+                      {{ survey.farmer.last_name }}
                     </td>
                     <td>
                       {{ survey.farmer.address }}
                     </td>
                     <td>
-                      <template v-if="survey.farmer.cultivated_crops.length > 0">
-                        <span v-for="(cultivated, c) in survey.farmer.cultivated_crops" :key="c">
+                      <template
+                        v-if="survey.farmer.cultivated_crops.length > 0"
+                      >
+                        <span
+                          v-for="(cultivated, c) in survey.farmer
+                            .cultivated_crops"
+                          :key="c"
+                        >
                           <span>{{ cultivated.crop_name }}</span> <br />
                         </span>
                       </template>
@@ -120,8 +239,19 @@
                       </template>
                     </td>
                     <td>
+                      <span v-if="survey.tindahan">
+                        {{ survey.tindahan.name }}
+                      </span>
+                      <span v-else>
+                        N/A
+                      </span>
+                    </td>
+                    <td>
                       <template v-if="survey.bumo_insects.length > 0">
-                        <span v-for="(insect, c) in survey.bumo_insects" :key="c">
+                        <span
+                          v-for="(insect, c) in survey.bumo_insects"
+                          :key="c"
+                        >
                           <span>{{ insect.insect_brand_name }}</span> <br />
                         </span>
                       </template>
@@ -131,7 +261,10 @@
                     </td>
                     <td>
                       <template v-if="survey.bumo_diseases.length > 0">
-                        <span v-for="(disease, c) in survey.bumo_diseases" :key="c">
+                        <span
+                          v-for="(disease, c) in survey.bumo_diseases"
+                          :key="c"
+                        >
                           <span>{{ disease.disease_brand_name }}</span> <br />
                         </span>
                       </template>
@@ -140,6 +273,7 @@
                       </template>
                     </td>
                   </tr>
+                  </template>
                 </tbody>
               </table>
             </div>
@@ -174,8 +308,6 @@
         </div>
       </div>
     </div>
-
-    
   </div>
 </template>
 
@@ -186,6 +318,12 @@ export default {
   props: ["userRole"],
   data() {
     return {
+      farmername: "",
+      selected_cultivated_crops: "",
+      region_id: "",
+      city: "",
+      store_name: "",
+      cultivated_crops: [],
       searchString: "",
       loading: false,
       errors: [],
@@ -196,11 +334,31 @@ export default {
   },
   created() {
     this.fetchFarmerMeetings();
+    this.fetchCultivatedCropName();
   },
   methods: {
+    newSurvey() {
+      return window.location.origin + "/aapc-farmer/create";
+    },
+    fetchCultivatedCropName() {
+      axios
+        .get(`/api/aapc-cultivated-crops`)
+        .then((res) => {
+          this.cultivated_crops = res.data;
+        })
+        .catch((err) => {
+          console.log("err: ", err.message);
+        });
+    },
     fetchFarmerMeetings() {
       this.loading = true;
-      axios.get(`/api/aapc-farmer-survey`).then((res) => {
+      axios.post(`/api/aapc-farmer-survey-list`,{
+        farmername: this.farmername,
+        cultivated_crops: this.selected_cultivated_crops,
+        region_id: this.region_id,
+        city: this.city,
+        store_name: this.store_name,
+      }).then((res) => {
         this.surveys = res.data;
         this.loading = false;
       });
