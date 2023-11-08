@@ -23,7 +23,7 @@
 
             <div class="mb-3">
               <div class="row pl-2 pr-2">
-                <div class="col-md-2">
+                <div class="col">
                   <div class="form-group">
                     <label for="start_date" class="form-control-label"
                       >Farmer Name</label
@@ -38,7 +38,22 @@
                     </span>
                   </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col">
+                  <div class="form-group">
+                    <label for="start_date" class="form-control-label"
+                      >Date Conducted</label
+                    >
+                    <input
+                      type="date"
+                      class="form-control form-control-alternative"
+                      v-model="date_conducted"
+                    />
+                    <span class="text-danger" v-if="errors.date_conducted">
+                      {{ errors.date_conducted[0] }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col">
                   <div class="form-group">
                     <label class="form-control-label" for="role">Cultivated Crops</label>
                     <select
@@ -61,7 +76,10 @@
                     >
                   </div>
                 </div>
-                <div class="col-md-2">
+                </div>
+                 <div class="row pl-2 pr-2">
+                
+                <div class="col">
                   <div class="form-group">
                     <label for="start_date" class="form-control-label"
                       >Province</label
@@ -76,23 +94,23 @@
                     </span>
                   </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col">
                   <div class="form-group">
                     <label for="end_date" class="form-control-label"
-                      >City</label
+                      >Barangay</label
                     >
                     <input
                       type="text"
                       id="end_date"
                       class="form-control form-control-alternative"
-                      v-model="city"
+                      v-model="barangay"
                     />
-                    <span class="text-danger" v-if="errors.city">
-                      {{ errors.city[0] }}
+                    <span class="text-danger" v-if="errors.barangay">
+                      {{ errors.barangay[0] }}
                     </span>
                   </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col">
                   <div class="form-group">
                     <label for="end_date" class="form-control-label"
                       >Store Name</label
@@ -108,7 +126,7 @@
                     </span>
                   </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col">
                   <div class="form-group">
                     <label for="end_date" class="form-control-label"
                       >&nbsp;</label
@@ -139,6 +157,7 @@
                     <th scope="col">Target Crops</th>
                     <th scope="col">Farmer Name</th>
                     <th scope="col">Farmer Address</th>
+                    <th scope="col">Land Holding</th>
                     <th scope="col">Farmer Cultivated Crops</th>
                     <th scope="col">Store Name</th>
                     <th scope="col">Brands for Insects</th>
@@ -243,6 +262,9 @@
                       {{ survey.farmer.address }}
                     </td>
                     <td>
+                      {{ survey.farmer.land_hectares }}
+                    </td>
+                    <td>
                       <template
                         v-if="survey.farmer.cultivated_crops.length > 0"
                       >
@@ -341,8 +363,9 @@ export default {
       farmername: "",
       selected_cultivated_crops: "",
       region_id: "",
-      city: "",
+      barangay: "",
       store_name: "",
+      date_conducted: "",
       cultivated_crops: [],
       searchString: "",
       loading: false,
@@ -376,8 +399,9 @@ export default {
         farmername: this.farmername,
         cultivated_crops: this.selected_cultivated_crops,
         region_id: this.region_id,
-        city: this.city,
+        barangay: this.barangay,
         store_name: this.store_name,
+        date_conducted: this.date_conducted,
       }).then((res) => {
         this.surveys = res.data;
         this.loading = false;

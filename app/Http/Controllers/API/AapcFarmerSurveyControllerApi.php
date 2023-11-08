@@ -33,8 +33,9 @@ class AapcFarmerSurveyControllerApi extends Controller
         $farmer_name = $request->farmername;
         $cultivated_crops = $request->cultivated_crops;
         $region_id = $request->region_id;
-        $city = $request->city;
+        $barangay = $request->barangay;
         $store_name = $request->store_name;
+        $date_conducted = $request->date_conducted;
 
         return AapcFarmerMeeting::orderBy('id','desc')
                     ->when($farmer_name, function ($query) use ($farmer_name) {
@@ -52,13 +53,16 @@ class AapcFarmerSurveyControllerApi extends Controller
                             $q->where('id',$region_id);
                         });
                     })
-                    ->when($city, function ($query) use ($city) {
-                        $query->where('city', 'like', '%'.$city.'%');
+                    ->when($barangay, function ($query) use ($barangay) {
+                        $query->where('venue', 'like', '%'.$barangay.'%');
                     })
                     ->when($store_name, function ($query) use ($store_name) {
                         $query->whereHas('tindahan', function($q) use ($store_name) {
                             $q->where('name', 'like', '%'.$store_name.'%');
                         });
+                    })
+                    ->when($date_conducted, function ($query) use ($date_conducted) {
+                        $query->whereDate('date_conducted',Carbon::parse($date_conducted));
                     })
                     ->with('activityType',
                             'region',
@@ -192,6 +196,11 @@ class AapcFarmerSurveyControllerApi extends Controller
                 $selected_crops = $request->input('selected_crops');
 
                 foreach($selected_crops as $item) {
+                    if($item === 1) {
+                        $farmerMeeting->farmerCrops()->attach($item,
+                            ['others' => $request->rice_others
+                        ]);
+                    }
                     if($item === 4) {
                         $farmerMeeting->farmerCrops()->attach($item,
                             ['others' => $request->lowland_others
@@ -202,7 +211,7 @@ class AapcFarmerSurveyControllerApi extends Controller
                             'others' => $request->highland_others,
                         ]);
                     }
-                    if($item <= 3) {
+                    if($item == 2 || $item == 3) {
                         $farmerMeeting->farmerCrops()->attach($item);
                     }
                 }
