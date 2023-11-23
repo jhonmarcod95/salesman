@@ -41,7 +41,7 @@ class AapcFarmerSurveyControllerApi extends Controller
 
         return AapcFarmerMeeting::orderBy('id','desc')
                     ->when($checkRole, function ($query) use ($checkRole) {
-                        return $query->where('user_id',$checkRole);
+                        return $query->where('user_id', Auth::user()->id);
                     })
                     ->when($farmer_name, function ($query) use ($farmer_name) {
                         return $query->whereHas('farmer', function($q) use ($farmer_name) {
