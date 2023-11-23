@@ -37,7 +37,12 @@ class AapcFarmerSurveyControllerApi extends Controller
         $store_name = $request->store_name;
         $date_conducted = $request->date_conducted;
 
+        $checkRole = Auth::user()->roles[0]->slug === 'tsr' ? true : null;
+
         return AapcFarmerMeeting::orderBy('id','desc')
+                    ->when($checkRole, function ($query) use ($checkRole) {
+                        return $query->where('user_id',$checkRole);
+                    })
                     ->when($farmer_name, function ($query) use ($farmer_name) {
                         return $query->whereHas('farmer', function($q) use ($farmer_name) {
                             $q->where('first_name','like', '%'.$farmer_name.'%');

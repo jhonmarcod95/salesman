@@ -227,7 +227,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
 
 // For AAPC Survey
-Route::group(['middleware' => ['auth', 'role:it|tsr']], function () {
+Route::group(['middleware' => ['auth', 'role:it|tsr|coordinator|manager|vp|president']], function () {
 
     Route::get('/aapc-farmer','AapcFarmerMeetingController@index');
     Route::get('/aapc-farmer/create','AapcFarmerMeetingController@create');

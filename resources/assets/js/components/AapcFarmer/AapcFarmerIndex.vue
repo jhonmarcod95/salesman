@@ -23,7 +23,7 @@
 
             <div class="mb-3">
               <div class="row pl-2 pr-2">
-                <div class="col">
+                <div class="col" v-if="userRole == 1 || userRole == 2 || userRole == 6 || userRole == 10 || userRole == 7">
                   <div class="form-group">
                     <label for="start_date" class="form-control-label"
                       >Farmer Name</label
