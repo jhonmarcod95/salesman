@@ -11,5 +11,8 @@ class AapcStore extends Model
         'address',
         'city',
         'zip_code',
+        'contact_number',
+        'region_name',
+        'barangay',
     ];
 }

@@ -168,5 +168,6 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('aapc-vegetable','API\AapcFarmerSurveyControllerApi@aapcVegetable');
     Route::get('aapc-insect-types','API\AapcFarmerSurveyControllerApi@aapcInsectTypes');
     Route::get('aapc-disease-types','API\AapcFarmerSurveyControllerApi@aapcDiseaseTypes');
+    Route::get('aapc-herbicide-types','API\AapcFarmerSurveyControllerApi@aapcHerbicideTypes');
     Route::post('aapc-farmer-survey','API\AapcFarmerSurveyControllerApi@store');
 });

@@ -17,6 +17,7 @@ class AapcFarmer extends Model
         'crops_cultivated',
         'land_hectares',
         'region_name',
+        'fb_link',
     ];
 
     public function cultivatedCrops()

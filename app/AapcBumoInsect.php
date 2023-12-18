@@ -8,6 +8,6 @@ class AapcBumoInsect extends Model
 {
     public function insectType()
     {
-        return $this->belongsTo(AapcInsectType::class);
+        return $this->belongsTo(AapcInsectType::class,'insect_type_id');
     }
 }

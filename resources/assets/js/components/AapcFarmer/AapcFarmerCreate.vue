@@ -56,26 +56,17 @@
                 <div class="col-lg-6">
                   <div class="form-group">
                     <label class="form-control-label" for="classification"
-                      >Region</label
+                      >Province</label
                     >
                     <multiselect
                       v-model="form.region_name"
                       :options="getProvinceNames"
                       :multiple="false"
                       track-by="id"
-                      placeholder="Select Region/Province"
+                      placeholder="Select Province"
                       id="selected_region"
                     >
                     </multiselect>
-                    <!-- <select class="form-control" v-model="form.region_name">
-                      <option
-                        v-for="(province, c) in getProvinceNames"
-                        v-bind:key="c"
-                        :value="province"
-                      >
-                        {{ province }}
-                      </option>
-                    </select> -->
                     <span class="text-danger small" v-if="errors.region_name">{{
                       errors.region_name[0]
                     }}</span>
@@ -122,13 +113,6 @@
                       :disabled="form.city === null"
                     >
                     </multiselect>
-                    <!-- <input
-                      type="text"
-                      id="input-baranggay"
-                      placeholder="Barangay/Venue"
-                      class="form-control form-control-alternative"
-                      v-model="form.barangay"
-                    /> -->
                     <span class="text-danger small" v-if="errors.barangay">{{
                       errors.barangay[0]
                     }}</span>
@@ -372,13 +356,6 @@
                     <label class="form-control-label" for="input-contact-number"
                       >Contact Number</label
                     >
-                    <!-- <input
-                      type="text"
-                      id="input-contact-number"
-                      placeholder="Contact Number"
-                      class="form-control form-control-alternative"
-                      v-model="form.farmer_contact_number"
-                    /> -->
                     <masked-input
                       id="input-contact-number"
                       class="form-control form-control-alternative"
@@ -400,6 +377,30 @@
               <div class="row pl-2 pr-2">
                 <div class="col-lg-12">
                   <div class="form-group">
+                    <label class="form-control-label" for="input-fb-link"
+                      >Facebook Profile Link</label
+                    >
+                    <input
+                      type="text"
+                      id="input-fb-link"
+                      placeholder="Facebook Link"
+                      class="form-control form-control-alternative"
+                      v-model="form.farmer_fb_link"
+                    />
+                    <span
+                      class="text-danger small"
+                      v-if="errors.farmer_fb_link"
+                      >{{ errors.farmer_fb_link[0] }}</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- <div class="mb-3">
+              <div class="row pl-2 pr-2">
+                <div class="col-lg-12">
+                  <div class="form-group">
                     <label class="form-control-label" for="input-username"
                       >Address</label
                     >
@@ -418,9 +419,9 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
                 <div class="col-lg-6">
                   <div class="form-group">
@@ -436,18 +437,6 @@
                       id="selected_region_farmer"
                     >
                     </multiselect>
-                    <!-- <select
-                      class="form-control"
-                      v-model="form.farmer_region_id"
-                    >
-                      <option
-                        v-for="(region, c) in regions"
-                        v-bind:key="c"
-                        :value="region.id"
-                      >
-                        {{ region.name }}
-                      </option>
-                    </select> -->
                     <span
                       class="text-danger small"
                       v-if="errors.farmer_region_name"
@@ -471,20 +460,13 @@
                       :disabled="form.farmer_region_name === null"
                     >
                     </multiselect>
-                    <!-- <input
-                      type="text"
-                      id="input-city"
-                      placeholder="Farmer City"
-                      class="form-control form-control-alternative"
-                      v-model="form.farmer_city"
-                    /> -->
                     <span class="text-danger small" v-if="errors.farmer_city">{{
                       errors.farmer_city[0]
                     }}</span>
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
@@ -674,7 +656,7 @@
 
             <div class="mb-3">
               <div class="row pl-2 pr-2">
-                <div class="col-lg-12">
+                <div class="col-lg-6">
                   <div class="form-group">
                     <label
                       class="form-control-label"
@@ -692,6 +674,32 @@
                       class="text-danger small"
                       v-if="errors.bumo_weeds_brand_name"
                       >{{ errors.bumo_weeds_brand_name[0] }}</span
+                    >
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label
+                      class="form-control-label"
+                      for="input-bumo-brand-name"
+                      >Select Type of Herbicide</label
+                    >
+                    <select
+                      class="form-control"
+                      v-model="form.bumo_herbicide_type_id"
+                    >
+                      <option
+                        v-for="(herbicide, c) in herbicideTypes"
+                        v-bind:key="c"
+                        :value="herbicide.id"
+                      >
+                        {{ herbicide.name }}
+                      </option>
+                    </select>
+                    <span
+                      class="text-danger small"
+                      v-if="errors.bumo_herbicide_type_id"
+                      >{{ errors.bumo_herbicide_type_id[0] }}</span
                     >
                   </div>
                 </div>
@@ -960,7 +968,7 @@
 
             <div class="mb-3">
               <div class="row pl-2 pr-2">
-                <div class="col-lg-12">
+                <div class="col-lg-6">
                   <div class="form-group">
                     <label class="form-control-label" for="input-store-name"
                       >Store Name / Trader Name</label
@@ -968,7 +976,7 @@
                     <input
                       type="text"
                       id="input-store-name"
-                      placeholder="Address"
+                      placeholder="Store Name"
                       class="form-control form-control-alternative"
                       v-model="form.store_name"
                     />
@@ -977,10 +985,94 @@
                     }}</span>
                   </div>
                 </div>
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label class="form-control-label" for="input-contact-number"
+                      >Contact Number</label
+                    >
+                    <masked-input
+                      id="input-contact-number"
+                      class="form-control form-control-alternative"
+                      mask="\+\63 (111)-1111-111"
+                      placeholder="Phone"
+                      @input="form.store_contact_number = arguments[1]"
+                    />
+                    <span
+                      class="text-danger small"
+                      v-if="errors.store_contact_number"
+                      >{{ errors.store_contact_number[0] }}</span
+                    >
+                  </div>
+                </div>
               </div>
             </div>
 
             <div class="mb-3">
+              <div class="row pl-2 pr-2">
+                <div class="col-lg-4">
+                  <div class="form-group">
+                    <label class="form-control-label" for="classification"
+                      >Province</label
+                    >
+                    <multiselect
+                      v-model="form.store_region_name"
+                      :options="getProvinceNames"
+                      :multiple="false"
+                      track-by="id"
+                      placeholder="Select Province"
+                      id="selected_region"
+                    >
+                    </multiselect>
+                    <span class="text-danger small" v-if="errors.store_region_name">{{
+                      errors.store_region_name[0]
+                    }}</span>
+                  </div>
+                </div>
+                <div class="col-lg-4">
+                  <div class="form-group">
+                    <label class="form-control-label" for="input-username"
+                      >City</label
+                    >
+                    <multiselect
+                      v-model="form.store_city"
+                      :options="store_municipalities"
+                      :multiple="false"
+                      track-by="id"
+                      :custom-label="customStoreMunicipalities"
+                      placeholder="Select Municipality"
+                      id="selected_municipality"
+                      :disabled="form.store_region_name === null"
+                    >
+                    </multiselect>
+                    <span class="text-danger small" v-if="errors.store_city">{{
+                      errors.store_city[0]
+                    }}</span>
+                  </div>
+                </div>
+                <div class="col-lg-4">
+                  <div class="form-group">
+                    <label class="form-control-label" for="input-username"
+                      >Barangay</label
+                    >
+                    <multiselect
+                      v-model="form.store_barangay"
+                      :options="store_barangays"
+                      :multiple="false"
+                      track-by="id"
+                      placeholder="Select Barangay"
+                      id="selected_barangay"
+                      :disabled="form.store_city === null"
+                    >
+                    </multiselect>
+                    <span class="text-danger small" v-if="errors.store_barangay">{{
+                      errors.store_barangay[0]
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
                 <div class="col-lg-12">
                   <div class="form-group">
@@ -1002,9 +1094,9 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
                 <div class="col-lg-12">
                   <div class="form-group">
@@ -1024,7 +1116,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
@@ -1052,21 +1144,21 @@
 
             <hr class="ml-3 mr-3" style="border: 1px dashed #94a3b8" />
 
-            <div class="row align-items-center text-center p-3">
+            <!-- <div class="row align-items-center text-center p-3">
               <div class="col">
                 <h2 class="mb-0">Brands to Consider by Farmer</h2>
               </div>
-            </div>
+            </div> -->
 
-            <div class="row align-items-center my-3 p-3">
+            <!-- <div class="row align-items-center my-3 p-3">
               <div class="col">
                 <h3 class="mb-0">Brands Used for Weeds</h3>
               </div>
-            </div>
+            </div> -->
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
-                <div class="col-lg-12">
+                <div class="col-lg-6">
                   <div class="form-group">
                     <label
                       class="form-control-label"
@@ -1087,10 +1179,36 @@
                     >
                   </div>
                 </div>
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label
+                      class="form-control-label"
+                      for="input-bumo-brand-name"
+                      >Select Type of Insect</label
+                    >
+                    <select
+                      class="form-control"
+                      v-model="form.c_bumo_herbicide_type_id"
+                    >
+                      <option
+                        v-for="(c_herbicide, c) in herbicideTypes"
+                        v-bind:key="c"
+                        :value="c_herbicide.id"
+                      >
+                        {{ c_herbicide.name }}
+                      </option>
+                    </select>
+                    <span
+                      class="text-danger small"
+                      v-if="errors.c_bumo_herbicide_type_id"
+                      >{{ errors.c_bumo_herbicide_type_id[0] }}</span
+                    >
+                  </div>
+                </div>
               </div>
-            </div>
+            </div> -->
 
-            <div class="row align-items-center my-3 p-3">
+            <!-- <div class="row align-items-center my-3 p-3">
               <div class="col">
                 <div class="d-flex justify-content-between">
                   <h3 class="mb-0">Brands to Consider for Insects</h3>
@@ -1102,9 +1220,9 @@
                   </button>
                 </div>
               </div>
-            </div>
+            </div> -->
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
                 <div class="col-lg-6">
                   <div class="form-group">
@@ -1154,9 +1272,9 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
-            <div
+            <!-- <div
               v-if="cons_bumo_for_insects.length > 0"
               v-for="(bumo_insects, c) in cons_bumo_for_insects"
               :key="`cons_insect_${c}`"
@@ -1207,9 +1325,9 @@
                   </button>
                 </div>
               </div>
-            </div>
+            </div> -->
 
-            <div class="row align-items-center my-3 p-3">
+            <!-- <div class="row align-items-center my-3 p-3">
               <div class="col">
                 <div class="d-flex justify-content-between">
                   <h3 class="mb-0">Brands to Consider for Diseases</h3>
@@ -1221,9 +1339,9 @@
                   </button>
                 </div>
               </div>
-            </div>
+            </div> -->
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <div class="row pl-2 pr-2">
                 <div class="col-lg-6">
                   <div class="form-group">
@@ -1273,9 +1391,9 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
-            <div
+            <!-- <div
               v-if="cons_bumo_for_diseases.length > 0"
               v-for="(bumo_disease, c) in cons_bumo_for_diseases"
               :key="`cons_disease_${c}`"
@@ -1330,7 +1448,7 @@
                   </button>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <div class="mb-3">
               <div class="row pl-2 pr-2">
@@ -1445,14 +1563,17 @@ export default {
       vegetables: [],
       insectTypes: [],
       diseaseTypes: [],
+      herbicideTypes: [],
       farmer_cultivated_crops: [],
       bumo_for_insects: [],
       bumo_for_diseases: [],
       cons_bumo_for_insects: [],
       cons_bumo_for_diseases: [],
       municipalities: [],
+      store_municipalities: [],
       farmer_municipalities: [],
       barangays: [],
+      store_barangays: [],
       old_region_name: null,
       old_city: null,
       old_farmer_region_name: null,
@@ -1469,6 +1590,7 @@ export default {
         plant_season_end: "",
         plant_season_start: "",
         vegetable_id: "",
+        farmer_fb_link: "",
         farmer_first_name: "",
         farmer_last_name: "",
         farmer_contact_number: "",
@@ -1494,12 +1616,17 @@ export default {
         store_address: "",
         store_city: "",
         store_state: "",
+        store_region_name: "",
+        store_barangay: "",
+        store_contact_number: "",
         bumo_weeds_brand_name: "",
+        bumo_herbicide_type_id: "",
         bumo_insect_type_id: "",
         bumo_insect_brand_name: "",
         bumo_disease_type_id: "",
         bumo_disesse_brand_name: "",
         c_bumo_weeds_brand_name: "",
+        c_bumo_herbicide_type_id: "",
         c_bumo_insect_type_id: "",
         c_bumo_insect_brand_name: "",
         c_bumo_disease_type_id: "",
@@ -1518,6 +1645,7 @@ export default {
     this.fetchVegetables();
     this.fetchInsectTypes();
     this.fetchDiseaseTypes();
+    this.fetchHerbicideTypes();
   },
 
   computed: {
@@ -1564,10 +1692,10 @@ export default {
       handler(val, oldValue) {
         // do stuff
 
-        console.log("check region name: ", val.region_name);
-        console.log("check city: ", val.city);
-        console.log("check farmer region: ", val.farmer_region_name);
-        console.log("check farmer city: ", val.farmer_city);
+        // console.log("check region name: ", val.region_name);
+        // console.log("check city: ", val.city);
+        // console.log("check farmer region: ", val.farmer_region_name);
+        // console.log("check farmer city: ", val.farmer_city);
 
         if (this.old_region_name === null) {
           this.old_region_name = val.region_name;
@@ -1627,6 +1755,21 @@ export default {
             this.barangays = val.city.barangays;
           }
         }
+
+        if (val.store_region_name) {
+          const updateMunicipalities = this.getMunicipalities.filter(
+            (item) => item.provinceName === val.store_region_name
+          );
+          this.store_municipalities = updateMunicipalities;
+        }
+
+        if (val.store_city) {
+          if (val.store_city != null) {
+            this.store_barangays = val.store_city.barangays;
+          }
+        }
+
+
       },
       deep: true,
     },
@@ -1640,6 +1783,9 @@ export default {
       return `${municipality.name}`;
     },
     customMunicipalities(municipality) {
+      return `${municipality.name}`;
+    },
+    customStoreMunicipalities(municipality) {
       return `${municipality.name}`;
     },
     customBarangays(barangay) {
@@ -1896,6 +2042,16 @@ export default {
         .get(`/api/aapc-disease-types`)
         .then((res) => {
           this.diseaseTypes = res.data;
+        })
+        .catch((err) => {
+          console.log("err: ", err.message);
+        });
+    },
+    fetchHerbicideTypes() {
+      axios
+        .get(`/api/aapc-herbicide-types`)
+        .then((res) => {
+          this.herbicideTypes = res.data;
         })
         .catch((err) => {
           console.log("err: ", err.message);

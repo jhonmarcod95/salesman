@@ -14,12 +14,14 @@ use App\AapcStore;
 use App\AapcVegetable;
 use App\AapcInsectType;
 use App\AapcDiseaseType;
+use App\AapcHerbicideType;
 use App\AapcBumo;
 use App\AapcBumosType;
 use Carbon\Carbon;
 use App\AapcCultivatedCrop;
 use App\AapcBumoInsect;
 use App\AapcBumoDisease;
+use App\AapcBumoHerbicide;
 use App\AapcActivityType;
 use App\AapcCultivatedCropName;
 use DB;
@@ -125,6 +127,11 @@ class AapcFarmerSurveyControllerApi extends Controller
         return AapcDiseaseType::orderBy('id','asc')->get();
     }
 
+    public function aapcHerbicideTypes()
+    {
+        return AapcHerbicideType::orderBy('id','asc')->get();
+    }
+
     public function store(Request $request)
     {
         $this->validate($request,[
@@ -140,19 +147,21 @@ class AapcFarmerSurveyControllerApi extends Controller
             'farmer_first_name' => 'required',
             'farmer_last_name' => 'required',
             'farmer_contact_number' => 'required',
-            'store_address' => 'required',
+            // 'store_address' => 'required',
             // 'store_zip_code' => 'required',
             'farmer_crop_cultivated' => 'required',
             'farmer_hectares' => 'required',
             'bumo_weeds_brand_name' => 'required',
             'bumo_insect_type_id' => 'required',
             'bumo_insect_brand_name' => 'required',
+            'bumo_herbicide_type_id' => 'required',
             'bumo_disease_type_id' => 'required',
             'bumo_disesse_brand_name' => 'required',
-            'c_bumo_insect_type_id' => 'required',
-            'c_bumo_insect_brand_name' => 'required',
-            'c_bumo_disease_type_id' => 'required',
-            'c_bumo_disesse_brand_name' => 'required',
+            // 'c_bumo_insect_type_id' => 'required',
+            // 'c_bumo_insect_brand_name' => 'required',
+            // 'c_bumo_herbicide_type_id' => 'required',
+            // 'c_bumo_disease_type_id' => 'required',
+            // 'c_bumo_disesse_brand_name' => 'required',
         ],[
             'activity_type_id.required' => "The activity type field is required",
             'region_name.required' => "The region field is required",
@@ -161,17 +170,19 @@ class AapcFarmerSurveyControllerApi extends Controller
             'plant_season_start.required' => "The planting season start is required",
             'plant_season_end.required' => "The planting season end is required",
             'selected_crops.required' => "The crop field is required",
-            'store_address.required' => "The address field is required",
+            // 'store_address.required' => "The address field is required",
             // 'store_zip_code.required' => "The zip code field is required",
             'bumo_weeds_brand_name.required' => "The brand name field is required",
+            'bumo_herbicide_type_id.required' => "The herbicide type is required",
             'bumo_insect_type_id.required' => "The insect type field is required",
             'bumo_insect_brand_name.required' => "The insect brand name field is required",
             'bumo_disease_type_id.required' => "The disease type field is required",
             'bumo_disesse_brand_name.required' => "The disease brand name field is required",
-            'c_bumo_insect_type_id.required' => "The insect type field is required",
-            'c_bumo_insect_brand_name.required' => "The insect brand name field is required",
-            'c_bumo_disease_type_id.required' => "The disease type field is required",
-            'c_bumo_disesse_brand_name.required' => "The disease brand name field is required",
+            // 'c_bumo_insect_type_id.required' => "The insect type field is required",
+            // 'c_bumo_herbicide_type_id.required' => "The herbicide type is required",
+            // 'c_bumo_insect_brand_name.required' => "The insect brand name field is required",
+            // 'c_bumo_disease_type_id.required' => "The disease type field is required",
+            // 'c_bumo_disesse_brand_name.required' => "The disease brand name field is required",
         ]);
 
             DB::beginTransaction();
@@ -241,8 +252,9 @@ class AapcFarmerSurveyControllerApi extends Controller
                 $new_farmer->first_name = $request->farmer_first_name;
                 $new_farmer->last_name = $request->farmer_last_name;
                 $new_farmer->contact_number = $request->farmer_contact_number;
-                $new_farmer->address = $request->farmer_address;
-                $new_farmer->city = $request->farmer_city['name'];
+                $new_farmer->fb_link = $request->farmer_fb_link;
+                // $new_farmer->address = $request->farmer_address;
+                // $new_farmer->city = $request->farmer_city['name'];
                 $new_farmer->region_id = 0; // set to default
                 $new_farmer->region_name = $request->farmer_region_name;
                 $new_farmer->zip_code = 'N/A';
@@ -276,8 +288,11 @@ class AapcFarmerSurveyControllerApi extends Controller
             // store suking tindahan
             $aapcStore = new AapcStore;
             $aapcStore->name = $request->store_name;
-            $aapcStore->address = $request->store_address;
-            $aapcStore->city = $request->store_city;
+            $aapcStore->address = $request->store_region_name.' '.$request->store_city['name'].' '.$request->store_barangay;
+            $aapcStore->city = $request->store_city['name'];
+            $aapcStore->region_name = $request->store_region_name;
+            $aapcStore->barangay = $request->store_barangay;
+            $aapcStore->contact_number = $request->store_contact_number;
             $aapcStore->zip_code = 'N/A';
             $aapcStore->save();
 
@@ -287,6 +302,15 @@ class AapcFarmerSurveyControllerApi extends Controller
             }
 
             // primary
+
+            if($request->bumo_weeds_brand_name) {
+                AapcBumoHerbicide::create([
+                    'bumos_type_id' => 1,
+                    'aapc_farmer_meeting_id' => $farmerMeeting->id,
+                    'weeds_brand_name' => $request->bumo_weeds_brand_name,
+                    'aapc_herbicide_type_id' => $request->bumo_herbicide_type_id,
+                ]);
+            }
 
             $bumo_insects = $request->bumo_for_insects_all;
             foreach($bumo_insects as $insect) {
@@ -318,46 +342,55 @@ class AapcFarmerSurveyControllerApi extends Controller
                 ]);
             }
 
-            $cons_bumo_insects = $request->cons_bumo_for_insects_all;
-            foreach($cons_bumo_insects as $insect) {
-                AapcBumoInsect::insert([
-                    array(
-                        'bumos_type_id' => 2,
-                        'aapc_farmer_meeting_id' => $farmerMeeting->id,
-                        'weeds_brand_name' => $request->c_bumo_weeds_brand_name,
-                        'insect_type_id' => $insect['bumo_insect_type_id'],
-                        'insect_brand_name' => $insect['bumo_insect_brand_name'],
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                    )
-                ]);
-            }
+            // if($request->c_bumo_weeds_brand_name) {
+            //     AapcBumoHerbicide::create([
+            //         'bumos_type_id' => 2,
+            //         'aapc_farmer_meeting_id' => $farmerMeeting->id,
+            //         'weeds_brand_name' => $request->c_bumo_weeds_brand_name,
+            //         'aapc_herbicide_type_id' => $request->c_bumo_herbicide_type_id,
+            //     ]);
+            // }
 
-            $cons_bumo_diseases = $request->cons_bumo_for_diseases_all;
-            foreach($cons_bumo_diseases as $disease) {
-                AapcBumoDisease::insert([
-                    array(
-                        'bumos_type_id' => 2,
-                        'aapc_farmer_meeting_id' => $farmerMeeting->id,
-                        'weeds_brand_name' => $request->c_bumo_weeds_brand_name,
-                        'disease_type_id' => $disease['bumo_disease_type_id'],
-                        'disease_brand_name' => $disease['bumo_disesse_brand_name'],
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                    )
-                ]);
-            }
+            // $cons_bumo_insects = $request->cons_bumo_for_insects_all;
+            // foreach($cons_bumo_insects as $insect) {
+            //     AapcBumoInsect::insert([
+            //         array(
+            //             'bumos_type_id' => 2,
+            //             'aapc_farmer_meeting_id' => $farmerMeeting->id,
+            //             'weeds_brand_name' => $request->c_bumo_weeds_brand_name,
+            //             'insect_type_id' => $insect['bumo_insect_type_id'],
+            //             'insect_brand_name' => $insect['bumo_insect_brand_name'],
+            //             'created_at' => Carbon::now(),
+            //             'updated_at' => Carbon::now(),
+            //         )
+            //     ]);
+            // }
+
+            // $cons_bumo_diseases = $request->cons_bumo_for_diseases_all;
+            // foreach($cons_bumo_diseases as $disease) {
+            //     AapcBumoDisease::insert([
+            //         array(
+            //             'bumos_type_id' => 2,
+            //             'aapc_farmer_meeting_id' => $farmerMeeting->id,
+            //             'weeds_brand_name' => $request->c_bumo_weeds_brand_name,
+            //             'disease_type_id' => $disease['bumo_disease_type_id'],
+            //             'disease_brand_name' => $disease['bumo_disesse_brand_name'],
+            //             'created_at' => Carbon::now(),
+            //             'updated_at' => Carbon::now(),
+            //         )
+            //     ]);
+            // }
 
             // secondary
-            $aapcBumo_consider = new AapcBumo;
-            $aapcBumo_consider->bumos_type_id = 2; // secondary; for consideration
-            $aapcBumo_consider->aapc_farmer_meeting_id = $farmerMeeting->id; // primary
-            $aapcBumo_consider->weeds_brand_name = $request->c_bumo_weeds_brand_name;
-            $aapcBumo_consider->insect_type_id = $request->c_bumo_insect_type_id;
-            $aapcBumo_consider->insect_brand_name = $request->c_bumo_insect_brand_name;
-            $aapcBumo_consider->disease_type_id = $request->c_bumo_disease_type_id;
-            $aapcBumo_consider->disease_brand_name = $request->c_bumo_disesse_brand_name;
-            $aapcBumo_consider->save();
+            // $aapcBumo_consider = new AapcBumo;
+            // $aapcBumo_consider->bumos_type_id = 2; // secondary; for consideration
+            // $aapcBumo_consider->aapc_farmer_meeting_id = $farmerMeeting->id; // primary
+            // $aapcBumo_consider->weeds_brand_name = $request->c_bumo_weeds_brand_name;
+            // $aapcBumo_consider->insect_type_id = $request->c_bumo_insect_type_id;
+            // $aapcBumo_consider->insect_brand_name = $request->c_bumo_insect_brand_name;
+            // $aapcBumo_consider->disease_type_id = $request->c_bumo_disease_type_id;
+            // $aapcBumo_consider->disease_brand_name = $request->c_bumo_disesse_brand_name;
+            // $aapcBumo_consider->save();
 
             DB::commit();
 
