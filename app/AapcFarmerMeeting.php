@@ -82,6 +82,11 @@ class AapcFarmerMeeting extends Model
         return $this->hasMany(AapcBumoDisease::class);
     }
 
+    public function bumoWeeds()
+    {
+        return $this->hasMany(AapcBumoHerbicide::class);
+    }
+
     public function activityType()
     {
         return $this->belongsTo(AapcActivityType::class,'aapc_activity_type_id');

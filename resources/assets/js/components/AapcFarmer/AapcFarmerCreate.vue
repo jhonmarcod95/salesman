@@ -370,12 +370,7 @@
                     >
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <div class="row pl-2 pr-2">
-                <div class="col-lg-12">
+                <div class="col-lg-6">
                   <div class="form-group">
                     <label class="form-control-label" for="input-fb-link"
                       >Facebook Profile Link</label
@@ -644,18 +639,52 @@
 
             <div class="row align-items-center text-center p-3">
               <div class="col">
-                <h2 class="mb-0">Brands Used Most Often (BUMO)</h2>
+                <h2 class="mb-0">Brands Used Most Often (BUMO)</h2>                
               </div>
             </div>
 
             <div class="row align-items-center my-3 p-3">
               <div class="col">
+                <div class="d-flex justify-content-between">
                 <h3 class="mb-0">Brands Used for Weeds</h3>
+                <button
+                    @click="addBumoWeeds()"
+                    class="btn btn-sm btn-primary mb-3"
+                  >
+                    Add
+                  </button>
+                </div>
               </div>
             </div>
 
             <div class="mb-3">
               <div class="row pl-2 pr-2">
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label
+                      class="form-control-label"
+                      for="input-bumo-brand-name"
+                      >Select Type of Herbicide</label
+                    >
+                    <select
+                      class="form-control"
+                      v-model="form.bumo_weeds_type_id"
+                    >
+                      <option
+                        v-for="(herbicide, c) in herbicideTypes"
+                        v-bind:key="c"
+                        :value="herbicide.id"
+                      >
+                        {{ herbicide.name }}
+                      </option>
+                    </select>
+                    <span
+                      class="text-danger small"
+                      v-if="errors.bumo_weeds_type_id"
+                      >{{ errors.bumo_weeds_type_id[0] }}</span
+                    >
+                  </div>
+                </div>
                 <div class="col-lg-6">
                   <div class="form-group">
                     <label
@@ -677,34 +706,63 @@
                     >
                   </div>
                 </div>
-                <div class="col-lg-6">
+              </div>
+            </div>
+
+            <div
+              v-if="bumo_for_weeds.length > 0"
+              v-for="(bumo_weeds, c) in bumo_for_weeds"
+              :key="`weeds_${c}`"
+              class="mb-3"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center pl-2 pr-2"
+              >
+                <div class="form-group" style="width: 40%; margin-right: 10px">
+                  <label class="form-control-label" for="input-bumo-brand-name"
+                    >Select Type of Herbicide</label
+                  >
+                  <select
+                    class="form-control"
+                    v-model="bumo_weeds.bumo_weeds_type_id"
+                  >
+                    <option
+                      v-for="(weeds, c) in herbicideTypes"
+                      v-bind:key="c"
+                      :value="weeds.id"
+                    >
+                      {{ weeds.name }}
+                    </option>
+                  </select>
+                </div>
+                <div style="width: 40%; margin-right: 10px">
                   <div class="form-group">
                     <label
                       class="form-control-label"
-                      for="input-bumo-brand-name"
-                      >Select Type of Herbicide</label
+                      for="input-bumo-insect-brand-name"
+                      >Insert Brand name</label
                     >
-                    <select
-                      class="form-control"
-                      v-model="form.bumo_herbicide_type_id"
-                    >
-                      <option
-                        v-for="(herbicide, c) in herbicideTypes"
-                        v-bind:key="c"
-                        :value="herbicide.id"
-                      >
-                        {{ herbicide.name }}
-                      </option>
-                    </select>
-                    <span
-                      class="text-danger small"
-                      v-if="errors.bumo_herbicide_type_id"
-                      >{{ errors.bumo_herbicide_type_id[0] }}</span
-                    >
+                    <input
+                      type="text"
+                      id="input-bumo-weeds-brand-name"
+                      placeholder="Insert brand name"
+                      class="form-control form-control-alternative"
+                      v-model="bumo_weeds.bumo_weeds_brand_name"
+                    />
                   </div>
+                </div>
+                <div style="width: 100px" class="align-items-center">
+                  <button
+                    @click="removeBumoWeeds(`weeds_${c}`)"
+                    class="btn btn-danger"
+                  >
+                    <i class="fa fa-minus" aria-hidden="true"></i>
+                  </button>
                 </div>
               </div>
             </div>
+
+            <hr class="ml-3 mr-3" style="border: 1px dashed #94a3b8" />
 
             <div class="row align-items-center my-3 p-3">
               <div class="col">
@@ -834,6 +892,8 @@
                 </div>
               </div>
             </div>
+
+            <hr class="ml-3 mr-3" style="border: 1px dashed #94a3b8" />
 
             <div class="row align-items-center my-3 p-3">
               <div class="col">
@@ -1565,6 +1625,7 @@ export default {
       diseaseTypes: [],
       herbicideTypes: [],
       farmer_cultivated_crops: [],
+      bumo_for_weeds: [],
       bumo_for_insects: [],
       bumo_for_diseases: [],
       cons_bumo_for_insects: [],
@@ -1602,6 +1663,7 @@ export default {
         farmer_all_cultivated_crops: [],
         bumo_for_diseases_all: [],
         bumo_for_insects_all: [],
+        bumo_for_weeds_all: [],
         cons_bumo_for_diseases_all: [],
         cons_bumo_for_insects_all: [],
         other_vegetables: [],
@@ -1621,6 +1683,7 @@ export default {
         store_contact_number: "",
         bumo_weeds_brand_name: "",
         bumo_herbicide_type_id: "",
+        bumo_weeds_type_id: "",
         bumo_insect_type_id: "",
         bumo_insect_brand_name: "",
         bumo_disease_type_id: "",
@@ -1807,6 +1870,16 @@ export default {
       this.farmer_cultivated_crops.splice(index, 1);
     },
 
+    addBumoWeeds() {
+      this.bumo_for_weeds.push({
+        bumo_weeds_type_id: "",
+        bumo_weeds_brand_name: "",
+      });
+    },
+    removeBumoWeeds(index) {
+      this.bumo_for_weeds.splice(index, 1);
+    },
+
     addBumoInsects() {
       this.bumo_for_insects.push({
         bumo_insect_type_id: "",
@@ -1896,6 +1969,15 @@ export default {
           bumo_disesse_brand_name: this.form.bumo_disesse_brand_name,
         },
       ];
+
+      this.form.bumo_for_weeds_all = [
+        ...this.bumo_for_weeds,
+        {
+          bumo_weeds_type_id: this.form.bumo_weeds_type_id,
+          bumo_weeds_brand_name: this.form.bumo_weeds_brand_name,
+        },
+      ];
+
       this.form.bumo_for_insects_all = [
         ...this.bumo_for_insects,
         {
@@ -1911,6 +1993,7 @@ export default {
           bumo_disesse_brand_name: this.form.c_bumo_disesse_brand_name,
         },
       ];
+
       this.form.cons_bumo_for_insects_all = [
         ...this.cons_bumo_for_insects,
         {

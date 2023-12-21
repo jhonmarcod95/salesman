@@ -81,6 +81,7 @@ class AapcFarmerSurveyControllerApi extends Controller
                             'bumos',
                             'bumoInsects',
                             'bumoDiseases',
+                            'bumoWeeds',
                             'user')
                     ->paginate(10);
     }
@@ -154,12 +155,12 @@ class AapcFarmerSurveyControllerApi extends Controller
             'bumo_weeds_brand_name' => 'required',
             'bumo_insect_type_id' => 'required',
             'bumo_insect_brand_name' => 'required',
-            'bumo_herbicide_type_id' => 'required',
+            'bumo_weeds_type_id' => 'required',
             'bumo_disease_type_id' => 'required',
             'bumo_disesse_brand_name' => 'required',
             // 'c_bumo_insect_type_id' => 'required',
             // 'c_bumo_insect_brand_name' => 'required',
-            // 'c_bumo_herbicide_type_id' => 'required',
+            // 'c_bumo_weeds_type_id' => 'required',
             // 'c_bumo_disease_type_id' => 'required',
             // 'c_bumo_disesse_brand_name' => 'required',
         ],[
@@ -173,13 +174,13 @@ class AapcFarmerSurveyControllerApi extends Controller
             // 'store_address.required' => "The address field is required",
             // 'store_zip_code.required' => "The zip code field is required",
             'bumo_weeds_brand_name.required' => "The brand name field is required",
-            'bumo_herbicide_type_id.required' => "The herbicide type is required",
+            'bumo_weeds_type_id.required' => "The herbicide type is required",
             'bumo_insect_type_id.required' => "The insect type field is required",
             'bumo_insect_brand_name.required' => "The insect brand name field is required",
             'bumo_disease_type_id.required' => "The disease type field is required",
             'bumo_disesse_brand_name.required' => "The disease brand name field is required",
             // 'c_bumo_insect_type_id.required' => "The insect type field is required",
-            // 'c_bumo_herbicide_type_id.required' => "The herbicide type is required",
+            // 'c_bumo_weeds_type_id.required' => "The herbicide type is required",
             // 'c_bumo_insect_brand_name.required' => "The insect brand name field is required",
             // 'c_bumo_disease_type_id.required' => "The disease type field is required",
             // 'c_bumo_disesse_brand_name.required' => "The disease brand name field is required",
@@ -303,14 +304,29 @@ class AapcFarmerSurveyControllerApi extends Controller
 
             // primary
 
-            if($request->bumo_weeds_brand_name) {
-                AapcBumoHerbicide::create([
-                    'bumos_type_id' => 1,
-                    'aapc_farmer_meeting_id' => $farmerMeeting->id,
-                    'weeds_brand_name' => $request->bumo_weeds_brand_name,
-                    'aapc_herbicide_type_id' => $request->bumo_herbicide_type_id,
+            // if($request->bumo_weeds_brand_name) {
+            //     AapcBumoHerbicide::create([
+            //         'bumos_type_id' => 1,
+            //         'aapc_farmer_meeting_id' => $farmerMeeting->id,
+            //         'weeds_brand_name' => $request->bumo_weeds_brand_name,
+            //         'aapc_herbicide_type_id' => $request->bumo_weeds_type_id,
+            //     ]);
+            // }
+
+            $bumo_weeds = $request->bumo_for_weeds_all;
+            foreach($bumo_weeds as $weeds) {
+                AapcBumoHerbicide::insert([
+                    array(
+                        'bumos_type_id' => 1,
+                        'aapc_farmer_meeting_id' => $farmerMeeting->id,
+                        'weeds_brand_name' => $weeds['bumo_weeds_brand_name'],
+                        'aapc_herbicide_type_id' => $weeds['bumo_weeds_type_id'],
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    )
                 ]);
             }
+    
 
             $bumo_insects = $request->bumo_for_insects_all;
             foreach($bumo_insects as $insect) {
@@ -347,7 +363,7 @@ class AapcFarmerSurveyControllerApi extends Controller
             //         'bumos_type_id' => 2,
             //         'aapc_farmer_meeting_id' => $farmerMeeting->id,
             //         'weeds_brand_name' => $request->c_bumo_weeds_brand_name,
-            //         'aapc_herbicide_type_id' => $request->c_bumo_herbicide_type_id,
+            //         'aapc_herbicide_type_id' => $request->c_bumo_weeds_type_id,
             //     ]);
             // }
 

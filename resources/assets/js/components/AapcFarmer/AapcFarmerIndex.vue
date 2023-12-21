@@ -162,6 +162,7 @@
                     <th scope="col">Store Name</th>
                     <th scope="col">Brands for Insects</th>
                     <th scope="col">Brands for Diseases</th>
+                    <th scope="col">Brands Used for Weeds</th>
                   </tr>
                 </thead>
 
@@ -308,6 +309,19 @@
                           :key="c"
                         >
                           <span>{{ disease.disease_brand_name }}</span> <br />
+                        </span>
+                      </template>
+                      <template v-else>
+                        <span class="text-muted">N/A</span>
+                      </template>
+                    </td>
+                    <td>
+                      <template v-if="survey.bumo_weeds.length > 0">
+                        <span
+                          v-for="(weeds, c) in survey.bumo_weeds"
+                          :key="c"
+                        >
+                          <span>{{ weeds.weeds_brand_name }}</span> <br />
                         </span>
                       </template>
                       <template v-else>
