@@ -400,6 +400,8 @@ class AppAPIController extends Controller
             'amount' => [new AmountLimit($request->input('types'), 0, $this->checkBudget($request->input('types'))), 'required'],
         ]);
 
+        // if qty checked exceeded for the month
+
         if($this->expenseRestriction($request->input('types')) == 'false') {
             $this->validate($request, [
                 'expense_restriction' => 'required'

@@ -147,7 +147,7 @@ class AapcFarmerSurveyControllerApi extends Controller
             'selected_crops' => 'required',
             'farmer_first_name' => 'required',
             'farmer_last_name' => 'required',
-            'farmer_contact_number' => 'required',
+            // 'farmer_contact_number' => 'required',
             // 'store_address' => 'required',
             // 'store_zip_code' => 'required',
             'farmer_crop_cultivated' => 'required',
