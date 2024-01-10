@@ -116,8 +116,8 @@ class AmountLimit implements Rule
             return true;
         }
 
-        if($this->io_balance === "QTYLIMIT") {
-            $this->returnMessage = 'The expense entry limit has been reached for this month!';
+        if($this->io_balance == "QTYLIMIT") {
+            $this->returnMessage = 'The maximum entry for this expense type this month has been reached.';
             return false;
         }
 
