@@ -118,6 +118,20 @@ class AppAPIController extends Controller
     }
 
     /**
+     * Check expense qty within the month
+     * 
+     * submitted entries only
+     */
+    public function checkExpenseQty($expense_type)
+    {
+        return Expense::where('user_id',Auth::user()->id)
+                        ->where('expenses_type_id', $expense_type)
+                        ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
+                        // ->where('expenses_entry_id', '!=', 0)
+                        ->count();
+    }
+
+    /**
      * Check budget balance from SAP by given expense type and user id
      *
      * @param [Integer] $expense_type
@@ -142,6 +156,31 @@ class AppAPIController extends Controller
 
                 $simulatedBalancedReturn = (float) $toJson[0]['balance_amount'] - $this->getUnprocessSubmittedExpense($expenseChargeType->first()->expenseType->id);
 
+                // check for possbile qty validation
+
+                // hardcoded GL
+                $allowed_gl_code = collect([23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]);
+
+                // check if IO is allowed for qty checking
+                if($internalOrder->gl_account_id != null) {
+
+                    $gl_code = in_array($internalOrder->gl_account_id, $allowed_gl_code->toArray()) ? 'true' : 'false';
+
+                    if($gl_code === 'true') {
+
+                        $expenseQty = $this->checkExpenseQty($expense_type);
+
+
+                        if($expenseQty > 0) {
+                            $simulatedAllowedExpenseQty = (float) $toJson[0]['balance_qty'] -  $expenseQty;
+                            
+                            if($simulatedAllowedExpenseQty < 0) {
+                                return "QTYLIMIT";
+                            }
+                        }
+                    }
+                }
+                
                 $zeroOrResult = $simulatedBalancedReturn < 0 ? 0 : $simulatedBalancedReturn;
 
                 $isDuplicate = false;

@@ -116,6 +116,11 @@ class AmountLimit implements Rule
             return true;
         }
 
+        if($this->io_balance === "QTYLIMIT") {
+            $this->returnMessage = 'The expense entry limit has been reached for this month!';
+            return false;
+        }
+
         // do not proceed if io_balance is empty
         // if io_balance is found
         if($this->io_balance || $this->io_balance === 'N/A') {
