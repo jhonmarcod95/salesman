@@ -306,6 +306,7 @@ class AppAPIController extends Controller
                 'sap_server' => $internalOrder->sap_server,
                 'balance' => $isDuplicate == true ? $isDuplicateIoAmount : $totalBalance,
                 'check_if_duplicate' => $isDuplicate,
+                'balance_qty' => $toJson[0]['balance_qty'],
             );
             array_push($expenseBalances,$data);
 
