@@ -117,7 +117,7 @@ class AmountLimit implements Rule
         }
 
         if($this->io_balance == "QTYLIMIT") {
-            $this->returnMessage = 'The maximum entry for this expense type this month has been reached.';
+            $this->returnMessage = 'Quantity budget exceeded. Contact Sales Coordinator.';
             return false;
         }
 
