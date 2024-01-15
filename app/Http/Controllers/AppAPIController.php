@@ -127,6 +127,7 @@ class AppAPIController extends Controller
         return Expense::where('user_id',Auth::user()->id)
                         ->where('expenses_type_id', $expense_type)
                         ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
+                        ->doesntHave('postedPayments')
                         // ->where('expenses_entry_id', '!=', 0)
                         ->count();
     }
@@ -306,7 +307,7 @@ class AppAPIController extends Controller
                 'sap_server' => $internalOrder->sap_server,
                 'balance' => $isDuplicate == true ? $isDuplicateIoAmount : $totalBalance,
                 'check_if_duplicate' => $isDuplicate,
-                // 'balance_qty' => $toJson[0]['balance_qty'],
+                'balance_qty' => $toJson[0]['balance_qty'],
             );
             array_push($expenseBalances,$data);
 
