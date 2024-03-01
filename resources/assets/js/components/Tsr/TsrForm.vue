@@ -57,7 +57,7 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="role">Company</label>
-                                                <select class="form-control" v-model="tsr.company">
+                                                <select class="form-control" v-model="tsr.company" @change="fetchDivisions()">
                                                     <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
                                                 </select>
                                                 <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
@@ -74,6 +74,17 @@
                                                 <span class="text-danger" v-if="errors.location  ">{{ errors.location[0] }}</span>
                                             </div>
                                         </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="role">Division</label>
+                                                <select class="form-control" v-model="tsr.division">
+                                                    <option v-for="(division,l) in divisions" v-bind:key="l" :value="division.id"> {{ division.name }}</option>
+                                                </select>
+                                                <span class="text-danger" v-if="errors.division  ">{{ errors.division[0] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-last-name">Vendor Code</label>
@@ -184,6 +195,7 @@ export default {
                 email: '',
                 address: '',
                 location: '',
+                division : '',
                 vendor_code: '',
                 contact_number: '',
                 date_of_birth: '',
@@ -195,6 +207,7 @@ export default {
             },
             companies: [],
             locations: [],
+            divisions: [],
             errors: []
         }
     },
@@ -221,6 +234,20 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
+
+        fetchDivisions(){
+            axios.post('/divisions',
+            {
+                company: [this.tsr.company],
+            })
+            .then(response => {
+                this.divisions = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
+        
     addTsr(tsr){
             axios.post('/tsr', {
                 last_name: tsr.last_name,
@@ -238,6 +265,7 @@ export default {
                 plate_number: tsr.plate_number,
                 monthly_qouta: tsr.monthly_qouta,
                 company: tsr.company,
+                division: tsr.division,
                 location: tsr.location,
                 vendor_code: tsr.vendor_code,
 

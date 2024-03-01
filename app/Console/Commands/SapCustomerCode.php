@@ -88,7 +88,7 @@ class SapCustomerCode extends Command
         
         $x = 0;
         if($customers_data){
-            
+
             foreach($customers_data as $customer_code){
 
                 if($customer_code['customer_code']){

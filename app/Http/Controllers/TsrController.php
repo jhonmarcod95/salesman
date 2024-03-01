@@ -42,7 +42,7 @@ class TsrController extends Controller
      */
 
     public function indexData(){
-        return  TechnicalSalesRepresentative::with('company', 'user')
+        return  TechnicalSalesRepresentative::with('company', 'user','user.divisions')
         ->when(Auth::user()->level() < 8 && Auth::user()->roles[0]->name != "Ap", function($q){
             $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
         })
@@ -86,6 +86,7 @@ class TsrController extends Controller
             'date_of_birth' => 'required',
             'company' => 'required',
             'location' => 'required',
+            'division' => 'required',
             // 'vendor_code' => 'required'
         ]);
 
@@ -126,6 +127,8 @@ class TsrController extends Controller
                 $user->companies()->sync( (array) $request->company);
                 // Assigning of locations
                 $user->location()->sync( (array) $request->location);
+                // Assigning of division
+                $user->divisions()->sync( (array) $request->division);
                 // Insert to salesman vendor table
                 $array = [
                     'user_id' => $user->id,
@@ -139,6 +142,7 @@ class TsrController extends Controller
             }
         }
     }
+    
     /**
      * Show the edit form
      *
@@ -167,7 +171,7 @@ class TsrController extends Controller
      */
     public function show($id)
     {
-        return TechnicalSalesRepresentative::with('user.location', 'user.vendor')->where('id',$id)->first();
+        return TechnicalSalesRepresentative::with('user.location', 'user.vendor','user.divisions')->where('id',$id)->first();
     }
 
     /**
@@ -187,6 +191,7 @@ class TsrController extends Controller
             'date_of_birth' => 'required',
             'company' => 'required',
             'location' => 'required',
+            'division' => 'required',
 //            'vendor_code' => 'required'
         ]);
 
@@ -206,9 +211,9 @@ class TsrController extends Controller
         $technicalSalesRepresentative->personal_email = $request->personal_email;
         $technicalSalesRepresentative->company_id = $request->company;
         $technicalSalesRepresentative->monthly_qouta = $request->monthly_qouta;
-
+        
         if($technicalSalesRepresentative->save()){
-
+            
             $user = User::findOrFail($technicalSalesRepresentative->user_id);
             $user->name = $technicalSalesRepresentative->first_name. ' ' .$technicalSalesRepresentative->last_name;
             $user->email = $technicalSalesRepresentative->email;
@@ -218,6 +223,8 @@ class TsrController extends Controller
                 $user->companies()->sync( (array) $request->company);
                 // Assigning of locations
                 $user->location()->sync( (array) $request->location);
+                // Assigning of division
+                $user->divisions()->sync( (array) $request->division);
                 // Update to salesman vendor table
                 $array = [
                     'user_id' => $user->id,

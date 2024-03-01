@@ -10,13 +10,13 @@ use App\Schedule;
 use App\Customer;
 use App\User;
 use App\Attendance;
+use App\SAPServer;
 
 use App\Company;
 use App\DashboardFilter;
 
 
 use App\SapUser;
-use App\SapServer;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 

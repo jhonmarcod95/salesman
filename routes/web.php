@@ -43,6 +43,9 @@ Route::group(['middleware' => 'auth'], function(){
     //Roles
     Route::get('/roles', 'RoleController@index');
 
+    //Divisions
+    Route::post('/divisions', 'DivisionController@index');
+
     // User
     Route::post('/change-password', 'UserController@changePassword');
     // Show change password page

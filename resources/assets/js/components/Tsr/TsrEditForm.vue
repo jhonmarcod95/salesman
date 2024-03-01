@@ -55,7 +55,7 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="role">Company</label>
-                                                <select class="form-control" :disabled="defaultFields" v-model="tsr.company_id">
+                                                <select class="form-control" :disabled="defaultFields" v-model="tsr.company_id" @change="fetchDivisions(tsr.company_id)">
                                                     <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
                                                 </select>
                                                 <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
@@ -72,6 +72,18 @@
                                                 <span class="text-danger" v-if="errors.location  ">{{ errors.location[0] }}</span>
                                             </div>
                                         </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="role">Division</label>
+                                                <select class="form-control" :disabled="defaultFields" v-model="division">
+                                                    <option v-for="(division,d) in divisions" v-bind:key="d" :value="division.id"> {{ division.name }}</option>
+                                                </select>
+                                                <span class="text-danger" v-if="errors.division  ">{{ errors.division[0] }}</span>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-last-name">Vendor Code</label>
@@ -172,9 +184,11 @@ export default {
             tsr: [],
             companies: [],
             locations: [],
+            divisions: [],
             errors: [],
             vendorCodeField: false,
-            defaultFields : false
+            defaultFields : false,
+            division : ''
         }
     },
     created(){
@@ -211,16 +225,31 @@ export default {
                 this.errors = error.response.data.errors;
             })
         }, 
+        fetchDivisions(companyid){
+            axios.post('/divisions',
+            {
+                company: [companyid],
+            })
+            .then(response => {
+                this.divisions = response.data;
+            })
+            .catch(error => { 
+                this.errors = error.response.data.errors;
+            })
+        },
         fetchTsr(){
             axios.get(`/tsr/show/${this.tsrId}`)
             .then(response =>{
                 this.tsr = response.data;
+                this.fetchDivisions(this.tsr.company_id)
+                this.division = this.tsr.user.divisions[0].id
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
             })
         },
         updateTsr(tsr){
+            
             axios.patch(`/tsr/${tsr.id}`,{
                 last_name: tsr.last_name,
                 first_name: tsr.first_name,
@@ -237,6 +266,7 @@ export default {
                 plate_number: tsr.plate_number,
                 monthly_qouta: tsr.monthly_qouta,
                 company: tsr.company_id,
+                division: this.division,
                 location: tsr.user.location[0].id,
                 vendor_code: tsr.user.vendor.vendor_code ? tsr.user.vendor.vendor_code.padStart(10, '0') : null,
 

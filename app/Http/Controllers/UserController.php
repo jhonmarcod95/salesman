@@ -37,7 +37,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexData(){
-        return  User::with('roles','companies')->orderBy('id','desc')->get();
+        return  User::with('roles','companies','divisions')->orderBy('id','desc')->get();
     }
 
     /**
@@ -72,7 +72,8 @@ class UserController extends Controller
             'email' => 'required',
             'password' => 'required',
             'role' => 'required',
-            'company' => 'required'            
+            'company' => 'required',
+            'division' => 'required'              
         ]);
 
         $user = new User;
@@ -85,7 +86,11 @@ class UserController extends Controller
             // Assigning of role
             $user->syncRoles($request->role);
             // Assigning of companies
-            $user->companies()->sync( (array) $request->company);
+            // $user->companies()->sync( (array) $request->company);
+            $user->companies()->attach($request->company);
+            // Assigning of divisions
+            // $user->divisions()->sync((array) $request->division);
+            $user->divisions()->attach($request->division);
 
             return ['redirect' => route('users_list')];
         }
@@ -119,7 +124,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        return User::with('roles', 'companies')->where('id',$id)->get();
+        return User::with('roles', 'companies','divisions')->where('id',$id)->get();
     }
 
     /**
@@ -134,9 +139,10 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required',
             'role' => 'required',
-            'company' => 'required'
+            'company' => 'required',
+            'division' => 'required'
         ]);
-        
+
         $user->name = $request->name;
         $user->email= $request->email;
 
@@ -145,6 +151,8 @@ class UserController extends Controller
             $user->syncRoles($request->role);
             // Assigning of companies
             $user->companies()->sync( (array) $request->company);
+
+            $user->divisions()->sync( (array) $request->division);
 
             return ['redirect' => route('users_list')];
         }

@@ -39,4 +39,8 @@ class Customer extends Model implements Auditable
     public function provinces(){
         return $this->hasOne('App\Province', 'id', 'province_id');
     }
+
+    public function companycode(){
+        return $this->hasOne('App\Company', 'id', 'company_id');
+    }
 }

@@ -31,6 +31,7 @@
                                     <th scope="col">Email</th>
                                     <th scope="col">Role</th>
                                     <th scope="col">Company</th>
+                                    <th scope="col">Division</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -55,7 +56,11 @@
                                                 {{ company.name }} <br/>
                                             </span>
                                         </td>
-                                        <td></td>
+                                        <td>
+                                            <span v-for="(division, d) in user.divisions" :key="d">
+                                                {{ division.name }} <br/>
+                                            </span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

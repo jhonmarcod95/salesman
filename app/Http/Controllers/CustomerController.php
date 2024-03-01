@@ -59,6 +59,8 @@ class CustomerController extends Controller
             ->leftJoin('provinces', 'provinces.id', '=', 'customers.province_id')
             ->leftJoin('regions', 'regions.id', '=', 'provinces.region_id')
             ->leftJoin('customer_classifications', 'customer_classifications.id', '=', 'customers.classification')
+            ->leftJoin('customer_codes', 'customer_codes.customer_code', '=', 'customers.customer_code')
+            ->leftJoin('companies', 'companies.id', '=', 'customers.company_id')
             // ->where('verified_status',1)
             ->get([
                 'customers.id',
@@ -87,6 +89,10 @@ class CustomerController extends Controller
                 'customers.verified_status',
                 'regions.code AS region_code',
                 'regions.name AS region',
+                'customers.account_group',
+                'customers.sales_area',
+                'customers.customer_status',
+                'companies.code AS company_code',
             ]);
     }
 

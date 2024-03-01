@@ -50,6 +50,7 @@
                                                 <span class="text-danger" v-if="errors.role">{{ errors.role[0] }}</span>
                                             </div>
                                         </div>
+                                        
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
@@ -63,9 +64,27 @@
                                                         :custom-label="customLabelCompany"
                                                         placeholder="Select Company"
                                                         id="selected_company"
+                                                        @input="fetchDivisions(user)"
                                                     >
                                                 </multiselect>
                                                 <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="division">Division</label>
+                                                
+                                                <multiselect
+                                                        v-model="user.division"
+                                                        :options="divisions"
+                                                        :multiple="true"
+                                                        track-by="id"
+                                                        :custom-label="customLabelCompany"
+                                                        placeholder="Select Division"
+                                                        id="selected_company"
+                                                    >
+                                                </multiselect>
+                                                <span class="text-danger" v-if="errors.division  ">{{ errors.division[0] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -100,10 +119,12 @@ export default {
                 email: ' ',
                 password: '',
                 role: '',
-                company: ''
+                company: '',
+                division : ''
             },
             roles: [],
             companies: [],
+            divisions: [],
             errors: []
         }
     },
@@ -124,12 +145,23 @@ export default {
                 comapanyids.push(selected_company.id);
                 });
             }
+
+            let divisionids = [];
+            let selected_division = user.division;
+            if(selected_division)
+            {
+                selected_division.forEach((selected_division) => {
+                    divisionids.push(selected_division.id);
+                });
+            }
+
             axios.post('/user', {
                 name: user.name,
                 email: user.email,
                 password: user.password,
                 role: user.role,
-                company: comapanyids
+                company: comapanyids,
+                division : divisionids
             })
             .then(response => { 
                 window.location.href = response.data.redirect;
@@ -147,6 +179,28 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
+
+        fetchDivisions(user){
+            let comapanyids = [];
+            let selected_company = user.company;
+            if(selected_company)
+            {
+                selected_company.forEach((selected_company) => {
+                comapanyids.push(selected_company.id);
+                });
+            }
+            axios.post('/divisions',
+            {
+                company: comapanyids,
+            })
+            .then(response => {
+                this.divisions = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
+
         fetchCompanies(){
             axios.get('/companies-all')
             .then(response => { 
