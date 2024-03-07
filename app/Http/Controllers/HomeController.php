@@ -11,7 +11,10 @@ use App\Customer;
 use App\User;
 use App\Attendance;
 use App\SAPServer;
-
+use App\CustomerCode;
+use App\CustomerCompany;
+use App\CustomerSaleArea;
+use App\Division;
 use App\Company;
 use App\DashboardFilter;
 

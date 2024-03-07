@@ -87,7 +87,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('command:sap_customer_codes')->dailyAt('23:59');
 
         // get sap Customer
-        $schedule->command('command:sap_customer ')->everyMinute();
+        $schedule->command('command:sap_customer ')->dailyAt('03:00');
+
+        // get sap User
+        $schedule->command('command:sap_user ')->dailyAt('00:00');
 
         /* end:: daily *******************************/
 
