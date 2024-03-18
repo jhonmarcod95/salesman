@@ -25,6 +25,12 @@
                                                         <label class="form-control-label" for="customer_code">
                                                             Select Customer Code from SAP
                                                         </label>
+                                                        <div >
+                                                            <select class="form-control" v-model="customer_company" @change="statusCustomerCode">
+                                                                <option v-for="(company, c) in user_companies" v-bind:key="c" :value="company.id">{{ company.name}}</option>
+                                                            </select>
+                                                        </div>
+                                                        <br>
                                                         <div v-if="customer_codes.length > 0">
                                                             <multiselect
                                                                 v-model="customercodeSelect"
@@ -70,7 +76,7 @@
                                         <div class="col-lg-6  mb-2">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-email">Name</label>
-                                                <input type="text" id="name" class="form-control form-control-alternative" v-model="customer.name">
+                                                <input type="text" id="name" class="form-control form-control-alternative" v-model="customer.name" :disabled="disable_field">
                                                 <span class="text-danger small" v-if="errors.name">{{ errors.name[0] }}</span>
                                             </div>
                                         </div>
@@ -88,7 +94,7 @@
                                         <div class="col-lg-6">
                                            <div class="form-group">
                                                 <label class="form-control-label" for="classification">Status</label>
-                                                <select class="form-control" v-model="customer.status" @change="statusCustomerCode">
+                                                <select class="form-control" v-model="customer.status" @change="onchangeStatus">
                                                     <option v-for="(status, c) in statuses" v-bind:key="c" :value="status.id">{{ status.description}}</option>
                                                 </select>
                                                 <span class="text-danger small" v-if="errors.status">{{ errors.status[0] }}</span>
@@ -105,14 +111,14 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="street">Street</label>
-                                                <input id="street" class="form-control form-control-alternative" type="text" v-model="customer.street">
+                                                <input id="street" class="form-control form-control-alternative" type="text" v-model="customer.street" :disabled="disable_field">
                                                 <span class="text-danger small" v-if="errors.street">{{ errors.street[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="town">Town or City</label>
-                                                <input id="town" class="form-control form-control-alternative" type="text" v-model="customer.town_city">
+                                                <input id="town" class="form-control form-control-alternative" type="text" v-model="customer.town_city" :disabled="disable_field">
                                                 <span class="text-danger small" v-if="errors.town_city">{{ errors.town_city[0] }}</span>
                                             </div>
                                         </div>
@@ -152,14 +158,14 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-city">Telephone 1</label>
-                                                <input type="text" id="telephone-1" class="form-control form-control-alternative" v-model="customer.telephone_1">
+                                                <input type="text" id="telephone-1" class="form-control form-control-alternative" v-model="customer.telephone_1" :disabled="disable_field">
                                                 <span class="text-danger small" v-if="errors.telephone_1">{{ errors.telephone_1[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-country">Telephone 2</label>
-                                                <input type="text" id="telephone_2" class="form-control form-control-alternative" v-model="customer.telephone_2">
+                                                <input type="text" id="telephone_2" class="form-control form-control-alternative" v-model="customer.telephone_2" :disabled="disable_field">
                                                 <span class="text-danger small" v-if="errors.telephone_2">{{ errors.telephone_2[0] }}</span>
                                             </div>
                                         </div>
@@ -284,6 +290,11 @@
                     brand_used: '',
                     monthly_volume: '',
                     date_converted: '',
+                    division : '',
+                    sales_organization : '',
+                    order_block : '',
+                    delivery_block : '',
+                    billing_block : ''
                 },
                 accessToken: 'pk.eyJ1IjoiamF5LWx1bWFnZG9uZzEyMyIsImEiOiJjazFxNm5wZGwxNG02M2dtaXF2dHE1YzluIn0.SHUJTfNTrhGoyacA8H7Tbw',
                 mapStyle: 'mapbox://styles/mapbox/streets-v11',
@@ -298,15 +309,19 @@
                 errors: [],
                 customer_codes : [],
                 customercodeSelect : '',
-                checkCustomerCodeSAP : true
+                checkCustomerCodeSAP : true,
+                user_companies : [],
+                customer_company : '',
+                disable_field: false
             }
         },
         created(){
-            this.fetchCustomerCodes();
+            // this.fetchCustomerCodes();
             this.fetchRegion();
             this.fetchProvince();
             this.fetchClassification();
             this.fetchStatus();
+            this.fetchUserCompanies();
         },
         mounted() {
             let vm  = this;
@@ -362,6 +377,20 @@
             },
             onChangeCustomerCode(){
                 this.customer.name = this.customercodeSelect.name
+                this.customer.street = this.customercodeSelect.street
+                this.customer.town_city = this.customercodeSelect.township
+                this.customer.telephone_1 = this.customercodeSelect.telephone_1
+                this.customer.telephone_2 = this.customercodeSelect.telephone_2
+
+                this.disable_field = true
+            },
+            onchangeStatus(){
+                this.customer.name = ''
+                this.customer.street = ''
+                this.customer.town_city = ''
+                this.customer.telephone_1 = ''
+                this.customer.telephone_2 = ''
+                this.disable_field = false
             },
             statusCustomerCode(){
                 if(this.customer.status == 1 || this.customer.status == 2){
@@ -369,24 +398,45 @@
                 }else{
                      this.checkCustomerCode();
                 }
+                this.fetchCustomerCodes(this.customer_company)
             },
             customLabelCustomerCode (customer) {
                 return `${customer.customer_code  }` + ' - ' + `${customer.name  }`
             },
-            fetchCustomerCodes(){
-                axios.get('/customer-codes-all')
+            fetchCustomerCodes(companyid){
+                this.customer.name = ''
+                this.customer.street = ''
+                this.customer.town_city = ''
+                this.customer.telephone_1 = ''
+                this.customer.telephone_2 = ''
+                this.disable_field = false
+
+                axios.get('/customer-codes-all/'+companyid)
                 .then(response => {
                     this.customer_codes = response.data;
+                })
+                .catch(error => {
+                   this.errors = error.response.data.errors;
+                })
+            },
+            fetchUserCompanies(){
+                axios.get('/user-companies')
+                .then(response => {
+                    this.user_companies = response.data;
                 })
                 .catch(error => {
                     this.errors = error.response.data.errors;
                 })
             },
             addCustomer(customer){
-
                 if(this.customer.status == 1 || this.customer.status == 2){
                     if(this.customercodeSelect.customer_code){
                         customer.customer_code = this.customercodeSelect.customer_code;
+                        customer.division = this.customercodeSelect.customersalesarea[0].division
+                        customer.sales_organization = this.customercodeSelect.customersalesarea[0].sales_organization
+                        customer.order_block = this.customercodeSelect.customersalesarea[0].order_block
+                        customer.delivery_block = this.customercodeSelect.customersalesarea[0].delivery_block
+                        customer.billing_block = this.customercodeSelect.customersalesarea[0].billing_block
                     }else{
                         this.checkCustomerCodeSAP = false;
                     }
@@ -394,6 +444,7 @@
                     this.checkCustomerCodeSAP = false;
                 }
 
+                
                 axios.post('/customers',{
                     classification : customer.classification,
                     status : customer.status,
@@ -415,6 +466,12 @@
                     brand_used: customer.brand_used,
                     monthly_volume: customer.monthly_volume,
                     date_converted: customer.date_converted,
+                    sales_organization : customer.sales_organization,
+                    division : customer.division,
+                    order_block : customer.order_block,
+                    delivery_block : customer.delivery_block,
+                    billing_block : customer.billing_block,
+                    company_id : this.companyId
                 })
                 .then(response => {
                     if(confirm('Customer Successful Added')){
@@ -450,7 +507,7 @@
                 })
                 .catch(error =>{
                     this.errors = error.response.data.errors;
-                })
+                });
             },
             fetchClassification(){
                 axios.get('/customers-classification-options')

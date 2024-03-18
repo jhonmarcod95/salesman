@@ -17,6 +17,7 @@ use App\CustomerSaleArea;
 use App\Division;
 use App\Company;
 use App\DashboardFilter;
+use App\CustomerClassification;
 
 
 use App\SapUser;

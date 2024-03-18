@@ -442,7 +442,8 @@ Route::get('/year-options', 'HomeController@yearOptions');
 
 Route::get('/customer-codes', 'CustomerController@getCustomerCodes');
 
-Route::get('/customer-codes-all', 'CustomerController@getCustomerCodesAll');
+Route::get('/customer-codes-all/{companyid}', 'CustomerController@getCustomerCodesAll');
+Route::get('/user-companies', 'CustomerController@getUserCompanies');
 
 Route::get('/missed_itineraries', 'ScheduleController@missedItineraries');
 Route::post('/missed-itineraries-data', 'ScheduleController@missedItinerariesData');

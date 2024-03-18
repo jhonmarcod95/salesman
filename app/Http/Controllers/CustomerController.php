@@ -10,6 +10,9 @@ use App\CustomerOrder;
 use App\User;
 use App\Message;
 use App\Attendance;
+use App\CustomerSaleArea;
+use App\CustomerCompany;
+use App\Company;
 use Illuminate\Http\Request;
 use Spatie\Geocoder\Facades\Geocoder;
 
@@ -174,7 +177,10 @@ class CustomerController extends Controller
      */
     public function store(Request $request){
 
-        $company_id = Auth::user()->companies->pluck('id')[0];
+        $customers;
+        $company_id = $request->company_id;
+        // $company_id = Auth::user()->companies->pluck('id')[0];
+        
         $request->validate([
             // 'customer_code' => 'required|unique:customers,customer_code',
             'customer_code' => [
@@ -190,11 +196,12 @@ class CustomerController extends Controller
             'province' => 'required',
         ]);
 
+        
+        $customers = new Customer;
+        
         // $geocode = Geocoder::getCoordinatesForAddress($request->google_address);
 
-        $customers = new Customer;
-
-        $customers->company_id = Auth::user()->companies->pluck('id')[0];
+        $customers->company_id = $company_id;//Auth::user()->companies->pluck('id')[0];
         $customers->classification = $request->classification;
         $customers->status = $request->status;
         $customers->customer_code = $request->customer_code;
@@ -214,6 +221,11 @@ class CustomerController extends Controller
         $customers->brand_used = $request->brand_used;
         $customers->monthly_volume = $request->monthly_volume;
         $customers->date_converted = $request->date_converted;
+        $customers->sales_organization = $request->sales_organization;
+        $customers->division_code = $request->division;
+        $customers->order_block = $request->order_block;
+        $customers->delivery_block = $request->delivery_block;
+        $customers->billing_block = $request->billing_block;
 
         // return $customers;
 
@@ -629,26 +641,90 @@ class CustomerController extends Controller
         return count($customer_codes_from_sap);
     }
 
-    public function getCustomerCodesAll(){
+    public function getUserCompanies(){
+        $company_code = Company::whereIn('id',Auth::user()->companies->pluck('id'))->get();
 
-        $company_id = Auth::user()->companies->pluck('id')[0];
+        return $company_code;
+    }
 
-        $customer_code_within = Customer::select('customer_code')->where('company_id',$company_id)->get();
-
-        $customer_codes_not = [];
-        if($customer_code_within){
-            foreach($customer_code_within as $customer){
-                $customer_code_selected = str_pad($customer['customer_code'], 10, '0', STR_PAD_LEFT);
-                array_push($customer_codes_not,$customer_code_selected);
-            }
+    public function getCustomerCodesAll($companyid){
+        $customerlist;
+        $company = Company::where('id',$companyid)->first();
+        
+        if($company['code'] !== '2100'){
+            $companycode = $company['code'];
+            $customer_list = CustomerCode::with(['customercompanies' => function($query) use($companycode ){
+                        $query->where('company_code',$companycode );
+                    }])
+                    ->whereHas('customercompanies',function($query) use($companycode){
+                        $query->where('company_code',$companycode );
+                    })
+                    ->where('name','not like','%XXX%')
+                    ->where('name','not like','%X:%')
+                    ->get();
+        }
+        else{
+            $division = $company['division_code'];
+            $sales_organization = $company['sales_organization'];
+            $customer_list = CustomerCode::with(['customersalesarea' => function($query) use($division, $sales_organization ){
+                $query->where('division',$division);
+                $query->where('sales_organization',$sales_organization);
+            }])
+            ->whereHas('customersalesarea',function($query) use($division, $sales_organization ){
+                $query->where('division',$division);
+                $query->where('sales_organization',$sales_organization);
+            })
+            ->where('name','not like','%XXX%')
+            ->where('name','not like','%X:%')
+            ->get();
         }
 
-        return $customer_codes = CustomerCode::select('id','customer_code','name')
-                                ->whereNotIn('customer_code',$customer_codes_not)
-                                ->where('name','not like','%XXX%')
-                                // ->where('name','not like','%XX:%')
-                                // ->where('name','not like','%X:%')
-                                ->get();
+        return $customer_list;
+        
+        // if($companycode !== 2100){
+        //     $customer_list = CustomerCode::with(['customercompanies' => function($query) use($companycode ){
+        //         $query->where('company_code',$companycode );
+        //     }])
+        //     ->whereHas('customercompanies',function($query) use($companycode){
+        //         $query->where('company_code',$companycode );
+        //     })
+        //     ->where('name','not like','%XXX%')
+        //     ->where('name','not like','%X:%')
+        //     ->get();
+        // }
+        // else{
+        //     $company_divisison = Company::where('id',$companycode)->pluck('division_code');
+        //     $customer_list = CustomerCode::with(['customersalesarea' => function($query) use($company_divisison ){
+        //         $query->whereIn('division',$company_divisison );
+        //     }])
+        //     ->whereHas('customersalesarea',function($query) use($company_divisison){
+        //         $query->whereIn('division',$company_divisison );
+        //     })
+        //     ->where('name','not like','%XXX%')
+        //     ->where('name','not like','%X:%')
+        //     ->get();
+        // }
+
+        return  $companycode;
+        
+        // $company_id = Auth::user()->companies->pluck('id')[0];
+
+        // $customer_code_within = Customer::select('customer_code')->where('company_id',$company_id)->get();
+
+        // $customer_codes_not = [];
+        // if($customer_code_within){
+        //     foreach($customer_code_within as $customer){
+        //         $customer_code_selected = str_pad($customer['customer_code'], 10, '0', STR_PAD_LEFT);
+        //         array_push($customer_codes_not,$customer_code_selected);
+        //     }
+        // }
+
+        // return $customer_codes = CustomerCode::select('id','customer_code','name')
+        //                         ->whereNotIn('customer_code',$customer_codes_not)
+        //                         ->where('name','not like','%XXX%')
+        //                         // ->where('name','not like','%XX:%')
+        //                         // ->where('name','not like','%X:%')
+        //                         ->get();
     }
 
 }

@@ -51,13 +51,13 @@ class SapUser extends Command
                 
                 $validate_user_email = User::where('email',$result['email'])->first();
                 if(!empty($validate_user_email)){
-                    $user_companies = [];
+                    // $user_companies = [];
                     $user_divisions = [];
 
-                    foreach($result['companies'] as $companies){
-                        $company_id = Company::where('code',$companies['code'])->pluck('id')->first();
-                        if($company_id) array_push($user_companies,$company_id);
-                    }
+                    // foreach($result['companies'] as $companies){
+                    //     $company_id = Company::where('code',$companies['code'])->pluck('id')->first();
+                    //     if($company_id) array_push($user_companies,$company_id);
+                    // }
 
                     foreach($result['divisions'] as $divisions){
                         $division_id = Division::where([['code',$divisions['code']],
@@ -68,7 +68,7 @@ class SapUser extends Command
                         if($division_id) array_push($user_divisions,$division_id);
                     }
                    $validate_user_email->divisions()->sync($user_divisions);
-                   $validate_user_email->companies()->sync($user_companies);
+                //    $validate_user_email->companies()->sync($user_companies);
                 }
                 
             }

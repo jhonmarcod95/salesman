@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddCustomerDetailsToCustomersTable extends Migration
+class AddUserContactNumberToCustomerCodesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,9 @@ class AddCustomerDetailsToCustomersTable extends Migration
      */
     public function up()
     {
-        Schema::table('customers', function (Blueprint $table) {
-            $table->string('account_group')->nullable();
-            $table->string('sales_area')->nullable();
-            $table->string('customer_status')->nullable();
+        Schema::table('customer_codes', function (Blueprint $table) {
+            $table->char('telephone_1',30)->nullable();
+            $table->char('telephone_2',30)->nullable();
         });
     }
 
@@ -27,7 +26,7 @@ class AddCustomerDetailsToCustomersTable extends Migration
      */
     public function down()
     {
-        Schema::table('customers', function (Blueprint $table) {
+        Schema::table('customer_codes', function (Blueprint $table) {
             //
         });
     }
