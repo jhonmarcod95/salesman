@@ -26,7 +26,7 @@ class AddSapServerToCustomerSaleAreasTable extends Migration
     public function down()
     {
         Schema::table('customer_sale_areas', function (Blueprint $table) {
-            //
+            $table->char('sap_server', 10);
         });
     }
 }
