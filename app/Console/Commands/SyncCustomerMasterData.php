@@ -53,7 +53,6 @@ class SyncCustomerMasterData extends Command
             $customer_company = Company::where('id',$with_customer_code['company_id'])->pluck('code');
             $validate_customer_companies = CustomerCompany::where([['customer_code',$customer_code],['company_code',$customer_company]])->first();
 
-            
             if(empty($validate_customer_companies)){
                 $update_active_customer_status = Customer::where('id',$customer_id)->update(['status'=>$classification_id['id']]);
             }

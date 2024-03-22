@@ -182,17 +182,6 @@ class SapCustomer extends Command
                     }
 
                     $validate_customer_code = CustomerCode::where([['customer_code',$customer_code],['server',$sap_server]])->first();
-                    $validate_customer = Customer::where('customer_code',$customer_code)->first();
-
-                    if(!empty($validate_customer)){
-                        $validate_customer->name = $name;
-                        $validate_customer->street = $street;
-                        $validate_customer->town_city = $township;
-                        $validate_customer->telephone_1 = $telephone_1;
-                        $validate_customer->telephone_2 = $telephone_2;
-                        $validate_customer->save();
-                    }
-
 
                     if(empty($validate_customer_code)){
                         $validate_customer_code = new CustomerCode;

@@ -52,7 +52,7 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     public function indexData(){
+    public function indexData(){
         ini_set('memory_limit', '2048M'); // revise this
 
         return  Customer::orderBy('customers.id', 'desc')
@@ -62,8 +62,8 @@ class CustomerController extends Controller
             ->leftJoin('provinces', 'provinces.id', '=', 'customers.province_id')
             ->leftJoin('regions', 'regions.id', '=', 'provinces.region_id')
             ->leftJoin('customer_classifications', 'customer_classifications.id', '=', 'customers.classification')
-            ->leftJoin('customer_classifications as customer_status', 'customer_status.id', '=', 'customers.status')
-            ->leftjoin('companies','companies.id','=','customers.company_id')
+            ->leftJoin('customer_codes', 'customer_codes.customer_code', '=', 'customers.customer_code')
+            ->leftJoin('companies', 'companies.id', '=', 'customers.company_id')
             // ->where('verified_status',1)
             ->get([
                 'customers.id',
@@ -92,8 +92,10 @@ class CustomerController extends Controller
                 'customers.verified_status',
                 'regions.code AS region_code',
                 'regions.name AS region',
+                'customers.account_group',
+                'customers.sales_area',
+                'customers.customer_status',
                 'companies.code AS company_code',
-                'customer_status.description as customer_status',
             ]);
     }
 
@@ -678,6 +680,32 @@ class CustomerController extends Controller
         }
 
         return $customer_list;
+        
+        // if($companycode !== 2100){
+        //     $customer_list = CustomerCode::with(['customercompanies' => function($query) use($companycode ){
+        //         $query->where('company_code',$companycode );
+        //     }])
+        //     ->whereHas('customercompanies',function($query) use($companycode){
+        //         $query->where('company_code',$companycode );
+        //     })
+        //     ->where('name','not like','%XXX%')
+        //     ->where('name','not like','%X:%')
+        //     ->get();
+        // }
+        // else{
+        //     $company_divisison = Company::where('id',$companycode)->pluck('division_code');
+        //     $customer_list = CustomerCode::with(['customersalesarea' => function($query) use($company_divisison ){
+        //         $query->whereIn('division',$company_divisison );
+        //     }])
+        //     ->whereHas('customersalesarea',function($query) use($company_divisison){
+        //         $query->whereIn('division',$company_divisison );
+        //     })
+        //     ->where('name','not like','%XXX%')
+        //     ->where('name','not like','%X:%')
+        //     ->get();
+        // }
+
+        return  $companycode;
         
         // $company_id = Auth::user()->companies->pluck('id')[0];
 
