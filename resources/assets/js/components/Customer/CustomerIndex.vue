@@ -62,7 +62,6 @@
                                     <th scope="col">Verified</th>
                                     <th scope="col">Customer Code</th>
                                     <th scope="col">Company Code</th>
-                                    <th scope="col">Account Group</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Street</th>
                                     <th scope="col">Town or City</th>
@@ -72,7 +71,6 @@
                                     <th scope="col">Telephone 1</th>
                                     <th scope="col">Telephone 2</th>
                                     <th scope="col">Fax number</th>
-                                    <th scope="col">Sales Area</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Remarks</th>
                                     <th></th>
@@ -101,7 +99,6 @@
                                         </td>
                                         <td>{{ customer.customer_code }}</td>
                                         <td>{{ customer.company_code }}</td>
-                                        <td>{{ customer.account_group }}</td>
                                         <td>{{ customer.name }}</td>
                                         <td>{{ customer.street }}</td>
                                         <td>{{ customer.town_city }}</td>
@@ -110,8 +107,7 @@
                                         <td>{{ customer.customer_classification }}</td>
                                         <td>{{ customer.telephone_1 }}</td>
                                         <td>{{ customer.telephone_2 }}</td>
-                                        <td>{{ customer.fax_number }}</td>    
-                                        <td>{{ customer.sales_area }}</td> 
+                                        <td>{{ customer.fax_number }}</td>  
                                         <td>{{ customer.customer_status }}</td>  
                                         <td>{{ customer.remarks }}</td>
                                     </tr>
@@ -185,7 +181,6 @@ export default {
             json_fields: {
                 'CUSTOMER CODE' : 'customer_code',
                 'COMPANY CODE' : 'company_code',
-                'ACCOUNT GROUP' : 'account_group',
                 'CUSTOMER NAME': 'name',
                 'Telephone 1' : 'telephone_1',
                 'Telephone 2' : 'telephone_2',
@@ -232,7 +227,6 @@ export default {
                     }
                 },
                 'REMARKS' : 'remarks',
-                'SALES AREA' : 'sales_area',
                 'STATUS' : 'customer_status',
                 'Distributor' : 'distributor_name',
                 'Brand Use' : 'brand_used',
@@ -278,10 +272,6 @@ export default {
             .catch(error => { 
                 this.errors = error.response.data.errors;
             })
-
-            
-            
-
         },
         fetchFilterCustomers(){
             let v = this;
@@ -309,7 +299,7 @@ export default {
       fetchCustomer(){
           axios.get('/customers-all')
           .then(response => {
-              this.customers = response.data;
+                this.customers = response.data;
           })
           .catch(error => {
               this.errors = error.response.data.errors;
