@@ -92,6 +92,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('update:IODetails')
             ->weekly()
             ->mondays();
+
+          // update dormant_days of users
+          $schedule->command('command:dormant-users')->dailyAt('00:00');
+
     }
 
     /**
