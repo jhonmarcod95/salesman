@@ -212,13 +212,13 @@ class AppAPIController extends Controller
 
                 // If budget is low but has a Qty check remaining = proceed to save
                 if($expense_amount != null && $isDuplicate == true) {
-                    if(($isDuplicateIoAmount < (float) $expense_amount) == true && $simulatedAllowedExpenseQty > 0) {
+                    if(($isDuplicateIoAmount <= (float) $expense_amount) == true && $simulatedAllowedExpenseQty > 0) {
                         return "QTYPASSED";
                     }
                 }
 
                 if($expense_amount != null && $isDuplicate == false) {
-                    if(($zeroOrResult < (float) $expense_amount) == true && $simulatedAllowedExpenseQty > 0) {
+                    if(($zeroOrResult <= (float) $expense_amount) == true && $simulatedAllowedExpenseQty > 0) {
                         return "QTYPASSED";
                     }
                 }
