@@ -124,12 +124,18 @@ class AppAPIController extends Controller
      */
     public function checkExpenseQty($expense_type)
     {
-        return Expense::where('user_id',Auth::user()->id)
+        $checkEntries = Expense::where('user_id',Auth::user()->id)
                         ->where('expenses_type_id', $expense_type)
-                        ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])
-                        ->doesntHave('postedPayments')
-                        // ->where('expenses_entry_id', '!=', 0)
-                        ->count();
+                        ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()]);
+
+        if ($checkEntries->count() > 0) {
+            return $checkEntries->doesntHave('postedPayments')
+                // ->where('expenses_entry_id', '!=', 0)
+                ->count();
+        }
+
+        return -1;
+                       
     }
 
     /**
@@ -168,11 +174,19 @@ class AppAPIController extends Controller
                 if($internalOrder->gl_account_id != null) {
 
                     $gl_code = in_array($internalOrder->gl_account_id, $allowed_gl_code->toArray()) ? 'true' : 'false';
-
+                 
                     if($gl_code === 'true') {
 
                         $expenseQty = $this->checkExpenseQty($expense_type);
 
+                        // if there no expense entries found within the month + no payment made 
+                        if($expenseQty == -1) {
+
+                            $simulatedAllowedExpenseQty = (float) $toJson[0]['balance_qty'];
+
+                        }
+
+                        // if there are entries found within the month
                         if($expenseQty > 0) {
 
                             $simulatedAllowedExpenseQty = (float) $toJson[0]['balance_qty'] -  $expenseQty;
@@ -198,12 +212,13 @@ class AppAPIController extends Controller
 
                 // If budget is low but has a Qty check remaining = proceed to save
                 if($expense_amount != null && $isDuplicate == true) {
-                    if($isDuplicateIoAmount < (float) $expense_amount && $simulatedAllowedExpenseQty > 0) {
+                    if(($isDuplicateIoAmount < (float) $expense_amount) == true && $simulatedAllowedExpenseQty > 0) {
                         return "QTYPASSED";
                     }
                 }
+
                 if($expense_amount != null && $isDuplicate == false) {
-                    if($zeroOrResult < (float) $expense_amount && $simulatedAllowedExpenseQty > 0) {
+                    if(($zeroOrResult < (float) $expense_amount) == true && $simulatedAllowedExpenseQty > 0) {
                         return "QTYPASSED";
                     }
                 }

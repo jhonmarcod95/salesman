@@ -123,6 +123,17 @@ class AmountLimit implements Rule
 
         // if budget is low vs amount but has a qty checking value yet. proceed to save.
         if($this->io_balance == "QTYPASSED") {
+
+            // If user has SAP budget line assigned
+            $isMaintainedExpenseRate = $maintainedExpenseRate->exists() ?
+                                        $maintainedExpenseRate->pluck('amount')->first() :
+                                        $defaultExpenseRate;
+            
+            if(($value <= $isMaintainedExpenseRate) == false) {
+                $this->returnMessage = "The daily allocated budget has been exceeded!";
+                return false;
+            }
+
             return true;
         }
 
