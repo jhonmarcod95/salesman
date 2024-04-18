@@ -138,12 +138,14 @@ class AppAPIController extends Controller
      * @param [Integer] $expense_type
      * @return void
      */
-    public function checkBudget($expense_type)
+    public function checkBudget($expense_type, $expense_amount = null)
     {
         if($this->checkInternalOrder($expense_type) != 'N/A') {
             if($this->checkInternalOrder($expense_type)) {
 
                 $internalOrder = $this->checkInternalOrder($expense_type);
+
+                $simulatedAllowedExpenseQty = 0;
 
                 $response = Curl::to('http://10.97.70.51/salesforcepaymentservice/api/sap_budget_checking')
                 ->withContentType('application/x-www-form-urlencoded')
@@ -171,13 +173,14 @@ class AppAPIController extends Controller
 
                         $expenseQty = $this->checkExpenseQty($expense_type);
 
-
                         if($expenseQty > 0) {
+
                             $simulatedAllowedExpenseQty = (float) $toJson[0]['balance_qty'] -  $expenseQty;
                             
                             if($simulatedAllowedExpenseQty < 0) {
                                 return "QTYLIMIT";
                             }
+
                         }
                     }
                 }
@@ -187,9 +190,22 @@ class AppAPIController extends Controller
                 $isDuplicate = false;
                 $isDuplicateIoAmount = 0;
                 $isDuplicateInfo = $this->checkDuplicateIo()->where('internal_order', $internalOrder->internal_order);
+
                 if ($isDuplicateInfo->count() > 1) {
                     $isDuplicate = true;
                     $isDuplicateIoAmount = (float) $toJson[0]['balance_amount'] - $isDuplicateInfo->sum('amount');
+                }
+
+                // If budget is low but has a Qty check remaining = proceed to save
+                if($expense_amount != null && $isDuplicate == true) {
+                    if($isDuplicateIoAmount < (float) $expense_amount && $simulatedAllowedExpenseQty > 0) {
+                        return "QTYPASSED";
+                    }
+                }
+                if($expense_amount != null && $isDuplicate == false) {
+                    if($zeroOrResult < (float) $expense_amount && $simulatedAllowedExpenseQty > 0) {
+                        return "QTYPASSED";
+                    }
                 }
 
                 return $isDuplicate == true ? $isDuplicateIoAmount :  $zeroOrResult;
@@ -438,7 +454,9 @@ class AppAPIController extends Controller
 
         $this->validate($request, [
             'types' => 'required',
-            'amount' => [new AmountLimit($request->input('types'), 0, $this->checkBudget($request->input('types'))), 'required'],
+            'amount' => [new AmountLimit($request->input('types'), 
+                    0, 
+                    $this->checkBudget($request->input('types'),$request->input('amount'))), 'required'],
         ]);
 
         // if qty checked exceeded for the month

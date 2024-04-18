@@ -121,6 +121,11 @@ class AmountLimit implements Rule
             return false;
         }
 
+        // if budget is low vs amount but has a qty checking value yet. proceed to save.
+        if($this->io_balance == "QTYPASSED") {
+            return true;
+        }
+
         // do not proceed if io_balance is empty
         // if io_balance is found
         if($this->io_balance || $this->io_balance === 'N/A') {
