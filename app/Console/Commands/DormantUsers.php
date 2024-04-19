@@ -46,24 +46,24 @@ class DormantUsers extends Command
         ->orderBy('id','desc')->get();
         
         foreach($users as $user){
-            $validate_attendance = Attendance::where('user_id',$user->id)->orderBy('sign_out','desc')->get()->first();
-            $dormant_days = 0;
-
-            if($user->roles->count() > 0 && $validate_attendance){
-                $dormant_days = now()->diffInDays(Carbon::parse($validate_attendance->sign_out));
-            }
-            else{
-               if ($user->last_login_at != null)
-                $dormant_days = now()->diffInDays(Carbon::parse($user->last_login_at));
-            }
+           $validate_attendance = Attendance::where('user_id',$user->id)->orderBy('sign_out','desc')->get()->first();
+           $dormant_days = 0;
+           if($user->last_login_at != null){
+               $dormant_days = now()->diffInDays(Carbon::parse($user->last_login_at));
+           }
+           else{
+               $dormant_days = now()->diffInDays(Carbon::parse($user->created_at));
+               if($user->roles->count() > 0 && $validate_attendance){
+                   $dormant_days = now()->diffInDays(Carbon::parse($validate_attendance->sign_out));
+               }
+           }   
 
            $user->dormant_days = $dormant_days;
-
-            if($dormant_days == 90){
-                $user->remarks = 'Dormant User';
-                $user->deleted_at = Carbon::now()->toDateTimeString();
-            }
-            $user->save();
-        }
+           if($dormant_days > 90){
+               $user->remarks = 'Dormant User';
+               $user->deleted_at = Carbon::now()->toDateTimeString();
+           }
+           $user->save();
+       }
     }
 }

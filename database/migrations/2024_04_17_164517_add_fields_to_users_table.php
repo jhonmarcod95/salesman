@@ -14,8 +14,8 @@ class AddFieldsToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->integer('dormant_days');
-            $table->string('remarks',30);
+            $table->integer('dormant_days')->default(0);
+            $table->string('remarks',30)->nullable();
         });
     }
 
