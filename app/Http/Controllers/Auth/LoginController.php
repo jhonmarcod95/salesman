@@ -46,8 +46,8 @@ class LoginController extends Controller
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
         // the login attempts for this application. We'll key this by the username and
         // the IP address of the client making these requests into this application.
-        $validate_dormant_account = User::withTrashed()->where('email',$request->email)->first()['remarks'];
-        if(!empty($validate_dormant_account)){
+        $validate_dormant_account = User::withTrashed()->where('email',$request->email)->first();
+        if(!empty($validate_dormant_account->remarks)){
             $this->sendLockedAccountResponse($request);
         }
 
