@@ -73,7 +73,6 @@ class DormantUsers extends Command
             $user->remarks = $remarks;
             $user->deleted_at = $deleted_at;
             $user->save();
-            return $user; 
         }
     }
 }
