@@ -66,7 +66,7 @@ class DormantUsers extends Command
             
             if($dormant_days > 90){
                 $remarks = 'Dormant User';
-                $deleted_at = Carbon::now()->toDateTimeString();
+                // $deleted_at = Carbon::now()->toDateTimeString();
             }
             
             $user->dormant_days = $dormant_days;
