@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\SalesmanInternalOrder;
 class SalesmanInternalOrderController extends Controller
 {
-    public function fetchSalesManInternalOrders(){
-        return SalesmanInternalOrder::whereHas('user')->get();
+    public function fetchSalesManInternalOrders($sap_server){
+        return SalesmanInternalOrder::whereHas('user')->where('sap_server', $sap_server)->get();
     }
 }
