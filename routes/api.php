@@ -22,7 +22,7 @@ Route::post('login', 'AuthController@login');
 Route::get('hacienda/sap', 'API\PlanterHaciendaApiController@fetchHacienda');
 
 // fetch SalesManInternalOrder
-Route::get('internalorders/', 'API\SalesmanInternalOrderController@fetchSalesManInternalOrders');
+Route::get('internal-orders', 'API\SalesmanInternalOrderController@fetchSalesManInternalOrders');
 
 // Route API setup for Mobile Client
 Route::group(['middleware' => 'auth:api'], function() {

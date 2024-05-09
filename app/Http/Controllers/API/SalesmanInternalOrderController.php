@@ -8,6 +8,6 @@ use App\SalesmanInternalOrder;
 class SalesmanInternalOrderController extends Controller
 {
     public function fetchSalesManInternalOrders(){
-        return SalesmanInternalOrder::all();
+        return SalesmanInternalOrder::whereHas('user')->get();
     }
 }
