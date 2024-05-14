@@ -71,7 +71,6 @@ class DormantUsers extends Command
             
             $user->dormant_days = $dormant_days;
             $user->remarks = $remarks;
-            $user->deleted_at = $deleted_at;
             $user->save();
         }
     }
