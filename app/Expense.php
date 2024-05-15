@@ -13,6 +13,7 @@ class Expense extends Model implements Auditable
         'amount',
         'attachment',
         'remarks',
+        'dms_reference',
     ];
 
     // protected $hidden = [

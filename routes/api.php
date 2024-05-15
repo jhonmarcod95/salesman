@@ -170,4 +170,8 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('aapc-disease-types','API\AapcFarmerSurveyControllerApi@aapcDiseaseTypes');
     Route::get('aapc-herbicide-types','API\AapcFarmerSurveyControllerApi@aapcHerbicideTypes');
     Route::post('aapc-farmer-survey','API\AapcFarmerSurveyControllerApi@store');
+
+    // api for expense document checking and approval to dms
+    Route::get('expenses-docs','API\ExpenseDocumentControllerApi@expenseEntries');
+    Route::post('expenses-docs/{expense}','API\ExpenseDocumentControllerApi@expenseDmsReceived');
 });
