@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\SalesmanInternalOrder;
 class SalesmanInternalOrderController extends Controller
 {
-    public function fetchSalesManInternalOrders(){
-        return SalesmanInternalOrder::get()->unique('internal_order')->makeHidden('charge_type');
+    public function fetchSalesManInternalOrders($sap_server){
+        return SalesmanInternalOrder::where('sap_server', $sap_server)->get()->unique('internal_order')->makeHidden('charge_type');
     }
 }
