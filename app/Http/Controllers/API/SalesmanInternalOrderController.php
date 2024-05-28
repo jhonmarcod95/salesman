@@ -8,6 +8,6 @@ use App\SalesmanInternalOrder;
 class SalesmanInternalOrderController extends Controller
 {
     public function fetchSalesManInternalOrders($sap_server){
-        return SalesmanInternalOrder::where('sap_server', $sap_server)->get()->unique('internal_order')->makeHidden('charge_type');
+        return SalesmanInternalOrder::where('sap_server', $sap_server)->get()->unique('internal_order')->makeHidden('charge_type')->values();
     }
 }
