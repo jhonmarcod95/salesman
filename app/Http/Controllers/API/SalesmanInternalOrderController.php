@@ -8,6 +8,6 @@ use App\SalesmanInternalOrder;
 class SalesmanInternalOrderController extends Controller
 {
     public function fetchSalesManInternalOrders(){
-        return SalesmanInternalOrder::get()->unique('internal_order')->makeHidden('charge_type');
+       return SalesmanInternalOrder::with('user:id,name,email')->get()->unique('internal_order')->values()->makeHidden('charge_type');
     }
 }
