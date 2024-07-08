@@ -28,6 +28,7 @@ class ExpenseDocumentControllerApi extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $search_name = $request->input('search_name');
+        $limit = $request->input('limit');
     
         return ExpensesEntry::select('id','user_id','totalExpenses','created_at')
                     ->with('user','expensesModel.payments','expensesModel.expensesType')
@@ -42,7 +43,7 @@ class ExpenseDocumentControllerApi extends Controller
                     ->has('expensesModel')
                     ->withCount('expensesModel')
                     ->orderBy('id', 'desc')
-                    ->paginate(10);
+                    ->paginate($limit ? $limit : 10);
     }
 
     public function expenseDmsReceived(Request $request, Expense $expense)
