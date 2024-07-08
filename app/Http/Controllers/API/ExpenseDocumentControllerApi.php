@@ -46,15 +46,19 @@ class ExpenseDocumentControllerApi extends Controller
                     ->paginate($limit ? $limit : 10);
     }
 
-    public function expenseDmsReceived(Request $request, Expense $expense)
+    public function expenseDmsReceived(Request $request)
     {
         $this->validate($request,[
-            'dms_reference' => 'required'
+            'dms_reference' => 'required',
+            'expense_ids' => 'required'
         ]);
 
-        $expense->dms_reference = $request->dms_reference;
-        $expense->save();
+        foreach($request->expense_ids as $expense_id) {
+            $expense = Expense::find($expense_id);
+            $expense->dms_reference = $request->dms_reference;
+            $expense->save();
+        }
 
-        return $expense;
+        return response()->json(['message' => "Expense Received Success"], 200);
     }
 }
