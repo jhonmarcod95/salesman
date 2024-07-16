@@ -70,7 +70,7 @@
                                             </div>
                                         </td>
                                         <td v-else></td>
-                                        <td>{{ expense.user.name }}</td>
+                                        <td>{{ !isEmpty(expense.user) ? expense.user.name : '' }}</td>
                                         <td>{{ expense.expenses_model_count  }}</td>
                                         <td>{{ moment(expense.created_at).format('ll') }}</td>
                                         <td>PHP {{ countTotalExpenses(expense) }}</td>
@@ -123,6 +123,7 @@
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
+                                <th scope="col" v-if="expenseVerifierRole">Verify</th>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Date</th>
@@ -131,6 +132,13 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
+                                    <td v-if="expenseVerifierRole">
+                                        <span v-if="expenseBy.is_verified">Verified</span>
+                                        <button type="button" class="btn btn-primary btn-sm" v-else @click="verifyExpense(expenseBy)" :disabled="verifiyingId">
+                                            Verify
+                                            <span v-if="verifiyingId == expenseBy.id">...</span>
+                                        </button>
+                                    </td>
                                     <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                     <td>{{ expenseBy.expenses_type.name }}</td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
@@ -165,6 +173,7 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            verifiyingId: null
         }
     },
     created(){
@@ -207,6 +216,16 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
+        doFetchExpenseByTsr(id) {
+            axios.get(`/expense-report/${id}`)
+            .then(response => { 
+                this.verifiyingId = null;
+                this.expenseByTsr = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
         },
@@ -221,6 +240,20 @@ export default {
 
         showNextLink() {
             return this.currentPage == (this.totalPages - 1) ? false : true;
+        },
+
+        verifyExpense(expense) {
+            let vm = this;
+            if(confirm("Are you sure you want to mark as verified this attachment?")) {
+                vm.verifiyingId = expense.id;
+                axios.get(`/verify-expense-attachment/${expense.id}`)
+                .then(res => {
+                    vm.doFetchExpenseByTsr(expense.expenses_entry_id)
+                })
+            }
+        },
+        isEmpty(data) {
+            return _.isEmpty(data);
         }
     },
     computed:{
@@ -249,6 +282,13 @@ export default {
         },
         imageLink(){
             return window.location.origin+'/storage/';
+        },
+        expenseVerifierRole() {
+            let verifier = [
+                4, //Coordinator
+                1  //IT
+            ];
+            return _.includes(verifier, this.userLevel);
         }
     },
 }

@@ -645,4 +645,8 @@ class ExpenseController extends Controller
         return $tsr_arr;
     }
 
+    public function verifyAttachment($expenseId) {
+        Expense::find($expenseId)->update([ 'is_verified' => 1 /**true */ ]);
+    }
+
 }
