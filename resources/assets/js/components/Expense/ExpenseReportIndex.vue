@@ -52,6 +52,7 @@
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Expense Submitted</th>
+                                    <th scope="col" v-if="expenseVerifierRole">Verified Count</th>
                                     <th scope="col">Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
@@ -72,6 +73,7 @@
                                         <td v-else></td>
                                         <td>{{ !isEmpty(expense.user) ? expense.user.name : '' }}</td>
                                         <td>{{ expense.expenses_model_count  }}</td>
+                                        <td v-if="expenseVerifierRole">{{ expense.verified_expense_count  }}</td>
                                         <td>{{ moment(expense.created_at).format('ll') }}</td>
                                         <td>PHP {{ countTotalExpenses(expense) }}</td>
                                     </tr>

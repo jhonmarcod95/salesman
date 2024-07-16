@@ -76,6 +76,7 @@ class ExpenseController extends Controller
             ->whereDate('created_at' ,'<=', $request->endDate)
             ->has('expensesModel')
             ->withCount('expensesModel')
+            ->withCount('verifiedExpense')
             ->orderBy('id', 'desc')->get();
         }else{
             $expense = ExpensesEntry::with('user','expensesModel.payments')
@@ -83,6 +84,7 @@ class ExpenseController extends Controller
                 ->whereDate('created_at' ,'<=', $request->endDate)
                 ->has('expensesModel')
                 ->withCount('expensesModel')
+                ->withCount('verifiedExpense')
                 ->orderBy('id', 'desc')->get();
         }
 

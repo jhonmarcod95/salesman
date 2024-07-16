@@ -28,6 +28,10 @@ class ExpensesEntry extends Model
         return $this->hasMany(Expense::class);
     }
 
+    public function verifiedExpense() {
+        return $this->hasMany(Expense::class)->where('is_verified', 1);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
