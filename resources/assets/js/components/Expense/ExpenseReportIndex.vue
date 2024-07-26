@@ -12,6 +12,7 @@
                                 <div class="col">
                                     <h3 class="mb-0">Expenses Report</h3>
                                 </div>
+                                <div><a class="btn btn-sm btn-info mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -37,11 +38,16 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <button class="btn btn-sm btn-primary" @click="fetchExpenses"> Filter</button>
+                                    <button class="btn btn-sm btn-primary mt-4" @click="fetchExpenses">
+                                        Filter
+                                        <span v-if="fetchingExpense">...</span>
+                                    </button> 
                                 </div>
 
-                                <div class="col-md-12 text-right">
-                                      <a class="btn btn-sm btn-info mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a>  
+                                <div class="col-md-12">
+                                    <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
+                                    <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
+                                    <span class="text-warning">Unverified: {{ filteredExpensesStats.unverifiedCount }}</span>
                                 </div>
                             </div>
                         </div>
@@ -165,6 +171,7 @@ export default {
     props:['userLevel'],
     data(){
         return{
+            fetchingExpense: false,
             expenses: [],
             expenseByTsr: [],
             startDate: '',
@@ -194,6 +201,8 @@ export default {
             return totalExpenses.toFixed(2);
         },
         fetchExpenses(){
+            this.errors = [];
+            this.fetchingExpense = true;
             axios.post('/expense-report-bydate', {
                 startDate: this.startDate,
                 endDate: this.endDate
@@ -201,9 +210,11 @@ export default {
             .then(response => {
                 this.expenses = response.data;
                 this.errors = []; 
+                this.fetchingExpense = false;
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
+                this.fetchingExpense = false;
             })
         },
         fetchExpenseByTsr(id,name,created){
@@ -265,6 +276,22 @@ export default {
                 return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase())
             });
         },
+        filteredExpensesStats(){
+            let self = this;
+            let expensesCount = 0;
+            let verifiedCount = 0;
+            let unverifiedCount = 0;
+
+            if(!_.isEmpty(self.filteredExpenses)) {
+                _.each(self.filteredExpenses, (item) => {
+                    verifiedCount = verifiedCount + item.verified_expense_count;
+                    unverifiedCount = unverifiedCount + (item.expenses_model_count - item.verified_expense_count);
+                    expensesCount = expensesCount + item.expenses_model_count;
+                })
+            }
+
+            return {expensesCount, verifiedCount, unverifiedCount}
+        },
         totalPages() {
             return Math.ceil(this.filteredExpenses.length / this.itemsPerPage)
         },
@@ -283,6 +310,7 @@ export default {
             return queues_array;
         },
         imageLink(){
+            // return 'http://salesforce.lafilgroup.net:8666/storage/';
             return window.location.origin+'/storage/';
         },
         expenseVerifierRole() {
