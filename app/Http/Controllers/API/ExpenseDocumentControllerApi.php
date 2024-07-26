@@ -32,41 +32,57 @@ class ExpenseDocumentControllerApi extends Controller
         $user_id = $request->input('user_id');
 
         $expenses_entry = ExpensesEntry::select('id','user_id','totalExpenses','created_at')
-                    ->with('user:id,name', 'verifiedExpense', 'verifiedExpense.expensesType:id,name')
+                    ->with('user:id,name', 'expensesModel', 'verifiedExpense')
                     ->whereBetween('created_at', [Carbon::parse($startDate), Carbon::parse($endDate)])
                     ->whereHas('user', function ($query) use ($user_id) {
                         $query->where('id', $user_id);
                     })
-                    ->with(['verifiedExpense' => function ($q) {
+                    ->with(['expensesModel' => function ($q) {
                         $q->whereNull('dms_reference');
                     }])
-                    ->has('verifiedExpense')
+                    ->has('expensesModel')
                     ->withCount('verifiedExpense')
+                    ->withCount('expensesModel')
                     ->get();
 
         $verified_expense_count = 0;
+        $unverified_expense_count = 0;
         $total_expenses = 0;
+        $total_count = 0;
         $expense_attachments = [];
         foreach($expenses_entry as $expense) {
             $verified_expense_count = $verified_expense_count + $expense->verified_expense_count;
+            $unverified_expense_count = $unverified_expense_count + ($expense->expenses_model_count - $expense->verified_expense_count);
+            $total_count = $total_count + $expense->expenses_model_count;
             $total_expenses = $total_expenses + $expense->totalExpenses;
 
-            foreach($expense->verifiedExpense as $verified) {
-                $data = [];
-                $data['id'] = $verified->id;
-                $data['expenses_entry_id'] = $verified->expenses_entry_id;
-                $data['attachment'] = $verified->attachment;
-                $data['expenses_type'] = $verified->expensesType->name;
-                $expense_attachments[] = $data;
+            if(!empty($expense->verifiedExpense)) {
+                foreach ($expense->verifiedExpense as $verified) {
+                    $data = [];
+                    $data['id'] = $verified->id;
+                    $data['expenses_entry_id'] = $verified->expenses_entry_id;
+                    $data['attachment'] = $verified->attachment;
+                    $data['expenses_type'] = $verified->expensesType->name;
+                    $expense_attachments[] = $data;
+                }
             }
         }
 
         $expense_data = [
             'user' => User::find($user_id, ['id', 'name']),
             'expense_attachments' => $expense_attachments,
-            'expense_attachment_count' => count($expense_attachments),
-            'total_expenses' => $total_expenses,
+            'unverified' => $unverified_expense_count,
+            'verified_count' => $verified_expense_count,
+            'total_count' => $total_count,
+            'total_expenses' => $total_expenses
         ];
+
+        // $expense_data = [
+        //     'user' => User::find($user_id, ['id', 'name']),
+        //     'expense_attachments' => $expense_attachments,
+        //     'expense_attachment_count' => count($expense_attachments),
+        //     'total_expenses' => $total_expenses,
+        // ];
 
         return $expense_data;
     }
