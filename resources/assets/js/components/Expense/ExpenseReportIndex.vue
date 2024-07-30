@@ -58,7 +58,7 @@
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Expense Submitted</th>
-                                    <th scope="col" v-if="expenseVerifierRole">Verified Count</th>
+                                    <th scope="col" v-if="expenseVerifierRole || salesHeadRole">Verified Count</th>
                                     <th scope="col">Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
@@ -66,7 +66,8 @@
                                 <tbody v-if="expenses.length">
                                     <tr v-for="(expense, e) in filteredQueues" v-bind:key="e">
                                         <td class="text-right" v-if="userLevel != 5">
-                                            <div class="dropdown">
+                                            <button class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</button>
+                                            <!-- <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fas fa-ellipsis-v"></i>
@@ -74,12 +75,12 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</a>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                         </td>
                                         <td v-else></td>
                                         <td>{{ !isEmpty(expense.user) ? expense.user.name : '' }}</td>
                                         <td>{{ expense.expenses_model_count  }}</td>
-                                        <td v-if="expenseVerifierRole">{{ expense.verified_expense_count  }}</td>
+                                        <td v-if="expenseVerifierRole || salesHeadRole">{{ expense.verified_expense_count  }}</td>
                                         <td>{{ moment(expense.created_at).format('ll') }}</td>
                                         <td>PHP {{ countTotalExpenses(expense) }}</td>
                                     </tr>
@@ -131,7 +132,7 @@
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
-                                <th scope="col" v-if="expenseVerifierRole">Verify</th>
+                                <th scope="col" v-if="expenseVerifierRole || salesHeadRole">Verify</th>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Date</th>
@@ -140,9 +141,12 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
-                                    <td v-if="expenseVerifierRole">
-                                        <span v-if="expenseBy.is_verified">Verified</span>
-                                        <button type="button" class="btn btn-primary btn-sm" v-else @click="verifyExpense(expenseBy)" :disabled="verifiyingId">
+                                    <td v-if="expenseVerifierRole || salesHeadRole">
+                                        <div v-if="expenseBy.is_verified">
+                                            <div>Verified</div>
+                                            <div v-if="salesHeadRole" class="btn btn-warning btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Unverify</div>
+                                        </div>
+                                        <button type="button" class="btn btn-primary btn-sm" v-else @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
                                             Verify
                                             <span v-if="verifiyingId == expenseBy.id">...</span>
                                         </button>
@@ -168,14 +172,14 @@
 <script>
 import moment from 'moment';
 export default {
-    props:['userLevel'],
+    props:['userLevel','userRole'],
     data(){
         return{
             fetchingExpense: false,
             expenses: [],
             expenseByTsr: [],
-            startDate: '',
-            endDate: '',
+            startDate: '2023-12-01',
+            endDate: '2023-12-31',
             tsrName: '',
             date: '',
             errors: [],
@@ -255,11 +259,12 @@ export default {
             return this.currentPage == (this.totalPages - 1) ? false : true;
         },
 
-        verifyExpense(expense) {
+        verifyExpense(expense, mode) {
             let vm = this;
-            if(confirm("Are you sure you want to mark as verified this attachment?")) {
+            let alertStatus = mode == 'verify' ? "mark as verified" : "reset to unverified"
+            if(confirm(`Are you sure you want to ${alertStatus} this attachment?`)) {
                 vm.verifiyingId = expense.id;
-                axios.get(`/verify-expense-attachment/${expense.id}`)
+                axios.post(`/verify-expense-attachment/${expense.id}`,{mode})
                 .then(res => {
                     vm.doFetchExpenseByTsr(expense.expenses_entry_id)
                 })
@@ -314,11 +319,18 @@ export default {
             return window.location.origin+'/storage/';
         },
         expenseVerifierRole() {
-            let verifier = [
-                4, //Coordinator
-                1  //IT
+            let userLevel = [
+                4, // Coordinator
+                9  // IT
             ];
-            return _.includes(verifier, this.userLevel);
+            return _.includes(userLevel, this.userLevel);
+        },
+        salesHeadRole() {
+            let userRole = [
+                4, // VP/Sales Head
+                1  // IT
+            ];
+            return _.includes(userRole, this.userRole);
         }
     },
 }

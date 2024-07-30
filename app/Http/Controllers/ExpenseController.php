@@ -25,6 +25,7 @@ use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
 
 use DB;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 use ZipArchive;
 
 class ExpenseController extends Controller
@@ -647,8 +648,12 @@ class ExpenseController extends Controller
         return $tsr_arr;
     }
 
-    public function verifyAttachment($expenseId) {
-        Expense::find($expenseId)->update([ 'is_verified' => 1 /**true */ ]);
+    public function verifyAttachment(Request $request, $expenseId) {
+        Expense::find($expenseId)->update([
+            'is_verified' => $request->mode == 'verify' ? 1 /**true */ : null, 
+            'verified_by' => $request->mode == 'verify' ? Auth::user()->id : null,
+            'date_verified' => $request->mode == 'verify' ? now() : null
+        ]);
     }
 
 }
