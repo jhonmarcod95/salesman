@@ -12,6 +12,7 @@
                                 <div class="col">
                                     <h3 class="mb-0">Expenses Report</h3>
                                 </div>
+                                <div><a class="btn btn-sm btn-info mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -37,11 +38,16 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <button class="btn btn-sm btn-primary" @click="fetchExpenses"> Filter</button>
+                                    <button class="btn btn-sm btn-primary mt-4" @click="fetchExpenses">
+                                        Filter
+                                        <span v-if="fetchingExpense">...</span>
+                                    </button> 
                                 </div>
 
-                                <div class="col-md-12 text-right">
-                                      <a class="btn btn-sm btn-info mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a>  
+                                <div class="col-md-12">
+                                    <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
+                                    <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
+                                    <span class="text-warning">Unverified: {{ filteredExpensesStats.unverifiedCount }}</span>
                                 </div>
                             </div>
                         </div>
@@ -52,6 +58,7 @@
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Expense Submitted</th>
+                                    <th scope="col" v-if="expenseVerifierRole || salesHeadRole">Verified Count</th>
                                     <th scope="col">Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
@@ -59,7 +66,8 @@
                                 <tbody v-if="expenses.length">
                                     <tr v-for="(expense, e) in filteredQueues" v-bind:key="e">
                                         <td class="text-right" v-if="userLevel != 5">
-                                            <div class="dropdown">
+                                            <button class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</button>
+                                            <!-- <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fas fa-ellipsis-v"></i>
@@ -67,11 +75,12 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</a>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                         </td>
                                         <td v-else></td>
-                                        <td>{{ expense.user.name }}</td>
+                                        <td>{{ !isEmpty(expense.user) ? expense.user.name : '' }}</td>
                                         <td>{{ expense.expenses_model_count  }}</td>
+                                        <td v-if="expenseVerifierRole || salesHeadRole">{{ expense.verified_expense_count  }}</td>
                                         <td>{{ moment(expense.created_at).format('ll') }}</td>
                                         <td>PHP {{ countTotalExpenses(expense) }}</td>
                                     </tr>
@@ -123,6 +132,7 @@
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
+                                <th scope="col" v-if="expenseVerifierRole || salesHeadRole">Verify</th>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Date</th>
@@ -131,6 +141,16 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
+                                    <td v-if="expenseVerifierRole || salesHeadRole">
+                                        <div v-if="expenseBy.is_verified">
+                                            <div>Verified</div>
+                                            <div v-if="salesHeadRole" class="btn btn-warning btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Unverify</div>
+                                        </div>
+                                        <button type="button" class="btn btn-primary btn-sm" v-else @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
+                                            Verify
+                                            <span v-if="verifiyingId == expenseBy.id">...</span>
+                                        </button>
+                                    </td>
                                     <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                     <td>{{ expenseBy.expenses_type.name }}</td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
@@ -152,9 +172,10 @@
 <script>
 import moment from 'moment';
 export default {
-    props:['userLevel'],
+    props:['userLevel','userRole'],
     data(){
         return{
+            fetchingExpense: false,
             expenses: [],
             expenseByTsr: [],
             startDate: '',
@@ -165,6 +186,7 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
+            verifiyingId: null
         }
     },
     created(){
@@ -183,6 +205,8 @@ export default {
             return totalExpenses.toFixed(2);
         },
         fetchExpenses(){
+            this.errors = [];
+            this.fetchingExpense = true;
             axios.post('/expense-report-bydate', {
                 startDate: this.startDate,
                 endDate: this.endDate
@@ -190,9 +214,11 @@ export default {
             .then(response => {
                 this.expenses = response.data;
                 this.errors = []; 
+                this.fetchingExpense = false;
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
+                this.fetchingExpense = false;
             })
         },
         fetchExpenseByTsr(id,name,created){
@@ -202,6 +228,16 @@ export default {
                 this.tsrName = name;
                 this.date = created;
                 $('#viewModal').modal('show');
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
+        doFetchExpenseByTsr(id) {
+            axios.get(`/expense-report/${id}`)
+            .then(response => { 
+                this.verifiyingId = null;
+                this.expenseByTsr = response.data;
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -221,6 +257,21 @@ export default {
 
         showNextLink() {
             return this.currentPage == (this.totalPages - 1) ? false : true;
+        },
+
+        verifyExpense(expense, mode) {
+            let vm = this;
+            let alertStatus = mode == 'verify' ? "mark as verified" : "reset to unverified"
+            if(confirm(`Are you sure you want to ${alertStatus} this attachment?`)) {
+                vm.verifiyingId = expense.id;
+                axios.post(`/verify-expense-attachment/${expense.id}`,{mode})
+                .then(res => {
+                    vm.doFetchExpenseByTsr(expense.expenses_entry_id)
+                })
+            }
+        },
+        isEmpty(data) {
+            return _.isEmpty(data);
         }
     },
     computed:{
@@ -229,6 +280,22 @@ export default {
             return self.expenses.filter(expense => {
                 return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase())
             });
+        },
+        filteredExpensesStats(){
+            let self = this;
+            let expensesCount = 0;
+            let verifiedCount = 0;
+            let unverifiedCount = 0;
+
+            if(!_.isEmpty(self.filteredExpenses)) {
+                _.each(self.filteredExpenses, (item) => {
+                    verifiedCount = verifiedCount + item.verified_expense_count;
+                    unverifiedCount = unverifiedCount + (item.expenses_model_count - item.verified_expense_count);
+                    expensesCount = expensesCount + item.expenses_model_count;
+                })
+            }
+
+            return {expensesCount, verifiedCount, unverifiedCount}
         },
         totalPages() {
             return Math.ceil(this.filteredExpenses.length / this.itemsPerPage)
@@ -248,7 +315,22 @@ export default {
             return queues_array;
         },
         imageLink(){
+            // return 'http://salesforce.lafilgroup.net:8666/storage/';
             return window.location.origin+'/storage/';
+        },
+        expenseVerifierRole() {
+            let userLevel = [
+                4, // Coordinator
+                9  // IT
+            ];
+            return _.includes(userLevel, this.userLevel);
+        },
+        salesHeadRole() {
+            let userRole = [
+                4, // VP/Sales Head
+                1  // IT
+            ];
+            return _.includes(userRole, this.userRole);
         }
     },
 }

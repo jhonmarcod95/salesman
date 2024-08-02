@@ -176,5 +176,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 
     // api for expense document checking and approval to dms
     Route::get('expenses-docs','API\ExpenseDocumentControllerApi@expenseEntries');
-    Route::post('expenses-docs/{expense}','API\ExpenseDocumentControllerApi@expenseDmsReceived');
+    Route::get('expenses-docs2','API\ExpenseDocumentControllerApi@expenseEntries2');
+    Route::post('expenses-docs','API\ExpenseDocumentControllerApi@expenseDmsReceived');
+    Route::get('tsr-users', "API\ExpenseDocumentControllerApi@getTsrUsers");
 });
