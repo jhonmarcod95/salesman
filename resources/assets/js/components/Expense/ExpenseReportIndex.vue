@@ -172,7 +172,7 @@
 <script>
 import moment from 'moment';
 export default {
-    props:['userLevel','userRole'],
+    props:['userLevel','userRole','expenseVerifier'],
     data(){
         return{
             fetchingExpense: false,
@@ -323,7 +323,8 @@ export default {
                 4, // Coordinator
                 9  // IT
             ];
-            return _.includes(userLevel, this.userLevel);
+
+            return _.includes(userLevel, this.userLevel) && this.expenseVerifier;
         },
         salesHeadRole() {
             let userRole = [

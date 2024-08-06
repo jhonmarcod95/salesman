@@ -79,6 +79,7 @@ class UserController extends Controller
 
         $user->name = $request->name;
         $user->email = $request->email;
+        $user->is_expense_approver = $request->is_expense_approver;
         $user->password = bcrypt($request->password);
 
         if($user->save()){
@@ -139,6 +140,7 @@ class UserController extends Controller
         
         $user->name = $request->name;
         $user->email= $request->email;
+        $user->is_expense_approver= $request->is_expense_approver;
 
         if($user->save()){
             // Assigning of role
