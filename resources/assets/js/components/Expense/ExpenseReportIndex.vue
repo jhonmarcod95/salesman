@@ -324,7 +324,7 @@ export default {
                 9  // IT
             ];
 
-            return _.includes(userLevel, this.userLevel) && this.expenseVerifier;
+            return _.includes(userLevel, this.userLevel) || this.expenseVerifier;
         },
         salesHeadRole() {
             let userRole = [
