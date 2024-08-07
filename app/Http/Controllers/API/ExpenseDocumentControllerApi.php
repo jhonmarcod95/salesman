@@ -7,6 +7,7 @@ use App\Expense;
 use Carbon\Carbon;
 use App\ExpensesEntry;
 use Illuminate\Http\Request;
+use App\ExpenseMonthlyDmsReceive;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
@@ -136,7 +137,21 @@ class ExpenseDocumentControllerApi extends Controller
         }
 
         return response()->json(['message' => "Expense Received Success"], 200);
-    }    
+    }
+
+    public function expenseDmsReceivedMonth(Request $request)
+    {
+        $this->validate($request, [
+            'user_id' => 'required',
+            'month' => 'required',
+            'year' => 'required',
+            'dms_qr_code' => 'required'
+        ]);
+
+        ExpenseMonthlyDmsReceive::create($request->all());
+
+        return response()->json(['message' => "Expense Received Success"], 200);
+    }
 
     public function getTsrUsers() {
         return User::select('id','name')
