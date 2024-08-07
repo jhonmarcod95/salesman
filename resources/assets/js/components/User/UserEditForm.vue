@@ -60,6 +60,16 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="checkbox form-control-label">
+                                                <input type="checkbox" v-model="user[0].is_expense_approver"/>
+                                                <span></span>
+                                                Expense Verifier
+                                            </label>
+                                            <span class="text-danger" v-if="errors.is_expense_approver">{{ errors.is_expense_approver[0] }}</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="pl-lg-4">
                                     <div class="row">
@@ -143,7 +153,8 @@ export default {
                 name: user.name,
                 email: user.email,
                 role: user.roles[0].id,
-                company: comapanyids
+                company: comapanyids,
+                is_expense_approver: user.is_expense_approver
             })
             .then(response => {
                 window.location.href = response.data.redirect;

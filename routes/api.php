@@ -178,5 +178,6 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::get('expenses-docs','API\ExpenseDocumentControllerApi@expenseEntries');
     Route::get('expenses-docs2','API\ExpenseDocumentControllerApi@expenseEntries2');
     Route::post('expenses-docs','API\ExpenseDocumentControllerApi@expenseDmsReceived');
+    Route::post('expenses-dms-received', 'API\ExpenseDocumentControllerApi@expenseDmsReceivedMonth');
     Route::get('tsr-users', "API\ExpenseDocumentControllerApi@getTsrUsers");
 });
