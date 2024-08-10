@@ -59,12 +59,12 @@
                                 </div>
 
                                 <div class="col-md-12">
-                                    <span>Attachment: {{ expenseStatusCount.expensesCount }}</span> |
+                                    <!-- <span>Attachment: {{ expenseStatusCount.expensesCount }}</span> |
                                     <span>Verified: {{ expenseStatusCount.verifiedCount }}</span> |
-                                    <span class="text-warning">Unverified: {{ expenseStatusCount.unverifiedCount }}</span>
-                                    <!-- <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
-                                            <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
-                                            <span class="text-warning">Unverified: {{ filteredExpensesStats.unverifiedCount }}</span> -->
+                                    <span class="text-warning">Unverified: {{ expenseStatusCount.unverifiedCount }}</span> -->
+                                    <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
+                                    <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
+                                    <span class="text-warning">Unverified: {{ filteredExpensesStats.unverifiedCount }}</span>
                                 </div>
                             </div>
                         </div>
@@ -75,7 +75,10 @@
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Expense Submitted</th>
-                                    <th scope="col" v-if="expenseVerifierRole || salesHeadRole">Verified Count</th>
+                                    <template v-if="expenseVerifierRole || salesHeadRole">
+                                        <th scope="col">Verified Count</th>
+                                        <th scope="col">Unverified Count</th>
+                                    </template>
                                     <th scope="col">Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
@@ -97,7 +100,10 @@
                                         <td v-else></td>
                                         <td>{{ !isEmpty(expense.user) ? expense.user.name : '' }}</td>
                                         <td>{{ expense.expenses_model_count  }}</td>
-                                        <td v-if="expenseVerifierRole || salesHeadRole">{{ expense.verified_expense_count  }}</td>
+                                        <template v-if="expenseVerifierRole || salesHeadRole">
+                                            <td>{{ expense.verified_expense_count  }}</td>
+                                            <td>{{ expense.expenses_model_count - expense.verified_expense_count  }}</td>
+                                        </template>
                                         <td>{{ moment(expense.created_at).format('ll') }}</td>
                                         <td>PHP {{ countTotalExpenses(expense) }}</td>
                                     </tr>
