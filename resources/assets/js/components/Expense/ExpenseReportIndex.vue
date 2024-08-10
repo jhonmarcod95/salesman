@@ -17,7 +17,7 @@
                         </div>
                         <div class="mb-3">
                             <div class="row ml-2">
-                                <div class="col-md-4 float-left">
+                                <div class="col-md-3 float-left">
                                     <div class="form-group">
                                         <label for="name" class="form-control-label">Search</label> 
                                         <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
@@ -38,6 +38,20 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="end_date" class="form-control-label">Status</label> 
+
+                                        <select
+                                        class="form-control"
+                                        v-model="expense_verify_status"
+                                        >
+                                        <option value=""> Select Status </option>
+                                        <option value="verified">Verified</option>
+                                        <option value="unverified">Unverified</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
                                     <button class="btn btn-sm btn-primary mt-4" @click="fetchExpenses">
                                         Filter
                                         <span v-if="fetchingExpense">...</span>
@@ -180,6 +194,7 @@ export default {
             expenseByTsr: [],
             startDate: '',
             endDate: '',
+            expense_verify_status: '',
             tsrName: '',
             date: '',
             errors: [],
@@ -209,7 +224,8 @@ export default {
             this.fetchingExpense = true;
             axios.post('/expense-report-bydate', {
                 startDate: this.startDate,
-                endDate: this.endDate
+                endDate: this.endDate,
+                expense_verify_status: this.expense_verify_status
             })
             .then(response => {
                 this.expenses = response.data;

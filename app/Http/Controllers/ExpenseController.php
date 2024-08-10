@@ -64,6 +64,8 @@ class ExpenseController extends Controller
             'startDate' => 'required',
             'endDate' => 'required|after_or_equal:startDate'
         ]);
+
+        $verify_status = $request->expense_verify_status;
         
         if(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap')){
             
@@ -75,6 +77,14 @@ class ExpenseController extends Controller
             })
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
+            ->when($verify_status, function ($q) use ($verify_status) {
+                if($verify_status == "verified") {
+                    $q->has('verifiedExpense');
+                }
+                if($verify_status == "unverified") {
+                    $q->doesntHave('verifiedExpense');
+                }
+            })
             ->has('expensesModel')
             ->withCount('expensesModel')
             ->withCount('verifiedExpense')
@@ -84,6 +94,13 @@ class ExpenseController extends Controller
                 ->whereDate('created_at', '>=',  $request->startDate)
                 ->whereDate('created_at' ,'<=', $request->endDate)
                 ->has('expensesModel')
+                ->when($verify_status, function ($q) use ($verify_status) {
+                    if($verify_status == "unverified") {
+                        $q->doesntHave('verifiedExpense');
+                    } else {
+                        $q->has('verifiedExpense');
+                    }
+                })
                 ->withCount('expensesModel')
                 ->withCount('verifiedExpense')
                 ->orderBy('id', 'desc')->get();
