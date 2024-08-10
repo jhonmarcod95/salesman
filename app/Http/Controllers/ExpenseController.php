@@ -67,9 +67,30 @@ class ExpenseController extends Controller
 
         $verify_status = $request->expense_verify_status;
         
-        if(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap')){
+        if(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap')) {
             
-            $expense = ExpensesEntry::with('user','expensesModel.payments')
+            // $expense = ExpensesEntry::with('user','expensesModel.payments')
+            // ->whereHas('user' , function($q){
+            //     $q->whereHas('companies', function ($q){
+            //         $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+            //     });
+            // })
+            // ->whereDate('created_at', '>=',  $request->startDate)
+            // ->whereDate('created_at' ,'<=', $request->endDate)
+            // ->when($verify_status, function ($q) use ($verify_status) {
+            //     if($verify_status == "verified") {
+            //         $q->has('verifiedExpense');
+            //     }
+            //     if($verify_status == "unverified") {
+            //         $q->doesntHave('verifiedExpense');
+            //     }
+            // })
+            // ->has('expensesModel')
+            // ->withCount('expensesModel')
+            // ->withCount('verifiedExpense')
+            // ->orderBy('id', 'desc')->get();
+
+            $expensesWithEntries = ExpensesEntry::with('user','expensesModel.payments')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
@@ -77,33 +98,118 @@ class ExpenseController extends Controller
             })
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
+            ->has('expensesModel')
             ->when($verify_status, function ($q) use ($verify_status) {
-                if($verify_status == "verified") {
-                    $q->has('verifiedExpense');
-                }
                 if($verify_status == "unverified") {
                     $q->doesntHave('verifiedExpense');
+                } else {
+                    $q->has('verifiedExpense');
                 }
             })
-            ->has('expensesModel')
             ->withCount('expensesModel')
             ->withCount('verifiedExpense')
-            ->orderBy('id', 'desc')->get();
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'id' => $expense->id,
+                    'tsr_name' => $expense->user ? $expense->user->name : '',
+                    'expenses_model_count' => $expense->expenses_model_count,
+                    'verified_expense_count' => $expense->verified_expense_count,
+                    'expenses_model' => $expense->expensesModel,
+                    'created_at' => $expense->created_at,
+                ];
+            });
+
+
+            $usersWithoutEntries = User::doesntHave('expensesEntries')
+            ->whereHas('companies', function ($q) {
+                $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+            })
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => null,
+                    'tsr_name' => $user->name,
+                    'expenses_model_count' => 0,
+                    'verified_expense_count' => 0,
+                    'expenses_model' => null,
+                    'created_at' => null,
+                ];
+            });
+
+            $expense = $expensesWithEntries->merge($usersWithoutEntries)->sortByDesc('id')->values()->toArray();
+
         }else{
-            $expense = ExpensesEntry::with('user','expensesModel.payments')
-                ->whereDate('created_at', '>=',  $request->startDate)
-                ->whereDate('created_at' ,'<=', $request->endDate)
-                ->has('expensesModel')
-                ->when($verify_status, function ($q) use ($verify_status) {
-                    if($verify_status == "unverified") {
-                        $q->doesntHave('verifiedExpense');
-                    } else {
-                        $q->has('verifiedExpense');
-                    }
-                })
-                ->withCount('expensesModel')
-                ->withCount('verifiedExpense')
-                ->orderBy('id', 'desc')->get();
+
+            // $expense = User::with(['expensesEntries' => function ($query) use ($request, $verify_status) {
+            //     $query->whereDate('created_at', '>=',  $request->startDate)
+            //           ->whereDate('created_at', '<=', $request->endDate)
+            //           ->when($verify_status, function ($q) use ($verify_status) {
+            //               if ($verify_status == "verified") {
+            //                   $q->has('verifiedExpense');
+            //               }
+            //               if ($verify_status == "unverified") {
+            //                   $q->doesntHave('verifiedExpense');
+            //               }
+            //           })
+            //           ->withCount('expensesModel')
+            //           ->withCount('verifiedExpense')
+            //           ->orderBy('id', 'desc');
+            // }])->get()
+            // ->map(function ($user) {
+            //     return [
+            //         'id' => $user->id,
+            //         'name' => $user->name,
+            //         'email' => $user->email,
+            //         // 'expenses_model_count' => $user->expensesEntries->expenses_model_count,
+            //         'expenses_entries' => $user->expensesEntries
+            //     ];
+            // })
+            // ->toArray();
+
+            $expensesWithEntries = ExpensesEntry::with('user','expensesModel.payments')
+            ->whereDate('created_at', '>=',  $request->startDate)
+            ->whereDate('created_at' ,'<=', $request->endDate)
+            ->has('expensesModel')
+            ->when($verify_status, function ($q) use ($verify_status) {
+                if($verify_status == "unverified") {
+                    $q->doesntHave('verifiedExpense');
+                } else {
+                    $q->has('verifiedExpense');
+                }
+            })
+            ->withCount('expensesModel')
+            ->withCount('verifiedExpense')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'id' => $expense->id,
+                    'tsr_name' => $expense->user ? $expense->user->name : '',
+                    'expenses_model_count' => $expense->expenses_model_count,
+                    'verified_expense_count' => $expense->verified_expense_count,
+                    'expenses_model' => $expense->expensesModel,
+                    'created_at' => $expense->created_at,
+                ];
+            });
+
+            $usersWithoutEntries = User::doesntHave('expensesEntries')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => null,
+                    'tsr_name' => $user->name,
+                    'expenses_model_count' => 0,
+                    'verified_expense_count' => 0,
+                    'expenses_model' => null,
+                    'created_at' => null,
+                ];
+            });
+            
+            // Combine the results
+            $expense = $expensesWithEntries->merge($usersWithoutEntries)->sortByDesc('id')->values()->toArray();
+            
         }
 
         $new_expense = [];

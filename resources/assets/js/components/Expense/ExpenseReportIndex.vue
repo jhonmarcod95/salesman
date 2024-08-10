@@ -83,7 +83,7 @@
                                 <tbody v-if="expenses.length">
                                     <tr v-for="(expense, e) in filteredQueues" v-bind:key="e">
                                         <td class="text-right" v-if="userLevel != 5">
-                                            <button class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</button>
+                                            <button v-if="expense.id != null" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(expense.id, expense.tsr_name, expense.created_at)">View</button>
                                             <!-- <div class="dropdown">
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -95,11 +95,25 @@
                                             </div> -->
                                         </td>
                                         <td v-else></td>
-                                        <td>{{ !isEmpty(expense.user) ? expense.user.name : '' }}</td>
-                                        <td>{{ expense.expenses_model_count  }}</td>
-                                        <td v-if="expenseVerifierRole || salesHeadRole">{{ expense.verified_expense_count  }}</td>
-                                        <td>{{ moment(expense.created_at).format('ll') }}</td>
-                                        <td>PHP {{ countTotalExpenses(expense) }}</td>
+                                        <td>{{ expense.tsr_name }}</td>
+                                        <!-- <td>{{ expense.name }}</td> -->
+                                        <td>
+                                            {{ expense.expenses_model_count  }}
+                                        </td>
+                                        <td v-if="expenseVerifierRole || salesHeadRole">
+                                            {{ expense.verified_expense_count  }}
+                                        </td>
+                                        <td>
+                                            {{ expense.created_at ? moment(expense.created_at).format('ll') : '' }}
+                                        </td>
+                                        <td>
+                                            <span v-if="expense.id != null">
+                                                PHP {{ countTotalExpenses(expense) }}
+                                            </span>
+                                            <span v-else>
+                                                0
+                                            </span>
+                                        </td>
                                     </tr>
                                 </tbody>
                                 <tbody v-else>
@@ -312,7 +326,8 @@ export default {
         filteredExpenses(){
             let self = this;
             const filterExpense =  self.expenses.filter(expense => {
-                return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase());
+                return expense.tsr_name.toLowerCase().includes(this.keywords.toLowerCase());
+                // return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase());
             });
 
             if (this.expense_verify_status === 'verified') {
