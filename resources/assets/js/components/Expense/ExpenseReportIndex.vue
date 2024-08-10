@@ -23,18 +23,27 @@
                                         <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="start_date" class="form-control-label">Start Date</label> 
                                         <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate">
                                         <span class="text-danger" v-if="errors.startDate"> {{ errors.startDate[0] }} </span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">End Date</label> 
                                         <input type="date" id="end_date" class="form-control form-control-alternative" v-model="endDate">
                                         <span class="text-danger" v-if="errors.endDate"> {{ errors.endDate[0] }} </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="role">Company</label>
+                                        <select class="form-control" v-model="company">
+                                            <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
+                                        </select>
+                                        <span class="text-danger" v-if="errors.company  ">{{ errors.company[0] }}</span>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -59,12 +68,12 @@
                                 </div>
 
                                 <div class="col-md-12">
-                                    <span>Attachment: {{ expenseStatusCount.expensesCount }}</span> |
+                                    <!-- <span>Attachment: {{ expenseStatusCount.expensesCount }}</span> |
                                     <span>Verified: {{ expenseStatusCount.verifiedCount }}</span> |
-                                    <span class="text-warning">Unverified: {{ expenseStatusCount.unverifiedCount }}</span>
-                                    <!-- <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
-                                            <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
-                                            <span class="text-warning">Unverified: {{ filteredExpensesStats.unverifiedCount }}</span> -->
+                                    <span class="text-warning">Unverified: {{ expenseStatusCount.unverifiedCount }}</span> -->
+                                    <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
+                                    <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
+                                    <span class="text-warning">Unverified: {{ filteredExpensesStats.unverifiedCount }}</span>
                                 </div>
                             </div>
                         </div>
@@ -75,7 +84,10 @@
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Expense Submitted</th>
-                                    <th scope="col" v-if="expenseVerifierRole || salesHeadRole">Verified Count</th>
+                                    <template v-if="expenseVerifierRole || salesHeadRole">
+                                        <th scope="col">Verified Count</th>
+                                        <th scope="col">Unverified Count</th>
+                                    </template>
                                     <th scope="col">Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
@@ -100,9 +112,10 @@
                                         <td>
                                             {{ expense.expenses_model_count  }}
                                         </td>
-                                        <td v-if="expenseVerifierRole || salesHeadRole">
-                                            {{ expense.verified_expense_count  }}
-                                        </td>
+                                        <template v-if="expenseVerifierRole || salesHeadRole">
+                                            <td>{{ expense.verified_expense_count  }}</td>
+                                            <td>{{ expense.expenses_model_count - expense.verified_expense_count  }}</td>
+                                        </template>
                                         <td>
                                             {{ expense.created_at ? moment(expense.created_at).format('ll') : '' }}
                                         </td>
@@ -211,10 +224,12 @@ export default {
             expenseByTsr: [],
             startDate: '',
             endDate: '',
+            company: '',
             expense_verify_status: '',
             tsrName: '',
             date: '',
             errors: [],
+            companies: [],
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
@@ -227,7 +242,7 @@ export default {
         }
     },
     created(){
-
+        this.fetchCompanies();
     },
     methods:{
         moment,
@@ -241,12 +256,22 @@ export default {
             });
             return totalExpenses.toFixed(2);
         },
+        fetchCompanies(){
+            axios.get('/companies-all')
+            .then(response => {
+                this.companies = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
         fetchExpenses(){
             this.errors = [];
             this.fetchingExpense = true;
             axios.post('/expense-report-bydate', {
                 startDate: this.startDate,
                 endDate: this.endDate,
+                company: this.company,
                 // expense_verify_status: this.expense_verify_status
             })
             .then(response => {
@@ -325,6 +350,7 @@ export default {
     computed:{
         filteredExpenses(){
             let self = this;
+
             const filterExpense =  self.expenses.filter(expense => {
                 return expense.tsr_name.toLowerCase().includes(this.keywords.toLowerCase());
                 // return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase());

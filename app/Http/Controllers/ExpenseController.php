@@ -66,6 +66,7 @@ class ExpenseController extends Controller
         ]);
 
         $verify_status = $request->expense_verify_status;
+        $company = $request->company;
         
         if(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap')) {
             
@@ -171,6 +172,13 @@ class ExpenseController extends Controller
             $expensesWithEntries = ExpensesEntry::with('user','expensesModel.payments')
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
+            ->when($company, function ($query) use ($company) {
+                $query->whereHas('user', function($q) use ($company){
+                    $q->whereHas('companies', function ($q) use ($company){
+                        $q->where('company_id', $company);
+                    });
+                });
+            })
             ->has('expensesModel')
             ->when($verify_status, function ($q) use ($verify_status) {
                 if($verify_status == "unverified") {
@@ -195,6 +203,11 @@ class ExpenseController extends Controller
             });
 
             $usersWithoutEntries = User::doesntHave('expensesEntries')
+            ->when($company , function($q) use ($company) {
+                $q->whereHas('companies', function ($q) use ($company){
+                    $q->where('company_id', $company);
+                });
+            })
             ->get()
             ->map(function ($user) {
                 return [
@@ -206,6 +219,10 @@ class ExpenseController extends Controller
                     'created_at' => null,
                 ];
             });
+
+            // \Log::info($expensesWithEntries); 
+
+            // \Log::info($usersWithoutEntries); 
             
             // Combine the results
             $expense = $expensesWithEntries->merge($usersWithoutEntries)->sortByDesc('id')->values()->toArray();
