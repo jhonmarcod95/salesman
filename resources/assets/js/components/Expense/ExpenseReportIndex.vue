@@ -59,9 +59,12 @@
                                 </div>
 
                                 <div class="col-md-12">
-                                    <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
-                                    <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
-                                    <span class="text-warning">Unverified: {{ filteredExpensesStats.unverifiedCount }}</span>
+                                    <span>Attachment: {{ expenseStatusCount.expensesCount }}</span> |
+                                    <span>Verified: {{ expenseStatusCount.verifiedCount }}</span> |
+                                    <span class="text-warning">Unverified: {{ expenseStatusCount.unverifiedCount }}</span>
+                                    <!-- <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
+                                            <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
+                                            <span class="text-warning">Unverified: {{ filteredExpensesStats.unverifiedCount }}</span> -->
                                 </div>
                             </div>
                         </div>
@@ -201,7 +204,12 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
-            verifiyingId: null
+            verifiyingId: null,
+            expenseStatusCount: {
+                expensesCount: 0,
+                verifiedCount: 0,
+                unverifiedCount: 0,
+            }
         }
     },
     created(){
@@ -225,12 +233,22 @@ export default {
             axios.post('/expense-report-bydate', {
                 startDate: this.startDate,
                 endDate: this.endDate,
-                expense_verify_status: this.expense_verify_status
+                // expense_verify_status: this.expense_verify_status
             })
             .then(response => {
                 this.expenses = response.data;
                 this.errors = []; 
                 this.fetchingExpense = false;
+
+                this.expenseStatusCount = this.expenses.reduce((acc, item) => {
+                    return {
+                        verifiedCount: acc.verifiedCount + item.verified_expense_count,
+                        unverifiedCount: acc.unverifiedCount + (item.expenses_model_count - item.verified_expense_count),
+                        expensesCount: acc.expensesCount + item.expenses_model_count
+                    };
+                }, this.expenseStatusCount);
+
+
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -293,9 +311,21 @@ export default {
     computed:{
         filteredExpenses(){
             let self = this;
-            return self.expenses.filter(expense => {
-                return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+            const filterExpense =  self.expenses.filter(expense => {
+                return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase());
             });
+
+            if (this.expense_verify_status === 'verified') {
+
+                return filterExpense.filter(expense => expense.verified_expense_count > 0);
+
+            } else if (this.expense_verify_status === 'unverified') {
+
+                return filterExpense.filter(expense => expense.verified_expense_count == 0);
+
+            }
+
+            return filterExpense;
         },
         filteredExpensesStats(){
             let self = this;
