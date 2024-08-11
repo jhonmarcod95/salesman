@@ -83,6 +83,7 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
+                                    <th scope="col">Company</th>
                                     <th scope="col">Expense Submitted</th>
                                     <template v-if="expenseVerifierRole || salesHeadRole">
                                         <th scope="col">Verified Count</th>
@@ -108,6 +109,7 @@
                                         </td>
                                         <td v-else></td>
                                         <td>{{ expense.tsr_name }}</td>
+                                        <td>{{ expense.company }}</td>
                                         <!-- <td>{{ expense.name }}</td> -->
                                         <td>
                                             {{ expense.expenses_model_count  }}
@@ -268,6 +270,7 @@ export default {
         },
         fetchExpenses(){
             this.errors = [];
+            this.expenses = [];
             this.fetchingExpense = true;
             axios.post('/expense-report-bydate', {
                 startDate: this.startDate,
@@ -280,13 +283,13 @@ export default {
                 this.errors = []; 
                 this.fetchingExpense = false;
 
-                this.expenseStatusCount = this.expenses.reduce((acc, item) => {
-                    return {
-                        verifiedCount: acc.verifiedCount + item.verified_expense_count,
-                        unverifiedCount: acc.unverifiedCount + (item.expenses_model_count - item.verified_expense_count),
-                        expensesCount: acc.expensesCount + item.expenses_model_count
-                    };
-                }, this.expenseStatusCount);
+                // this.expenseStatusCount = this.expenses.reduce((acc, item) => {
+                //     return {
+                //         verifiedCount: acc.verifiedCount + item.verified_expense_count,
+                //         unverifiedCount: acc.unverifiedCount + (item.expenses_model_count - item.verified_expense_count),
+                //         expensesCount: acc.expensesCount + item.expenses_model_count
+                //     };
+                // }, this.expenseStatusCount);
 
 
             })

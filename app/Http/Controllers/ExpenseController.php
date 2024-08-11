@@ -91,7 +91,7 @@ class ExpenseController extends Controller
             // ->withCount('verifiedExpense')
             // ->orderBy('id', 'desc')->get();
 
-            $expensesWithEntries = ExpensesEntry::with('user','expensesModel.payments')
+            $expensesWithEntries = ExpensesEntry::with('user.company','expensesModel.payments')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
@@ -115,6 +115,7 @@ class ExpenseController extends Controller
                 return [
                     'id' => $expense->id,
                     'tsr_name' => $expense->user ? $expense->user->name : '',
+                    'company' => $expense->user->company ? $expense->user->company->name : '',
                     'expenses_model_count' => $expense->expenses_model_count,
                     'verified_expense_count' => $expense->verified_expense_count,
                     'expenses_model' => $expense->expensesModel,
@@ -132,6 +133,7 @@ class ExpenseController extends Controller
                 return [
                     'id' => null,
                     'tsr_name' => $user->name,
+                    'company' => $user->company ? $user->company->name : '',
                     'expenses_model_count' => 0,
                     'verified_expense_count' => 0,
                     'expenses_model' => null,
@@ -195,6 +197,7 @@ class ExpenseController extends Controller
                 return [
                     'id' => $expense->id,
                     'tsr_name' => $expense->user ? $expense->user->name : '',
+                    'company' => $expense->user->company ? $expense->user->company->name : '',
                     'expenses_model_count' => $expense->expenses_model_count,
                     'verified_expense_count' => $expense->verified_expense_count,
                     'expenses_model' => $expense->expensesModel,
@@ -213,6 +216,7 @@ class ExpenseController extends Controller
                 return [
                     'id' => null,
                     'tsr_name' => $user->name,
+                    'company' => $user->company ? $user->company->name : '',
                     'expenses_model_count' => 0,
                     'verified_expense_count' => 0,
                     'expenses_model' => null,
