@@ -117,7 +117,8 @@
                                             <td>{{ expense.expenses_model_count - expense.verified_expense_count  }}</td>
                                         </template>
                                         <td>
-                                            {{ expense.created_at ? moment(expense.created_at).format('ll') : '' }}
+                                            <!-- {{ expense.created_at ? moment(expense.created_at).format('ll') : '' }} -->
+                                            {{ expense.created_at }}
                                         </td>
                                         <td>
                                             <span v-if="expense.id != null">

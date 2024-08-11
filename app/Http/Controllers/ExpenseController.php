@@ -198,7 +198,7 @@ class ExpenseController extends Controller
                     'expenses_model_count' => $expense->expenses_model_count,
                     'verified_expense_count' => $expense->verified_expense_count,
                     'expenses_model' => $expense->expensesModel,
-                    'created_at' => $expense->created_at,
+                    'created_at' =>  Carbon::parse($expense->created_at)->format('M d, Y'),
                 ];
             });
 
