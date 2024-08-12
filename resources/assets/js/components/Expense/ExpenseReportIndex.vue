@@ -85,10 +85,8 @@
                                     <th scope="col">TSR</th>
                                     <th scope="col">Company</th>
                                     <th scope="col">Expense Submitted</th>
-                                    <template v-if="expenseVerifierRole || salesHeadRole">
-                                        <th scope="col">Verified Count</th>
-                                        <th scope="col">Unverified Count</th>
-                                    </template>
+                                    <th scope="col">Verified Count</th>
+                                    <th scope="col">Unverified Count</th>
                                     <th scope="col">Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
@@ -117,10 +115,8 @@
                                         <td>
                                             {{ expense.expenses_model_count  }}
                                         </td>
-                                        <template v-if="expenseVerifierRole || salesHeadRole">
-                                            <td>{{ expense.verified_expense_count  }}</td>
-                                            <td>{{ expense.expenses_model_count - expense.verified_expense_count  }}</td>
-                                        </template>
+                                        <td>{{ expense.verified_expense_count  }}</td>
+                                        <td>{{ expense.expenses_model_count - expense.verified_expense_count  }}</td>
                                         <td>
                                             <!-- {{ expense.created_at ? moment(expense.created_at).format('ll') : '' }} -->
                                             {{ expense.created_at }}
