@@ -16,7 +16,8 @@ use App\{CronLog,
     ExpensesEntry,
     Payment,
     PaymentHeader,
-    PaymentHeaderError};
+    PaymentHeaderError,
+    ExpenseMonthlyDmsReceive};
 use Illuminate\Support\Facades\Storage;
 
 class PaymentAutoPosting extends Command
@@ -92,7 +93,7 @@ class PaymentAutoPosting extends Command
     }
 
     public function simulateExpense($expenses ,$coveredWeek, $lastWeekMonday, $lastWeekSunday){
-        foreach($expenses as  $expense){
+        foreach($expenses as $expense){
             //Group entry by month
             $groupedArrayExpenses = [];
             $baseline_date = '';
@@ -116,8 +117,7 @@ class PaymentAutoPosting extends Command
             $posting_date = '';
             $sameMonth = date("n",  strtotime($lastWeekMonday)) == date("n", strtotime($lastWeekSunday));
             //Simulate entry
-            foreach($groupedArrayExpenses as $groupedExpenses){ // Loop month's. if there's an entry with different month
-
+            foreach($groupedArrayExpenses as $index => $groupedExpenses){ // Loop month's. if there's an entry with different month
                 if(!$sameMonth){ // Set posting date for different month
                     $firstMonth = date("n",  strtotime($lastWeekMonday));
                     $posting_date = $firstMonth == date('n', strtotime($groupedExpenses[0]->created_at)) ? $groupedExpenses[0]->created_at->endOfMonth() : Carbon::now();
@@ -126,164 +126,171 @@ class PaymentAutoPosting extends Command
                     $posting_date = !$samePostingDate ? Carbon::parse($lastWeekSunday)->endOfMonth() : Carbon::now();
                 }
 
-                $expense_ids = [];
-                $items = [];
+                // Checking of submitted receipts from previous months(Should be completed)
+                $is_complete = $this->checkSubmittedReceipts($groupedExpenses[0]->user->id,$posting_date);
 
-                $filteredBusinessArea = $groupedExpenses[0]->user->companies[0]->businessArea
-                    ->where('location_id',$groupedExpenses[0]->user->location[0]->id)->first(); //Loop to get the correct business area base on the and user's location
+                if($is_complete){
+                    $expense_ids = [];
+                    $items = [];
 
-                $item = 1;
-                $tax_amount = 0;
-                $tax_amountI3 = 0;
-                $tax_amountI7 = 0;
-                $acc_amount_first_index = 0;
+                    $filteredBusinessArea = $groupedExpenses[0]->user->companies[0]->businessArea
+                        ->where('location_id',$groupedExpenses[0]->user->location[0]->id)->first(); //Loop to get the correct business area base on the and user's location
 
-                // Generate the line 1
-                array_push($items, [
-                    'item_no' => 1,
-                    'item_text' => 'SALESFORCE REIMBURSEMENT; '. $coveredWeek,
-                    'gl_account' => $groupedExpenses[0]->user->vendor->vendor_code,
-                    'gl_description' => $groupedExpenses[0]->user->name,
-                    'assignment' => '',
-                    'input_tax_code' => '',
-                    'internal_order' => '',
-                    'uom' => '',
-                    'amount' => '',
-                    'charge_type' => '',
-                    'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
-                    'or_number' => '',
-                    'supplier_name' => '',
-                    'address' => '',
-                    'tin_number' => '',
-                    'tag' => 'ap'
-                ]);
+                    $item = 1;
+                    $tax_amount = 0;
+                    $tax_amountI3 = 0;
+                    $tax_amountI7 = 0;
+                    $acc_amount_first_index = 0;
 
-                foreach($groupedExpenses as $expense){ // Loop entry per month. This will generate line 2 to the nth line
+                    // Generate the line 1
+                    array_push($items, [
+                        'item_no' => 1,
+                        'item_text' => 'SALESFORCE REIMBURSEMENT; '. $coveredWeek,
+                        'gl_account' => $groupedExpenses[0]->user->vendor->vendor_code,
+                        'gl_description' => $groupedExpenses[0]->user->name,
+                        'assignment' => '',
+                        'input_tax_code' => '',
+                        'internal_order' => '',
+                        'uom' => '',
+                        'amount' => '',
+                        'charge_type' => '',
+                        'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
+                        'or_number' => '',
+                        'supplier_name' => '',
+                        'address' => '',
+                        'tin_number' => '',
+                        'tag' => 'ap'
+                    ]);
 
-                    $company_code = $expense->user->companies[0]->code;
+                    foreach($groupedExpenses as $expense){ // Loop entry per month. This will generate line 2 to the nth line
 
-                    array_push($expense_ids,$expense->id);
-                    $filteredGL = $expense->expensesType->expenseChargeType->chargeType->expenseGl->where('charge_type', $expense->expensesType->expenseChargeType->chargeType->name)
-                        ->where('company_code', $expense->user->companies[0]->code)->first(); //Loop to get correct GL base on the charge type and user company code
-                    $filteredInternalOrders = $expense->user->internalOrders->where('charge_type',$expense->expensesType->expenseChargeType->chargeType->name)->first(); //Loop to get correct IO base on the charge type of expense
+                        $company_code = $expense->user->companies[0]->code;
 
-                    // Hard coded  for special scenario for specific company
-                    $amount = '';
-                    $tax_code = '';
-                    $or_number = '';
-                    $supplier_name = '';
-                    $supplier_address = '';
-                    $bol_tax_amount = false;
+                        array_push($expense_ids,$expense->id);
+                        $filteredGL = $expense->expensesType->expenseChargeType->chargeType->expenseGl->where('charge_type', $expense->expensesType->expenseChargeType->chargeType->name)
+                            ->where('company_code', $expense->user->companies[0]->code)->first(); //Loop to get correct GL base on the charge type and user company code
+                        $filteredInternalOrders = $expense->user->internalOrders->where('charge_type',$expense->expensesType->expenseChargeType->chargeType->name)->first(); //Loop to get correct IO base on the charge type of expense
 
-                    if($company_code == '1100' || $company_code == 'CSCI'){ // NON-VAT
-                        $amount = $expense->amount;
-                        $tax_code = 'IX';
+                        // Hard coded  for special scenario for specific company
+                        $amount = '';
+                        $tax_code = '';
+                        $or_number = '';
+                        $supplier_name = '';
+                        $supplier_address = '';
                         $bol_tax_amount = false;
-                    }else if($company_code == '2100' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){ // NON-VAT
-                        $amount = $expense->amount;
-                        $tax_code = 'IX';
-                    }else{
-                        $tax_code = $expense->receiptExpenses ? $expense->receiptExpenses->receiptType->tax_code : 'IX';
 
-                        if($tax_code  == 'IX'){ // NON-VAT
-                            $amount = number_format($expense->amount, 2, '.', "");
-                            $tax_amount = number_format($expense->amount, 2, '.', "");
+                        if($company_code == '1100' || $company_code == 'CSCI'){ // NON-VAT
+                            $amount = $expense->amount;
+                            $tax_code = 'IX';
+                            $bol_tax_amount = false;
+                        }else if($company_code == '2100' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){ // NON-VAT
+                            $amount = $expense->amount;
+                            $tax_code = 'IX';
                         }else{
-                            $amount = number_format($expense->amount / 1.12, 2, '.', "");
-                            $tax_amount = number_format($expense->amount - ($expense->amount / 1.12), 2, '.', "");
-                            $bol_tax_amount = true;
+                            $tax_code = $expense->receiptExpenses ? $expense->receiptExpenses->receiptType->tax_code : 'IX';
+
+                            if($tax_code  == 'IX'){ // NON-VAT
+                                $amount = number_format($expense->amount, 2, '.', "");
+                                $tax_amount = number_format($expense->amount, 2, '.', "");
+                            }else{
+                                $amount = number_format($expense->amount / 1.12, 2, '.', "");
+                                $tax_amount = number_format($expense->amount - ($expense->amount / 1.12), 2, '.', "");
+                                $bol_tax_amount = true;
+                            }
                         }
+                        $acc_amount_first_index = $acc_amount_first_index + $amount;
+
+                        $internal_order = $filteredInternalOrders ? $filteredInternalOrders->internal_order : '';
+                        $uom = $filteredInternalOrders ? $filteredInternalOrders->uom : '';
+
+                        // populate gl account
+                        $gl_account_code = $filteredInternalOrders->gl_account->code ?? null; // gl from IO master
+                        $gl_account_name = $filteredInternalOrders->gl_account->name ?? null;
+
+                        array_push($items, [
+                            'item_no' =>  $item = $item + 1,
+                            'item_text' => 'SALESFORCE ' . strtoupper($expense->expensesType->name . ' ' . $expense->created_at->format('m/d/Y')),
+                            'gl_account' =>  $gl_account_code,
+                            'gl_description' => $gl_account_name,
+                            'assignment' => '',
+                            'input_tax_code' => $tax_code,
+                            'internal_order' =>  $internal_order,
+                            'uom' => $uom,
+                            'amount' => $amount,
+                            'charge_type' => $expense->expensesType->expenseChargeType->chargeType->name,
+                            'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
+                            'or_number' => $expense->receiptExpenses && $expense->receiptExpenses->receipt_number ? $expense->receiptExpenses->receipt_number : '',
+                            'supplier_name' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_name ? $expense->receiptExpenses->vendor_name : '',
+                            'address' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_address ? $expense->receiptExpenses->vendor_address : '',
+                            'tin_number' => $expense->receiptExpenses && $expense->receiptExpenses->tin_number ? $expense->receiptExpenses->tin_number : '',
+                            'expense_date' => $expense->created_at->format('Y-m-d'),
+                            'tag' => 'gl'
+                        ]);
+
+                        if($bol_tax_amount && $expense->receiptExpenses->receiptType->tax_code == 'I3'){
+                            $tax_amountI3 = number_format($tax_amountI3 + $tax_amount, 2, '.', "");
+                        }elseif($bol_tax_amount && $expense->receiptExpenses->receiptType->tax_code == 'I7'){
+                            $tax_amountI7 = number_format($tax_amountI7 + $tax_amount, 2, '.', "");
+                        }else{}
                     }
-                    $acc_amount_first_index = $acc_amount_first_index + $amount;
 
-                    $internal_order = $filteredInternalOrders ? $filteredInternalOrders->internal_order : '';
-                    $uom = $filteredInternalOrders ? $filteredInternalOrders->uom : '';
+                    // Generate last line of the entry for I7 or I3
+                    $gl_account_i7 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I7')->first();
 
-                    // populate gl account
-                    $gl_account_code = $filteredInternalOrders->gl_account->code ?? null; // gl from IO master
-                    $gl_account_name = $filteredInternalOrders->gl_account->name ?? null;
+                    if($tax_amountI7){
+                        array_push($items, [
+                            'item_no' =>  $item = $item + 1,
+                            'item_text' => '',
+                            'gl_account' => $gl_account_i7->gl_account,
+                            'gl_description' => $gl_account_i7->gl_description,
+                            'assignment' => '',
+                            'input_tax_code' => 'I7',
+                            'internal_order' => '',
+                            'uom' => '',
+                            'amount' => $tax_amountI7,
+                            'charge_type' => '',
+                            'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
+                            'or_number' => '',
+                            'supplier_name' => '',
+                            'address' => '',
+                            'tin_number' => '',
+                            'tag' => 'tax'
+                        ]);
+                        $acc_amount_first_index = $acc_amount_first_index + $tax_amountI7;
+                    }
 
-                    array_push($items, [
-                        'item_no' =>  $item = $item + 1,
-                        'item_text' => 'SALESFORCE ' . strtoupper($expense->expensesType->name . ' ' . $expense->created_at->format('m/d/Y')),
-                        'gl_account' =>  $gl_account_code,
-                        'gl_description' => $gl_account_name,
-                        'assignment' => '',
-                        'input_tax_code' => $tax_code,
-                        'internal_order' =>  $internal_order,
-                        'uom' => $uom,
-                        'amount' => $amount,
-                        'charge_type' => $expense->expensesType->expenseChargeType->chargeType->name,
-                        'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
-                        'or_number' => $expense->receiptExpenses && $expense->receiptExpenses->receipt_number ? $expense->receiptExpenses->receipt_number : '',
-                        'supplier_name' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_name ? $expense->receiptExpenses->vendor_name : '',
-                        'address' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_address ? $expense->receiptExpenses->vendor_address : '',
-                        'tin_number' => $expense->receiptExpenses && $expense->receiptExpenses->tin_number ? $expense->receiptExpenses->tin_number : '',
-                        'expense_date' => $expense->created_at->format('Y-m-d'),
-                        'tag' => 'gl'
-                    ]);
+                    $gl_account_i3 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I3')->first();
+                    if($tax_amountI3){
+                        array_push($items, [
+                            'item_no' =>  $item = $item + 1,
+                            'item_text' => '',
+                            'gl_account' => $gl_account_i3->gl_account,
+                            'gl_description' => $gl_account_i3->gl_description,
+                            'assignment' => '',
+                            'input_tax_code' => 'I3',
+                            'internal_order' => '',
+                            'uom' => '',
+                            'amount' => $tax_amountI3,
+                            'charge_type' => '',
+                            'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
+                            'or_number' => '',
+                            'supplier_name' => '',
+                            'address' => '',
+                            'tin_number' => '',
+                            'tag' => 'tax'
+                        ]);
+                        $acc_amount_first_index = $acc_amount_first_index + $tax_amountI3;
+                    }
 
-                    if($bol_tax_amount && $expense->receiptExpenses->receiptType->tax_code == 'I3'){
-                        $tax_amountI3 = number_format($tax_amountI3 + $tax_amount, 2, '.', "");
-                    }elseif($bol_tax_amount && $expense->receiptExpenses->receiptType->tax_code == 'I7'){
-                        $tax_amountI7 = number_format($tax_amountI7 + $tax_amount, 2, '.', "");
-                    }else{}
+                    //Place total amount to be reimburse in the first index of @acc_amount
+                    $items[0]['amount'] = number_format($acc_amount_first_index * -1, 2, '.', "");
+                    // Get SAP server
+                    $sapCredential = $this->simulateExpenseSubmitted($groupedExpenses[0]->expenses_entry_id);
+                    // Post Simulated Expeses to SAP
+                    $this->postSimulatedExpenses($items,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date, $lastWeekMonday, $lastWeekSunday);
+                }else{
+                    $this->recordForReposting($index,$groupedExpenses,$lastWeekMonday,$lastWeekSunday,$posting_date);
                 }
-
-                // Generate last line of the entry for I7 or I3
-                $gl_account_i7 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I7')->first();
-
-                if($tax_amountI7){
-                    array_push($items, [
-                        'item_no' =>  $item = $item + 1,
-                        'item_text' => '',
-                        'gl_account' => $gl_account_i7->gl_account,
-                        'gl_description' => $gl_account_i7->gl_description,
-                        'assignment' => '',
-                        'input_tax_code' => 'I7',
-                        'internal_order' => '',
-                        'uom' => '',
-                        'amount' => $tax_amountI7,
-                        'charge_type' => '',
-                        'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
-                        'or_number' => '',
-                        'supplier_name' => '',
-                        'address' => '',
-                        'tin_number' => '',
-                        'tag' => 'tax'
-                    ]);
-                    $acc_amount_first_index = $acc_amount_first_index + $tax_amountI7;
-                }
-
-                $gl_account_i3 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I3')->first();
-                if($tax_amountI3){
-                    array_push($items, [
-                        'item_no' =>  $item = $item + 1,
-                        'item_text' => '',
-                        'gl_account' => $gl_account_i3->gl_account,
-                        'gl_description' => $gl_account_i3->gl_description,
-                        'assignment' => '',
-                        'input_tax_code' => 'I3',
-                        'internal_order' => '',
-                        'uom' => '',
-                        'amount' => $tax_amountI3,
-                        'charge_type' => '',
-                        'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
-                        'or_number' => '',
-                        'supplier_name' => '',
-                        'address' => '',
-                        'tin_number' => '',
-                        'tag' => 'tax'
-                    ]);
-                    $acc_amount_first_index = $acc_amount_first_index + $tax_amountI3;
-                }
-
-                //Place total amount to be reimburse in the first index of @acc_amount
-                $items[0]['amount'] = number_format($acc_amount_first_index * -1, 2, '.', "");
-                // Get SAP server
-                $sapCredential = $this->simulateExpenseSubmitted($groupedExpenses[0]->expenses_entry_id);
-                // Post Simulated Expeses to SAP
-                $this->postSimulatedExpenses($items,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date, $lastWeekMonday, $lastWeekSunday);
             }
         }
     }
@@ -788,4 +795,70 @@ class PaymentAutoPosting extends Command
         }
     }
 
+    /**
+     *  Check submitted receipts for previous months if complete
+     *
+     */
+    public function checkSubmittedReceipts($user_id,$posting_date){
+        $month = Carbon::parse($posting_date)->format('F');
+        $year = Carbon::parse($posting_date)->format('Y');
+        $month_number = intval(Carbon::parse($posting_date)->format('m'));
+        
+        if($month == 'January'){
+            $year = $year - 1;
+            $month_number = 13;
+        }
+        $months = $this->generateMonths($month_number,$year,$user_id);
+
+        $expenses = ExpenseMonthlyDmsReceive::where('user_id',$user_id)
+            ->whereIn('month',$months)
+            ->where('year',$year)
+            ->get();
+        
+        return ($expenses->count() == count($months));
+    }
+
+    /**
+     *  Check submitted receipts for previous months if complete
+     *
+     */
+    public function generateMonths($month,$year,$user_id){
+        $months = [];
+        $month_number = 0;
+
+        for ($x = 1; $x < $month; $x++) {
+            $month_number += 1;
+            if($this->checkIfHasSubmittedExpense($month_number,$year,$user_id)) $months[] = Carbon::createFromFormat('m', $month_number)->format('F');
+        }
+        return $months;
+    }
+    
+    /**
+     *  Check submitted receipts for previous months if complete
+     *
+     */
+    public function checkIfHasSubmittedExpense($month,$year,$user_id){
+        $expense = Expense::where('user_id',$user_id)
+            ->whereYear('created_at', '=', $year)
+            ->whereMonth('created_at', '=', $month)
+            ->where('expenses_entry_id','!=',0)
+            ->first();
+
+        return $expense ? true : false;
+    }
+
+    /**
+     *  Check submitted receipts for previous months if complete
+     *
+     */
+    public function recordForReposting($index,$grouped_expenses,$expense_from,$expense_to,$posting_date){
+        Expense::whereIn('id',array_column($grouped_expenses,'id'))
+            ->update([
+                'expense_from' => $expense_from,
+                'expense_to' => $expense_to,
+                'should_be_posting_date' => $posting_date,
+                'expense_grouping' => $posting_date->format('yy-m-d').'+'.$grouped_expenses[0]->user_id.'+'.$index,
+                'status_id' => 2
+            ]);
+    }
 }
