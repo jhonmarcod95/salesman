@@ -93,8 +93,11 @@
                                     <th scope="col">Total Expenses</th>
                                 </tr>
                                 </thead>
-                                <tbody v-if="expenses.length">
-                                    <tr v-for="(expense, e) in filteredQueues" v-bind:key="e">
+                                <tbody>
+                                    <tr v-if="isEmpty(expenses) && fetchingExpense">
+                                        <td colspan="10">Loading Data...</td>
+                                    </tr>
+                                    <tr v-else v-for="(expense, e) in filteredQueues" v-bind:key="e">
                                         <td class="text-right" v-if="userLevel != 5">
                                             <button v-if="expense.id != null" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(expense.id, expense.tsr_name, expense.created_at)">View</button>
                                             <!-- <div class="dropdown">
@@ -131,12 +134,13 @@
                                             </span>
                                         </td>
                                     </tr>
+                                    <tr v-if="isEmpty(expenses) && !fetchingExpense">
+                                        <td>No data available in the table</td>
+                                    </tr>
                                 </tbody>
-                                <tbody v-else>
-                                       <tr>
-                                           <td>No data available in the table</td>
-                                       </tr>
-                                </tbody>
+                                <!-- <tbody v-else>
+                                       
+                                </tbody> -->
                             </table>
                         </div>
                        <div class="card-footer py-4" v-if="expenses.length">

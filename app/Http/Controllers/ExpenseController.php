@@ -141,7 +141,7 @@ class ExpenseController extends Controller
                 ];
             });
 
-            $expense = $expensesWithEntries->merge($usersWithoutEntries)->sortByDesc('id')->values()->toArray();
+            $expense = collect($expensesWithEntries)->merge(collect($usersWithoutEntries))->sortByDesc('id')->values()->toArray();
 
         }else{
 
@@ -201,7 +201,7 @@ class ExpenseController extends Controller
                     'expenses_model_count' => $expense->expenses_model_count,
                     'verified_expense_count' => $expense->verified_expense_count,
                     'expenses_model' => $expense->expensesModel,
-                    'created_at' =>  Carbon::parse($expense->created_at)->format('M d, Y'),
+                    'created_at' =>  Carbon::parse($expense->created_at)->format('M d, Y')
                 ];
             });
 
@@ -220,16 +220,16 @@ class ExpenseController extends Controller
                     'expenses_model_count' => 0,
                     'verified_expense_count' => 0,
                     'expenses_model' => null,
-                    'created_at' => null,
+                    'created_at' => null
                 ];
             });
 
             // \Log::info($expensesWithEntries); 
 
-            // \Log::info($usersWithoutEntries); 
+            \Log::info($usersWithoutEntries); 
             
             // Combine the results
-            $expense = $expensesWithEntries->merge($usersWithoutEntries)->sortByDesc('id')->values()->toArray();
+            $expense = collect($expensesWithEntries)->merge(collect($usersWithoutEntries))->sortByDesc('id')->values()->toArray();
             
         }
 
