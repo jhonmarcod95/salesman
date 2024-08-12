@@ -91,7 +91,7 @@ class ExpenseController extends Controller
             // ->withCount('verifiedExpense')
             // ->orderBy('id', 'desc')->get();
 
-            $expensesWithEntries = ExpensesEntry::with('user.company','expensesModel.payments')
+            $expensesWithEntries = ExpensesEntry::with('user:id,name,company_id,email','user.company:id,code,name','expensesModel.payments')
             ->whereHas('user' , function($q){
                 $q->whereHas('companies', function ($q){
                     $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
@@ -119,12 +119,13 @@ class ExpenseController extends Controller
                     'expenses_model_count' => $expense->expenses_model_count,
                     'verified_expense_count' => $expense->verified_expense_count,
                     'expenses_model' => $expense->expensesModel,
-                    'created_at' => $expense->created_at,
+                    'user' => $expense->user,
+                    'created_at' => Carbon::parse($expense->created_at)->format('M d, Y'),
                 ];
             });
 
 
-            $usersWithoutEntries = User::doesntHave('expensesEntries')
+            $usersWithoutEntries = User::select('id','name','company_id','email')->with('company:id,code,name')->doesntHave('expensesEntries')
             ->whereHas('companies', function ($q) {
                 $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
             })
@@ -137,6 +138,7 @@ class ExpenseController extends Controller
                     'expenses_model_count' => 0,
                     'verified_expense_count' => 0,
                     'expenses_model' => null,
+                    'user' => $user,
                     'created_at' => null,
                 ];
             });
@@ -171,7 +173,7 @@ class ExpenseController extends Controller
             // })
             // ->toArray();
 
-            $expensesWithEntries = ExpensesEntry::with('user','expensesModel.payments')
+            $expensesWithEntries = ExpensesEntry::with('user:id,name,company_id,email','user.company:id,code,name','expensesModel.payments')
             ->whereDate('created_at', '>=',  $request->startDate)
             ->whereDate('created_at' ,'<=', $request->endDate)
             ->when($company, function ($query) use ($company) {
@@ -201,11 +203,12 @@ class ExpenseController extends Controller
                     'expenses_model_count' => $expense->expenses_model_count,
                     'verified_expense_count' => $expense->verified_expense_count,
                     'expenses_model' => $expense->expensesModel,
+                    'user' => $expense->user,
                     'created_at' =>  Carbon::parse($expense->created_at)->format('M d, Y')
                 ];
             });
 
-            $usersWithoutEntries = User::doesntHave('expensesEntries')
+            $usersWithoutEntries = User::select('id','name','company_id','email')->with('company:id,code,name')->doesntHave('expensesEntries')
             ->when($company , function($q) use ($company) {
                 $q->whereHas('companies', function ($q) use ($company){
                     $q->where('company_id', $company);
@@ -220,6 +223,7 @@ class ExpenseController extends Controller
                     'expenses_model_count' => 0,
                     'verified_expense_count' => 0,
                     'expenses_model' => null,
+                    'user' => $user,
                     'created_at' => null
                 ];
             });
@@ -233,12 +237,14 @@ class ExpenseController extends Controller
             
         }
 
+        // dd($expense);
+
         $new_expense = [];
         // Executive and VP Roles
         if(Auth::user()->level() >= 6 || Auth::user()->hasRole('ap')){
             $new_expense = $expense; 
         }else{
-            foreach($expense->pluck('user') as $key => $value){
+            foreach(collect($expense)->pluck('user') as $key => $value){
                 // AVP and Coordinator  roles
                 if(Auth::user()->level() < 6){
                     if($value->roles[0]['level'] < 6){
