@@ -69,7 +69,6 @@ class ExpenseController extends Controller
         $company = $request->company;
         
         if(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap')) {
-            
             // $expense = ExpensesEntry::with('user','expensesModel.payments')
             // ->whereHas('user' , function($q){
             //     $q->whereHas('companies', function ($q){
@@ -143,8 +142,7 @@ class ExpenseController extends Controller
                 ];
             });
 
-            $expense = collect($expensesWithEntries)->merge(collect($usersWithoutEntries))->sortByDesc('id')->values()->toArray();
-
+            $expenses = collect($expensesWithEntries)->merge(collect($usersWithoutEntries))->sortByDesc('id')->values()->toArray();
         }else{
 
             // $expense = User::with(['expensesEntries' => function ($query) use ($request, $verify_status) {
@@ -228,34 +226,11 @@ class ExpenseController extends Controller
                 ];
             });
 
-            // \Log::info($expensesWithEntries); 
-
             \Log::info($usersWithoutEntries); 
-            
             // Combine the results
-            $expense = collect($expensesWithEntries)->merge(collect($usersWithoutEntries))->sortByDesc('id')->values()->toArray();
-            
+            $expenses = collect($expensesWithEntries)->merge(collect($usersWithoutEntries))->sortByDesc('id')->values()->toArray();   
         }
-
-        // dd($expense);
-
-        $new_expense = [];
-        // Executive and VP Roles
-        if(Auth::user()->level() >= 6 || Auth::user()->hasRole('ap')){
-            $new_expense = $expense; 
-        }else{
-            foreach(collect($expense)->pluck('user') as $key => $value){
-                // AVP and Coordinator  roles
-                if(Auth::user()->level() < 6){
-                    if($value->roles[0]['level'] < 6){
-                        $new_expense[] = $expense[$key]; 
-                    }
-                }else{
-                    $new_expense = []; 
-                }
-            }
-        }
-        return $new_expense;
+        return $expenses;
     }
 
     /**
