@@ -201,11 +201,14 @@
                         </a>
                         <div class="collapse space-left" id="MasterData" style="">
                             <ul class="nav" style="list-style-type: none;">
-                                <li>
-                                    <a class="nav-link" href="{{ url('/tsr') }}">
-                                        <i class="ni ni-circle-08 text-pink"></i> Salesman
-                                    </a>
-                                </li>
+                                {{-- @if(Auth::user()->roles[0]->name != 'Coordinator' || Auth::user()->roles[0]->name != 'Vp') --}}
+                                @if(!Auth::user()->hasRole(['coordinator','vp']))
+                                    <li>
+                                        <a class="nav-link" href="{{ url('/tsr') }}">
+                                            <i class="ni ni-circle-08 text-pink"></i> Salesman
+                                        </a>
+                                    </li>
+                                @endif
                                 <li>
                                     <a class="nav-link" href="{{ url('/customers') }}">
                                         <i class="ni ni-shop text-blue"></i> Customers
