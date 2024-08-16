@@ -68,16 +68,19 @@ class ExpenseDocumentControllerApi extends Controller
                 $total_count = $total_count + $expense->expenses_model_count;
                 $total_expenses = $total_expenses + $expense->totalExpenses;
 
-                if(!empty($expense->verifiedExpense)) {
-                    foreach ($expense->verifiedExpense as $verified) {
-                        $data = [];
-                        $data['id'] = $verified->id;
-                        $data['expenses_entry_id'] = $verified->expenses_entry_id;
-                        $data['attachment'] = $verified->attachment;
-                        $data['expenses_type'] = $verified->expensesType->name;
-                        $expense_attachments[] = $data;
+                // if(!empty($expense->verifiedExpense)) { //TEMPORARY ACCEPT(DMS) UNVERIFIED EXPENSE
+                    // foreach ($expense->verifiedExpense as $verified) { //TEMPORARY ACCEPT(DMS) UNVERIFIED EXPENSE
+                    foreach ($expense->expensesModel as $verified) {
+                        if(!empty($verified->expenses_entry_id)) {
+                            $data = [];
+                            $data['id'] = $verified->id;
+                            $data['expenses_entry_id'] = $verified->expenses_entry_id;
+                            $data['attachment'] = $verified->attachment;
+                            $data['expenses_type'] = $verified->expensesType->name;
+                            $expense_attachments[] = $data;
+                        }
                     }
-                }
+                // }
             }
         } else {
             $message = 'Already Received';
@@ -94,13 +97,6 @@ class ExpenseDocumentControllerApi extends Controller
             'message' => $message,
             'status_code' => $status_code
         ];
-
-        // $expense_data = [
-        //     'user' => User::find($user_id, ['id', 'name']),
-        //     'expense_attachments' => $expense_attachments,
-        //     'expense_attachment_count' => count($expense_attachments),
-        //     'total_expenses' => $total_expenses,
-        // ];
 
         return $expense_data;
     }
