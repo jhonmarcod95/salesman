@@ -199,10 +199,6 @@ class ExpenseDocumentControllerApi extends Controller
     }
 
     public function getTsrUsers() {
-        return User::select('id','name')
-            ->whereHas('roles', function($q) {
-                $q->whereIn('slug', ['tsr','coordinator']);
-            })
-            ->get();
+        return User::select('id','name')->get();
     }
 }
