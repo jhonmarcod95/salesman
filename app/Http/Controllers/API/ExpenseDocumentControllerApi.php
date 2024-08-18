@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use App\ExpensesEntry;
 use Illuminate\Http\Request;
 use App\ExpenseMonthlyDmsReceive;
+use Illuminate\Support\Facades\DB;
+use App\ExpenseMonthlyDmsUnverified;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
@@ -68,16 +70,19 @@ class ExpenseDocumentControllerApi extends Controller
                 $total_count = $total_count + $expense->expenses_model_count;
                 $total_expenses = $total_expenses + $expense->totalExpenses;
 
-                if(!empty($expense->verifiedExpense)) {
-                    foreach ($expense->verifiedExpense as $verified) {
-                        $data = [];
-                        $data['id'] = $verified->id;
-                        $data['expenses_entry_id'] = $verified->expenses_entry_id;
-                        $data['attachment'] = $verified->attachment;
-                        $data['expenses_type'] = $verified->expensesType->name;
-                        $expense_attachments[] = $data;
+                // if(!empty($expense->verifiedExpense)) { //TEMPORARY ACCEPT(DMS) UNVERIFIED EXPENSE
+                    // foreach ($expense->verifiedExpense as $verified) { //TEMPORARY ACCEPT(DMS) UNVERIFIED EXPENSE
+                    foreach ($expense->expensesModel as $verified) {
+                        if(!empty($verified->expenses_entry_id)) {
+                            $data = [];
+                            $data['id'] = $verified->id;
+                            $data['expenses_entry_id'] = $verified->expenses_entry_id;
+                            $data['attachment'] = $verified->attachment;
+                            $data['expenses_type'] = $verified->expensesType->name;
+                            $expense_attachments[] = $data;
+                        }
                     }
-                }
+                // }
             }
         } else {
             $message = 'Already Received';
@@ -94,13 +99,6 @@ class ExpenseDocumentControllerApi extends Controller
             'message' => $message,
             'status_code' => $status_code
         ];
-
-        // $expense_data = [
-        //     'user' => User::find($user_id, ['id', 'name']),
-        //     'expense_attachments' => $expense_attachments,
-        //     'expense_attachment_count' => count($expense_attachments),
-        //     'total_expenses' => $total_expenses,
-        // ];
 
         return $expense_data;
     }
@@ -165,16 +163,42 @@ class ExpenseDocumentControllerApi extends Controller
             'dms_qr_code' => 'required'
         ]);
 
-        ExpenseMonthlyDmsReceive::create($request->all());
+        return DB::transaction(function () use($request) {
+            //Store monthly DMS received ===============================
+            $monthly_received = ExpenseMonthlyDmsReceive::create($request->all());
+            //==========================================================
 
-        return response()->json(['message' => "Expense Received Success"], 200);
+            //Store monthly DMS unverified =============================
+            $dms_month_year = "$request->month $request->year";
+            $first_of_month = date('Y-m-d', strtotime("first day of $dms_month_year"));
+            $last_of_month = date('Y-m-d', strtotime("last day of $dms_month_year"));
+            $start_date = "$first_of_month 00:00:01";
+            $last_date = "$last_of_month 23:59:59";
+
+            $unverified_expense = Expense::select('id', 'user_id', 'is_verified', 'expenses_entry_id', 'created_at')
+                ->where('user_id', $request->user_id)
+                ->where(function($q) {
+                    $q->where('is_verified', 0)
+                      ->orWhere('is_verified', null);
+                }) 
+                ->where('expenses_entry_id', '!=', 0)
+                ->whereBetween('created_at', [$start_date, $last_date])
+                ->get();
+
+            foreach($unverified_expense as $unverified) {
+                ExpenseMonthlyDmsUnverified::create([
+                    'user_id' => $request->user_id,
+                    'expense_monthly_dms_receive_id' => $monthly_received->id,
+                    'expense_id' => $unverified->id
+                ]);
+            }
+            //==========================================================
+
+            return response()->json(['message' => "Expense Received Success"], 200);
+        });
     }
 
     public function getTsrUsers() {
-        return User::select('id','name')
-            ->whereHas('roles', function($q) {
-                $q->whereIn('slug', ['tsr','coordinator']);
-            })
-            ->get();
+        return User::select('id','name')->get();
     }
 }
