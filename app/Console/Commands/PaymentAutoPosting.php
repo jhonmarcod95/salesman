@@ -65,7 +65,7 @@ class PaymentAutoPosting extends Command
 //        RunningCommand::where('name', $this->signature)->delete();
     }
 
-    public function generateExpense($dateFrom, $dateTo, $sap_server){
+    public function generateExpense($dateFrom, $dateTo, $sap_server, $isReprocessing = false){
 
         $companies = Company::whereHas('sapServers', function ($q) use ($sap_server) {
                 $q->where('sap_server', $sap_server);
@@ -85,9 +85,11 @@ class PaymentAutoPosting extends Command
                 })->whereDate('created_at', '>=',  $dateFrom)
                 ->whereDate('created_at' ,'<=', $dateTo)
                 ->where('expenses_entry_id', '!=', 0)
+                ->when($isReprocessing, function($q){
+                    $q->where('status_id',2);
+                })
                 ->get()
                 ->groupBy('user.id');
-
             $this->simulateExpense($expenses,$coveredWeek, $dateFrom, $dateTo);
         }
     }
@@ -127,7 +129,8 @@ class PaymentAutoPosting extends Command
                 }
 
                 // Checking of submitted receipts from previous months(Should be completed)
-                $is_complete = $this->checkSubmittedReceipts($groupedExpenses[0]->user->id,$posting_date);
+                // $is_complete = $this->checkSubmittedReceipts($groupedExpenses[0]->user->id,$posting_date);
+                $is_complete = true;
 
                 if($is_complete){
                     $expense_ids = [];
@@ -618,6 +621,11 @@ class PaymentAutoPosting extends Command
                                         }
                                     }
                                 }
+                                //Update status to posted
+                                Expense::whereIn('id',$expense_ids)
+                                    ->update([
+                                        'status_id' => 3
+                                    ]);
                             }
 //                            DB::commit();
                         }
@@ -857,7 +865,7 @@ class PaymentAutoPosting extends Command
                 'expense_from' => $expense_from,
                 'expense_to' => $expense_to,
                 'should_be_posting_date' => $posting_date,
-                'expense_grouping' => $posting_date->format('yy-m-d').'+'.$grouped_expenses[0]->user_id.'+'.$index,
+                'expense_grouping' => $posting_date->format('y-m-d').'+'.$grouped_expenses[0]->user_id.'+'.$index,
                 'status_id' => 2
             ]);
     }
