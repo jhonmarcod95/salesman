@@ -16,7 +16,12 @@ class Expense extends Model implements Auditable
         'dms_reference',
         'is_verified',
         'verified_by',
-        'date_verified'
+        'date_verified',
+        'status_id',
+        'expense_from',
+        'expense_to',
+        'should_be_posting_date',
+        'expense_grouping'
     ];
 
     // protected $hidden = [
