@@ -10,6 +10,11 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
+require('./mixins.js'); // Global reusable functions
+
+import Multiselect from 'vue-multiselect';
+Vue.component('multiselect', Multiselect);
+
 import HighchartsVue from 'highcharts-vue'
 Vue.use(HighchartsVue)
 
@@ -52,6 +57,7 @@ Vue.component('expense-submitted-index', require('./components/Expense/ExpenseSu
 Vue.component('historical-expense-index', require('./components/Expense/HistoricalExpense.vue'));
 
 Vue.component('expense-top-spender', require('./components/Expense/ExpenseTopSpender.vue'));
+Vue.component('dms-received-expense', require('./components/Expense/ExpenseDmsReceivedIndex.vue'));
 
 // Announcement
 Vue.component('announcement-index', require('./components/Announcement/AnnouncementIndex.vue'));
@@ -125,6 +131,10 @@ Vue.component('aapc-farmer-create', require('./components/AapcFarmer/AapcFarmerC
 
 Vue.component('aapc-farmer-index', require('./components/AapcFarmer/AapcFarmerIndex.vue'));
 
+//Common
+Vue.component('table-pagination', require('./components/Common/TablePagination.vue'));
+Vue.component('app-block-ui', require('./components/Common/BlockUi.vue'));
+Vue.component('app-select', require('./components/Common/Select2.vue'));
 
 const app = new Vue({
     el: '#app',

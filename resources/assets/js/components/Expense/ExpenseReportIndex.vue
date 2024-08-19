@@ -12,7 +12,10 @@
                                 <div class="col">
                                     <h3 class="mb-0">Expenses Report</h3>
                                 </div>
-                                <div><a class="btn btn-sm btn-info mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
+                                <div class="d-flex">
+                                    <div><a class="btn btn-sm btn-success mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
+                                    <div><a class="btn btn-sm btn-info mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
+                                </div>
                             </div>
                         </div>
                         <div class="mb-3">

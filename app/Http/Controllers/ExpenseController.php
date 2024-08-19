@@ -7,6 +7,7 @@ use App\{
     Http\Controllers\APIController,
     Message,
     Expense,
+    ExpenseMonthlyDmsReceive,
     ExpensesEntry,
     ExpensesType,
     User,
@@ -655,5 +656,28 @@ class ExpenseController extends Controller
             'date_verified' => $request->mode == 'verify' ? now() : null
         ]);
     }
+
+    //DMS Received Report ================================================
+    public function dmsReceivedReportIndex() {
+        session(['header_text' => 'Expenses Report']);
+        return view('expense.dms-received-index-report');
+    }
+
+    public function dmsReceivedReportAll(Request $request) {
+        return ExpenseMonthlyDmsReceive::with('user:id,name', 'user.companies')
+            ->when(isset($request->user_id), function($q) use($request){
+                $q->whereHas('user', function($userQuery) use ($request){
+                    $userQuery->where('id', $request->user_id);
+                });
+            })
+            ->when(isset($request->month_year), function($q) use($request){
+                $date = date('Y-m-t 23:59:59', strtotime($request->month_year));
+                $month = date('F', strtotime($date));
+                $year = date('Y', strtotime($date));
+                $q->where(['month' => $month, 'year' => $year]);
+            })
+            ->paginate($request->limit);
+    }
+    //====================================================================
 
 }

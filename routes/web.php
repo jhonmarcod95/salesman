@@ -104,9 +104,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::patch('/user/{user}', 'UserController@update');
     //delete user
     Route::delete('/user/{id}', 'UserController@destroy');
+    //selection user
+    Route::get('/selection-users', 'UserController@selectionUsers');
 
 
-    Route::get('/users/show/{id}', 'UserController@show');
+    Route::get('/selection-users/show/{id}', 'UserController@show');
     Route::patch('/users/update/{id}', 'UserController@update');
 
 
@@ -167,6 +169,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::post('/expenses-top-spender-data', 'ExpenseController@expenseTopSpenderData');
     Route::get('/expenses-current-top-spender-data', 'ExpenseController@expenseCurrentTopSpenderData');
 
+    //DMS Received Expense
+    Route::group(['prefix' => 'dms-received-expense'], function () {
+        Route::get('/', 'ExpenseController@dmsReceivedReportIndex');
+        Route::get('/all', 'ExpenseController@dmsReceivedReportAll');
+    });
 
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
     Route::post('/expense-io-report-data', 'ExpenseController@expenseIOReportData');
