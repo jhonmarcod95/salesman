@@ -87,7 +87,7 @@
                                     <th scope="col">Expense Submitted</th>
                                     <th scope="col">Verified Count</th>
                                     <th scope="col">Unverified Count</th>
-                                    <th scope="col">Date</th>
+                                    <th scope="col">Submitted Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
                                 </thead>
@@ -173,7 +173,7 @@
                 <div class="modal-body text-center">
                   <div class="row">
                         <div class="col"><h3>TSR: {{ this.tsrName }}</h3></div>
-                        <div class="col"><h3>Date: {{ moment(this.date).format('ll') }} </h3></div>
+                        <div class="col"><h3>Submitted Date: {{ moment(this.date).format('ll') }} </h3></div>
                     </div>
                     <div class="table-responsive">
                         <table class="table align-items-center table-flush">
@@ -182,7 +182,7 @@
                                 <th scope="col" v-if="expenseVerifierRole || salesHeadRole">Verify</th>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
-                                <th scope="col">Date</th>
+                                <th scope="col">Entry Date</th>
                                 <th scope="col">Amount</th>
                             </tr>
                             </thead>
