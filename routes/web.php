@@ -186,6 +186,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::patch('/expenses/{expensesType}', 'ExpenseController@update');
     // Verify expense attachment
     Route::post('/verify-expense-attachment/{id}', 'ExpenseController@verifyAttachment');
+    Route::get('/expense-verification-statuses', 'ExpenseController@getExpenseVerificationStatuses');
 
 
     // Expense Unposted

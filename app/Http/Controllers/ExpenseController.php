@@ -15,7 +15,8 @@ use App\{
     PaymentHeader,
     PaymentHeaderError,
     SalesmanInternalOrder,
-    ExpenseSapIoBudget
+    ExpenseSapIoBudget,
+    ExpenseVerificationStatus
 };
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -340,9 +341,11 @@ class ExpenseController extends Controller
      */
     public function show($id)
     {
-        return Expense::with('expensesType', 'payments')->whereHas('expensesEntry', function($q) use ($id){
-            $q->where('id', $id);
-        })->get();
+        return Expense::with('expensesType','payments','expenseVerificationStatus')
+            ->whereHas('expensesEntry', function($q) use ($id){
+                $q->where('id', $id);
+            })
+            ->get();
     }
 
     /**
@@ -774,11 +777,31 @@ class ExpenseController extends Controller
     }
 
     public function verifyAttachment(Request $request, $expenseId) {
+        $user_id =  Auth::user()->id;
+        $date = now();
+
+        switch ($request->mode) {
+            case 'unset':
+                $status = null;
+                $user_id = null;
+                $date = null;
+                break;
+            case 'verify':
+                $status = 1;
+                break;
+            case 'unverify':
+                $status = 2;
+                break;
+            case 'reject':
+                $status = 3;
+                break;
+        }
+
         Expense::find($expenseId)->update([
-            'is_verified' => $request->mode == 'verify' ? 1 /**true */ : null, 
-            'verified_by' => $request->mode == 'verify' ? Auth::user()->id : null,
-            'date_verified' => $request->mode == 'verify' ? now() : null
+            'is_verified' => $status,
+            'verified_by' => $user_id,
+            'date_verified' => $date,
+            'expense_verification_status_id' => $status
         ]);
     }
-
 }

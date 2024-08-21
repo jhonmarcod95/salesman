@@ -190,13 +190,36 @@
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
                                     <td v-if="expenseVerifierRole || salesHeadRole">
                                         <div v-if="expenseBy.is_verified">
-                                            <div>Verified</div>
+                                            <div>{{ expenseBy.expense_verification_status.name }}</div>
                                             <div v-if="salesHeadRole" class="btn btn-warning btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Unverify</div>
                                         </div>
-                                        <button type="button" class="btn btn-primary btn-sm" v-else @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
-                                            Verify
-                                            <span v-if="verifiyingId == expenseBy.id">...</span>
-                                        </button>
+                                        <div v-else>
+                                            <button type="button" class="btn btn-primary btn-sm" @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
+                                                Verify
+                                                <span v-if="verifiyingId == expenseBy.id">...</span>
+                                            </button>
+
+                                            <button type="button" class="btn btn-warning btn-sm" @click="verifyExpense(expenseBy,'unverify')" :disabled="verifiyingId">
+                                                Unverify
+                                                <span v-if="verifiyingId == expenseBy.id">...</span>
+                                            </button>
+
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Reject
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="#">Reason 1</a>
+                                                    <a class="dropdown-item" href="#">Reason 2</a>
+                                                    <a class="dropdown-item" href="#">Reason 3</a>
+                                                    <a class="dropdown-item" href="#">Reason 4</a>
+                                                </div>
+                                            </div>  
+                                            <!-- <button type="button" class="btn btn-danger btn-sm" @click="verifyExpense(expenseBy,'reject')" :disabled="verifiyingId">
+                                                Reject
+                                                <span v-if="verifiyingId == expenseBy.id">...</span>
+                                            </button> -->
+                                        </div>
                                     </td>
                                     <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
                                     <td>{{ expenseBy.expenses_type.name }}</td>
@@ -335,10 +358,10 @@ export default {
         showNextLink() {
             return this.currentPage == (this.totalPages - 1) ? false : true;
         },
-
         verifyExpense(expense, mode) {
             let vm = this;
-            let alertStatus = mode == 'verify' ? "mark as verified" : "reset to unverified"
+            // let alertStatus = mode == 'verify' ? "mark as verified" : "reset to unverified"
+            let alertStatus = "mark as " + (mode == 'verify' ? 'verified' : ( mode == 'unverify' ? 'unverified' : 'rejected'))
             if(confirm(`Are you sure you want to ${alertStatus} this attachment?`)) {
                 vm.verifiyingId = expense.id;
                 axios.post(`/verify-expense-attachment/${expense.id}`,{mode})
