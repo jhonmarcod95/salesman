@@ -38,6 +38,8 @@ class ExpenseDocumentControllerApi extends Controller
         //Set return data default value
         $verified_expense_count = 0;
         $unverified_expense_count = 0;
+        $rejected_expense_count = 0;
+        $pending_expense_count = 0;
         $total_expenses = 0;
         $total_count = 0;
         $expense_attachments = [];
@@ -61,12 +63,17 @@ class ExpenseDocumentControllerApi extends Controller
                         }])
                         ->has('expensesModel')
                         ->withCount('verifiedExpense')
+                        ->withCount('unverifiedExpense')
+                        ->withCount('rejectedExpense')
+                        ->withCount('pendingExpense')
                         ->withCount('expensesModel')
                         ->get();
             
             foreach($expenses_entry as $expense) {
                 $verified_expense_count = $verified_expense_count + $expense->verified_expense_count;
-                $unverified_expense_count = $unverified_expense_count + ($expense->expenses_model_count - $expense->verified_expense_count);
+                $unverified_expense_count = $unverified_expense_count + $expense->unverified_expense_count;
+                $rejected_expense_count = $rejected_expense_count + $expense->rejected_expense_count;
+                $pending_expense_count = $pending_expense_count + $expense->pending_expense_count;
                 $total_count = $total_count + $expense->expenses_model_count;
                 $total_expenses = $total_expenses + $expense->totalExpenses;
 
@@ -92,8 +99,10 @@ class ExpenseDocumentControllerApi extends Controller
         $expense_data = [
             'user' => User::find($user_id, ['id', 'name']),
             'expense_attachments' => $expense_attachments,
-            'unverified' => $unverified_expense_count,
             'verified_count' => $verified_expense_count,
+            'unverified' => $unverified_expense_count,
+            'rejected' => $rejected_expense_count,
+            'pending' => $pending_expense_count,
             'total_count' => $total_count,
             'total_expenses' => $total_expenses,
             'message' => $message,
