@@ -782,7 +782,7 @@ class ExpenseController extends Controller
 
         switch ($request->mode) {
             case 'unset':
-                $status = null;
+                $status = 0;
                 $user_id = null;
                 $date = null;
                 break;
@@ -798,10 +798,9 @@ class ExpenseController extends Controller
         }
 
         Expense::find($expenseId)->update([
-            'is_verified' => $status,
+            'verified_status_id' => $status,
             'verified_by' => $user_id,
             'date_verified' => $date,
-            'expense_verification_status_id' => $status
         ]);
     }
 }

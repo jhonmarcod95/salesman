@@ -175,11 +175,11 @@ class ExpenseDocumentControllerApi extends Controller
             $start_date = "$first_of_month 00:00:01";
             $last_date = "$last_of_month 23:59:59";
 
-            $unverified_expense = Expense::select('id', 'user_id', 'is_verified', 'expenses_entry_id', 'created_at')
+            $unverified_expense = Expense::select('id', 'user_id', 'verified_status_id', 'expenses_entry_id', 'created_at')
                 ->where('user_id', $request->user_id)
                 ->where(function($q) {
-                    $q->where('is_verified', 0)
-                      ->orWhere('is_verified', null);
+                    $q->where('verified_status_id', 0)
+                      ->orWhere('verified_status_id', null);
                 }) 
                 ->where('expenses_entry_id', '!=', 0)
                 ->whereBetween('created_at', [$start_date, $last_date])

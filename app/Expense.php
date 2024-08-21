@@ -14,9 +14,8 @@ class Expense extends Model implements Auditable
         'attachment',
         'remarks',
         'dms_reference',
-        'expense_verification_status_id',
         'expense_rejected_reason_id',
-        'is_verified',
+        'verified_status_id',
         'verified_by',
         'date_verified',
         'status_id',
@@ -62,6 +61,6 @@ class Expense extends Model implements Auditable
 
     public function expenseVerificationStatus()
     {
-        return $this->belongsTo(ExpenseVerificationStatus::class);
+        return $this->belongsTo(ExpenseVerificationStatus::class, 'verified_status_id');
     }
 }

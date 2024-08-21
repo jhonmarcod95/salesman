@@ -14,7 +14,7 @@ class AddVerifiedColumnInExpensesTable extends Migration
     public function up()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->boolean('is_verified')->default(false)->nullable();
+            $table->integer('verified_status_id')->default(0)->nullable();
             $table->bigInteger('verified_by')->unsigned()->nullable();
             $table->dateTime('date_verified')->nullable();
         });
@@ -28,7 +28,7 @@ class AddVerifiedColumnInExpensesTable extends Migration
     public function down()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->dropColumn(['is_verified', 'verified_by', 'date_verified']);
+            $table->dropColumn(['verified_status_id', 'verified_by', 'date_verified']);
         });
     }
 }

@@ -15,7 +15,6 @@ class AddVerificationStatusToExpensesTable extends Migration
     {
         Schema::table('expenses', function (Blueprint $table) {
             $table->integer('expense_rejected_reason_id')->nullable()->after('dms_reference');
-            $table->integer('expense_verification_status_id')->nullable()->after('dms_reference');
         });
     }
 
@@ -27,7 +26,6 @@ class AddVerificationStatusToExpensesTable extends Migration
     public function down()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->dropColumn('expense_verification_status_id');
             $table->dropColumn('expense_rejected_reason_id');
         });
     }

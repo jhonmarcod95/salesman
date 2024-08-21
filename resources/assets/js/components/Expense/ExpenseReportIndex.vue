@@ -175,7 +175,7 @@
                         <div class="col"><h3>TSR: {{ this.tsrName }}</h3></div>
                         <div class="col"><h3>Submitted Date: {{ moment(this.date).format('ll') }} </h3></div>
                     </div>
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="overflow-x:unset">
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
@@ -189,9 +189,9 @@
                             <tbody>
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
                                     <td v-if="expenseVerifierRole || salesHeadRole">
-                                        <div v-if="expenseBy.is_verified">
+                                        <div v-if="expenseBy.verified_status_id">
                                             <div>{{ expenseBy.expense_verification_status.name }}</div>
-                                            <div v-if="salesHeadRole" class="btn btn-warning btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Unverify</div>
+                                            <div v-if="salesHeadRole" class="btn btn-warning btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
                                         </div>
                                         <div v-else>
                                             <button type="button" class="btn btn-primary btn-sm" @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
@@ -209,10 +209,10 @@
                                                     Reject
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="#">Reason 1</a>
-                                                    <a class="dropdown-item" href="#">Reason 2</a>
-                                                    <a class="dropdown-item" href="#">Reason 3</a>
-                                                    <a class="dropdown-item" href="#">Reason 4</a>
+                                                    <a class="dropdown-item" href="#" @click="verifyExpense(expenseBy,'rejected', 'id')">Reason 1</a>
+                                                    <a class="dropdown-item" href="#" @click="verifyExpense(expenseBy,'rejected', 'id')">Reason 2</a>
+                                                    <a class="dropdown-item" href="#" @click="verifyExpense(expenseBy,'rejected', 'id')">Reason 3</a>
+                                                    <a class="dropdown-item" href="#" @click="verifyExpense(expenseBy,'rejected', 'id')">Reason 4</a>
                                                 </div>
                                             </div>  
                                             <!-- <button type="button" class="btn btn-danger btn-sm" @click="verifyExpense(expenseBy,'reject')" :disabled="verifiyingId">
@@ -248,9 +248,9 @@ export default {
             fetchingExpense: false,
             expenses: [],
             expenseByTsr: [],
-            startDate: '',
-            endDate: '',
-            company: '',
+            startDate: '2023-12-01',
+            endDate: '2023-12-10',
+            company: 4,
             expense_verify_status: '',
             tsrName: '',
             date: '',
@@ -358,9 +358,8 @@ export default {
         showNextLink() {
             return this.currentPage == (this.totalPages - 1) ? false : true;
         },
-        verifyExpense(expense, mode) {
+        verifyExpense(expense, mode, id = null) {
             let vm = this;
-            // let alertStatus = mode == 'verify' ? "mark as verified" : "reset to unverified"
             let alertStatus = "mark as " + (mode == 'verify' ? 'verified' : ( mode == 'unverify' ? 'unverified' : 'rejected'))
             if(confirm(`Are you sure you want to ${alertStatus} this attachment?`)) {
                 vm.verifiyingId = expense.id;
