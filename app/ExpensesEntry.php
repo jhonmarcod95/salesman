@@ -32,6 +32,18 @@ class ExpensesEntry extends Model
         return $this->hasMany(Expense::class)->where('verified_status_id', 1);
     }
 
+    public function unverifiedExpense(){
+        return $this->hasMany(Expense::class)->where('verified_status_id', 2);
+    }
+
+    public function rejectedExpense(){
+        return $this->hasMany(Expense::class)->where('verified_status_id', 3);
+    }
+
+    public function pendingExpense() {
+        return $this->hasMany(Expense::class)->where('verified_status_id', 0);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

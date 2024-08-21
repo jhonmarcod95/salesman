@@ -187,6 +187,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Verify expense attachment
     Route::post('/verify-expense-attachment/{id}', 'ExpenseController@verifyAttachment');
     Route::get('/expense-verification-statuses', 'ExpenseController@getExpenseVerificationStatuses');
+    Route::get('/expense-rejected-remarks', 'ExpenseController@getExpenseRejectedRemarks');
 
 
     // Expense Unposted

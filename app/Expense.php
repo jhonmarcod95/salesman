@@ -63,4 +63,8 @@ class Expense extends Model implements Auditable
     {
         return $this->belongsTo(ExpenseVerificationStatus::class, 'verified_status_id');
     }
+
+    public function expenseRejectedRemarks() {
+        return $this->belongsTo(ExpenseVerificationRejectedRemarks::class, 'expense_rejected_reason_id');
+    }
 }

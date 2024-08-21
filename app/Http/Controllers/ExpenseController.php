@@ -16,7 +16,8 @@ use App\{
     PaymentHeaderError,
     SalesmanInternalOrder,
     ExpenseSapIoBudget,
-    ExpenseVerificationStatus
+    ExpenseVerificationStatus,
+    ExpenseVerificationRejectedRemarks
 };
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -109,6 +110,9 @@ class ExpenseController extends Controller
             })
             ->withCount('expensesModel')
             ->withCount('verifiedExpense')
+            ->withCount('unverifiedExpense')
+            ->withCount('rejectedExpense')
+            ->withCount('pendingExpense')
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($expense) {
@@ -118,6 +122,9 @@ class ExpenseController extends Controller
                     'company' => $expense->user->company ? $expense->user->company->name : '',
                     'expenses_model_count' => $expense->expenses_model_count,
                     'verified_expense_count' => $expense->verified_expense_count,
+                    'unverified_expense_count' => $expense->unverified_expense_count,
+                    'rejected_expense_count' => $expense->rejected_expense_count,
+                    'pending_expense_count' => $expense->pending_expense_count,
                     'expenses_model' => $expense->expensesModel,
                     'user' => $expense->user,
                     'created_at' => Carbon::parse($expense->created_at)->format('M d, Y'),
@@ -192,6 +199,9 @@ class ExpenseController extends Controller
             })
             ->withCount('expensesModel')
             ->withCount('verifiedExpense')
+            ->withCount('unverifiedExpense')
+            ->withCount('rejectedExpense')
+            ->withCount('pendingExpense')
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($expense) {
@@ -201,6 +211,9 @@ class ExpenseController extends Controller
                     'company' => $expense->user->company ? $expense->user->company->name : '',
                     'expenses_model_count' => $expense->expenses_model_count,
                     'verified_expense_count' => $expense->verified_expense_count,
+                    'unverified_expense_count' => $expense->unverified_expense_count,
+                    'rejected_expense_count' => $expense->rejected_expense_count,
+                    'pending_expense_count' => $expense->pending_expense_count,
                     'expenses_model' => $expense->expensesModel,
                     'user' => $expense->user,
                     'created_at' =>  Carbon::parse($expense->created_at)->format('M d, Y')
@@ -221,6 +234,9 @@ class ExpenseController extends Controller
                     'company' => $user->company ? $user->company->name : '',
                     'expenses_model_count' => 0,
                     'verified_expense_count' => 0,
+                    'unverified_expense_count' => 0,
+                    'rejected_expense_count' => 0,
+                    'pending_expense_count' => 0,
                     'expenses_model' => null,
                     'user' => $user,
                     'created_at' => null
@@ -341,7 +357,7 @@ class ExpenseController extends Controller
      */
     public function show($id)
     {
-        return Expense::with('expensesType','payments','expenseVerificationStatus')
+        return Expense::with('expensesType','payments','expenseVerificationStatus:id,name','expenseRejectedRemarks:id,remark')
             ->whereHas('expensesEntry', function($q) use ($id){
                 $q->where('id', $id);
             })
@@ -778,6 +794,7 @@ class ExpenseController extends Controller
 
     public function verifyAttachment(Request $request, $expenseId) {
         $user_id =  Auth::user()->id;
+        $rejected_id = isset($request->rejected_id) ? $request->rejected_id : null;
         $date = now();
 
         switch ($request->mode) {
@@ -799,8 +816,17 @@ class ExpenseController extends Controller
 
         Expense::find($expenseId)->update([
             'verified_status_id' => $status,
+            'expense_rejected_reason_id' => $rejected_id,
             'verified_by' => $user_id,
             'date_verified' => $date,
         ]);
+    }
+
+    public function getExpenseRejectedRemarks() {
+        return ExpenseVerificationRejectedRemarks::all(['id','remark']);
+    }
+
+    public function getExpenseVerificationStatuses() {
+        return ExpenseVerificationStatus::all(['id','name']);
     }
 }

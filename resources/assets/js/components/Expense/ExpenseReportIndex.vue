@@ -50,13 +50,10 @@
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">Status</label> 
 
-                                        <select
-                                        class="form-control"
-                                        v-model="expense_verify_status"
-                                        >
-                                        <option value=""> Select Status </option>
-                                        <option value="verified">Verified</option>
-                                        <option value="unverified">Unverified</option>
+                                        <select class="form-control" v-model="expense_verify_status">
+                                            <option value=""> Select Status </option>
+                                            <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
+                                            <option value="0">Pending</option>
                                         </select>
                                     </div>
                                 </div>
@@ -68,12 +65,11 @@
                                 </div>
 
                                 <div class="col-md-12">
-                                    <!-- <span>Attachment: {{ expenseStatusCount.expensesCount }}</span> |
-                                    <span>Verified: {{ expenseStatusCount.verifiedCount }}</span> |
-                                    <span class="text-warning">Unverified: {{ expenseStatusCount.unverifiedCount }}</span> -->
                                     <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
                                     <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
-                                    <span class="text-warning">Unverified: {{ filteredExpensesStats.unverifiedCount }}</span>
+                                    <span>Unverified: {{ filteredExpensesStats.unverifiedCount }}</span> |
+                                    <span class="text-warning">Rejected: {{ filteredExpensesStats.rejectedCount }}</span> |
+                                    <span>Pending: {{ filteredExpensesStats.pendingCount }}</span>
                                 </div>
                             </div>
                         </div>
@@ -85,8 +81,9 @@
                                     <th scope="col">TSR</th>
                                     <th scope="col">Company</th>
                                     <th scope="col">Expense Submitted</th>
-                                    <th scope="col">Verified Count</th>
-                                    <th scope="col">Unverified Count</th>
+                                    <th scope="col">Receipt Status</th>
+                                    <!-- <th scope="col">Verified Count</th>
+                                    <th scope="col">Unverified Count</th> -->
                                     <th scope="col">Submitted Date</th>
                                     <th scope="col">Total Expenses</th>
                                 </tr>
@@ -98,25 +95,21 @@
                                     <tr v-else v-for="(expense, e) in filteredQueues" v-bind:key="e">
                                         <td class="text-right" v-if="userLevel != 5">
                                             <button v-if="expense.id != null" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(expense.id, expense.tsr_name, expense.created_at)">View</button>
-                                            <!-- <div class="dropdown">
-                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </a>
-                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" href="javascript:void(0)"  @click="fetchExpenseByTsr(expense.id, expense.user.name, expense.created_at)">View</a>
-                                                </div>
-                                            </div> -->
                                         </td>
                                         <td v-else></td>
                                         <td>{{ expense.tsr_name }}</td>
                                         <td>{{ expense.company }}</td>
-                                        <!-- <td>{{ expense.name }}</td> -->
                                         <td>
                                             {{ expense.expenses_model_count  }}
                                         </td>
-                                        <td>{{ expense.verified_expense_count  }}</td>
-                                        <td>{{ expense.expenses_model_count - expense.verified_expense_count  }}</td>
+                                        <td>
+                                            <p class="mb-0" style="line-height:1.3;"><small>Pending: {{ (expenseStatus(expense)).pending }}</small></p>
+                                            <p class="mb-0" style="line-height:1.3;"><small>Verified: {{ (expenseStatus(expense)).verified }}</small></p>
+                                            <p class="mb-0" style="line-height:1.3;"><small>Unverified: {{ (expenseStatus(expense)).unverified }}</small></p>
+                                            <p class="mb-0" style="line-height:1.3;"><small>Rejected: {{ (expenseStatus(expense)).rejected }}</small></p>
+                                        </td>
+                                        <!-- <td>{{ expense.verified_expense_count  }}</td>
+                                        <td>{{ expense.expenses_model_count - expense.verified_expense_count  }}</td> -->
                                         <td>
                                             <!-- {{ expense.created_at ? moment(expense.created_at).format('ll') : '' }} -->
                                             {{ expense.created_at }}
@@ -190,8 +183,11 @@
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
                                     <td v-if="expenseVerifierRole || salesHeadRole">
                                         <div v-if="expenseBy.verified_status_id">
-                                            <div>{{ expenseBy.expense_verification_status.name }}</div>
-                                            <div v-if="salesHeadRole" class="btn btn-warning btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
+                                            <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': ''">{{ expenseBy.expense_verification_status.name }}</strong></div>
+                                            <div style="text-wrap: balance;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
+                                                {{ expenseBy.expense_rejected_remarks.remark }}
+                                            </div>
+                                            <div v-if="salesHeadRole" class="btn btn-light btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
                                         </div>
                                         <div v-else>
                                             <button type="button" class="btn btn-primary btn-sm" @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
@@ -205,20 +201,14 @@
                                             </button>
 
                                             <div class="btn-group">
-                                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :disabled="verifiyingId">
                                                     Reject
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="#" @click="verifyExpense(expenseBy,'rejected', 'id')">Reason 1</a>
-                                                    <a class="dropdown-item" href="#" @click="verifyExpense(expenseBy,'rejected', 'id')">Reason 2</a>
-                                                    <a class="dropdown-item" href="#" @click="verifyExpense(expenseBy,'rejected', 'id')">Reason 3</a>
-                                                    <a class="dropdown-item" href="#" @click="verifyExpense(expenseBy,'rejected', 'id')">Reason 4</a>
+                                                    <a class="dropdown-item" href="#" v-for="(rejected, rejectedIndex) in rejectedRemarks" :key="rejectedIndex" 
+                                                        @click="verifyExpense(expenseBy,'reject', rejected.id)">{{rejected.remark}}</a>
                                                 </div>
-                                            </div>  
-                                            <!-- <button type="button" class="btn btn-danger btn-sm" @click="verifyExpense(expenseBy,'reject')" :disabled="verifiyingId">
-                                                Reject
-                                                <span v-if="verifiyingId == expenseBy.id">...</span>
-                                            </button> -->
+                                            </div>
                                         </div>
                                     </td>
                                     <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
@@ -264,11 +254,15 @@ export default {
                 expensesCount: 0,
                 verifiedCount: 0,
                 unverifiedCount: 0,
-            }
+            },
+            rejectedRemarks: [],
+            expenseVerificationStatuses: []
         }
     },
     created(){
         this.fetchCompanies();
+        this.fetchExpenseRejectedRemarks();
+        this.fetchExpenseVerificationStatuses();
     },
     methods:{
         moment,
@@ -291,6 +285,24 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
+        fetchExpenseRejectedRemarks(){
+            axios.get('/expense-rejected-remarks')
+            .then(response => {
+                this.rejectedRemarks = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
+        fetchExpenseVerificationStatuses(){
+            axios.get('/expense-verification-statuses')
+            .then(response => {
+                this.expenseVerificationStatuses = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
         fetchExpenses(){
             this.errors = [];
             this.expenses = [];
@@ -305,16 +317,6 @@ export default {
                 this.expenses = response.data;
                 this.errors = []; 
                 this.fetchingExpense = false;
-
-                // this.expenseStatusCount = this.expenses.reduce((acc, item) => {
-                //     return {
-                //         verifiedCount: acc.verifiedCount + item.verified_expense_count,
-                //         unverifiedCount: acc.unverifiedCount + (item.expenses_model_count - item.verified_expense_count),
-                //         expensesCount: acc.expensesCount + item.expenses_model_count
-                //     };
-                // }, this.expenseStatusCount);
-
-
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -363,7 +365,7 @@ export default {
             let alertStatus = "mark as " + (mode == 'verify' ? 'verified' : ( mode == 'unverify' ? 'unverified' : 'rejected'))
             if(confirm(`Are you sure you want to ${alertStatus} this attachment?`)) {
                 vm.verifiyingId = expense.id;
-                axios.post(`/verify-expense-attachment/${expense.id}`,{mode})
+                axios.post(`/verify-expense-attachment/${expense.id}`,{mode, rejected_id: id})
                 .then(res => {
                     vm.doFetchExpenseByTsr(expense.expenses_entry_id)
                 })
@@ -371,6 +373,15 @@ export default {
         },
         isEmpty(data) {
             return _.isEmpty(data);
+        },
+        expenseStatus(item) {
+            let {verified_expense_count, unverified_expense_count, rejected_expense_count, pending_expense_count, expenses_model_count} = item;
+            return {
+                verified: verified_expense_count,
+                unverified: unverified_expense_count,
+                rejected: rejected_expense_count,
+                pending: pending_expense_count
+            }
         }
     },
     computed:{
@@ -382,15 +393,27 @@ export default {
                 // return expense.user.name.toLowerCase().includes(this.keywords.toLowerCase());
             });
 
-            if (this.expense_verify_status === 'verified') {
-
-                return filterExpense.filter(expense => expense.verified_expense_count > 0);
-
-            } else if (this.expense_verify_status === 'unverified') {
-
-                return filterExpense.filter(expense => expense.verified_expense_count == 0);
-
+            if (this.expense_verify_status != "") {
+                switch (this.expense_verify_status) {
+                    case 0:
+                        return filterExpense.filter(expense => expense.pending_expense_count > 0);
+                        break;
+                    case 1:
+                        return filterExpense.filter(expense => expense.verified_expense_count > 0);
+                        break;
+                    case 2:
+                        return filterExpense.filter(expense => expense.unverified_expense_count > 0);
+                        break;
+                    case 3:
+                        return filterExpense.filter(expense => expense.rejected_expense_count > 0);
+                        break;
+                }
             }
+            // if (this.expense_verify_status !== 'verified') {
+            //     return filterExpense.filter(expense => expense.verified_expense_count > 0);
+            // } else if (this.expense_verify_status === 'unverified') {
+            //     return filterExpense.filter(expense => expense.verified_expense_count == 0);
+            // }
 
             return filterExpense;
         },
@@ -399,16 +422,20 @@ export default {
             let expensesCount = 0;
             let verifiedCount = 0;
             let unverifiedCount = 0;
+            let rejectedCount = 0;
+            let pendingCount = 0;
 
             if(!_.isEmpty(self.filteredExpenses)) {
                 _.each(self.filteredExpenses, (item) => {
                     verifiedCount = verifiedCount + item.verified_expense_count;
-                    unverifiedCount = unverifiedCount + (item.expenses_model_count - item.verified_expense_count);
+                    unverifiedCount = unverifiedCount + item.unverified_expense_count;
+                    rejectedCount = rejectedCount + item.rejected_expense_count;
+                    pendingCount = pendingCount + item.pending_expense_count;
                     expensesCount = expensesCount + item.expenses_model_count;
                 })
             }
 
-            return {expensesCount, verifiedCount, unverifiedCount}
+            return {expensesCount, verifiedCount, unverifiedCount, rejectedCount, pendingCount}
         },
         totalPages() {
             return Math.ceil(this.filteredExpenses.length / this.itemsPerPage)
@@ -442,7 +469,7 @@ export default {
         salesHeadRole() {
             let userRole = [
                 4, // VP/Sales Head
-                1  // IT
+                // 1  // IT
             ];
             return _.includes(userRole, this.userRole);
         }
