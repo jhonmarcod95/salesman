@@ -9,6 +9,7 @@ use App\Expense;
 use App\ExpenseRate;
 use App\ExpensesType;
 use App\ExpenseBypass;
+use App\User;
 
 class AmountLimit implements Rule
 {
@@ -88,6 +89,17 @@ class AmountLimit implements Rule
     }
 
     /**
+     * Get the user who created the expense entry
+     */
+    public function checkIfPliliAgent()
+    {
+        return User::where('id',Auth::user()->id)
+                          ->whereHas('companies', function ($x) {
+                                $x->whereIn('companies.id',[5]); // if has FMCG-PL
+                            })->exists();
+    }
+
+    /**
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
@@ -96,10 +108,15 @@ class AmountLimit implements Rule
      */
     public function passes($attribute, $value)
     {
-
+        // if user is FMCG-PL
+        // if expense type is equal = 1 or food and the user is plili
+        $plFoodBudget = 0;
+        if($this->expenses_type_id == 1 && $this->checkIfPliliAgent()) {
+            $plFoodBudget = ExpensesType::find(25)->exists() ? ExpensesType::find(25)->amount_rate : 150; // 150; // Food-PL amount
+        }
         // default or maximum amount per expense type
         // daily limit
-        $defaultExpenseRate = ExpensesType::find($this->expenses_type_id)->amount_rate;
+        $defaultExpenseRate = $plFoodBudget > 0 ? $plFoodBudget : ExpensesType::find($this->expenses_type_id)->amount_rate;
 
         // determine if has maintained custom expense rate
         // daily limit

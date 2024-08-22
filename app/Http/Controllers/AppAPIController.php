@@ -519,6 +519,15 @@ class AppAPIController extends Controller
             'amount' => [new AmountLimit($request->input('types'), $expense->id, $this->checkBudget($request->input('types'))), 'required'],
         ]);
 
+        // check if the expense type from old vs new is not match
+        if($request->input('types') != $expense->expenses_type_id) {
+            $this->validate($request, [
+                'invalid_type' => 'required'
+            ],[
+                'invalid_types.required' => "Expense type cannot be changed. Delete this entry to modify the type."
+            ]);
+        }
+
         $expense->amount = $request->input('amount');
         $expense->expensesType()->associate($request->input('types'));
         $expense->save();
