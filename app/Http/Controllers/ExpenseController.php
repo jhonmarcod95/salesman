@@ -844,7 +844,7 @@ class ExpenseController extends Controller
         $start_date = "$first_of_month 00:00:01";
         $last_date = "$last_of_month 23:59:59";
 
-        $expensesEntry = ExpensesEntry::where('user_id', $user_id)
+        $expenses_entry = ExpensesEntry::where('user_id', $user_id)
             ->withCount('verifiedExpense')
             ->withCount('unverifiedExpense')
             ->withCount('rejectedExpense')
@@ -853,12 +853,26 @@ class ExpenseController extends Controller
             ->whereBetween('created_at', [$start_date, $last_date])
             ->get();
 
+        $not_verified_expense_count = 0;
+        $verified_expense_count = 0;
+        $unverified_expense_count = 0;
+        $rejected_expense_count = 0;
+        $total_expense_count = 0;
+
+        foreach ($expenses_entry as $expense) {
+            $verified_expense_count = $verified_expense_count + $expense->verified_expense_count;
+            $unverified_expense_count = $unverified_expense_count + $expense->unverified_expense_count;
+            $rejected_expense_count = $rejected_expense_count + $expense->rejected_expense_count;
+            $not_verified_expense_count = $not_verified_expense_count + $expense->pending_expense_count;
+            $total_expense_count = $total_expense_count + $expense->expenses_model_count;
+        }
+
         return [
-            'not_verified' => 0,
-            'verified' => 0,
-            'unverified' => 0,
-            'rejected' => 0,
-            'expense_count' => 0
+            'not_verified' => $not_verified_expense_count,
+            'verified' => $verified_expense_count,
+            'unverified' => $unverified_expense_count,
+            'rejected' => $rejected_expense_count,
+            'expense_count' => $total_expense_count
         ];
     }
 
@@ -877,14 +891,13 @@ class ExpenseController extends Controller
             })
             ->paginate($request->limit);
 
-        // $expenseMonthlyDmsReceive->getCollection()->transform(function($item) {
-            //Activate this once repart is merged to update status tagging update
-            // $item['expense_status'] = $this->getUserStatPerMonth($item['user_id'], $item['month'], $item['year']);
-            // return $item;
-        // });
+        $expenseMonthlyDmsReceive->getCollection()->transform(function($item) {
+            $item['expense_status'] = $this->getUserStatPerMonth($item['user_id'], $item['month'], $item['year']);
+            return $item;
+        });
 
         return $expenseMonthlyDmsReceive;
     }
     //====================================================================
-    
+
 }

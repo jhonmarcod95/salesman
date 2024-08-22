@@ -107,10 +107,10 @@
                                             {{ expense.expenses_model_count  }}
                                         </td>
                                         <td>
-                                            <p class="mb-0" style="line-height:1.3;"><small>Pending: {{ (expenseStatus(expense)).pending }}</small></p>
-                                            <p class="mb-0" style="line-height:1.3;"><small>Verified: {{ (expenseStatus(expense)).verified }}</small></p>
-                                            <p class="mb-0" style="line-height:1.3;"><small>Unverified: {{ (expenseStatus(expense)).unverified }}</small></p>
-                                            <p class="mb-0" style="line-height:1.3;"><small>Rejected: {{ (expenseStatus(expense)).rejected }}</small></p>
+                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Pending: </span>{{ (expenseStatus(expense)).pending }}</div>
+                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ (expenseStatus(expense)).verified }}</div>
+                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ (expenseStatus(expense)).unverified }}</div>
+                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ (expenseStatus(expense)).rejected }}</div>
                                         </td>
                                         <!-- <td>{{ expense.verified_expense_count  }}</td>
                                         <td>{{ expense.expenses_model_count - expense.verified_expense_count  }}</td> -->

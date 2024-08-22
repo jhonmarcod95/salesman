@@ -33,14 +33,6 @@
                                         <input type="month" class="form-control form-control-alternative" v-model="filterData.month_year" @input="searchKeyUp">
                                     </div>
                                 </div>
-                                <!-- <div class="col-md-3" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13"> -->
-                                    <!-- <div class="form-group">
-                                        <label class="form-control-label" for="role">Company</label>
-                                        <select class="form-control" v-model="filterData.company" @input="searchKeyUp">
-                                            <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
-                                        </select>
-                                    </div> -->
-                                <!-- </div> -->
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">Status</label> 
@@ -60,12 +52,6 @@
                                         Clear Filter
                                     </button> 
                                 </div>
-
-                                <!-- <div class="col-md-12">
-                                    <span>Attachment: {{ expensesCount || 0 }}</span> |
-                                    <span>Verified: {{ verifiedCount || 0 }}</span> |
-                                    <span class="text-warning">Unverified: {{ unverifiedCount || 0 }}</span>
-                                </div> -->
                             </div>
                         </div>
                         <div class="position-relative">
@@ -81,6 +67,8 @@
                                         <th scope="col">Company</th>
                                         <th scope="col">Month</th>
                                         <th scope="col">Year</th>
+                                        <th scope="col">Expense Status</th>
+                                        <th scope="col">Expense Count</th>
                                         <th scope="col">Date Submitted</th>
                                     </tr>
                                     </thead>
@@ -89,14 +77,17 @@
                                             <td colspan="10">Loading Data...</td>
                                         </tr>
                                         <tr v-else v-for="(expense, e) in items" v-bind:key="e">
-                                            <!-- <td class="text-right" v-if="userLevel != 5">
-                                                <button v-if="expense.id != null" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(expense.id, expense.tsr_name, expense.created_at)">View</button>
-                                            </td> -->
-                                            <!-- <td v-else></td> -->
                                             <td>{{ expense.user.name }}</td>
                                             <td>{{ expense.user.companies ? expense.user.companies[0].name : '' }}</td>
                                             <td>{{ expense.month }}</td>
                                             <td>{{ expense.year }}</td>
+                                            <td>
+                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ expense.expense_status.verified }}</div>
+                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ expense.expense_status.unverified }}</div>
+                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ expense.expense_status.rejected }}</div>
+                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Not Verified: </span>{{ expense.expense_status.not_verified }}</div>
+                                            </td>
+                                            <td>{{ expense.expense_status.expense_count }}</td>
                                             <td>
                                                 {{ expense.created_at | _date}}
                                             </td>
@@ -132,43 +123,6 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <!-- <div class="modal-body text-center">
-                  <div class="row">
-                        <div class="col"><h3>TSR: {{ tsrName }}</h3></div>
-                        <div class="col"><h3>Date: {{ moment(date).format('ll') }} </h3></div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table align-items-center table-flush">
-                            <thead class="thead-light">
-                            <tr>
-                                <th scope="col" v-if="expenseVerifierRole || salesHeadRole">Verify</th>
-                                <th scope="col">Attachment</th>
-                                <th scope="col">Type of Expense</th>
-                                <th scope="col">Date</th>
-                                <th scope="col">Amount</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
-                                    <td v-if="expenseVerifierRole || salesHeadRole">
-                                        <div v-if="expenseBy.is_verified">
-                                            <div>Verified</div>
-                                            <div v-if="salesHeadRole" class="btn btn-warning btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Unverify</div>
-                                        </div>
-                                        <button type="button" class="btn btn-primary btn-sm" v-else @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
-                                            Verify
-                                            <span v-if="verifiyingId == expenseBy.id">...</span>
-                                        </button>
-                                    </td>
-                                    <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
-                                    <td>{{ expenseBy.expenses_type.name }}</td>
-                                    <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
-                                    <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div> -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal">Close</button>
                 </div>
