@@ -213,4 +213,8 @@ class UserController extends Controller
         return $role[0]->name;
     }
 
+    public function selectionUsers() {
+        return User::all(['id','name']);
+    }
+
 }
