@@ -663,8 +663,33 @@ class ExpenseController extends Controller
         return view('expense.dms-received-index-report');
     }
 
+    public function getUserStatPerMonth($user_id, $month, $year) {
+        $dms_month_year = "$month $year";
+        $first_of_month = date('Y-m-d', strtotime("first day of $dms_month_year"));
+        $last_of_month = date('Y-m-d', strtotime("last day of $dms_month_year"));
+        $start_date = "$first_of_month 00:00:01";
+        $last_date = "$last_of_month 23:59:59";
+
+        $expensesEntry = ExpensesEntry::where('user_id', $user_id)
+            ->withCount('verifiedExpense')
+            ->withCount('unverifiedExpense')
+            ->withCount('rejectedExpense')
+            ->withCount('pendingExpense')
+            ->withCount('expensesModel')
+            ->whereBetween('created_at', [$start_date, $last_date])
+            ->get();
+
+        return [
+            'not_verified' => 0,
+            'verified' => 0,
+            'unverified' => 0,
+            'rejected' => 0,
+            'expense_count' => 0
+        ];
+    }
+
     public function dmsReceivedReportAll(Request $request) {
-        return ExpenseMonthlyDmsReceive::with('user:id,name', 'user.companies')
+        $expenseMonthlyDmsReceive = ExpenseMonthlyDmsReceive::with('user:id,name', 'user.companies', 'user.expenses')
             ->when(isset($request->user_id), function($q) use($request){
                 $q->whereHas('user', function($userQuery) use ($request){
                     $userQuery->where('id', $request->user_id);
@@ -677,6 +702,14 @@ class ExpenseController extends Controller
                 $q->where(['month' => $month, 'year' => $year]);
             })
             ->paginate($request->limit);
+
+        $expenseMonthlyDmsReceive->getCollection()->transform(function($item) {
+            //Activate this once repart is merged to update status tagging update
+            // $item['expense_status'] = $this->getUserStatPerMonth($item['user_id'], $item['month'], $item['year']);
+            return $item;
+        });
+
+        return $expenseMonthlyDmsReceive;
     }
     //====================================================================
 
