@@ -214,7 +214,12 @@ class UserController extends Controller
     }
 
     public function selectionUsers() {
-        return User::all(['id','name']);
+        return User::select(['id','name'])->whereHas('companies', function ($q) {
+            if(!Auth::user()->hasRole('it')) {
+                $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+            }
+        })
+        ->orderBy('name', 'ASC')
+        ->get();
     }
-
 }

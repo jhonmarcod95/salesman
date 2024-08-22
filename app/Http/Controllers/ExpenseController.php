@@ -889,6 +889,13 @@ class ExpenseController extends Controller
                 $year = date('Y', strtotime($date));
                 $q->where(['month' => $month, 'year' => $year]);
             })
+            ->whereHas('user', function ($q) {
+                $q->whereHas('companies', function ($q) {
+                    if (!Auth::user()->hasRole('it')) {
+                        $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                    }
+                });
+            })
             ->paginate($request->limit);
 
         $expenseMonthlyDmsReceive->getCollection()->transform(function($item) {
