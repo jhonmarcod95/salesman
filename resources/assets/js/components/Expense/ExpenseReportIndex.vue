@@ -186,31 +186,45 @@
                             <tbody>
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
                                     <td v-if="expenseVerifierRole || salesHeadRole">
-                                        <div v-if="expenseBy.verified_status_id">
-                                            <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': ''">{{ expenseBy.expense_verification_status.name }}</strong></div>
-                                            <div style="text-wrap: balance;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
-                                                {{ expenseBy.expense_rejected_remarks.remark }}
+                                        <div v-if="!isEmpty(expenseBy.dms_reference)">
+                                            <div v-if="!expenseBy.verified_status_id">
+                                                <em>Did Not Verified</em>
                                             </div>
-                                            <div v-if="salesHeadRole" class="btn btn-light btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
+                                            <div v-else>
+                                                <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': ''">{{ expenseBy.expense_verification_status.name }}</strong></div>
+                                                <div style="text-wrap: balance;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
+                                                    {{ expenseBy.expense_rejected_remarks.remark }}
+                                                </div>
+                                            </div>
+                                            <div><small><em>-DMS Received-</em></small></div>
                                         </div>
                                         <div v-else>
-                                            <button type="button" class="btn btn-primary btn-sm" @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
-                                                Verify
-                                                <span v-if="verifiyingId == expenseBy.id">...</span>
-                                            </button>
-
-                                            <button type="button" class="btn btn-warning btn-sm" @click="verifyExpense(expenseBy,'unverify')" :disabled="verifiyingId">
-                                                Unverify
-                                                <span v-if="verifiyingId == expenseBy.id">...</span>
-                                            </button>
-
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :disabled="verifiyingId">
-                                                    Reject
+                                            <div v-if="expenseBy.verified_status_id">
+                                                <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': ''">{{ expenseBy.expense_verification_status.name }}</strong></div>
+                                                <div style="text-wrap: balance;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
+                                                    {{ expenseBy.expense_rejected_remarks.remark }}
+                                                </div>
+                                                <div v-if="salesHeadRole" class="btn btn-light btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
+                                            </div>
+                                            <div v-else>
+                                                <button type="button" class="btn btn-primary btn-sm" @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
+                                                    Verify
+                                                    <span v-if="verifiyingId == expenseBy.id">...</span>
                                                 </button>
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="#" v-for="(rejected, rejectedIndex) in rejectedRemarks" :key="rejectedIndex" 
-                                                        @click="verifyExpense(expenseBy,'reject', rejected.id)">{{rejected.remark}}</a>
+
+                                                <button type="button" class="btn btn-warning btn-sm" @click="verifyExpense(expenseBy,'unverify')" :disabled="verifiyingId">
+                                                    Unverify
+                                                    <span v-if="verifiyingId == expenseBy.id">...</span>
+                                                </button>
+
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :disabled="verifiyingId">
+                                                        Reject
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="#" v-for="(rejected, rejectedIndex) in rejectedRemarks" :key="rejectedIndex" 
+                                                            @click="verifyExpense(expenseBy,'reject', rejected.id)">{{rejected.remark}}</a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
