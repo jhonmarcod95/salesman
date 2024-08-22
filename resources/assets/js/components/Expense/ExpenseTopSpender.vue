@@ -14,7 +14,7 @@
                                 </div>
                                 <div class="d-flex">
                                     <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-report"> Expenses Report</a></div>
-                                    <div><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
+                                    <div v-if="salesHeadRole"><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
                                     <div><a class="btn btn-sm btn-default mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
                                 </div>
                             </div>
@@ -122,6 +122,7 @@
     import JsonExcel from 'vue-json-excel'
 
     export default {
+        props:['userLevel','userRole','expenseVerifier'],
         components: {
             JsonExcel
         },
@@ -325,6 +326,23 @@
                 }
 
                 return queues_array;
+            },
+            expenseVerifierRole() {
+                let userLevel = [
+                    4, // Coordinator
+                    9  // IT
+                ];
+
+                return _.includes(userLevel, this.userLevel) || this.expenseVerifier;
+            },
+            salesHeadRole() {
+                let userRole = [
+                    1,  // IT,
+                    2,  // President,
+                    3,  // EVP,
+                    4,  // VP/Sales Head
+                ];
+                return _.includes(userRole, this.userRole);
             }
         }
     }

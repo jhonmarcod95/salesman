@@ -14,7 +14,7 @@
                                 </div>
                                 <div class="d-flex">
                                     <div><a class="btn btn-sm btn-default mr-2" href="/expenses-report"> Expenses Report</a></div>
-                                    <div><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
+                                    <div v-if="salesHeadRole"><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
                                     <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
                                 </div>
                             </div>
@@ -256,9 +256,9 @@ export default {
             fetchingExpense: false,
             expenses: [],
             expenseByTsr: [],
-            startDate: '2023-12-01',
-            endDate: '2023-12-10',
-            company: 4,
+            startDate: '',
+            endDate: '',
+            company: null,
             expense_verify_status: '',
             tsrName: '',
             date: '',
@@ -486,8 +486,10 @@ export default {
         },
         salesHeadRole() {
             let userRole = [
-                4, // VP/Sales Head
-                // 1  // IT
+                1,  // IT,
+                2,  // President,
+                3,  // EVP,
+                4,  // VP/Sales Head
             ];
             return _.includes(userRole, this.userRole);
         }
