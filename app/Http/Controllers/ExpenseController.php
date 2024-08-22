@@ -703,11 +703,11 @@ class ExpenseController extends Controller
             })
             ->paginate($request->limit);
 
-        $expenseMonthlyDmsReceive->getCollection()->transform(function($item) {
+        // $expenseMonthlyDmsReceive->getCollection()->transform(function($item) {
             //Activate this once repart is merged to update status tagging update
             // $item['expense_status'] = $this->getUserStatPerMonth($item['user_id'], $item['month'], $item['year']);
-            return $item;
-        });
+            // return $item;
+        // });
 
         return $expenseMonthlyDmsReceive;
     }
