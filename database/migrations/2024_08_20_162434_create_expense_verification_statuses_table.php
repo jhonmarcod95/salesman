@@ -15,7 +15,8 @@ class CreateExpenseVerificationStatusesTable extends Migration
     {
         Schema::create('expense_verification_statuses', function (Blueprint $table) {
             $table->increments('id');
-            $table->name('char',50);
+            // $table->name('char',50);
+            $table->string('name',50);
             $table->timestamps();
             $table->softDeletes();
         });
