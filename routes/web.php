@@ -160,7 +160,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Get all expenses
     Route::get('/expenses-all', 'ExpenseController@indexExpenseData');
     // Show Expense Report page
-    Route::get('/expenses-report', 'ExpenseController@index');
+    // Route::get('/expenses-report', 'ExpenseController@index');
 
     Route::get('/historical-expenses-report', 'ExpenseController@historicalExpenseReport');
     Route::get('/historical-expenses-report-data', 'ExpenseController@historicalExpenseReportData');
@@ -173,6 +173,12 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::group(['prefix' => 'dms-received-expense'], function () {
         Route::get('/', 'ExpenseController@dmsReceivedReportIndex');
         Route::get('/all', 'ExpenseController@dmsReceivedReportAll');
+    });
+
+    //Expense v2
+    Route::group(['prefix' => '/expenses-report'], function() {
+        Route::get('/', 'ExpenseController@index');
+        Route::get('/all', 'ExpenseController@getExpensePerUser');
     });
 
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');

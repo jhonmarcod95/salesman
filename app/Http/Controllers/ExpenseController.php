@@ -256,6 +256,62 @@ class ExpenseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+     public function getExpensePerUser(Request $request) {
+        $start_date = "$request->start_date 00:00:01";
+        $end_date = "$request->end_date 23:59:59";
+        $company = $request->company;
+        $userExpense = User::select('id', 'name', 'company_id', 'email')
+            ->with('company:id,code,name',
+            'expensesEntries:id,totalExpenses,user_id,created_at')
+            ->when($company, function ($q) use ($company) {
+                $q->whereHas('companies', function ($q) use ($company) {
+                    $q->where('company_id', $company);
+                });
+            })
+            ->with(['expensesEntries' => function($q) use($start_date, $end_date) {
+                $q->whereBetween('created_at',  [$start_date, $end_date])
+                ->withCount('expensesModel')
+                ->withCount('verifiedExpense')
+                ->withCount('unverifiedExpense')
+                ->withCount('rejectedExpense')
+                ->withCount('pendingExpense');
+            }])
+            ->paginate(10);
+
+        $userExpense->getCollection()->transform(function($item) {
+            $expenses_model_count   = 0;
+            $verified_expense_count = 0;
+            $unverified_expense_count = 0;
+            $rejected_expense_count = 0;
+            $pending_expense_count  = 0;
+            $total_expenses         = 0;
+
+            if(count($item->expensesEntries)) {
+                foreach($item->expensesEntries as $expenses) {
+                    $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
+                    $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
+                    $unverified_expense_count = $unverified_expense_count + $expenses->unverified_expense_count;
+                    $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
+                    $pending_expense_count    = $pending_expense_count + $expenses->pending_expense_count;
+                    $total_expenses           = $total_expenses + $expenses->totalExpenses;
+                }
+            }
+
+            $data['name'] = $item->name;
+            $data['company'] = $item->company->name;
+            $data['expense_entry_count'] = count($item->expensesEntries);
+            $data['expenses_model_count'] = $expenses_model_count;
+            $data['verified_expense_count'] = $verified_expense_count;
+            $data['unverified_expense_count'] = $unverified_expense_count;
+            $data['rejected_expense_count'] = $rejected_expense_count;
+            $data['pending_expense_count'] = $pending_expense_count;
+            $data['total_expenses'] = $total_expenses;
+            return $data;
+        });
+
+        return $userExpense;
+     }
     
     public function generateByCompany(Request $request){
         $request->validate([
