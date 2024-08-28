@@ -10,7 +10,7 @@
                         <div class="card-header border-0">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h3 class="mb-0">Expenses Report2</h3>
+                                    <h3 class="mb-0">Expenses Report</h3>
                                 </div>
                                 <div class="d-flex">
                                     <div><a class="btn btn-sm btn-default mr-2" href="/expenses-report"> Expenses Report</a></div>
@@ -24,27 +24,28 @@
                                 <div class="col-md-3 float-left">
                                     <div class="form-group">
                                         <label for="name" class="form-control-label">Search</label> 
-                                        <input type="text" class="form-control" placeholder="Search" id="name" v-model="filterData.name">
+                                        <app-select :options="users" v-model="filterData.user_id" label="name" @input="searchKeyUp"/>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="start_date" class="form-control-label">Start Date</label> 
-                                        <input type="date" id="start_date" class="form-control form-control-alternative" v-model="filterData.start_date">
+                                        <input type="date" id="start_date" class="form-control form-control-alternative" v-model="filterData.start_date" @input="searchKeyUp">
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">End Date</label> 
-                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="filterData.end_date">
+                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="filterData.end_date" @input="searchKeyUp">
                                     </div>
                                 </div>
                                 <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
                                     <div class="form-group">
                                         <label class="form-control-label" for="role">Company</label>
-                                        <select class="form-control" v-model="filterData.company">
+                                        <!-- <select class="form-control" v-model="filterData.company">
                                             <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
-                                        </select>
+                                        </select> -->
+                                        <app-select :options="companies" v-model="filterData.company" label="name" @input="searchKeyUp"/>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -52,16 +53,19 @@
                                         <label for="end_date" class="form-control-label">Status</label> 
 
                                         <select class="form-control" v-model="filterData.expense_verify_status">
-                                            <option value=""> Select Status </option>
+                                            <option value=""> All </option>
                                             <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
                                             <option value="0">Pending</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-1">
-                                    <button class="btn btn-sm btn-primary mt-4" @click="fetchExpenses">
+                                    <!-- <button class="btn btn-sm btn-primary mt-4" @click="fetchExpenses">
                                         Filter
                                         <span v-if="fetchingExpense">...</span>
+                                    </button>  -->
+                                    <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">
+                                        Clear Filter
                                     </button> 
                                 </div>
 
@@ -257,6 +261,8 @@ export default {
             companies: [],
             rejectedRemarks: [],
             expenseVerificationStatuses: [],
+            users: [],
+            verifiedExpenseStats: [],
 
             filterData: {
                 start_date: '2023-12-01',
@@ -268,10 +274,12 @@ export default {
         }
     },
     created(){
+        this.getSelectOptions('users', '/selection-users')
         this.getSelectOptions('companies', '/companies-all')
         this.getSelectOptions('rejectedRemarks', '/expense-rejected-remarks')
         this.getSelectOptions('expenseVerificationStatuses', '/expense-verification-statuses')
         this.fetchList();
+        this.getVerifiedStats()
     },
     methods:{
         moment,
@@ -347,6 +355,31 @@ export default {
                 rejected: rejected_expense_count,
                 pending: pending_expense_count
             }
+        },
+        getVerifiedStats() {
+            // '/verified-stat'
+            axios.get(`${this.endpoint}/verified-stat`, {params: this.filterData})
+            .then(response => { 
+                this.verifiedExpenseStats = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
+        searchKeyUp() {
+            clearTimeout(this.keyTimeout);
+            this.keyTimeout = setTimeout(() => {
+                this.isProcessing = true;
+                this.fetchList();
+                this.getVerifiedStats();
+            }, 500)
+        },
+        resetSearch() {
+            this.filterData = {
+                start_date: moment().startOf('month').format('YYYY-MM-DD'),
+                end_date: moment().endOf('month').format('YYYY-MM-DD'),
+            };
+            this.fetchList();
         }
     },
     computed:{

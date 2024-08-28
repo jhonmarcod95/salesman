@@ -29,6 +29,7 @@ use GuzzleHttp\Exception\RequestException;
 
 use DB;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
+use phpDocumentor\Reflection\Types\This;
 use ZipArchive;
 
 class ExpenseController extends Controller
@@ -252,18 +253,20 @@ class ExpenseController extends Controller
     }
 
     /**
-     * Get all Expenses by company
+     * Handle common query for expense per user
      *
-     * @return \Illuminate\Http\Response
      */
-
-     public function getExpensePerUser(Request $request) {
+    public function expensePerUserCommonQuery($request) {
         $start_date = "$request->start_date 00:00:01";
         $end_date = "$request->end_date 23:59:59";
         $company = $request->company;
-        $userExpense = User::select('id', 'name', 'company_id', 'email')
+
+        return User::select('id', 'name', 'company_id', 'email')
             ->with('company:id,code,name',
             'expensesEntries:id,totalExpenses,user_id,created_at')
+            ->when(isset($request->user_id), function($q) use($request){
+                $q->where('id', $request->user_id);
+            })
             ->when($company, function ($q) use ($company) {
                 $q->whereHas('companies', function ($q) use ($company) {
                     $q->where('company_id', $company);
@@ -276,10 +279,20 @@ class ExpenseController extends Controller
                 ->withCount('unverifiedExpense')
                 ->withCount('rejectedExpense')
                 ->withCount('pendingExpense');
-            }])
-            ->paginate(10);
+            }]);
+    }
+
+    /**
+     * Get all Expenses by user
+     *
+     * @return \Illuminate\Http\Response
+     */
+     public function getExpensePerUser(Request $request) {
+        $userExpense = ($this->expensePerUserCommonQuery($request))->orderBy('name', 'ASC')->paginate($request->limit);
 
         $userExpense->getCollection()->transform(function($item) {
+            if(!$item) return;
+
             $expenses_model_count   = 0;
             $verified_expense_count = 0;
             $unverified_expense_count = 0;
@@ -299,7 +312,7 @@ class ExpenseController extends Controller
             }
 
             $data['name'] = $item->name;
-            $data['company'] = $item->company->name;
+            $data['company'] = isset($item->company) ? $item->company->name : '-';
             $data['expense_entry_count'] = count($item->expensesEntries);
             $data['expenses_model_count'] = $expenses_model_count;
             $data['verified_expense_count'] = $verified_expense_count;
@@ -311,6 +324,34 @@ class ExpenseController extends Controller
         });
 
         return $userExpense;
+     }
+
+     public function getExpenseVerifiedStat(Request $request) {
+        $userExpenses = ($this->expensePerUserCommonQuery($request))->has('expensesEntries')->get();
+        return $userExpenses->transform(function($item) {
+            $expenses_model_count   = 0;
+            $verified_expense_count = 0;
+            $unverified_expense_count = 0;
+            $rejected_expense_count = 0;
+            $pending_expense_count  = 0;
+
+            if (count($item->expensesEntries)) {
+                foreach ($item->expensesEntries as $expenses) {
+                    $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
+                    $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
+                    $unverified_expense_count = $unverified_expense_count + $expenses->unverified_expense_count;
+                    $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
+                    $pending_expense_count    = $pending_expense_count + $expenses->pending_expense_count;
+                }
+            }
+
+            $data['expenses_model_count'] = $expenses_model_count;
+            $data['verified_expense_count'] = $verified_expense_count;
+            $data['unverified_expense_count'] = $unverified_expense_count;
+            $data['rejected_expense_count'] = $rejected_expense_count;
+            $data['pending_expense_count'] = $pending_expense_count;
+            return $data;
+        });
      }
     
     public function generateByCompany(Request $request){
@@ -952,6 +993,7 @@ class ExpenseController extends Controller
                     }
                 });
             })
+            ->orderBy('created_at', 'DESC')
             ->paginate($request->limit);
 
         $expenseMonthlyDmsReceive->getCollection()->transform(function($item) {
