@@ -42,17 +42,15 @@
                                 <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
                                     <div class="form-group">
                                         <label class="form-control-label" for="role">Company</label>
-                                        <!-- <select class="form-control" v-model="filterData.company">
-                                            <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
-                                        </select> -->
                                         <app-select :options="companies" v-model="filterData.company" label="name" @input="searchKeyUp"/>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">Status</label> 
-
-                                        <select class="form-control" v-model="filterData.expense_verify_status">
+                                        <!-- allOption -->
+                                        <!-- <app-select :options="expenseVerificationStatuses" v-model="filterData.expense_verify_status" label="name" :all-option="true" @input="searchKeyUp"/> -->
+                                        <select class="form-control" v-model="filterData.expense_verify_status" @input="searchKeyUp">
                                             <option value=""> All </option>
                                             <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
                                             <option value="0">Pending</option>
@@ -60,10 +58,6 @@
                                     </div>
                                 </div>
                                 <div class="col-md-1">
-                                    <!-- <button class="btn btn-sm btn-primary mt-4" @click="fetchExpenses">
-                                        Filter
-                                        <span v-if="fetchingExpense">...</span>
-                                    </button>  -->
                                     <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">
                                         Clear Filter
                                     </button> 

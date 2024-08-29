@@ -260,10 +260,10 @@ class ExpenseController extends Controller
         $start_date = "$request->start_date 00:00:01";
         $end_date = "$request->end_date 23:59:59";
         $company = $request->company;
+        $verify_status = $request->expense_verify_status;
 
         return User::select('id', 'name', 'company_id', 'email')
-            ->with('company:id,code,name',
-            'expensesEntries:id,totalExpenses,user_id,created_at')
+            ->with('company:id,code,name')
             ->when(isset($request->user_id), function($q) use($request){
                 $q->where('id', $request->user_id);
             })
@@ -272,7 +272,19 @@ class ExpenseController extends Controller
                     $q->where('company_id', $company);
                 });
             })
-            ->with(['expensesEntries' => function($q) use($start_date, $end_date) {
+
+            //Require only users with Expenses Entries when filtering verify status
+            ->when(isset($verify_status), function($verifyStatusQuery) use($start_date, $end_date, $verify_status){
+                $verifyStatusQuery->whereHas('expensesEntries', function ($expensesEntriesQuery) use ($start_date, $end_date, $verify_status) {
+                    $expensesEntriesQuery->whereBetween('created_at',  [$start_date, $end_date])
+                    ->has('expensesModel')
+                    ->whereHas('expensesModel', function ($expensesModelQuery) use ($verify_status) {
+                        $expensesModelQuery->where('verified_status_id', $verify_status);
+                    });
+                });
+            })
+
+            ->with(['expensesEntries' => function($q) use($start_date, $end_date, $verify_status) {
                 $q->whereBetween('created_at',  [$start_date, $end_date])
                 ->withCount('expensesModel')
                 ->withCount('verifiedExpense')
