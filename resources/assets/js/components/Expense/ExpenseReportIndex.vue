@@ -57,7 +57,7 @@
                                         <select class="form-control" v-model="expense_verify_status">
                                             <option value=""> Select Status </option>
                                             <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
-                                            <option value="0">Pending</option>
+                                            <!-- <option value="0">Pending</option> -->
                                         </select>
                                     </div>
                                 </div>
@@ -72,8 +72,8 @@
                                     <span>Attachment: {{ filteredExpensesStats.expensesCount }}</span> |
                                     <span>Verified: {{ filteredExpensesStats.verifiedCount }}</span> |
                                     <span>Unverified: {{ filteredExpensesStats.unverifiedCount }}</span> |
-                                    <span class="text-warning">Rejected: {{ filteredExpensesStats.rejectedCount }}</span> |
-                                    <span>Pending: {{ filteredExpensesStats.pendingCount }}</span>
+                                    <span class="text-warning">Rejected: {{ filteredExpensesStats.rejectedCount }}</span>
+                                    <!-- <span>Pending: {{ filteredExpensesStats.pendingCount }}</span> -->
                                 </div>
                             </div>
                         </div>
@@ -107,7 +107,7 @@
                                             {{ expense.expenses_model_count  }}
                                         </td>
                                         <td>
-                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Pending: </span>{{ (expenseStatus(expense)).pending }}</div>
+                                            <!-- <div class="mb-0"><span style="width:90px; display: inline-block;">Pending: </span>{{ (expenseStatus(expense)).pending }}</div> -->
                                             <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ (expenseStatus(expense)).verified }}</div>
                                             <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ (expenseStatus(expense)).unverified }}</div>
                                             <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ (expenseStatus(expense)).rejected }}</div>
@@ -176,7 +176,7 @@
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
-                                <th scope="col" v-if="expenseVerifierRole || salesHeadRole">Verify</th>
+                                <th scope="col" v-if="expenseVerifierRole || salesHeadRole || isItRole">Verify</th>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Entry Date</th>
@@ -185,7 +185,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
-                                    <td v-if="expenseVerifierRole || salesHeadRole">
+                                    <td v-if="expenseVerifierRole || salesHeadRole || isItRole">
                                         <div v-if="!isEmpty(expenseBy.dms_reference)">
                                             <div v-if="!expenseBy.verified_status_id">
                                                 <em>Did Not Verified</em>
@@ -199,7 +199,7 @@
                                             <div><small><em>-DMS Received-</em></small></div>
                                         </div>
                                         <div v-else>
-                                            <div v-if="expenseBy.verified_status_id">
+                                            <div v-if="!(expenseBy.verified_status_id == 0 || expenseBy.verified_status_id == 2)">
                                                 <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': ''">{{ expenseBy.expense_verification_status.name }}</strong></div>
                                                 <div style="text-wrap: balance;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
                                                     {{ expenseBy.expense_rejected_remarks.remark }}
@@ -212,10 +212,10 @@
                                                     <span v-if="verifiyingId == expenseBy.id">...</span>
                                                 </button>
 
-                                                <button type="button" class="btn btn-warning btn-sm" @click="verifyExpense(expenseBy,'unverify')" :disabled="verifiyingId">
+                                                <!-- <button type="button" class="btn btn-warning btn-sm" @click="verifyExpense(expenseBy,'unverify')" :disabled="verifiyingId">
                                                     Unverify
                                                     <span v-if="verifiyingId == expenseBy.id">...</span>
-                                                </button>
+                                                </button> -->
 
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :disabled="verifiyingId">
@@ -229,7 +229,13 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td> <a :href="imageLink+expenseBy.attachment" target="__blank"><img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage"></a></td>
+                                    <td> 
+                                        <img v-if="expenseBy.attachment == 'attachments/default.jpg'" class="rounded-circle" :src="`${imgOrigin}/img/brand/no-image.png`" style="height: 70px; width: 90px;">
+
+                                        <a v-else :href="imageLink+expenseBy.attachment" target="__blank" @click="markAsUnverified(expenseBy)">
+                                            <img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage">
+                                        </a>
+                                    </td>
                                     <td>{{ expenseBy.expenses_type.name }}</td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
@@ -256,9 +262,9 @@ export default {
             fetchingExpense: false,
             expenses: [],
             expenseByTsr: [],
-            startDate: '',
-            endDate: '',
-            company: null,
+            startDate: '2023-12-01',
+            endDate: '2023-12-31',
+            company: 2,
             expense_verify_status: '',
             tsrName: '',
             date: '',
@@ -274,7 +280,8 @@ export default {
                 unverifiedCount: 0,
             },
             rejectedRemarks: [],
-            expenseVerificationStatuses: []
+            expenseVerificationStatuses: [],
+            imgOrigin: window.location.origin
         }
     },
     created(){
@@ -379,6 +386,8 @@ export default {
             return this.currentPage == (this.totalPages - 1) ? false : true;
         },
         verifyExpense(expense, mode, id = null) {
+            if(!(this.expenseVerifierRole || this.isItRole)) { return; }
+
             let vm = this;
             let alertStatus = "mark as " + (mode == 'verify' ? 'verified' : ( mode == 'unverify' ? 'unverified' : 'rejected'))
             if(confirm(`Are you sure you want to ${alertStatus} this attachment?`)) {
@@ -389,6 +398,18 @@ export default {
                 })
             }
         },
+        markAsUnverified(expense) {
+            //Return if already verified
+            if(!(this.expenseVerifierRole)) { return; }
+
+            //Return if already verified
+            if(expense.verified_status_id > 0) { return }
+
+            axios.post(`/verify-expense-attachment/${expense.id}`,{mode: 'unverify'})
+            .then(res => {
+                this.doFetchExpenseByTsr(expense.expenses_entry_id)
+            })
+        },
         isEmpty(data) {
             return _.isEmpty(data);
         },
@@ -396,9 +417,9 @@ export default {
             let {verified_expense_count, unverified_expense_count, rejected_expense_count, pending_expense_count, expenses_model_count} = item;
             return {
                 verified: verified_expense_count,
-                unverified: unverified_expense_count,
+                unverified: unverified_expense_count + pending_expense_count,
                 rejected: rejected_expense_count,
-                pending: pending_expense_count
+                // pending: pending_expense_count
             }
         }
     },
@@ -413,14 +434,14 @@ export default {
 
             if (this.expense_verify_status != "") {
                 switch (this.expense_verify_status) {
-                    case 0:
-                        return filterExpense.filter(expense => expense.pending_expense_count > 0);
-                        break;
+                    // case 0:
+                    //     return filterExpense.filter(expense => expense.pending_expense_count > 0);
+                    //     break;
                     case 1:
                         return filterExpense.filter(expense => expense.verified_expense_count > 0);
                         break;
                     case 2:
-                        return filterExpense.filter(expense => expense.unverified_expense_count > 0);
+                        return filterExpense.filter(expense => (expense.unverified_expense_count + expense.pending_expense_count) > 0);
                         break;
                     case 3:
                         return filterExpense.filter(expense => expense.rejected_expense_count > 0);
@@ -446,9 +467,9 @@ export default {
             if(!_.isEmpty(self.filteredExpenses)) {
                 _.each(self.filteredExpenses, (item) => {
                     verifiedCount = verifiedCount + item.verified_expense_count;
-                    unverifiedCount = unverifiedCount + item.unverified_expense_count;
+                    unverifiedCount = unverifiedCount + (item.unverified_expense_count + item.pending_expense_count);
                     rejectedCount = rejectedCount + item.rejected_expense_count;
-                    pendingCount = pendingCount + item.pending_expense_count;
+                    // pendingCount = pendingCount + item.pending_expense_count;
                     expensesCount = expensesCount + item.expenses_model_count;
                 })
             }
@@ -473,16 +494,18 @@ export default {
             return queues_array;
         },
         imageLink(){
-            // return 'http://salesforce.lafilgroup.net:8666/storage/';
+            return 'http://salesforce.lafilgroup.net:8666/storage/';
             return window.location.origin+'/storage/';
         },
         expenseVerifierRole() {
             let userLevel = [
                 4, // Coordinator
-                9  // IT
             ];
 
             return _.includes(userLevel, this.userLevel) || this.expenseVerifier;
+        },
+        isItRole() {
+            return this.userRole == 1  // IT
         },
         salesHeadRole() {
             let userRole = [

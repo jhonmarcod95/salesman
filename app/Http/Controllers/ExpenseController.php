@@ -103,10 +103,26 @@ class ExpenseController extends Controller
             ->whereDate('created_at' ,'<=', $request->endDate)
             ->has('expensesModel')
             ->when($verify_status, function ($q) use ($verify_status) {
-                if($verify_status == "unverified") {
-                    $q->doesntHave('verifiedExpense');
-                } else {
-                    $q->has('verifiedExpense');
+                // if($verify_status == "unverified") {
+                //     $q->doesntHave('verifiedExpense');
+                // } else {
+                //     $q->has('verifiedExpense');
+                // }
+
+                switch ($verify_status) {
+                    case 1:
+                        # Verified...
+                        $q->has('verifiedExpense');
+                        break;
+                    case 3:
+                        # Rejected...
+                        $q->has('rejectedExpense');
+                        break;
+                    default:
+                        # Pending and Unverified...
+                        $q->has('pendingExpense');
+                        $q->orHas('rejectedExpense');
+                        break;
                 }
             })
             ->withCount('expensesModel')
@@ -192,10 +208,26 @@ class ExpenseController extends Controller
             })
             ->has('expensesModel')
             ->when($verify_status, function ($q) use ($verify_status) {
-                if($verify_status == "unverified") {
-                    $q->doesntHave('verifiedExpense');
-                } else {
-                    $q->has('verifiedExpense');
+                // if($verify_status == "unverified") {
+                //     $q->doesntHave('verifiedExpense');
+                // } else {
+                //     $q->has('verifiedExpense');
+                // }
+
+                switch ($verify_status) {
+                    case 1:
+                        # Verified...
+                        $q->has('verifiedExpense');
+                        break;
+                    case 3:
+                        # Rejected...
+                        $q->has('rejectedExpense');
+                        break;
+                    default:
+                        # Pending and Unverified...
+                        $q->has('pendingExpense');
+                        $q->orHas('unverifiedExpense');
+                        break;
                 }
             })
             ->withCount('expensesModel')
