@@ -48,8 +48,6 @@
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">Status</label> 
-                                        <!-- allOption -->
-                                        <!-- <app-select :options="expenseVerificationStatuses" v-model="filterData.expense_verify_status" label="name" :all-option="true" @input="searchKeyUp"/> -->
                                         <select class="form-control" v-model="filterData.expense_verify_status" @input="searchKeyUp">
                                             <option value=""> All </option>
                                             <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
@@ -97,7 +95,7 @@
                                         </tr>
                                         <tr v-else v-for="(user, e) in items" v-bind:key="e">
                                             <td class="text-right" v-if="userLevel != 5">
-                                                <!-- <button v-if="user.id != null" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(expense.id, expense.tsr_name, expense.created_at)">View</button> -->
+                                                <button v-if="user.id != null" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(expense.id, expense.tsr_name, expense.created_at)">View</button>
                                             </td>
                                             <td v-else></td>
                                             <td>{{ user.name }}</td>

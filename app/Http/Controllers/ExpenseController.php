@@ -323,6 +323,7 @@ class ExpenseController extends Controller
                 }
             }
 
+            $data['id'] = $item->id;
             $data['name'] = $item->name;
             $data['company'] = isset($item->company) ? $item->company->name : '-';
             $data['expense_entry_count'] = count($item->expensesEntries);
