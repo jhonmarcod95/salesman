@@ -70,11 +70,11 @@
                                 </div>
 
                                 <div class="col-md-12">
-                                    <span>Attachment: 0 </span> |
-                                    <span>Verified: 0 </span> |
-                                    <span>Unverified: 0 </span> |
-                                    <span class="text-warning">Rejected: 0 </span> |
-                                    <span>Pending: 0 </span>
+                                    <span>Attachment: {{ verifiedExpenseStats.expenses_model_count || 0 }} </span> |
+                                    <span>Verified: {{ verifiedExpenseStats.verified_expense_count || 0 }} </span> |
+                                    <span>Unverified: {{ verifiedExpenseStats.unverified_expense_count || 0 }} </span> |
+                                    <span class="text-warning">Rejected: {{ verifiedExpenseStats.rejected_expense_count || 0 }} </span> |
+                                    <span>Pending: {{ verifiedExpenseStats.pending_expense_count || 0 }} </span>
                                 </div>
                             </div>
                         </div>
@@ -357,7 +357,6 @@ export default {
             }
         },
         getVerifiedStats() {
-            // '/verified-stat'
             axios.get(`${this.endpoint}/verified-stat`, {params: this.filterData})
             .then(response => { 
                 this.verifiedExpenseStats = response.data;
@@ -376,10 +375,13 @@ export default {
         },
         resetSearch() {
             this.filterData = {
-                start_date: moment().startOf('month').format('YYYY-MM-DD'),
-                end_date: moment().endOf('month').format('YYYY-MM-DD'),
+                start_date: '2023-12-01',
+                end_date: '2023-12-31',
+                //start_date: moment().startOf('month').format('YYYY-MM-DD'),
+                //end_date: moment().endOf('month').format('YYYY-MM-DD'),
             };
             this.fetchList();
+            this.getVerifiedStats();
         }
     },
     computed:{

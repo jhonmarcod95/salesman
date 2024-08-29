@@ -267,7 +267,7 @@ class ExpenseController extends Controller
             ->when(isset($request->user_id), function($q) use($request){
                 $q->where('id', $request->user_id);
             })
-            ->when($company, function ($q) use ($company) {
+            ->when(isset($request->company), function ($q) use ($company) {
                 $q->whereHas('companies', function ($q) use ($company) {
                     $q->where('company_id', $company);
                 });
@@ -328,13 +328,14 @@ class ExpenseController extends Controller
 
      public function getExpenseVerifiedStat(Request $request) {
         $userExpenses = ($this->expensePerUserCommonQuery($request))->has('expensesEntries')->get();
-        return $userExpenses->transform(function($item) {
-            $expenses_model_count   = 0;
-            $verified_expense_count = 0;
-            $unverified_expense_count = 0;
-            $rejected_expense_count = 0;
-            $pending_expense_count  = 0;
 
+        $expenses_model_count   = 0;
+        $verified_expense_count = 0;
+        $unverified_expense_count = 0;
+        $rejected_expense_count = 0;
+        $pending_expense_count  = 0;
+
+        foreach($userExpenses as $item) {
             if (count($item->expensesEntries)) {
                 foreach ($item->expensesEntries as $expenses) {
                     $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
@@ -344,14 +345,15 @@ class ExpenseController extends Controller
                     $pending_expense_count    = $pending_expense_count + $expenses->pending_expense_count;
                 }
             }
+        }
 
-            $data['expenses_model_count'] = $expenses_model_count;
-            $data['verified_expense_count'] = $verified_expense_count;
-            $data['unverified_expense_count'] = $unverified_expense_count;
-            $data['rejected_expense_count'] = $rejected_expense_count;
-            $data['pending_expense_count'] = $pending_expense_count;
-            return $data;
-        });
+        return [
+            'expenses_model_count' => $expenses_model_count,
+            'verified_expense_count' => $verified_expense_count,
+            'unverified_expense_count' => $unverified_expense_count,
+            'rejected_expense_count' => $rejected_expense_count,
+            'pending_expense_count' => $pending_expense_count
+        ];
      }
     
     public function generateByCompany(Request $request){
