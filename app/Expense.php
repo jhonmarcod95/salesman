@@ -15,6 +15,7 @@ class Expense extends Model implements Auditable
         'remarks',
         'dms_reference',
         'expense_rejected_reason_id',
+        'rejected_deducted_amount',
         'verified_status_id',
         'verified_by',
         'date_verified',

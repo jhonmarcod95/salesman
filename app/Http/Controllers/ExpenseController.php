@@ -826,8 +826,19 @@ class ExpenseController extends Controller
     }
 
     public function verifyAttachment(Request $request, $expenseId) {
+        if($request->mode == 'reject') {
+            $request->validate([
+                'rejected_reason_id' => 'required',
+                'deducted_amount' => 'required_if:rejected_reason_id,4',
+            ], [
+                'rejected_reason_id.required' => "Reject reason field is required.",
+                'deducted_amount.required_if' => "Input amount to be deducted from declared amount.",
+            ]);
+        }
+
         $user_id =  Auth::user()->id;
-        $rejected_id = isset($request->rejected_id) ? $request->rejected_id : null;
+        $rejected_id = isset($request->rejected_reason_id) ? $request->rejected_reason_id : null;
+        $deducted_amount = null;
         $date = now();
 
         switch ($request->mode) {
@@ -844,12 +855,14 @@ class ExpenseController extends Controller
                 break;
             case 'reject':
                 $status = 3;
+                $deducted_amount = $rejected_id == 4 ? (int) $request->deducted_amount : null;
                 break;
         }
 
         Expense::find($expenseId)->update([
             'verified_status_id' => $status,
             'expense_rejected_reason_id' => $rejected_id,
+            'rejected_deducted_amount' => $deducted_amount,
             'verified_by' => $user_id,
             'date_verified' => $date,
         ]);

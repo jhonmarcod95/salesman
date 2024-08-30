@@ -135,6 +135,7 @@ Vue.component('aapc-farmer-index', require('./components/AapcFarmer/AapcFarmerIn
 Vue.component('table-pagination', require('./components/Common/TablePagination.vue'));
 Vue.component('app-block-ui', require('./components/Common/BlockUi.vue'));
 Vue.component('app-select', require('./components/Common/Select2.vue'));
+Vue.component('error-messages', require('./components/Common/ErrorMessage.vue'));
 
 const app = new Vue({
     el: '#app',
