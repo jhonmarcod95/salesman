@@ -316,9 +316,9 @@ export default {
             fetchingExpense: false,
             expenses: [],
             expenseByTsr: [],
-            startDate: '2023-12-01',
-            endDate: '2023-12-31',
-            company: 2,
+            startDate: '',
+            endDate: '',
+            company: null,
             expense_verify_status: '',
             tsrName: '',
             date: '',
@@ -523,11 +523,6 @@ export default {
                         break;
                 }
             }
-            // if (this.expense_verify_status !== 'verified') {
-            //     return filterExpense.filter(expense => expense.verified_expense_count > 0);
-            // } else if (this.expense_verify_status === 'unverified') {
-            //     return filterExpense.filter(expense => expense.verified_expense_count == 0);
-            // }
 
             return filterExpense;
         },
@@ -569,7 +564,7 @@ export default {
             return queues_array;
         },
         imageLink(){
-            return 'http://salesforce.lafilgroup.net:8666/storage/';
+            // return 'http://salesforce.lafilgroup.net:8666/storage/';
             return window.location.origin+'/storage/';
         },
         expenseVerifierRole() {
