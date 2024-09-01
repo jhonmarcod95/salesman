@@ -20,6 +20,7 @@ use App\{
     ExpenseVerificationStatus,
     ExpenseVerificationRejectedRemarks
 };
+use App\Rules\ExpenseDeductionRule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -829,7 +830,7 @@ class ExpenseController extends Controller
         if($request->mode == 'reject') {
             $request->validate([
                 'rejected_reason_id' => 'required',
-                'deducted_amount' => 'required_if:rejected_reason_id,4',
+                'deducted_amount' => ['required_if:rejected_reason_id,4', new ExpenseDeductionRule($expenseId)],
             ], [
                 'rejected_reason_id.required' => "Reject reason field is required.",
                 'deducted_amount.required_if' => "Input amount to be deducted from declared amount.",
