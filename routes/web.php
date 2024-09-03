@@ -173,6 +173,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::group(['prefix' => 'dms-received-expense'], function () {
         Route::get('/', 'ExpenseController@dmsReceivedReportIndex');
         Route::get('/all', 'ExpenseController@dmsReceivedReportAll');
+        Route::get('/not-received-expense', 'ExpenseController@dmsPendingReceivedReportAll');
     });
 
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');

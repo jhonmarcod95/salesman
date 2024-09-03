@@ -14,20 +14,20 @@
 
         <nav v-if="!limitOnly">
             <ul class="pagination justify-content-center mb-0">
-                <li class="page-item" @click="goToPage(pagination.prev_page_url)"><a class="page-link" href="#"><i class="fa fa-chevron-left"></i></a></li>
+                <li class="page-item" @click="goToPage(pagination.prev_page_url)"><a class="page-link"><i class="fa fa-chevron-left"></i></a></li>
                 
                 <li class="page-item" 
                     v-for="(count, index) in 5"
                     :key="index"
-                    v-if="!pagination.total"><a class="page-link" href="#">{{count}}</a></li>
+                    v-if="!pagination.total"><a class="page-link">{{count}}</a></li>
 
                 <li class="page-item"
                     :class="{ 'btn-hover-primary active' : range == pagination.current_page }"
                     v-for="(range, index) in pagination.range"
                     :key="index"
-                    @click="goToPage(range)"><a class="page-link" href="#">{{range}}</a></li>
+                    @click="goToPage(range)"><a class="page-link">{{range}}</a></li>
 
-                <li class="page-item" @click="goToPage(pagination.next_page_url)"><a class="page-link" href="#"><i class="fa fa-chevron-right"></i></a></li>
+                <li class="page-item" @click="goToPage(pagination.next_page_url)"><a class="page-link"><i class="fa fa-chevron-right"></i></a></li>
             </ul>
         </nav>
     </div>

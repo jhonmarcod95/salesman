@@ -838,7 +838,7 @@ class ExpenseController extends Controller
         }
 
         $user_id =  Auth::user()->id;
-        $rejected_id = isset($request->rejected_reason_id) ? $request->rejected_reason_id : null;
+        $rejected_id = null;
         $deducted_amount = null;
         $date = now();
 
@@ -856,6 +856,7 @@ class ExpenseController extends Controller
                 break;
             case 'reject':
                 $status = 3;
+                $rejected_id = isset($request->rejected_reason_id) ? $request->rejected_reason_id : null;
                 $deducted_amount = $rejected_id == 4 ? (int) $request->deducted_amount : null;
                 break;
         }
@@ -899,7 +900,7 @@ class ExpenseController extends Controller
             ->whereBetween('created_at', [$start_date, $last_date])
             ->get();
 
-        $not_verified_expense_count = 0;
+        // $not_verified_expense_count = 0;
         $verified_expense_count = 0;
         $unverified_expense_count = 0;
         $rejected_expense_count = 0;
@@ -907,14 +908,14 @@ class ExpenseController extends Controller
 
         foreach ($expenses_entry as $expense) {
             $verified_expense_count = $verified_expense_count + $expense->verified_expense_count;
-            $unverified_expense_count = $unverified_expense_count + $expense->unverified_expense_count;
+            $unverified_expense_count = $unverified_expense_count + ($expense->unverified_expense_count + $expense->pending_expense_count);
             $rejected_expense_count = $rejected_expense_count + $expense->rejected_expense_count;
-            $not_verified_expense_count = $not_verified_expense_count + $expense->pending_expense_count;
+            // $not_verified_expense_count = $not_verified_expense_count + $expense->pending_expense_count;
             $total_expense_count = $total_expense_count + $expense->expenses_model_count;
         }
 
         return [
-            'not_verified' => $not_verified_expense_count,
+            // 'not_verified' => $not_verified_expense_count,
             'verified' => $verified_expense_count,
             'unverified' => $unverified_expense_count,
             'rejected' => $rejected_expense_count,
@@ -922,34 +923,101 @@ class ExpenseController extends Controller
         ];
     }
 
-    public function dmsReceivedReportAll(Request $request) {
-        $expenseMonthlyDmsReceive = ExpenseMonthlyDmsReceive::with('user:id,name', 'user.companies', 'user.expenses')
-            ->when(isset($request->user_id), function($q) use($request){
-                $q->whereHas('user', function($userQuery) use ($request){
+    public function dmsReceivedReportCommonQuery($request) {
+        $company_id = $request->company_id;
+        return ExpenseMonthlyDmsReceive::when(isset($request->user_id), function ($q) use ($request) {
+                $q->whereHas('user', function ($userQuery) use ($request) {
                     $userQuery->where('id', $request->user_id);
                 });
             })
-            ->when(isset($request->month_year), function($q) use($request){
+            ->when(isset($request->month_year), function ($q) use ($request) {
                 $date = date('Y-m-t 23:59:59', strtotime($request->month_year));
                 $month = date('F', strtotime($date));
                 $year = date('Y', strtotime($date));
                 $q->where(['month' => $month, 'year' => $year]);
             })
-            ->whereHas('user', function ($q) {
-                $q->whereHas('companies', function ($q) {
-                    if (!Auth::user()->hasRole('it')) {
-                        $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+            ->whereHas('user', function ($q) use($company_id) {
+                $q->whereHas('companies', function ($q) use ($company_id){
+                    if (isset($company_id)) {
+                        $q->where('company_id', $company_id);
+                    } else {
+                        if (!Auth::user()->hasRole('it')) {
+                            $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                        }
                     }
                 });
-            })
-            ->paginate($request->limit);
+            });
+    }
 
-        $expenseMonthlyDmsReceive->getCollection()->transform(function($item) {
+    public function dmsReceivedReportAll(Request $request) {
+        $expenseMonthlyDmsReceive = ($this->dmsReceivedReportCommonQuery($request))->with('user:id,name', 'user.companies', 'user.expenses')->paginate($request->limit);
+        $expenseMonthlyDmsReceive->getCollection()->transform(function ($item) {
             $item['expense_status'] = $this->getUserStatPerMonth($item['user_id'], $item['month'], $item['year']);
             return $item;
         });
 
         return $expenseMonthlyDmsReceive;
+    }
+
+    public function dmsPendingReceivedReportAll(Request $request) {
+        $expenseUserMonthlyDmsReceive = ($this->dmsReceivedReportCommonQuery($request))->select('user_id')->get()->pluck('user_id')->toArray();
+        
+        $first_day = date('Y-m-01 00:00:01', strtotime($request->month_year));
+        $last_day = date('Y-m-t 23:59:59', strtotime($request->month_year));
+        $company_id = $request->company_id;
+        $user_id = $request->user_id;
+
+        //Get MOnth and year
+        $date = date('Y-m-t 23:59:59', strtotime($request->month_year));
+        $month = date('F', strtotime($date));
+        $year = date('Y', strtotime($date));
+
+        //Get user who does not submit expense to DMS ========================
+        $noDmsExpensesUserIds = ExpensesEntry::select('id', 'user_id')
+            ->when(isset($user_id), function($q) use($user_id, $expenseUserMonthlyDmsReceive){
+                if(empty($expenseUserMonthlyDmsReceive)) {
+                    $q->where('user_id', $user_id);
+                } else {
+                    //Filter invalid id to return null
+                    $q->where('user_id', '--');
+                }
+            })
+            ->when(!isset($user_id), function($q) use($expenseUserMonthlyDmsReceive){
+                //Add default invalid user id if no dms received match
+                if (empty($expenseUserMonthlyDmsReceive)) {
+                    $expenseUserMonthlyDmsReceive[0] = 0;
+                }
+                $q->whereNotIn('user_id', $expenseUserMonthlyDmsReceive);
+            })
+            ->when(isset($request->month_year), function($q) use($first_day, $last_day){
+                $q->whereBetween('created_at', [$first_day, $last_day]);
+            })
+            ->whereHas('user', function ($q) use($company_id){
+                $q->whereHas('companies', function ($q) use($company_id){
+                    if(isset($company_id)) {
+                        $q->where('company_id', $company_id);
+                    } else {
+                        if (!Auth::user()->hasRole('it')) {
+                            $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                        }    
+                    }
+                });
+            })
+            ->get()
+            ->unique('user_id')
+            ->pluck('user_id')
+            ->toArray();
+        //===================================================================
+
+        $noDmsExpensesUser = User::select('id','name')->with('companies')->whereIn('id', $noDmsExpensesUserIds)->paginate($request->limit);
+        $noDmsExpensesUser->getCollection()->transform(function ($item) use($month, $year){
+            $item['expense_status'] = $this->getUserStatPerMonth($item['id'], $month, $year);
+            $item['month'] = $month;
+            $item['year'] = $year;
+            return $item;
+        });
+
+        return $noDmsExpensesUser;
     }
     //====================================================================
 
