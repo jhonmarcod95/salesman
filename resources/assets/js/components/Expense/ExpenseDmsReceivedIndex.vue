@@ -23,7 +23,7 @@
                             <div class="row ml-2">
                                 <div class="col-md-3 float-left">
                                     <div class="form-group">
-                                        <label for="name" class="form-control-label">User</label> 
+                                        <label for="name" class="form-control-label">Company</label> 
                                         <app-select :options="companies" v-model="filterData.company_id" label="name" @input="searchKeyUp"/>
                                     </div>
                                 </div>
