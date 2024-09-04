@@ -309,16 +309,14 @@ class ExpenseController extends Controller
             $verified_expense_count = 0;
             $unverified_expense_count = 0;
             $rejected_expense_count = 0;
-            $pending_expense_count  = 0;
             $total_expenses         = 0;
 
             if(count($item->expensesEntries)) {
                 foreach($item->expensesEntries as $expenses) {
                     $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
                     $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
-                    $unverified_expense_count = $unverified_expense_count + $expenses->unverified_expense_count;
+                    $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
                     $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
-                    $pending_expense_count    = $pending_expense_count + $expenses->pending_expense_count;
                     $total_expenses           = $total_expenses + $expenses->totalExpenses;
                 }
             }
@@ -331,7 +329,6 @@ class ExpenseController extends Controller
             $data['verified_expense_count'] = $verified_expense_count;
             $data['unverified_expense_count'] = $unverified_expense_count;
             $data['rejected_expense_count'] = $rejected_expense_count;
-            $data['pending_expense_count'] = $pending_expense_count;
             $data['total_expenses'] = $total_expenses;
             return $data;
         });
@@ -346,16 +343,14 @@ class ExpenseController extends Controller
         $verified_expense_count = 0;
         $unverified_expense_count = 0;
         $rejected_expense_count = 0;
-        $pending_expense_count  = 0;
 
         foreach($userExpenses as $item) {
             if (count($item->expensesEntries)) {
                 foreach ($item->expensesEntries as $expenses) {
                     $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
                     $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
-                    $unverified_expense_count = $unverified_expense_count + $expenses->unverified_expense_count;
+                    $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
                     $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
-                    $pending_expense_count    = $pending_expense_count + $expenses->pending_expense_count;
                 }
             }
         }
@@ -365,7 +360,6 @@ class ExpenseController extends Controller
             'verified_expense_count' => $verified_expense_count,
             'unverified_expense_count' => $unverified_expense_count,
             'rejected_expense_count' => $rejected_expense_count,
-            'pending_expense_count' => $pending_expense_count
         ];
      }
     

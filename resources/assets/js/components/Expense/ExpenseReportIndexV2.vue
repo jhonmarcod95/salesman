@@ -65,8 +65,7 @@
                                     <span>Attachment: {{ verifiedExpenseStats.expenses_model_count || 0 }} </span> |
                                     <span>Verified: {{ verifiedExpenseStats.verified_expense_count || 0 }} </span> |
                                     <span>Unverified: {{ verifiedExpenseStats.unverified_expense_count || 0 }} </span> |
-                                    <span class="text-warning">Rejected: {{ verifiedExpenseStats.rejected_expense_count || 0 }} </span> |
-                                    <span>Pending: {{ verifiedExpenseStats.pending_expense_count || 0 }} </span>
+                                    <span class="text-warning">Rejected: {{ verifiedExpenseStats.rejected_expense_count || 0 }} </span>
                                 </div>
                             </div>
                         </div>
@@ -103,9 +102,8 @@
                                             <td>{{ user.expense_entry_count }}</td>
                                             <td>{{ user.expenses_model_count }}</td>
                                             <td>
-                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Pending: </span>{{ user.pending_expense_count }}</div>
-                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ user.verified_expense_count }}</div>
                                                 <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ user.unverified_expense_count }}</div>
+                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ user.verified_expense_count }}</div>
                                                 <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ user.rejected_expense_count }}</div>
                                             </td>
                                             <td>PHP {{ user.total_expenses | _amount }}</td>
