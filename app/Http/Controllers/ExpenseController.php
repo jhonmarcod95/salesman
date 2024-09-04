@@ -391,7 +391,7 @@ class ExpenseController extends Controller
      */
     public function show($id)
     {
-        return Expense::with('expensesType','payments','expenseVerificationStatus:id,name','expenseRejectedRemarks:id,remark')
+        return Expense::with('expensesType','payments','expenseVerificationStatus:id,name','expenseRejectedRemarks:id,remark', 'representaion:id,expense_id,attendees,purpose', 'verifier:id,name')
             ->whereHas('expensesEntry', function($q) use ($id){
                 $q->where('id', $id);
             })

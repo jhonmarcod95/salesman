@@ -205,6 +205,11 @@
                                                     {{ expenseBy.expense_rejected_remarks.remark }}
                                                     <div v-if="expenseBy.expense_rejected_reason_id == 4">(Deduct PHP{{ expenseBy.rejected_deducted_amount | _amount }}) </div>
                                                 </div>
+                                                <div class="mt-2" v-if="isItRole">
+                                                    <div><small>{{expenseBy.verifier.name}}</small></div>
+                                                    <small>{{expenseBy.date_verified | _date}}</small>
+                                                </div>
+
                                                 <div v-if="salesHeadRole" class="btn btn-light btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
                                             </div>
                                             <div v-else>
@@ -242,7 +247,16 @@
                                             <img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage">
                                         </a>
                                     </td>
-                                    <td>{{ expenseBy.expenses_type.name }}</td>
+                                    <td style="white-space:unset; max-width:250px">
+                                        <div>{{ expenseBy.expenses_type.name }}</div>
+                                        <div v-if="!isEmpty(expenseBy.representaion)">
+                                            <div class="mt-2"><strong>Purpose</strong></div> 
+                                            {{expenseBy.representaion.purpose}}
+                                                
+                                            <div class="mt-1"><strong>Attendees</strong></div>
+                                            {{expenseBy.representaion.attendees}}
+                                        </div>
+                                    </td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
                                 </tr>
