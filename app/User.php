@@ -50,6 +50,27 @@ class User extends Authenticatable implements Auditable
         return $this->hasMany(ExpensesEntry::class);
     }
 
+    public function expensesModel() {
+        return $this->hasManyThrough(Expense::class, ExpensesEntry::class);
+    }
+
+    public function verifiedExpense() {
+        return $this->hasManyThrough(Expense::class, ExpensesEntry::class)->where('verified_status_id', 1);
+    }
+
+    public function unverifiedExpense() {
+        return $this->hasManyThrough(Expense::class, ExpensesEntry::class)->where('verified_status_id', 2);
+    }
+
+    public function rejectedExpense() {
+        return $this->hasManyThrough(Expense::class, ExpensesEntry::class)->where('verified_status_id', 3);
+    }
+
+    public function pendingExpense() {
+        return $this->hasManyThrough(Expense::class, ExpensesEntry::class)->where('verified_status_id', 0);
+    }
+
+
     public function schedules() {
         return $this->hasMany(Schedule::class);
     }

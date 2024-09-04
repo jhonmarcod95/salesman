@@ -30,6 +30,7 @@ use GuzzleHttp\Exception\RequestException;
 
 use DB;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
+use phpDocumentor\Reflection\Types\This;
 use ZipArchive;
 
 class ExpenseController extends Controller
@@ -285,10 +286,115 @@ class ExpenseController extends Controller
     }
 
     /**
-     * Get all Expenses by company
+     * Handle common query for expense per user
+     *
+     */
+    public function expensePerUserCommonQuery($request) {
+        $start_date = "$request->start_date 00:00:01";
+        $end_date = "$request->end_date 23:59:59";
+        $company = $request->company;
+        $verify_status = $request->expense_verify_status;
+
+        return User::select('id', 'name', 'company_id', 'email')
+            ->with('company:id,code,name')
+            ->when(isset($request->user_id), function($q) use($request){
+                $q->where('id', $request->user_id);
+            })
+            ->when(isset($request->company), function ($q) use ($company) {
+                $q->whereHas('companies', function ($q) use ($company) {
+                    $q->where('company_id', $company);
+                });
+            })
+
+            //Require only users with Expenses Entries when filtering verify status
+            ->when(isset($verify_status), function($verifyStatusQuery) use($start_date, $end_date, $verify_status){
+                $verifyStatusQuery->whereHas('expensesEntries', function ($expensesEntriesQuery) use ($start_date, $end_date, $verify_status) {
+                    $expensesEntriesQuery->whereBetween('created_at',  [$start_date, $end_date])
+                    ->has('expensesModel')
+                    ->whereHas('expensesModel', function ($expensesModelQuery) use ($verify_status) {
+                        $expensesModelQuery->where('verified_status_id', $verify_status);
+                    });
+                });
+            })
+
+            ->with(['expensesEntries' => function($q) use($start_date, $end_date, $verify_status) {
+                $q->whereBetween('created_at',  [$start_date, $end_date])
+                ->withCount('expensesModel')
+                ->withCount('verifiedExpense')
+                ->withCount('unverifiedExpense')
+                ->withCount('rejectedExpense')
+                ->withCount('pendingExpense');
+            }]);
+    }
+
+    /**
+     * Get all Expenses by user
      *
      * @return \Illuminate\Http\Response
      */
+     public function getExpensePerUser(Request $request) {
+        $userExpense = ($this->expensePerUserCommonQuery($request))->orderBy('name', 'ASC')->paginate($request->limit);
+
+        $userExpense->getCollection()->transform(function($item) {
+            if(!$item) return;
+
+            $expenses_model_count   = 0;
+            $verified_expense_count = 0;
+            $unverified_expense_count = 0;
+            $rejected_expense_count = 0;
+            $total_expenses         = 0;
+
+            if(count($item->expensesEntries)) {
+                foreach($item->expensesEntries as $expenses) {
+                    $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
+                    $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
+                    $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
+                    $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
+                    $total_expenses           = $total_expenses + $expenses->totalExpenses;
+                }
+            }
+
+            $data['id'] = $item->id;
+            $data['name'] = $item->name;
+            $data['company'] = isset($item->company) ? $item->company->name : '-';
+            $data['expense_entry_count'] = count($item->expensesEntries);
+            $data['expenses_model_count'] = $expenses_model_count;
+            $data['verified_expense_count'] = $verified_expense_count;
+            $data['unverified_expense_count'] = $unverified_expense_count;
+            $data['rejected_expense_count'] = $rejected_expense_count;
+            $data['total_expenses'] = $total_expenses;
+            return $data;
+        });
+
+        return $userExpense;
+     }
+
+     public function getExpenseVerifiedStat(Request $request) {
+        $userExpenses = ($this->expensePerUserCommonQuery($request))->has('expensesEntries')->get();
+
+        $expenses_model_count   = 0;
+        $verified_expense_count = 0;
+        $unverified_expense_count = 0;
+        $rejected_expense_count = 0;
+
+        foreach($userExpenses as $item) {
+            if (count($item->expensesEntries)) {
+                foreach ($item->expensesEntries as $expenses) {
+                    $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
+                    $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
+                    $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
+                    $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
+                }
+            }
+        }
+
+        return [
+            'expenses_model_count' => $expenses_model_count,
+            'verified_expense_count' => $verified_expense_count,
+            'unverified_expense_count' => $unverified_expense_count,
+            'rejected_expense_count' => $rejected_expense_count,
+        ];
+     }
     
     public function generateByCompany(Request $request){
         $request->validate([
