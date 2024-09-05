@@ -458,7 +458,7 @@ export default {
         },
         verifyExpense(expense, mode, id = null) {
             //return if not allowed to verify
-            if(!(this.expenseVerifierRole || this.isItRole)) { return; }
+            if(!(this.expenseVerifierRole || this.isItRole || this.salesHeadRole)) { return; }
             
             //reset error message if any
             this.rejectExpenseError = {};
