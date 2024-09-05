@@ -15,10 +15,13 @@ let mix = require('laravel-mix');
 //    .sass('resources/assets/sass/app.scss', 'public/css');
 
 
-mix.styles([
-    'public/css/argon.css',
-    'resources/assets/css/style.css'
+mix.sass('resources/assets/sass/app.scss', 'public/css/scss-app.css')
+.styles([
+    // 'public/css/argon.css',
+    // 'resources/assets/css/style.css',
+    'public/css/scss-app.css'
 ], 'public/css/all.css')
+
 .js([
 	'resources/assets/js/app.js',
     // 'node_modules/popper.js/dist/popper.js.map',

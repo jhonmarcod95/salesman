@@ -125,8 +125,54 @@
             </div>
         </div>
 
+        <div class="custom-modal-container" :class="isRejecModalOpen ? 'display-block' : ''" tabindex="0" role="dialog">
+            <div class="modal border border-danger">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCompanyLabel">Reject Expense</h5>
+                </div>
+                <div class="modal-body" v-if="!isEmpty(selectedExpense)">
+                    <div class="d-flex mb-4 p-3 border">
+                        <div class="col">
+                            <span><strong>Amount:</strong></span> 
+                            <br> PHP {{selectedExpense.amount | _amount}}
+                        </div>
+                        <div class="col">
+                            <span><strong>Expense Type:</strong></span> 
+                            <br> {{selectedExpense.expenses_type.name}}
+                        </div>
+                        <div class="col">
+                            <span><strong>Entry Date:</strong></span> 
+                            <br> {{selectedExpense.created_at | _date }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-control-label">Select Reject Reason  (<em class="text-danger">* required</em>)</label> 
+                        <app-select :options="rejectedRemarks" v-model="rejectedExpense.rejected_reason_id" label="remark"/>
+                    </div>
+
+                    <div class="form-group" v-if="rejectedExpense.rejected_reason_id == 4">
+                        <label class="form-control-label">Enter Amount To Deduct (<em class="text-danger">* required</em>)</label> 
+                        <input type="number" class="form-control" v-model="rejectedExpense.deducted_amount">
+                    </div>
+                    
+                    <!-- Start: Error Message-->
+                    <error-messages :form-errors="rejectExpenseError" v-if="!isEmpty(rejectExpenseError)"/>
+                    <!-- End: Error Message -->    
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-round btn-fill" @click="closeRejectExpenseModal">Close</button>
+                    <button type="button" class="btn btn-danger btn-round btn-fill" @click="verifyExpense(selectedExpense, 'reject')">
+                        Submit Reject
+                        <span v-if="verifiyingId">...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- View Expense Modal -->
-        <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="viewModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <span class="closed" data-dismiss="modal">&times;</span>
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
@@ -161,7 +207,7 @@
                                             </div>
                                             <div v-else>
                                                 <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': ''">{{ expenseBy.expense_verification_status.name }}</strong></div>
-                                                <div style="text-wrap: balance;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
+                                                <div style="text-wrap: wrap;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
                                                     {{ expenseBy.expense_rejected_remarks.remark }}
                                                 </div>
                                             </div>
@@ -170,7 +216,7 @@
                                         <div v-else>
                                             <div v-if="!(expenseBy.verified_status_id == 0 || expenseBy.verified_status_id == 2)">
                                                 <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': ''">{{ expenseBy.expense_verification_status.name }}</strong></div>
-                                                <div style="text-wrap: balance;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
+                                                <div style="text-wrap: wrap;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
                                                     {{ expenseBy.expense_rejected_remarks.remark }}
                                                     <div v-if="expenseBy.expense_rejected_reason_id == 4">(Deduct PHP{{ expenseBy.rejected_deducted_amount | _amount }}) </div>
                                                 </div>
@@ -266,12 +312,13 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal" @click="">Close</button>
                     <button type="button" class="btn btn-danger btn-round btn-fill" @click="verifyExpense(selectedExpense, 'reject')">Submit Reject</button>
                 </div>
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -323,7 +370,8 @@ export default {
             selectedUser: {},
             selectedExpense: {},
             rejectedExpense: {},
-            rejectExpenseError: {}
+            rejectExpenseError: {},
+            isRejecModalOpen: false
 
         }
     },
@@ -382,7 +430,7 @@ export default {
         },
         verifyExpense(expense, mode, id = null) {
             //return if not allowed to verify
-            if(!(this.expenseVerifierRole || this.isItRole)) { return; }
+            if(!(this.expenseVerifierRole || this.isItRole || this.salesHeadRole)) { return; }
             
             //reset error message if any
             this.rejectExpenseError = {};
@@ -395,8 +443,9 @@ export default {
                 .then(res => {
                     vm.doFetchExpenseByTsr(expense.user_id)
                     vm.fetchInitialData();
+                    vm.closeRejectExpenseModal();
                     // $('#viewModal').modal('show');
-                    $('#rejectModal').modal('hide');
+                    // $('#rejectModal').modal('hide');
                 })
                 .catch(error => {
                     if(error.response.status === 422) {
@@ -404,6 +453,7 @@ export default {
                     } else {
                         this.errors = error.response.data.errors;
                     }
+                    vm.verifiyingId = null;
                 })
             }
         },
@@ -423,7 +473,14 @@ export default {
             this.selectedExpense = expense;
             this.rejectedExpense = {};
             this.rejectExpenseError = {};
-            $('#rejectModal').modal('show');
+            this.isRejecModalOpen = true
+            // $('#rejectModal').modal('show');
+        },
+        closeRejectExpenseModal() {
+            this.selectedExpense = {};
+            this.rejectedExpense = {};
+            this.rejectExpenseError = {};
+            this.isRejecModalOpen = false
         },
         expenseStatus(item) {
             let {verified_expense_count, unverified_expense_count, rejected_expense_count, pending_expense_count, expenses_model_count} = item;

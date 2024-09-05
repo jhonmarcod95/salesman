@@ -1,14 +1,47 @@
 
-// Fonts
-@import url('https://fonts.googleapis.com/css?family=Nunito');
+// // Fonts
+// @import url('https://fonts.googleapis.com/css?family=Nunito');
 
-// Variables
-@import 'variables';
+// // Variables
+// @import 'variables';
 
-// Bootstrap
-@import '~bootstrap/scss/bootstrap';
+// // Bootstrap
+// @import '~bootstrap/scss/bootstrap';
 
-.navbar-laravel {
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+// .navbar-laravel {
+//   background-color: #fff;
+//   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+// }
+
+.custom-modal-container {
+  position: fixed;
+  z-index: 1060 !important;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: none;
+  overflow-y: scroll;
+  outline: 0;
+  background: #0000002b;
+  .modal {
+    border-radius: .4375rem;
+    background: white;
+    width: 800px;
+    min-height: 500px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    margin: auto;
+    margin-top: 200px;
+  }
+}
+
+.display-block {
+  display: block !important;
+}
+
+.display-none {
+  display: none !important;
 }
