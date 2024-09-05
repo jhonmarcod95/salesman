@@ -181,6 +181,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
         Route::get('/', 'ExpenseController@index');
         Route::get('/all', 'ExpenseController@getExpensePerUser');
         Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
+        Route::get('/expenses/{user_id}', 'ExpenseController@show2');
     });
 
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
@@ -194,7 +195,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Fetch expense report by date per user
     Route::get('/expense-report-bydate-peruser/{ids}', 'ExpenseController@generateBydatePerUser');
     // Fetch expense report by date
-    Route::get('/expense-report/{id}', 'ExpenseController@show');
+    Route::get('/expense-report/{id}', 'ExpenseController@show'); //TODO: Remove
     // Add Expenses
     Route::post('/expenses', 'ExpenseController@store');
     // Update Expenses

@@ -222,21 +222,6 @@
                                                     Reject
                                                     <span v-if="verifiyingId == expenseBy.id">...</span>
                                                 </button>
-
-                                                <!-- <button type="button" class="btn btn-warning btn-sm" @click="verifyExpense(expenseBy,'unverify')" :disabled="verifiyingId">
-                                                    Unverify
-                                                    <span v-if="verifiyingId == expenseBy.id">...</span>
-                                                </button> -->
-
-                                                <!-- <div class="btn-group">
-                                                    <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :disabled="verifiyingId">
-                                                        Reject
-                                                    </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="#" v-for="(rejected, rejectedIndex) in rejectedRemarks" :key="rejectedIndex" 
-                                                            @click="verifyExpense(expenseBy,'reject', rejected.id)">{{rejected.remark}}</a>
-                                                    </div>
-                                                </div> -->
                                             </div>
                                         </div>
                                     </td>
@@ -312,7 +297,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default btn-round btn-fill modal-reject-close" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-danger btn-round btn-fill" @click="verifyExpense(selectedExpense, 'reject')">Submit Reject</button>
                 </div>
                 </div>

@@ -296,7 +296,7 @@ class ExpenseController extends Controller
         $verify_status = $request->expense_verify_status;
 
         return User::select('id', 'name', 'company_id', 'email')
-            ->with('company:id,code,name')
+            ->with('company:id,code,name', 'roles')
             ->when(isset($request->user_id), function($q) use($request){
                 $q->where('id', $request->user_id);
             })
@@ -304,6 +304,9 @@ class ExpenseController extends Controller
                 $q->whereHas('companies', function ($q) use ($company) {
                     $q->where('company_id', $company);
                 });
+            })
+            ->whereHas('roles', function($q) {
+                $q->whereIn('role_id', [2,3,4,5,6,7,8,9,10]);
             })
 
             //Require only users with Expenses Entries when filtering verify status
@@ -363,6 +366,7 @@ class ExpenseController extends Controller
             $data['unverified_expense_count'] = $unverified_expense_count;
             $data['rejected_expense_count'] = $rejected_expense_count;
             $data['total_expenses'] = $total_expenses;
+            $data['roles'] = $item->roles;
             return $data;
         });
 
@@ -495,11 +499,35 @@ class ExpenseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id) /**TODO: REMOVE*/
     {
         return Expense::with('expensesType','payments','expenseVerificationStatus:id,name','expenseRejectedRemarks:id,remark', 'representaion:id,expense_id,attendees,purpose', 'verifier:id,name')
             ->whereHas('expensesEntry', function($q) use ($id){
                 $q->where('id', $id);
+            })
+            ->get();
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show2(Request $request, $user_id) {
+        $start_date = "$request->start_date 00:00:01";
+        $end_date = "$request->end_date 23:59:59";
+
+        return Expense::with(
+                'expensesType', 
+                'payments', 
+                'expenseVerificationStatus:id,name',
+                'expenseRejectedRemarks:id,remark',
+                'representaion:id,expense_id,attendees,purpose',
+                'verifier:id,name')
+            ->where('user_id', $user_id)
+            ->whereHas('expensesEntry', function ($q) use ($start_date, $end_date) {
+                $q->whereBetween('created_at', [$start_date, $end_date]);
             })
             ->get();
     }
