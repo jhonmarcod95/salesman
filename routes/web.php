@@ -190,8 +190,6 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     //Checker
     Route::get('/expense-io-checker', 'ExpenseController@expenseIOChecker');
 
-    // Fetch expense report by date
-    Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
     // Fetch expense report by date per user
     Route::get('/expense-report-bydate-peruser/{ids}', 'ExpenseController@generateBydatePerUser');
     // Fetch expense report by date

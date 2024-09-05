@@ -220,7 +220,7 @@ class UserController extends Controller
             }
         })
         ->whereHas('roles', function ($q) {
-            $q->whereIn('role_id', [2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            $q->whereIn('role_id', [4, 5, 6, 7, 8, 9, 10]);
         })
         ->orderBy('name', 'ASC')
         ->get();

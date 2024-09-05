@@ -36,7 +36,7 @@
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="end_date" class="form-control-label">End Date</label> 
-                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="filterData.end_date" @input="searchKeyUp">
+                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="filterData.end_date" @input="searchKeyUp" :min="filterData.start_date"> 
                                     </div>
                                 </div>
                                 <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
@@ -330,28 +330,14 @@ export default {
     props:['userLevel','userRole','expenseVerifier'],
     data(){
         return{
-            fetchingExpense: false,
-            expenses: [],
             expenseByTsr: [],
-            startDate: '',
-            endDate: '',
-            company: null,
-            expense_verify_status: '',
-            tsrName: '',
-            date: '',
-            errors: [],
-            companies: [],
-            keywords: '',
-            currentPage: 0,
-            itemsPerPage: 10,
             verifiyingId: null,
             expenseStatusCount: {
                 expensesCount: 0,
                 verifiedCount: 0,
                 unverifiedCount: 0,
             },
-
-            //==================
+            
             endpoint: '/expenses-report',
             items: [],
             companies: [],
@@ -361,10 +347,10 @@ export default {
             verifiedExpenseStats: [],
 
             filterData: {
-                start_date: '2023-12-01',
-                end_date: '2023-12-31',
-                // start_date: moment().startOf('month').format('YYYY-MM-DD'),
-                // end_date: moment().endOf('month').format('YYYY-MM-DD'),
+                // start_date: '2023-12-01',
+                // end_date: '2023-12-31',
+                start_date: moment().startOf('month').format('YYYY-MM-DD'),
+                end_date: moment().endOf('month').format('YYYY-MM-DD')
             },
             imgOrigin: window.location.origin,
             selectedUser: {},
@@ -510,10 +496,10 @@ export default {
         },
         resetSearch() {
             this.filterData = {
-                start_date: '2023-12-01',
-                end_date: '2023-12-31',
-                //start_date: moment().startOf('month').format('YYYY-MM-DD'),
-                //end_date: moment().endOf('month').format('YYYY-MM-DD'),
+                // start_date: '2023-12-01',
+                // end_date: '2023-12-31',
+                start_date: moment().startOf('month').format('YYYY-MM-DD'),
+                end_date: moment().endOf('month').format('YYYY-MM-DD')
             };
             this.fetchList();
             this.getVerifiedStats();
@@ -521,7 +507,7 @@ export default {
     },
     computed:{
         imageLink(){
-            return 'http://salesforce.lafilgroup.net:8666/storage/';
+            // return 'http://salesforce.lafilgroup.net:8666/storage/';
             return window.location.origin+'/storage/';
         },
         expenseVerifierRole() {
