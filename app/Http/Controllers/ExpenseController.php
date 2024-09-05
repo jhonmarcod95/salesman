@@ -162,9 +162,12 @@ class ExpenseController extends Controller
                     'company' => $user->company ? $user->company->name : '',
                     'expenses_model_count' => 0,
                     'verified_expense_count' => 0,
+                    'unverified_expense_count' => 0,
+                    'rejected_expense_count' => 0,
+                    'pending_expense_count' => 0,
                     'expenses_model' => null,
                     'user' => $user,
-                    'created_at' => null,
+                    'created_at' => null
                 ];
             });
 
