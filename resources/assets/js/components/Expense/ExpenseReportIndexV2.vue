@@ -86,6 +86,8 @@
                                         <th scope="col">Expense Submitted</th>
                                         <th scope="col">Receipt Status</th>
                                         <th scope="col">Total Expenses</th>
+                                        <th scope="col">Verified</th>
+                                        <th scope="col">Rejected</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -94,7 +96,7 @@
                                         </tr>
                                         <tr v-else v-for="(user, e) in items" v-bind:key="e">
                                             <td class="text-right" v-if="userLevel != 5">
-                                                <button v-if="user.id != null" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(user)">View</button>
+                                                <button v-if="user.expenses_model_count" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(user)">View</button>
                                             </td>
                                             <td v-else></td>
                                             <td>{{ user.name }}</td>
@@ -107,6 +109,8 @@
                                                 <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ user.rejected_expense_count }}</div>
                                             </td>
                                             <td>PHP {{ user.total_expenses | _amount }}</td>
+                                            <td>PHP {{ user.verified_amount | _amount }}</td>
+                                            <td>PHP {{ user.rejected_amount | _amount }}</td>
                                         </tr>
                                         <tr v-if="isEmpty(items) && !isProcessing">
                                             <td>No data available in the table</td>
@@ -206,7 +210,7 @@
                                                 <em>Did Not Verified</em>
                                             </div>
                                             <div v-else>
-                                                <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': ''">{{ expenseBy.expense_verification_status.name }}</strong></div>
+                                                <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': 'text-danger'">{{ expenseBy.expense_verification_status.name }}</strong></div>
                                                 <div style="text-wrap: wrap;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
                                                     {{ expenseBy.expense_rejected_remarks.remark }}
                                                 </div>
@@ -215,7 +219,7 @@
                                         </div>
                                         <div v-else>
                                             <div v-if="!(expenseBy.verified_status_id == 0 || expenseBy.verified_status_id == 2)">
-                                                <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': ''">{{ expenseBy.expense_verification_status.name }}</strong></div>
+                                                <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': 'text-danger'">{{ expenseBy.expense_verification_status.name }}</strong></div>
                                                 <div style="text-wrap: wrap;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
                                                     {{ expenseBy.expense_rejected_remarks.remark }}
                                                     <div v-if="expenseBy.expense_rejected_reason_id == 4">(Deduct PHP{{ expenseBy.rejected_deducted_amount | _amount }}) </div>
@@ -271,54 +275,6 @@
             </div>
         </div>
 
-        <!-- Reject Expense Modal -->
-        <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <span class="closed" data-dismiss="modal">&times;</span>
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                <div class="modal-content border border-danger">
-                <div class="modal-header">
-                    <h4 class="modal-title text-danger" id="addCompanyLabel">Reject Expense</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" v-if="!isEmpty(selectedExpense)">
-                    <div class="d-flex mb-4 p-3 border">
-                        <div class="col">
-                            <span><strong>Amount:</strong></span> 
-                            <br> PHP {{selectedExpense.amount | _amount}}
-                        </div>
-                        <div class="col">
-                            <span><strong>Expense Type:</strong></span> 
-                            <br> {{selectedExpense.expenses_type.name}}</div>
-                        <div class="col">
-                            <span><strong>Entry Date:</strong></span> 
-                            <br> {{selectedExpense.created_at | _date }}</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-control-label">Select Reject Reason  (<em class="text-danger">* required</em>)</label> 
-                        <app-select :options="rejectedRemarks" v-model="rejectedExpense.rejected_reason_id" label="remark"/>
-                    </div>
-
-                    <div class="form-group" v-if="rejectedExpense.rejected_reason_id == 4">
-                        <label class="form-control-label">Enter Amount To Deduct (<em class="text-danger">* required</em>)</label> 
-                        <input type="number" class="form-control" v-model="rejectedExpense.deducted_amount">
-                    </div>
-                    
-                    <!-- Start: Error Message-->
-                    <error-messages :form-errors="rejectExpenseError" v-if="!isEmpty(rejectExpenseError)"/>
-                    <!-- End: Error Message -->    
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-round btn-fill" data-dismiss="modal" @click="">Close</button>
-                    <button type="button" class="btn btn-danger btn-round btn-fill" @click="verifyExpense(selectedExpense, 'reject')">Submit Reject</button>
-                </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 </template>
 
@@ -347,10 +303,10 @@ export default {
             verifiedExpenseStats: [],
 
             filterData: {
-                // start_date: '2023-12-01',
-                // end_date: '2023-12-31',
-                start_date: moment().startOf('month').format('YYYY-MM-DD'),
-                end_date: moment().endOf('month').format('YYYY-MM-DD')
+                start_date: '2023-12-01',
+                end_date: '2023-12-31',
+                //start_date: moment().startOf('month').format('YYYY-MM-DD'),
+                //end_date: moment().endOf('month').format('YYYY-MM-DD')
             },
             imgOrigin: window.location.origin,
             selectedUser: {},
@@ -496,10 +452,10 @@ export default {
         },
         resetSearch() {
             this.filterData = {
-                // start_date: '2023-12-01',
-                // end_date: '2023-12-31',
-                start_date: moment().startOf('month').format('YYYY-MM-DD'),
-                end_date: moment().endOf('month').format('YYYY-MM-DD')
+                start_date: '2023-12-01',
+                end_date: '2023-12-31',
+                // start_date: moment().startOf('month').format('YYYY-MM-DD'),
+                // end_date: moment().endOf('month').format('YYYY-MM-DD')
             };
             this.fetchList();
             this.getVerifiedStats();

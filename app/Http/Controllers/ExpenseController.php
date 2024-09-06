@@ -69,7 +69,7 @@ class ExpenseController extends Controller
         $verify_status = $request->expense_verify_status;
 
         return User::select('id', 'name', 'company_id', 'email')
-            ->with('company:id,code,name', 'roles')
+            ->with('company:id,code,name', 'roles', 'expensesEntries')
             ->when(isset($request->user_id), function($q) use($request){
                 $q->where('id', $request->user_id);
             })
@@ -93,17 +93,6 @@ class ExpenseController extends Controller
                 $q->whereIn('role_id', [4,5,6,7,8,9,10]);
             })
 
-            //Require only users with Expenses Entries when filtering verify status
-            ->when(isset($verify_status), function($verifyStatusQuery) use($start_date, $end_date, $verify_status){
-                $verifyStatusQuery->whereHas('expensesEntries', function ($expensesEntriesQuery) use ($start_date, $end_date, $verify_status) {
-                    $expensesEntriesQuery->whereBetween('created_at',  [$start_date, $end_date])
-                    ->has('expensesModel')
-                    ->whereHas('expensesModel', function ($expensesModelQuery) use ($verify_status) {
-                        $expensesModelQuery->where('verified_status_id', $verify_status);
-                    });
-                });
-            })
-
             ->with(['expensesEntries' => function($q) use($start_date, $end_date, $verify_status) {
                 $q->whereBetween('created_at',  [$start_date, $end_date])
                 ->withCount('expensesModel')
@@ -111,7 +100,17 @@ class ExpenseController extends Controller
                 ->withCount('unverifiedExpense')
                 ->withCount('rejectedExpense')
                 ->withCount('pendingExpense');
-            }]);
+            }])
+
+            //Require only users with Expenses Entries when filtering verify status
+            ->when(isset($verify_status), function($q) use($verify_status, $start_date, $end_date){
+                $q->whereHas('expensesEntries', function ($query) use ($verify_status, $start_date, $end_date) {
+                    $query->whereBetween('created_at',  [$start_date, $end_date])
+                     ->whereHas('expensesModel', function($q2) use($verify_status){
+                        $q2->where('verified_status_id',  $verify_status);
+                    });
+                });
+            });
     }
 
     /**
@@ -130,6 +129,8 @@ class ExpenseController extends Controller
             $unverified_expense_count = 0;
             $rejected_expense_count = 0;
             $total_expenses         = 0;
+            $verified_amount        = 0;
+            $rejected_amount        = 0;
 
             if(count($item->expensesEntries)) {
                 foreach($item->expensesEntries as $expenses) {
@@ -138,6 +139,10 @@ class ExpenseController extends Controller
                     $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
                     $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
                     $total_expenses           = $total_expenses + $expenses->totalExpenses;
+
+                    $verified = $this->computeVerifiedAndRejected($expenses->expensesModel);
+                    $verified_amount = $verified_amount + $verified['verified_amount'];
+                    $rejected_amount = $rejected_amount + $verified['rejected_amount'];
                 }
             }
 
@@ -150,6 +155,8 @@ class ExpenseController extends Controller
             $data['unverified_expense_count'] = $unverified_expense_count;
             $data['rejected_expense_count'] = $rejected_expense_count;
             $data['total_expenses'] = $total_expenses;
+            $data['verified_amount'] = $verified_amount;
+            $data['rejected_amount'] = $rejected_amount;
             $data['roles'] = $item->roles;
             return $data;
         });
@@ -165,6 +172,9 @@ class ExpenseController extends Controller
         $unverified_expense_count = 0;
         $rejected_expense_count = 0;
 
+        $verified_amount = 0;
+        $rejected_amount = 0;
+
         foreach($userExpenses as $item) {
             if (count($item->expensesEntries)) {
                 foreach ($item->expensesEntries as $expenses) {
@@ -172,6 +182,10 @@ class ExpenseController extends Controller
                     $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
                     $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
                     $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
+
+                    $verified = $this->computeVerifiedAndRejected($expenses->expensesModel);
+                    $verified_amount = $verified_amount + $verified['verified_amount'];
+                    $rejected_amount = $rejected_amount + $verified['rejected_amount'];
                 }
             }
         }
@@ -181,6 +195,35 @@ class ExpenseController extends Controller
             'verified_expense_count' => $verified_expense_count,
             'unverified_expense_count' => $unverified_expense_count,
             'rejected_expense_count' => $rejected_expense_count,
+            'verified_amount' => $verified_amount,
+            'rejected_amount' => $rejected_amount
+        ];
+     }
+
+     public function computeVerifiedAndRejected($expenses) {
+        $verified_amount = 0;
+        $rejected_amount = 0;
+        foreach ($expenses as $expense) {
+            if ($expense->verified_status_id == 1) {
+                $verified_amount = $verified_amount + $expense->amount;
+            }
+
+            if ($expense->verified_status_id == 3) {
+                // compute rejected with remarks no.4
+                if ($expense->expense_rejected_reason_id == 4) {
+                    $rejected_amount = $rejected_amount + $expense->rejected_deducted_amount;
+
+                    //Add remaining amount to approved amount after deduction
+                    $verified_amount = $verified_amount + ($expense->amount - $expense->rejected_deducted_amount);
+                } else {
+                    $rejected_amount = $rejected_amount + $expense->amount;
+                }
+            }
+        }
+
+        return [
+            'verified_amount' => $verified_amount,
+            'rejected_amount' => $rejected_amount
         ];
      }
     
