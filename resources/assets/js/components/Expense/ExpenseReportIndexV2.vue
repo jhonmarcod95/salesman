@@ -232,15 +232,20 @@
                                                 <div v-if="salesHeadRole" class="btn btn-light btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
                                             </div>
                                             <div v-else>
-                                                <button type="button" class="btn btn-primary btn-sm" @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
-                                                    Verify
-                                                    <span v-if="verifiyingId == expenseBy.id">...</span>
-                                                </button>
+                                                <div v-if="expenseBy.verification_perion_expired">
+                                                    Verification Period Expired
+                                                </div>
+                                                <div v-else>
+                                                    <button type="button" class="btn btn-primary btn-sm" @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
+                                                        Verify
+                                                        <span v-if="verifiyingId == expenseBy.id">...</span>
+                                                    </button>
 
-                                                <button type="button" class="btn btn-danger btn-sm" @click="openRejectExpenseModal(expenseBy)" :disabled="verifiyingId">
-                                                    Reject
-                                                    <span v-if="verifiyingId == expenseBy.id">...</span>
-                                                </button>
+                                                    <button type="button" class="btn btn-danger btn-sm" @click="openRejectExpenseModal(expenseBy)" :disabled="verifiyingId">
+                                                        Reject
+                                                        <span v-if="verifiyingId == expenseBy.id">...</span>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -303,10 +308,10 @@ export default {
             verifiedExpenseStats: [],
 
             filterData: {
-                start_date: '2023-12-01',
-                end_date: '2023-12-31',
-                //start_date: moment().startOf('month').format('YYYY-MM-DD'),
-                //end_date: moment().endOf('month').format('YYYY-MM-DD')
+                // start_date: '2023-12-01',
+                // end_date: '2023-12-31',
+                start_date: moment().startOf('month').format('YYYY-MM-DD'),
+                end_date: moment().endOf('month').format('YYYY-MM-DD')
             },
             imgOrigin: window.location.origin,
             selectedUser: {},
@@ -314,7 +319,6 @@ export default {
             rejectedExpense: {},
             rejectExpenseError: {},
             isRejecModalOpen: false
-
         }
     },
     created(){
@@ -452,10 +456,10 @@ export default {
         },
         resetSearch() {
             this.filterData = {
-                start_date: '2023-12-01',
-                end_date: '2023-12-31',
-                // start_date: moment().startOf('month').format('YYYY-MM-DD'),
-                // end_date: moment().endOf('month').format('YYYY-MM-DD')
+                // start_date: '2023-12-01',
+                // end_date: '2023-12-31',
+                start_date: moment().startOf('month').format('YYYY-MM-DD'),
+                end_date: moment().endOf('month').format('YYYY-MM-DD')
             };
             this.fetchList();
             this.getVerifiedStats();
@@ -463,7 +467,7 @@ export default {
     },
     computed:{
         imageLink(){
-            // return 'http://salesforce.lafilgroup.net:8666/storage/';
+            return 'http://salesforce.lafilgroup.net:8666/storage/';
             return window.location.origin+'/storage/';
         },
         expenseVerifierRole() {

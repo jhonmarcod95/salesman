@@ -345,7 +345,10 @@ class ExpenseController extends Controller
         $start_date = "$request->start_date 00:00:01";
         $end_date = "$request->end_date 23:59:59";
 
-        return Expense::with(
+        $last_day_of_last_month = date("Y-m-t 23:59:59", strtotime("last day of last month"));
+        $first_day_of_last_month = date("Y-m-t 00:00:1", strtotime("first day of last month"));
+
+        $expenses = Expense::with(
                 'expensesType', 
                 'payments', 
                 'expenseVerificationStatus:id,name',
@@ -357,6 +360,29 @@ class ExpenseController extends Controller
                 $q->whereBetween('created_at', [$start_date, $end_date]);
             })
             ->get();
+
+        return $expenses->transform(function($item) use($last_day_of_last_month, $first_day_of_last_month){
+            //Set default verification perion expired as false
+            $item['verification_perion_expired'] = 0;
+
+            //get expense date
+            $expense_date = date('Y-m-t h:m:s', strtotime($item->created_at));
+
+            // //If expense date is past the first day of last month, the verification period will be expired
+            // if (strtotime($first_day_of_last_month) > strtotime($expense_date)) {
+            //     $item['verification_perion_expired'] = 1;
+            // }
+
+            // if(date('d') > '07') {
+            //     //Today is past 7th day of current montt,
+            //     //If the expense date is past of last day of last month, the verification period will be expired
+            //     if(strtotime($last_day_of_last_month) > strtotime($expense_date)) {
+            //         $item['verification_perion_expired'] = 1;
+            //     }
+            // }
+
+            return $item;
+        });
     }
 
     /**
