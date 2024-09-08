@@ -25,7 +25,7 @@
                             <tr v-else v-for="(user, e) in items" v-bind:key="e">
                                 <td>
                                     <strong>{{ user.name }}</strong> <br>
-                                    <span>{{ user.companies ? user.companies[0].name : '' }}</span>
+                                    <span>{{ user.company ? user.company.name : '' }}</span>
                                 </td>
                                 <td>{{ user.month }}</td>
                                 <td>{{ user.year }}</td>
