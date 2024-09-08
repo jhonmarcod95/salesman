@@ -48,79 +48,83 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-7">
-                            <div class="card shadow">
-                                <div class="card-header">
-                                    <h3 class="mb-0">
-                                        DMS Submitted Expenses
-                                        <span v-if="!isEmpty(items) && !isProcessing">({{ pagination.total }})</span>
-                                    </h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="position-relative">
-                                        <!-- Begin:Block UI -->
-                                        <app-block-ui v-if="!isEmpty(items) && isProcessing"></app-block-ui>
-                                        <!-- End:Block UI -->
+                    <!-- Begin: DMS Submitted -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header">
+                            <h3 class="mb-0">
+                                DMS Submitted Expenses
+                                <span v-if="!isEmpty(items) && !isProcessing">({{ pagination.total }})</span>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="position-relative">
+                                <!-- Begin:Block UI -->
+                                <app-block-ui v-if="!isEmpty(items) && isProcessing"></app-block-ui>
+                                <!-- End:Block UI -->
 
-                                        <div class="table-responsive">
-                                            <table class="table align-items-center table-flush">
-                                                <thead class="thead-light">
-                                                <tr>
-                                                    <th scope="col">TSR</th>
-                                                    <!-- <th scope="col">Company</th> -->
-                                                    <th scope="col">Month</th>
-                                                    <th scope="col">Year</th>
-                                                    <th scope="col">Expense Status</th>
-                                                    <th scope="col">Expense Count</th>
-                                                    <th scope="col">Date Submitted</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr v-if="isEmpty(items) && isProcessing">
-                                                        <td colspan="10">Loading Data...</td>
-                                                    </tr>
-                                                    <tr v-else v-for="(expense, e) in items" v-bind:key="e">
-                                                        <td>
-                                                            <strong>{{ expense.user.name }}</strong> <br>
-                                                            <span>{{ expense.user.companies ? expense.user.companies[0].name : '' }}</span>
-                                                        </td>
-                                                        <!-- <td>{{ expense.user.companies ? expense.user.companies[0].name : '' }}</td> -->
-                                                        <td>{{ expense.month }}</td>
-                                                        <td>{{ expense.year }}</td>
-                                                        <td>
-                                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ expense.expense_status.verified }}</div>
-                                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ expense.expense_status.unverified }}</div>
-                                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ expense.expense_status.rejected }}</div>
-                                                            <!-- <div class="mb-0"><span style="width:90px; display: inline-block;">Not Verified: </span>{{ expense.expense_status.not_verified }}</div> -->
-                                                        </td>
-                                                        <td>{{ expense.expense_status.expense_count }}</td>
-                                                        <td>
-                                                            {{ expense.created_at | _date}}
-                                                        </td>
-                                                    </tr>
-                                                    <tr v-if="isEmpty(items) && !isProcessing">
-                                                        <td>No data available in the table</td>
-                                                    </tr>
-                                                </tbody>
-                                                <!-- <tbody v-else>
-                                                    
-                                                </tbody> -->
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-footer">
-                                    <!--begin::Pagination-->
-                                    <table-pagination v-if="items.length > 0" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
-                                    <!--end::Pagination-->
+                                <div class="table-responsive">
+                                    <table class="table align-items-center table-flush">
+                                        <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col">TSR</th>
+                                            <!-- <th scope="col">Company</th> -->
+                                            <th scope="col">Month</th>
+                                            <th scope="col">Year</th>
+                                            <th scope="col">Expense Status</th>
+                                            <th scope="col">Expense Count</th>
+                                            <th scope="col">Date Submitted</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-if="isEmpty(items) && isProcessing">
+                                                <td colspan="10">Loading Data...</td>
+                                            </tr>
+                                            <tr v-else v-for="(expense, e) in items" v-bind:key="e">
+                                                <td>
+                                                    <strong>{{ expense.user.name }}</strong> <br>
+                                                    <span>{{ expense.user.companies ? expense.user.companies[0].name : '' }}</span>
+                                                </td>
+                                                <!-- <td>{{ expense.user.companies ? expense.user.companies[0].name : '' }}</td> -->
+                                                <td>{{ expense.month }}</td>
+                                                <td>{{ expense.year }}</td>
+                                                <td>
+                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ expense.expense_status.verified }}</div>
+                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ expense.expense_status.unverified }}</div>
+                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ expense.expense_status.rejected }}</div>
+                                                    <!-- <div class="mb-0"><span style="width:90px; display: inline-block;">Not Verified: </span>{{ expense.expense_status.not_verified }}</div> -->
+                                                </td>
+                                                <td>{{ expense.expense_status.expense_count }}</td>
+                                                <td>
+                                                    {{ expense.created_at | _date}}
+                                                </td>
+                                            </tr>
+                                            <tr v-if="isEmpty(items) && !isProcessing">
+                                                <td>No data available in the table</td>
+                                            </tr>
+                                        </tbody>
+                                        <!-- <tbody v-else>
+                                            
+                                        </tbody> -->
+                                    </table>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-5">
-                            <ExpenseDmsPendingToReceived :filterParams="filterData"/>
+                        <div class="card-footer">
+                            <!--begin::Pagination-->
+                            <table-pagination v-if="!isEmpty(items)" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
+                            <!--end::Pagination-->
                         </div>
                     </div>
+                    <!-- End: DMS Submitted -->
+
+                    <!-- Begin: Pending For Submission -->
+                    <ExpenseDmsPendingToReceived :filterParams="filterData" class="mb-4"/>
+                    <!-- End: Pending For Submission -->
+
+                    <!-- Begin: Pending For Submission -->
+                    <ExpenseDmsNoExpenses :filterParams="filterData"/>
+                    <!-- End: Pending For Submission -->
+                    
                 </div>
             </div>
         </div>
@@ -149,10 +153,11 @@
 import moment from 'moment';
 import listFormMixins from '../../list-form-mixins.vue';
 import ExpenseDmsPendingToReceived from './ExpenseDmsPendingToReceived.vue';
+import ExpenseDmsNoExpenses from './ExpenseDmsNoExpenses.vue';
 export default {
     mixins: [listFormMixins],
     props:['userLevel','userRole','expenseVerifier'],
-    components: {ExpenseDmsPendingToReceived},
+    components: {ExpenseDmsPendingToReceived,ExpenseDmsNoExpenses},
     data(){
         return{
             endpoint: '/dms-received-expense',

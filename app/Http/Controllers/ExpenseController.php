@@ -84,11 +84,6 @@ class ExpenseController extends Controller
                     });
                 });
             })
-            ->when(isset($request->company), function ($q) use ($company) {
-                $q->whereHas('companies', function ($q) use ($company) {
-                    $q->where('company_id', $company);
-                });
-            })
             ->whereHas('roles', function($q) {
                 $q->whereIn('role_id', [4,5,6,7,8,9,10]);
             })
@@ -1010,6 +1005,50 @@ class ExpenseController extends Controller
         });
 
         return $noDmsExpensesUser;
+    }
+
+    public function noClaimedExpenses(Request $request) {
+        $first_day = date('Y-m-01 00:00:01', strtotime($request->month_year));
+        $last_day = date('Y-m-t 23:59:59', strtotime($request->month_year));
+        $company_id = $request->company_id;
+
+        //Get MOnth and year
+        $date = date('Y-m-t 23:59:59', strtotime($request->month_year));
+        $month = date('F', strtotime($date));
+        $year = date('Y', strtotime($date));
+
+        $noCalimedExpensesUser =  User::select('id', 'name', 'company_id', 'email')
+            ->with('company:id,code,name', 'roles', 'expensesEntries')
+            ->when(isset($request->user_id), function($q) use($request){
+                $q->where('id', $request->user_id);
+            })
+            ->when(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap'), function($q) {
+                $q->whereHas('companies', function ($companQuery){
+                    $companQuery->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                });
+            }, function($q) use($company_id) {
+                $q->when(isset($request->company), function ($query) use ($company_id) {
+                    $query->whereHas('companies', function ($companQuery) use ($company_id){
+                        $companQuery->where('company_id', $company_id);
+                    });
+                });
+            })
+            ->whereHas('roles', function($q) {
+                $q->whereIn('role_id', [4,5,6,7,8,9,10]);
+            })
+            ->whereDoesntHave('expensesEntries', function($q) use($first_day, $last_day){
+                $q->whereBetween('created_at',  [$first_day, $last_day]);
+            })
+            ->orderBy('name', 'ASC')
+            ->paginate($request->limit);
+
+        $noCalimedExpensesUser->getCollection()->transform(function ($item) use ($month, $year) {
+            $item['month'] = $month;
+            $item['year'] = $year;
+            return $item;
+        });
+
+        return $noCalimedExpensesUser;
     }
     //====================================================================
 

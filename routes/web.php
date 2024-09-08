@@ -174,6 +174,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
         Route::get('/', 'ExpenseController@dmsReceivedReportIndex');
         Route::get('/all', 'ExpenseController@dmsReceivedReportAll');
         Route::get('/not-received-expense', 'ExpenseController@dmsPendingReceivedReportAll');
+        Route::get('/no-claimed-expenses', 'ExpenseController@noClaimedExpenses');
     });
 
     //Expense v2

@@ -1,7 +1,7 @@
 <template>
     <div class="card shadow">
         <div class="card-header">
-            <h3 class="mb-0">Haven't Submit <span v-if="!isEmpty(items) && !isProcessing">({{ pagination.total }})</span></h3>
+            <h3 class="mb-0">Pending For Sumission <span v-if="!isEmpty(items) && !isProcessing">({{ pagination.total }})</span></h3>
         </div>
         <div class="card-body">
             <div class="position-relative">
@@ -52,7 +52,7 @@
         </div>
         <div class="card-footer">
             <!--begin::Pagination-->
-            <table-pagination v-if="items.length > 0" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
+            <table-pagination v-if="!isEmpty(items)" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
             <!--end::Pagination-->
         </div>
     </div>
@@ -66,7 +66,8 @@
         data() {
             return {
                 endpoint: '/dms-received-expense',
-                listEndpoint: 'not-received-expense'
+                listEndpoint: 'not-received-expense',
+                items: []
             }
         },
         created() {
