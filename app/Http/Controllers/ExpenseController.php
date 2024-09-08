@@ -92,15 +92,23 @@ class ExpenseController extends Controller
             ->whereHas('roles', function($q) {
                 $q->whereIn('role_id', [4,5,6,7,8,9,10]);
             })
-
-            ->with(['expensesEntries' => function($q) use($start_date, $end_date, $verify_status) {
-                $q->whereBetween('created_at',  [$start_date, $end_date])
-                ->withCount('expensesModel')
-                ->withCount('verifiedExpense')
-                ->withCount('unverifiedExpense')
-                ->withCount('rejectedExpense')
-                ->withCount('pendingExpense');
-            }])
+            ->when(isset($request->expense_option), function($q) use($request,$start_date, $end_date) {
+                if($request->expense_option != 'all') {
+                    if ($request->expense_option == 'with_expenses') {
+                        $q->has('expensesEntries')
+                          ->with(['expensesEntries' => function($q) use($start_date, $end_date) {
+                            $q->whereBetween('created_at',  [$start_date, $end_date])
+                            ->withCount('expensesModel')
+                            ->withCount('verifiedExpense')
+                            ->withCount('unverifiedExpense')
+                            ->withCount('rejectedExpense')
+                            ->withCount('pendingExpense');
+                         }]);
+                    } else {
+                        $q->whereDoesntHave('expensesEntries');
+                    }
+                }
+            })
 
             //Require only users with Expenses Entries when filtering verify status
             ->when(isset($verify_status), function($q) use($verify_status, $start_date, $end_date){
@@ -368,18 +376,18 @@ class ExpenseController extends Controller
             //get expense date
             $expense_date = date('Y-m-t h:m:s', strtotime($item->created_at));
 
-            // //If expense date is past the first day of last month, the verification period will be expired
-            // if (strtotime($first_day_of_last_month) > strtotime($expense_date)) {
-            //     $item['verification_perion_expired'] = 1;
-            // }
+            //If expense date is past the first day of last month, the verification period will be expired
+            if (strtotime($first_day_of_last_month) > strtotime($expense_date)) {
+                $item['verification_perion_expired'] = 1;
+            }
 
-            // if(date('d') > '07') {
-            //     //Today is past 7th day of current montt,
-            //     //If the expense date is past of last day of last month, the verification period will be expired
-            //     if(strtotime($last_day_of_last_month) > strtotime($expense_date)) {
-            //         $item['verification_perion_expired'] = 1;
-            //     }
-            // }
+            if(date('d') > '07') {
+                //Today is past 7th day of current montt,
+                //If the expense date is past of last day of last month, the verification period will be expired
+                if(strtotime($last_day_of_last_month) > strtotime($expense_date)) {
+                    $item['verification_perion_expired'] = 1;
+                }
+            }
 
             return $item;
         });

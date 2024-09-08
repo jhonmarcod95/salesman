@@ -3,128 +3,209 @@
         <div class="header bg-green pb-6 pt-5 pt-md-6"></div>
         <div class="container-fluid mt--7">
             <!-- Table -->
-            <div class="row mt-5">
-                <div class="col">
-                    <div class="card shadow">
-
-                        <div class="card-header border-0">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <h3 class="mb-0">Expenses Report</h3>
-                                </div>
-                                <div class="d-flex">
-                                    <div><a class="btn btn-sm btn-default mr-2" href="/expenses-report"> Expenses Report</a></div>
-                                    <div v-if="salesHeadRole"><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
-                                    <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
-                                </div>
-                            </div>
+            <div class="card shadow mb-4 mt-5">
+                <div class="card-header border-0">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="mb-0">Expenses Report</h3>
                         </div>
-                        <div class="mb-3">
-                            <div class="row ml-2">
-                                <div class="col-md-3 float-left">
-                                    <div class="form-group">
-                                        <label for="name" class="form-control-label">Search</label> 
-                                        <app-select :options="users" v-model="filterData.user_id" label="name" @input="searchKeyUp"/>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label for="start_date" class="form-control-label">Start Date</label> 
-                                        <input type="date" id="start_date" class="form-control form-control-alternative" v-model="filterData.start_date" @input="searchKeyUp">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label for="end_date" class="form-control-label">End Date</label> 
-                                        <input type="date" id="end_date" class="form-control form-control-alternative" v-model="filterData.end_date" @input="searchKeyUp" :min="filterData.start_date"> 
-                                    </div>
-                                </div>
-                                <div class="col-md-2" v-if="userRole == 1 || userRole == 2 || userRole == 10 || userRole == 13">
-                                    <div class="form-group">
-                                        <label class="form-control-label" for="role">Company</label>
-                                        <app-select :options="companies" v-model="filterData.company" label="name" @input="searchKeyUp"/>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label for="end_date" class="form-control-label">Status</label> 
-                                        <select class="form-control" v-model="filterData.expense_verify_status" @input="searchKeyUp">
-                                            <option value=""> All </option>
-                                            <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
-                                            <option value="0">Pending</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-1">
-                                    <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">
-                                        Clear Filter
-                                    </button> 
-                                </div>
-
-                                <div class="col-md-12">
-                                    <span>Attachment: {{ verifiedExpenseStats.expenses_model_count || 0 }} </span> |
-                                    <span>Verified: {{ verifiedExpenseStats.verified_expense_count || 0 }} </span> |
-                                    <span>Unverified: {{ verifiedExpenseStats.unverified_expense_count || 0 }} </span> |
-                                    <span class="text-warning">Rejected: {{ verifiedExpenseStats.rejected_expense_count || 0 }} </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="position-relative">
-                            <!-- Begin:Block UI -->
-                            <app-block-ui v-if="!isEmpty(items) && isProcessing"></app-block-ui>
-                            <!-- End:Block UI -->
-
-                            <div class="table-responsive">
-                                <table class="table align-items-center table-flush">
-                                    <thead class="thead-light">
-                                    <tr>
-                                        <th scope="col"></th>
-                                        <th scope="col">TSR</th>
-                                        <th scope="col">Company</th>
-                                        <th scope="col">Expense Entry</th>
-                                        <th scope="col">Expense Submitted</th>
-                                        <th scope="col">Receipt Status</th>
-                                        <th scope="col">Total Expenses</th>
-                                        <th scope="col">Verified</th>
-                                        <th scope="col">Rejected</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-if="isEmpty(items) && isProcessing">
-                                            <td colspan="10">Loading Data...</td>
-                                        </tr>
-                                        <tr v-else v-for="(user, e) in items" v-bind:key="e">
-                                            <td class="text-right" v-if="userLevel != 5">
-                                                <button v-if="user.expenses_model_count" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(user)">View</button>
-                                            </td>
-                                            <td v-else></td>
-                                            <td>{{ user.name }}</td>
-                                            <td>{{ user.company }}</td>
-                                            <td>{{ user.expense_entry_count }}</td>
-                                            <td>{{ user.expenses_model_count }}</td>
-                                            <td>
-                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ user.unverified_expense_count }}</div>
-                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ user.verified_expense_count }}</div>
-                                                <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ user.rejected_expense_count }}</div>
-                                            </td>
-                                            <td>PHP {{ user.total_expenses | _amount }}</td>
-                                            <td>PHP {{ user.verified_amount | _amount }}</td>
-                                            <td>PHP {{ user.rejected_amount | _amount }}</td>
-                                        </tr>
-                                        <tr v-if="isEmpty(items) && !isProcessing">
-                                            <td>No data available in the table</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                       <div class="card-footer py-4" v-if="items.length">
-                            <!--begin::Pagination-->
-					        <table-pagination v-if="items.length > 0" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
-					        <!--end::Pagination-->
+                        <div class="d-flex">
+                            <div><a class="btn btn-sm btn-default mr-2" href="/expenses-report"> Expenses Report</a></div>
+                            <div v-if="salesHeadRole"><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
+                            <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
                         </div>
                     </div>
+                </div>
+                <div class="mb-3">
+                    <div class="row mx-2">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="start_date" class="form-control-label">Start Date</label> 
+                                <input type="date" id="start_date" class="form-control form-control-alternative" v-model="filterData.start_date" @input="searchKeyUp">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="end_date" class="form-control-label">End Date</label> 
+                                <input type="date" id="end_date" class="form-control form-control-alternative" v-model="filterData.end_date" @input="searchKeyUp" :min="filterData.start_date"> 
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Expense Option</label>
+                                <div class="radio-inline mt-2">
+                                    <label class="radio mr-2">
+                                        <input type="radio" value="all" v-model="filterData.expense_option" @input="searchKeyUp"/>
+                                        <span></span>
+                                        All
+                                    </label>
+                                    <label class="radio mr-2">
+                                        <input type="radio" value="with_expenses" v-model="filterData.expense_option" @input="searchKeyUp"/>
+                                        <span></span>
+                                        With Expense
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" value="without_expenses" v-model="filterData.expense_option" @input="searchKeyUp"/>
+                                        <span></span>
+                                        Without Expense
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mx-2">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="name" class="form-control-label">User</label> 
+                                <app-select :options="users" v-model="filterData.user_id" label="name" @input="searchKeyUp"/>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-control-label" for="role">Company</label>
+                                <app-select :options="companies" v-model="filterData.company" label="name" @input="searchKeyUp"/>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="end_date" class="form-control-label">Status</label> 
+                                <select class="form-control" v-model="filterData.expense_verify_status" @input="searchKeyUp">
+                                    <option value=""> All </option>
+                                    <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
+                                    <option value="0">Pending</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">
+                                Clear Filter
+                            </button> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="card shadow mb-4">
+                        <div class="card-body">
+                            <span class="stat-loading" v-if="fetchingExpenseStats">
+                                Loading...
+                            </span>
+                            <button v-else class="stat-loading btn bg-light" @click="getVerifiedStats">
+                                Refresh <i class="fas fa-sync-alt ml-2"></i>
+                            </button>
+                            <div class="row text-center">
+                                <div class="col">
+                                    <div class="font-weight-bold text-sm">
+                                        Attachment
+                                    </div>
+                                    <span>{{ verifiedExpenseStats.expenses_model_count || 0 }} </span>
+                                </div>
+                                <div class="col">
+                                    <div class="font-weight-bold text-sm">
+                                        Verified
+                                    </div>
+                                    <span>{{ verifiedExpenseStats.verified_expense_count || 0 }} </span>
+                                </div>
+                                <div class="col">
+                                    <div class="font-weight-bold text-sm">
+                                        Unverified
+                                    </div>
+                                    <span>{{ verifiedExpenseStats.unverified_expense_count || 0 }} </span>
+                                </div>
+                                <div class="col text-warning">
+                                    <div class="font-weight-bold text-sm">
+                                        Rejected
+                                    </div>
+                                    <span>{{ verifiedExpenseStats.rejected_expense_count || 0 }} </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card shadow mb-4">
+                        <div class="card-body">
+                            <span class="stat-loading" v-if="fetchingExpenseStats">
+                                Loading...
+                            </span>
+                            <button v-else class="stat-loading btn bg-light" @click="getVerifiedStats">
+                                Refresh <i class="fas fa-sync-alt ml-2"></i>
+                            </button>
+                            <div class="row">
+                                <div class="col"><div class="font-weight-bold text-sm">
+                                        Verified
+                                    </div>
+                                    <span>PHP {{ verifiedExpenseStats.verified_amount | _amount }} </span>
+                                </div>
+                                <div class="col"><div class="font-weight-bold text-sm">
+                                        Rejected
+                                    </div>
+                                    <span>PHP {{ verifiedExpenseStats.rejected_amount | _amount }} </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="position-relative">
+                        <!-- Begin:Block UI -->
+                        <app-block-ui v-if="!isEmpty(items) && isProcessing"></app-block-ui>
+                        <!-- End:Block UI -->
+
+                        <div class="table-responsive">
+                            <table class="table align-items-center table-flush">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">TSR</th>
+                                    <th scope="col">Company</th>
+                                    <th scope="col">Expense Entry</th>
+                                    <th scope="col">Expense Submitted</th>
+                                    <th scope="col">Receipt Status</th>
+                                    <th scope="col">Total Expenses</th>
+                                    <th scope="col">Verified</th>
+                                    <th scope="col">Rejected</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-if="isEmpty(items) && isProcessing">
+                                        <td colspan="10">Loading Data...</td>
+                                    </tr>
+                                    <tr v-else v-for="(user, e) in items" v-bind:key="e">
+                                        <td class="text-right" v-if="userLevel != 5">
+                                            <button v-if="user.expenses_model_count" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(user)">View</button>
+                                        </td>
+                                        <td v-else></td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.company }}</td>
+                                        <td>{{ user.expense_entry_count }}</td>
+                                        <td>{{ user.expenses_model_count }}</td>
+                                        <td>
+                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ user.unverified_expense_count }}</div>
+                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ user.verified_expense_count }}</div>
+                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ user.rejected_expense_count }}</div>
+                                        </td>
+                                        <td>PHP {{ user.total_expenses | _amount }}</td>
+                                        <td>PHP {{ user.verified_amount | _amount }}</td>
+                                        <td>PHP {{ user.rejected_amount | _amount }}</td>
+                                    </tr>
+                                    <tr v-if="isEmpty(items) && !isProcessing">
+                                        <td>No data available in the table</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer py-4" v-if="items.length">
+                    <!--begin::Pagination-->
+                    <table-pagination v-if="items.length > 0" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
+                    <!--end::Pagination-->
                 </div>
             </div>
         </div>
@@ -229,7 +310,7 @@
                                                     <small>{{expenseBy.date_verified | _date}}</small>
                                                 </div>
 
-                                                <div v-if="salesHeadRole" class="btn btn-light btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
+                                                <div v-if="!expenseBy.verification_perion_expired && salesHeadRole" class="btn btn-light btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
                                             </div>
                                             <div v-else>
                                                 <div v-if="expenseBy.verification_perion_expired">
@@ -306,10 +387,12 @@ export default {
             expenseVerificationStatuses: [],
             users: [],
             verifiedExpenseStats: [],
+            fetchingExpenseStats: false,
 
             filterData: {
                 // start_date: '2023-12-01',
                 // end_date: '2023-12-31',
+                expense_option: 'all',
                 start_date: moment().startOf('month').format('YYYY-MM-DD'),
                 end_date: moment().endOf('month').format('YYYY-MM-DD')
             },
@@ -326,7 +409,7 @@ export default {
         this.getSelectOptions('companies', '/companies-all')
         this.getSelectOptions('rejectedRemarks', '/expense-rejected-remarks')
         this.getSelectOptions('expenseVerificationStatuses', '/expense-verification-statuses')
-        this.fetchInitialData()
+        this.fetchInitialData();
     },
     methods:{
         moment,
@@ -388,7 +471,7 @@ export default {
                 axios.post(`/verify-expense-attachment/${expense.id}`,{mode, ...this.rejectedExpense})
                 .then(res => {
                     vm.doFetchExpenseByTsr(expense.user_id)
-                    vm.fetchInitialData();
+                    vm.fetchList();
                     vm.closeRejectExpenseModal();
                     // $('#viewModal').modal('show');
                     // $('#rejectModal').modal('hide');
@@ -438,12 +521,15 @@ export default {
             }
         },
         getVerifiedStats() {
+            this.fetchingExpenseStats = true;
             axios.get(`${this.endpoint}/verified-stat`, {params: this.filterData})
             .then(response => { 
                 this.verifiedExpenseStats = response.data;
+                this.fetchingExpenseStats = false;
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
+                this.fetchingExpenseStats = false;
             })
         },
         searchKeyUp() {
@@ -458,6 +544,7 @@ export default {
             this.filterData = {
                 // start_date: '2023-12-01',
                 // end_date: '2023-12-31',
+                expense_option: 'all',
                 start_date: moment().startOf('month').format('YYYY-MM-DD'),
                 end_date: moment().endOf('month').format('YYYY-MM-DD')
             };
