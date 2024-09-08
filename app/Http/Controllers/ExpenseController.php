@@ -87,23 +87,21 @@ class ExpenseController extends Controller
             ->whereHas('roles', function($q) {
                 $q->whereIn('role_id', [4,5,6,7,8,9,10]);
             })
-            ->when(isset($request->expense_option), function($q) use($request,$start_date, $end_date) {
-                if($request->expense_option != 'all') {
-                    if ($request->expense_option == 'with_expenses') {
-                        $q->has('expensesEntries')
-                          ->with(['expensesEntries' => function($q) use($start_date, $end_date) {
-                            $q->whereBetween('created_at',  [$start_date, $end_date])
-                            ->withCount('expensesModel')
-                            ->withCount('verifiedExpense')
-                            ->withCount('unverifiedExpense')
-                            ->withCount('rejectedExpense')
-                            ->withCount('pendingExpense');
-                         }]);
-                    } else {
-                        $q->whereDoesntHave('expensesEntries');
-                    }
+            ->when($request->expense_option != 'all', function($q) use($request,$start_date, $end_date) {
+                if ($request->expense_option == 'with_expenses') {
+                    $q->has('expensesEntries');
+                } else {
+                    $q->whereDoesntHave('expensesEntries');
                 }
             })
+            ->with(['expensesEntries' => function($q) use($start_date, $end_date) {
+                $q->whereBetween('created_at',  [$start_date, $end_date])
+                ->withCount('expensesModel')
+                ->withCount('verifiedExpense')
+                ->withCount('unverifiedExpense')
+                ->withCount('rejectedExpense')
+                ->withCount('pendingExpense');
+            }])
 
             //Require only users with Expenses Entries when filtering verify status
             ->when(isset($verify_status), function($q) use($verify_status, $start_date, $end_date){
@@ -153,7 +151,7 @@ class ExpenseController extends Controller
             $data['name'] = $item->name;
             $data['company'] = isset($item->company) ? $item->company->name : '-';
             $data['expense_entry_count'] = count($item->expensesEntries);
-            $data['expenses_model_count'] = $expenses_model_count;
+            $data['expenses_model_count'] = count($item->expensesEntries) ? $expenses_model_count : 0;
             $data['verified_expense_count'] = $verified_expense_count;
             $data['unverified_expense_count'] = $unverified_expense_count;
             $data['rejected_expense_count'] = $rejected_expense_count;
