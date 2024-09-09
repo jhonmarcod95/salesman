@@ -85,11 +85,15 @@ class PaymentAutoPosting extends Command
                 })->whereDate('created_at', '>=',  $dateFrom)
                 ->whereDate('created_at' ,'<=', $dateTo)
                 ->where('expenses_entry_id', '!=', 0)
+                ->when(!$isReprocessing, function($q){
+                    $q->where('status_id',0);//Not posted
+                })
                 ->when($isReprocessing, function($q){
-                    $q->where('status_id',2);
+                    $q->where('status_id',2);//For reprocessing 
                 })
                 ->get()
                 ->groupBy('user.id');
+                
             $this->simulateExpense($expenses,$coveredWeek, $dateFrom, $dateTo);
         }
     }
@@ -127,11 +131,8 @@ class PaymentAutoPosting extends Command
                     $samePostingDate = date("n",  strtotime($lastWeekSunday)) == date("n", strtotime(Carbon::now()));
                     $posting_date = !$samePostingDate ? Carbon::parse($lastWeekSunday)->endOfMonth() : Carbon::now();
                 }
-
                 // Checking of submitted receipts from previous months(Should be completed)
-                // $is_complete = $this->checkSubmittedReceipts($groupedExpenses[0]->user->id,$posting_date);
-                $is_complete = true;
-
+                $is_complete = $this->checkSubmittedReceipts($groupedExpenses[0]->user->id,$posting_date);     
                 if($is_complete){
                     $expense_ids = [];
                     $items = [];
@@ -810,33 +811,60 @@ class PaymentAutoPosting extends Command
     public function checkSubmittedReceipts($user_id,$posting_date){
         $month = Carbon::parse($posting_date)->format('F');
         $year = Carbon::parse($posting_date)->format('Y');
-        $month_number = intval(Carbon::parse($posting_date)->format('m'));
+        $start_month = 1;
+        $end_month = intval(Carbon::parse($posting_date)->format('m'));
+        $previous_month = ($end_month - 1); 
         
         if($month == 'January'){
             $year = $year - 1;
-            $month_number = 13;
+            $previous_month = 12;
         }
-        $months = $this->generateMonths($month_number,$year,$user_id);
-
-        $expenses = ExpenseMonthlyDmsReceive::where('user_id',$user_id)
+        //For 2024, start checking from month of August only
+        if($year == '2024') $start_month = 8;
+        //Generate months that has submitted expense
+        $months = $this->generateMonths($start_month,$previous_month,$year,$user_id);
+   
+        $dms_submitteds = ExpenseMonthlyDmsReceive::where('user_id',$user_id)
             ->whereIn('month',$months)
             ->where('year',$year)
             ->get();
-        
-        return ($expenses->count() == count($months));
+
+        $result = false;
+        // Complete receipt
+        if($dms_submitteds->count() == count($months)) $result = true;
+        // Exemption checking for 1 month only with no receipt and falls under 7 days leeway
+        if(!$result && intval(Carbon::now()->format('d')) < 8){
+            // With 1 month reimbursement and no submitted receipt(Must be in previous months, proceed due to 7 days leeway)
+            if(count($months) == 1){
+                if($previous_month == (intval(Carbon::createFromFormat('F', $months[0])->format('m')) -1)) $result = true;
+            }else{
+                //If total months that has reimbursement is more than 1,
+                // do additional checking, missing receipts must only be 1 month and must be previous month only.
+                // else will not proceed
+                if((count($months) - $dms_submitteds->count() == 1)){
+                    $previous_submitted = ExpenseMonthlyDmsReceive::where('user_id',$user_id)
+                        ->where('month',$previous_month)
+                        ->where('year',$year)
+                        ->first();
+                    
+                    $result = $previous_submitted ? false : true;
+                }
+            }
+        }
+        return $result;
     }
 
     /**
      *  Check submitted receipts for previous months if complete
      *
      */
-    public function generateMonths($month,$year,$user_id){
+    public function generateMonths($start_month,$end_month,$year,$user_id){
         $months = [];
-        $month_number = 0;
+        $month_number = $start_month;
 
-        for ($x = 1; $x < $month; $x++) {
-            $month_number += 1;
+        for ($x = $start_month; $x <= $end_month; $x++) {
             if($this->checkIfHasSubmittedExpense($month_number,$year,$user_id)) $months[] = Carbon::createFromFormat('m', $month_number)->format('F');
+            $month_number += 1;
         }
         return $months;
     }
