@@ -5,12 +5,14 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use function foo\func;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PaymentHeader extends Model implements Auditable
 {
 
     use \Awobaz\Compoships\Compoships;
     use \OwenIt\Auditing\Auditable;
+    use SoftDeletes;
 
     protected $fillable = [
         'company_code',
