@@ -89,7 +89,10 @@ class ExpenseController extends Controller
             })
             ->when($request->expense_option != 'all', function($q) use($request,$start_date, $end_date) {
                 if ($request->expense_option == 'with_expenses') {
-                    $q->has('expensesEntries');
+                    $q->has('expensesEntries')
+                    ->whereHas('expensesEntries', function ($query) use ($start_date, $end_date) {
+                        $query->whereBetween('created_at',  [$start_date, $end_date]);
+                     });
                 } else {
                     $q->whereDoesntHave('expensesEntries');
                 }
@@ -175,6 +178,7 @@ class ExpenseController extends Controller
 
         $verified_amount = 0;
         $rejected_amount = 0;
+        $total_expenses = 0;
 
         foreach($userExpenses as $item) {
             if (count($item->expensesEntries)) {
@@ -183,6 +187,7 @@ class ExpenseController extends Controller
                     $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
                     $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
                     $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
+                    $total_expenses           = $total_expenses + $expenses->totalExpenses;
 
                     $verified = $this->computeVerifiedAndRejected($expenses->expensesModel);
                     $verified_amount = $verified_amount + $verified['verified_amount'];
@@ -191,13 +196,21 @@ class ExpenseController extends Controller
             }
         }
 
+        $verified_percentage = $expenses_model_count ? ($verified_expense_count / $expenses_model_count) * 100 : 0;
+        $rejected_percentage = $expenses_model_count ? ($rejected_expense_count / $expenses_model_count) * 100 : 0;
+        $unverified_percentage = $expenses_model_count ?($unverified_expense_count / $expenses_model_count) * 100 : 0;
+
         return [
             'expenses_model_count' => $expenses_model_count,
             'verified_expense_count' => $verified_expense_count,
             'unverified_expense_count' => $unverified_expense_count,
             'rejected_expense_count' => $rejected_expense_count,
             'verified_amount' => $verified_amount,
-            'rejected_amount' => $rejected_amount
+            'rejected_amount' => $rejected_amount,
+            'total_expenses' => $total_expenses,
+            'verified_percentage' => round($verified_percentage),
+            'unverified_percentage' => round($unverified_percentage),
+            'rejected_percentage' => round($rejected_percentage),
         ];
      }
 

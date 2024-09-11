@@ -104,19 +104,19 @@
                                 </div>
                                 <div class="col">
                                     <div class="font-weight-bold text-sm">
-                                        Verified
+                                        Verified ({{verifiedExpenseStats.verified_percentage || 0}}%)
                                     </div>
                                     <span>{{ verifiedExpenseStats.verified_expense_count || 0 }} </span>
                                 </div>
                                 <div class="col">
                                     <div class="font-weight-bold text-sm">
-                                        Unverified
+                                        Unverified ({{verifiedExpenseStats.unverified_percentage || 0}}%)
                                     </div>
                                     <span>{{ verifiedExpenseStats.unverified_expense_count || 0 }} </span>
                                 </div>
                                 <div class="col text-warning">
                                     <div class="font-weight-bold text-sm">
-                                        Rejected
+                                        Rejected ({{verifiedExpenseStats.rejected_percentage || 0}}%)
                                     </div>
                                     <span>{{ verifiedExpenseStats.rejected_expense_count || 0 }} </span>
                                 </div>
@@ -135,11 +135,16 @@
                             </button>
                             <div class="row">
                                 <div class="col"><div class="font-weight-bold text-sm">
-                                        Verified
+                                        Total Expenses
+                                    </div>
+                                    <span>PHP {{ verifiedExpenseStats.total_expenses | _amount }} </span>
+                                </div>
+                                <div class="col"><div class="font-weight-bold text-sm">
+                                        Approved Claims
                                     </div>
                                     <span>PHP {{ verifiedExpenseStats.verified_amount | _amount }} </span>
                                 </div>
-                                <div class="col"><div class="font-weight-bold text-sm">
+                                <div class="col text-warning"><div class="font-weight-bold text-sm">
                                         Rejected
                                     </div>
                                     <span>PHP {{ verifiedExpenseStats.rejected_amount | _amount }} </span>
@@ -314,7 +319,7 @@
                                             </div>
                                             <div v-else>
                                                 <div v-if="expenseBy.verification_perion_expired">
-                                                    Verification Period Expired
+                                                    <small>Verification Period Expired</small>
                                                 </div>
                                                 <div v-else>
                                                     <button type="button" class="btn btn-primary btn-sm" @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
