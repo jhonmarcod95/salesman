@@ -219,6 +219,9 @@ class UserController extends Controller
                 $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
             }
         })
+        ->whereHas('roles', function ($q) {
+            $q->whereIn('role_id', [4, 5, 6, 7, 8, 9, 10]);
+        })
         ->orderBy('name', 'ASC')
         ->get();
     }

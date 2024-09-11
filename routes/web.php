@@ -160,7 +160,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Get all expenses
     Route::get('/expenses-all', 'ExpenseController@indexExpenseData');
     // Show Expense Report page
-    Route::get('/expenses-report', 'ExpenseController@index');
+    // Route::get('/expenses-report', 'ExpenseController@index');
 
     Route::get('/historical-expenses-report', 'ExpenseController@historicalExpenseReport');
     Route::get('/historical-expenses-report-data', 'ExpenseController@historicalExpenseReportData');
@@ -174,6 +174,15 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
         Route::get('/', 'ExpenseController@dmsReceivedReportIndex');
         Route::get('/all', 'ExpenseController@dmsReceivedReportAll');
         Route::get('/not-received-expense', 'ExpenseController@dmsPendingReceivedReportAll');
+        Route::get('/no-claimed-expenses', 'ExpenseController@noClaimedExpenses');
+    });
+
+    //Expense v2
+    Route::group(['prefix' => '/expenses-report'], function() {
+        Route::get('/', 'ExpenseController@index');
+        Route::get('/all', 'ExpenseController@getExpensePerUser');
+        Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
+        Route::get('/expenses/{user_id}', 'ExpenseController@show2');
     });
 
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
@@ -182,12 +191,10 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     //Checker
     Route::get('/expense-io-checker', 'ExpenseController@expenseIOChecker');
 
-    // Fetch expense report by date
-    Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
     // Fetch expense report by date per user
     Route::get('/expense-report-bydate-peruser/{ids}', 'ExpenseController@generateBydatePerUser');
     // Fetch expense report by date
-    Route::get('/expense-report/{id}', 'ExpenseController@show');
+    Route::get('/expense-report/{id}', 'ExpenseController@show'); //TODO: Remove
     // Add Expenses
     Route::post('/expenses', 'ExpenseController@store');
     // Update Expenses
