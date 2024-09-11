@@ -168,7 +168,6 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
-                                    <th scope="col">Company</th>
                                     <th scope="col">Expense Entry</th>
                                     <th scope="col">Expense Submitted</th>
                                     <th scope="col">Receipt Status</th>
@@ -186,8 +185,10 @@
                                             <button v-if="user.expenses_model_count" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(user)">View</button>
                                         </td>
                                         <td v-else></td>
-                                        <td>{{ user.name }}</td>
-                                        <td>{{ user.company }}</td>
+                                        <td>
+                                            <strong>{{ user.name }}</strong> <br>
+                                            <span>{{ user.company }}</span>
+                                        </td>
                                         <td>{{ user.expense_entry_count }}</td>
                                         <td>{{ user.expenses_model_count }}</td>
                                         <td>
