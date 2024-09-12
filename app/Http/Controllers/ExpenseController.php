@@ -334,31 +334,23 @@ class ExpenseController extends Controller
         $same_month = true;
         $start_date = Carbon::parse($request->startDate);
         $end_date = Carbon::parse($request->endDate);
-        $start_date2 = '';
         $end_date2 = '';
 
         if(!$start_date->isSameMonth($end_date)){
             $same_month = false;
             $end_date = Carbon::parse($request->startDate)->endOfMonth()->format('Y-m-d');
-            $start_date2 = Carbon::parse($request->endDate)->startOfMonth()->format('Y-m-d');
             $end_date2 = $request->endDate;
         }
 
-        return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request, $end_date,$same_month,$start_date2,$end_date2){
-                $q->when($request->weekFilter == '1', function($q) use($request, $end_date){//Posting
+        return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request){
+                $q->when($request->weekFilter == '1', function($q) use($request){//Posting
                     $q->whereDate('created_at', '>=',  $request->startDate)
-                    ->whereDate('created_at' ,'<=', $end_date);
+                    ->whereDate('created_at' ,'<=', $request->endDate);
                 })
-                ->when($request->weekFilter == '2', function($q) use($request, $end_date,$same_month,$start_date2,$end_date2){//Expense
-                    $q->whereHas('expense',function($q) use($request,$end_date,$same_month,$start_date2,$end_date2){
+                ->when($request->weekFilter == '2', function($q) use($request){//Expense
+                    $q->whereHas('expense',function($q) use($request){
                         $q->whereDate('created_at', '>=',  $request->startDate)
-                        ->whereDate('created_at' ,'<=', $end_date)
-                        ->orWhere(function ($q2)use($same_month,$start_date2,$end_date2){
-                            $q2->when(!$same_month,function($q3) use ($start_date2,$end_date2){
-                                $q3->whereDate('expense_from', '>=',  $start_date2)
-                                ->whereDate('expense_to' ,'<=', $end_date2);
-                            });
-                        });
+                        ->whereDate('created_at' ,'<=', $request->endDate);
                     });
                 })
                 ->with('expense');
@@ -368,12 +360,12 @@ class ExpenseController extends Controller
                 $q->whereDate('created_at', '>=',  $request->startDate)
                 ->whereDate('created_at' ,'<=', $end_date);
             })
-            ->when($request->weekFilter == '2', function($q) use($request,$end_date,$same_month,$start_date2,$end_date2){//expense date
+            ->when($request->weekFilter == '2', function($q) use($request,$end_date,$same_month,$end_date2){//expense date
                 $q->whereDate('expense_from', '>=',  $request->startDate)
                 ->whereDate('expense_to' ,'<=', $end_date)
-                ->orWhere(function ($q2)use($same_month,$start_date2,$end_date2){
-                    $q2->when(!$same_month,function($q3) use($start_date2,$end_date2){
-                        $q3->whereDate('expense_from', '>=',  $start_date2)
+                ->orWhere(function ($q2)use($request,$same_month,$end_date2){
+                    $q2->when(!$same_month,function($q3) use($request,$end_date2){
+                        $q3->whereDate('expense_from', '>=',  $request->startDate)
                         ->whereDate('expense_to' ,'<=', $end_date2);
                     });
                 });
