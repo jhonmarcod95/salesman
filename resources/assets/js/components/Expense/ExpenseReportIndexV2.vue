@@ -19,15 +19,23 @@
                 <div class="mb-3">
                     <div class="row mx-2">
                         <div class="col-md-3">
-                            <div class="form-group">
+                            <!-- <div class="form-group">
                                 <label for="start_date" class="form-control-label">Start Date</label> 
                                 <input type="date" id="start_date" class="form-control form-control-alternative" v-model="filterData.start_date" @input="searchKeyUp">
+                            </div> -->
+                            <div class="form-group">
+                                <label for="start_date" class="form-control-label">Month Year</label> 
+                                <input type="month" class="form-control form-control-alternative" v-model="filterData.month_year" @input="getWeekNumber">
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
+                        <div class="col-md-4">
+                            <!-- <div class="form-group">
                                 <label for="end_date" class="form-control-label">End Date</label> 
                                 <input type="date" id="end_date" class="form-control form-control-alternative" v-model="filterData.end_date" @input="searchKeyUp" :min="filterData.start_date"> 
+                            </div> -->
+                            <div class="form-group">
+                                <label for="name" class="form-control-label">Week</label> 
+                                <app-select :options="weekRanges" v-model="filterData.week_id" label="name" @input="getSelectedWeekRange"/>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -80,6 +88,8 @@
                             <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">
                                 Clear Filter
                             </button> 
+                            <button class="btn btn-sm btn-success mt-4" @click="exportReport('user')"> Export Per User</button>
+                            <button class="btn btn-sm btn-success mt-4" @click="exportReport('bu')"> Export Per BU</button>
                         </div>
                     </div>
                 </div>
@@ -89,7 +99,7 @@
                 <div class="col-md-7">
                     <div class="card shadow mb-4">
                         <div class="card-body">
-                            <span class="stat-loading" v-if="fetchingExpenseStats">
+                            <span class="stat-loading bg-light" v-if="fetchingExpenseStats">
                                 Loading...
                             </span>
                             <button v-else class="stat-loading btn bg-light" @click="getVerifiedStats">
@@ -127,7 +137,7 @@
                 <div class="col-md-5">
                     <div class="card shadow mb-4">
                         <div class="card-body">
-                            <span class="stat-loading" v-if="fetchingExpenseStats">
+                            <span class="stat-loading bg-light" v-if="fetchingExpenseStats">
                                 Loading...
                             </span>
                             <button v-else class="stat-loading btn bg-light" @click="getVerifiedStats">
@@ -137,17 +147,17 @@
                                 <div class="col"><div class="font-weight-bold text-sm">
                                         Total Expenses
                                     </div>
-                                    <span>PHP {{ verifiedExpenseStats.total_expenses | _amount }} </span>
+                                    <span>PHP {{ verifiedExpenseStats.total_expenses || 0 | _amount }} </span>
                                 </div>
                                 <div class="col"><div class="font-weight-bold text-sm">
                                         Approved Claims
                                     </div>
-                                    <span>PHP {{ verifiedExpenseStats.verified_amount | _amount }} </span>
+                                    <span>PHP {{ verifiedExpenseStats.verified_amount || 0 | _amount }} </span>
                                 </div>
                                 <div class="col text-warning"><div class="font-weight-bold text-sm">
                                         Rejected
                                     </div>
-                                    <span>PHP {{ verifiedExpenseStats.rejected_amount | _amount }} </span>
+                                    <span>PHP {{ verifiedExpenseStats.rejected_amount || 0 | _amount }} </span>
                                 </div>
                             </div>
                         </div>
@@ -396,12 +406,13 @@ export default {
             fetchingExpenseStats: false,
 
             filterData: {
-                // start_date: '2023-12-01',
-                // end_date: '2023-12-31',
                 expense_option: 'all',
+                week_id: 1,
+                month_year: moment().format('YYYY-MM'),
                 start_date: moment().startOf('month').format('YYYY-MM-DD'),
-                end_date: moment().endOf('month').format('YYYY-MM-DD')
+                end_date: moment().endOf('month').format('YYYY-MM-DD'),
             },
+            weekRanges: [],
             imgOrigin: window.location.origin,
             selectedUser: {},
             selectedExpense: {},
@@ -411,17 +422,28 @@ export default {
         }
     },
     created(){
+        this.defaultFilterData();
         this.getSelectOptions('users', '/selection-users')
         this.getSelectOptions('companies', '/companies-all')
         this.getSelectOptions('rejectedRemarks', '/expense-rejected-remarks')
         this.getSelectOptions('expenseVerificationStatuses', '/expense-verification-statuses')
-        this.fetchInitialData();
+        // this.fetchInitialData();
+        this.getWeekNumber();
     },
     methods:{
         moment,
         fetchInitialData() {
             this.fetchList();
             this.getVerifiedStats()
+        },
+        defaultFilterData() {
+            this.filterData = {
+                expense_option: 'all',
+                week_id: 1,
+                month_year: moment().format('YYYY-MM'),
+                start_date: moment().startOf('month').format('YYYY-MM-DD'),
+                end_date: moment().endOf('month').format('YYYY-MM-DD'),
+            }
         },
         noImage(event){
             event.target.src = window.location.origin+'/img/brand/no-image.png';
@@ -527,6 +549,7 @@ export default {
             }
         },
         getVerifiedStats() {
+            this.verifiedExpenseStats = [];
             this.fetchingExpenseStats = true;
             axios.get(`${this.endpoint}/verified-stat`, {params: this.filterData})
             .then(response => { 
@@ -547,20 +570,109 @@ export default {
             }, 500)
         },
         resetSearch() {
-            this.filterData = {
-                // start_date: '2023-12-01',
-                // end_date: '2023-12-31',
-                expense_option: 'all',
-                start_date: moment().startOf('month').format('YYYY-MM-DD'),
-                end_date: moment().endOf('month').format('YYYY-MM-DD')
-            };
+            this.defaultFilterData()
             this.fetchList();
             this.getVerifiedStats();
+        },
+        getWeekNumber() {
+            let date = _.split(this.filterData.month_year, '-', 2);
+
+            let startOfMonth = moment(`${date[0]}-${date[1]}-01`, 'YYYY-MM');
+            let endOfMonth = startOfMonth.clone().endOf('month');
+            
+            // Adjust to the first Sunday after the 1st of the month (or the 1st itself if it's a Sunday)
+            let currentWeekStart = startOfMonth.clone().startOf('week'); // This will start from Sunday
+
+            let weekRanges = [];
+
+            //Set default 1st week ; 1st to last date of monht
+            weekRanges[0] = {
+                id: 1,
+                name: 'All Week',
+                start_date: moment(`${date[0]}-${date[1]}`).startOf('month').format('YYYY-MM-DD'),
+                end_date: moment(`${date[0]}-${date[1]}`).endOf('month').format('YYYY-MM-DD')
+            }
+
+            //Set start of week loop
+            let week_count = 1;
+
+            // Loop through each week in the month
+            while (currentWeekStart.isBefore(endOfMonth)) {
+                let weekStart = currentWeekStart.clone();
+                let weekEnd = currentWeekStart.clone().endOf('week');
+
+                // Ensure we don't include days before the start of the month
+                if (weekStart.isBefore(startOfMonth)) {
+                    weekStart = startOfMonth.clone();
+                }
+
+                // Ensure we don't include days after the end of the month
+                if (weekEnd.isAfter(endOfMonth)) {
+                    weekEnd = endOfMonth.clone();
+                }
+
+                let start_date = weekStart.format('MM/DD/YYYY');
+                let end_date = weekEnd.format('MM/DD/YYYY');
+
+                // Add the valid week range to the result
+                weekRanges.push({
+                    id: weekRanges.length + 1,
+                    name: `Week ${week_count} ${start_date} - ${end_date}`,
+                    start_date: weekStart.format('YYYY-MM-DD'),
+                    end_date: weekEnd.format('YYYY-MM-DD')
+                });
+
+                // Move to the next Sunday
+                currentWeekStart.add(1, 'week');
+                week_count++;
+            }
+
+            //Define value of weekRanges
+            this.weekRanges = weekRanges;
+
+            //Set Default filter range
+            this.getSelectedWeekRange(1)
+        },
+        getSelectedWeekRange(week_id) {
+            let selected_week = _.find(this.weekRanges, (week) => week.id == week_id);
+            this.filterData.week_id = week_id;
+            this.filterData.start_date = selected_week.start_date;
+            this.filterData.end_date = selected_week.end_date;
+
+            this.searchKeyUp();
+        },
+        exportReport(type) {
+            // axios.get(`${this.endpoint}/export`, {params: {type, ...this.filterData}})
+
+            //get request uri
+            // let params = {type, ...this.filterData};
+            // let url = `${this.endpoint}/export`; 
+            // let requestUri = axios.getUri({url, params})
+
+
+            //=============
+            // Configuration object
+            let url = `${this.endpoint}/export`;
+            let params = {type, ...this.filterData};
+            let queryString = new URLSearchParams(params).toString();
+
+            // Manually constructing the URI
+            const requestUri = `${url}?${queryString}`;
+            //=============
+
+            //link to download
+            let link = document.createElement("a");
+
+            //donload/export excel
+            link.href = requestUri;
+            link.click();
+
+            console.log(document.readyState);
         }
     },
     computed:{
         imageLink(){
-            return 'http://salesforce.lafilgroup.net:8666/storage/';
+            // return 'http://salesforce.lafilgroup.net:8666/storage/';
             return window.location.origin+'/storage/';
         },
         expenseVerifierRole() {
