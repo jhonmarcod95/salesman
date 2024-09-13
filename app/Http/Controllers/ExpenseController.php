@@ -540,12 +540,14 @@ class ExpenseController extends Controller
                 ->whereDate('created_at' ,'<=', $end_date);
             })
             ->when($request->weekFilter == '2', function($q) use($request,$end_date,$same_month,$end_date2){//expense date
-                $q->whereDate('expense_from', '>=',  $request->startDate)
-                ->whereDate('expense_to' ,'<=', $end_date)
-                ->orWhere(function ($q2)use($request,$same_month,$end_date2){
-                    $q2->when(!$same_month,function($q3) use($request,$end_date2){
-                        $q3->whereDate('expense_from', '>=',  $request->startDate)
-                        ->whereDate('expense_to' ,'<=', $end_date2);
+                $q->where(function ($q2) use($request,$same_month,$end_date2,$end_date){
+                    $q2->whereDate('expense_from', '>=',  $request->startDate)
+                    ->whereDate('expense_to' ,'<=', $end_date)
+                    ->orWhere(function ($q3)use($request,$same_month,$end_date2){
+                        $q3->when(!$same_month,function($q4) use($request,$end_date2){
+                            $q4->whereDate('expense_from', '>=',  $request->startDate)
+                            ->whereDate('expense_to' ,'<=', $end_date2);
+                        });                    
                     });
                 });
             })
