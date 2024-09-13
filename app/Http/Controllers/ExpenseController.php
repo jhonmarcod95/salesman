@@ -21,6 +21,7 @@ use App\{
     ExpenseVerificationRejectedRemarks
 };
 use App\Exports\ExpenseVerifiedReportPerUserExport;
+use App\Exports\ExpenseVerifiedReportPerBuExport;
 use DateTime;
 use App\Rules\ExpenseDeductionRule;
 use Carbon\Carbon;
@@ -1069,8 +1070,12 @@ class ExpenseController extends Controller
     //Export Excel =======================================================
     public function export(Request $request) {
         $today = date_format(now(), "M-d-Y");
-        $date_range = $this->getWeekRangesOfMonthStartingMonday($request->month_year);
-        return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "User Weekly Expense Report - $today.xlsx");
+        if($request->type == 'user') {
+            $date_range = $this->getWeekRangesOfMonthStartingMonday($request->month_year);
+            return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "User Weekly Expense Report - $today.xlsx");
+        } else {
+            return Excel::download(new ExpenseVerifiedReportPerBuExport($request), "Reciept Verification Status - $today.xlsx");
+        }
     }
 
     function getWeekRangesOfMonthStartingMonday($month_year){
