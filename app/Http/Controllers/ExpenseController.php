@@ -85,7 +85,7 @@ class ExpenseController extends Controller
                 });
             })
             ->whereHas('roles', function($q) {
-                $q->whereIn('role_id', [4,5,6,7,8,9,10]);
+                $q->whereIn('role_id', [4,5,6,7,8,9,10,17]);
             })
             ->when($request->expense_option != 'all', function($q) use($request,$start_date, $end_date) {
                 if ($request->expense_option == 'with_expenses') {
@@ -1057,7 +1057,7 @@ class ExpenseController extends Controller
                 });
             })
             ->whereHas('roles', function($q) {
-                $q->whereIn('role_id', [4,5,6,7,8,9,10]);
+                $q->whereIn('role_id', [4,5,6,7,8,9,10,17]);
             })
             ->whereDoesntHave('expensesEntries', function($q) use($first_day, $last_day){
                 $q->whereBetween('created_at',  [$first_day, $last_day]);
