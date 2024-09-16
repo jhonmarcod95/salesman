@@ -42,6 +42,6 @@ class PaymentAutoPostingReprocessing extends Command
 
         $sap_server = $this->argument('sap_server');
         $paymentAutoPosting = new PaymentAutoPosting();
-        $paymentAutoPosting->generateExpense('2024-08-05','2024-08-11', $sap_server,true);
+        $paymentAutoPosting->generateExpense('2024-09-02','2024-09-08', $sap_server,true);
     }
 }
