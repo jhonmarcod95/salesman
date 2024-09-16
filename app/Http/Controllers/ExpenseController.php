@@ -331,26 +331,30 @@ class ExpenseController extends Controller
             'weekFilter' => 'required'
         ]);
 
-        $same_month = true;
         $start_date = Carbon::parse($request->startDate);
         $end_date = Carbon::parse($request->endDate);
         $end_date2 = '';
+        $last_day = Carbon::parse($request->endDate)->endOfMonth();
+        $same_month = $start_date->isSameMonth($end_date);
+        $next_monday = Carbon::parse($request->startDate)->next(Carbon::MONDAY)->format('Y-m-d');
 
-        if(!$start_date->isSameMonth($end_date)){
-            $same_month = false;
+        if($same_month){
+            // For month end posting, set posting date to last day of the month
+            if($last_day->diffInDays($end_date) < 7) $end_date = $last_day->format('Y-m-d');
+        }else{ // For tawid buwan scenario
             $end_date = Carbon::parse($request->startDate)->endOfMonth()->format('Y-m-d');
             $end_date2 = $request->endDate;
         }
 
-        return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request){
-                $q->when($request->weekFilter == '1', function($q) use($request){//Posting
+        return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request,$end_date){
+                $q->when($request->weekFilter == '1', function($q) use($request,$end_date){//Posting
                     $q->whereDate('created_at', '>=',  $request->startDate)
-                    ->whereDate('created_at' ,'<=', $request->endDate);
+                    ->whereDate('created_at' ,'<=', $end_date);
                 })
-                ->when($request->weekFilter == '2', function($q) use($request){//Expense
-                    $q->whereHas('expense',function($q) use($request){
+                ->when($request->weekFilter == '2', function($q) use($request,$end_date){//Expense
+                    $q->whereHas('expense',function($q) use($request,$end_date){
                         $q->whereDate('created_at', '>=',  $request->startDate)
-                        ->whereDate('created_at' ,'<=', $request->endDate);
+                        ->whereDate('created_at' ,'<=', $end_date);
                     });
                 })
                 ->with('expense');
@@ -360,10 +364,11 @@ class ExpenseController extends Controller
                 $q->whereDate('created_at', '>=',  $request->startDate)
                 ->whereDate('created_at' ,'<=', $end_date);
             })
-            ->when($request->weekFilter == '2', function($q) use($request,$end_date,$same_month,$end_date2){//expense date
-                $q->where(function ($q2) use($request,$same_month,$end_date2,$end_date){
+            ->when($request->weekFilter == '2', function($q) use($request,$end_date,$same_month,$end_date2,$next_monday){//expense date
+                $q->where(function ($q2) use($request,$same_month,$end_date2,$end_date,$next_monday){
                     $q2->whereDate('expense_from', '>=',  $request->startDate)
                     ->whereDate('expense_to' ,'<=', $end_date)
+                    ->whereDate('expense_from' ,'<', $next_monday)
                     ->orWhere(function ($q3)use($request,$same_month,$end_date2){
                         $q3->when(!$same_month,function($q4) use($request,$end_date2){
                             $q4->whereDate('expense_from', '>=',  $request->startDate)
