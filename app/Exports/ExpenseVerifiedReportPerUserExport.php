@@ -98,30 +98,40 @@ class ExpenseVerifiedReportPerUserExport implements FromCollection, WithHeadings
 
             //Loop through users to get expense details status
             foreach($user_expense as $key => $user) {
-                
-                // Set Default value of remark
-                $remark = !$user->expense_entry_count ? "No Reimbursement" : "";
 
                 $expense_model_count = 0;
+                $expense_count = 0;
+                $verified = 0;
+                $unverified = 0;
+                $rejected = 0;
+
                 foreach ($user->expensesEntries as $expense) {
                     //Define count of each expenses and its status
-                    $expense_count = $expense->expenses_model;
-                    $verified = $expense->verified_expense_count;
-                    $unverified = $expense->unverified_expense_count + $expense->pending_expense_count;
+                    $expense_count = $expense_count + $expense->expenses_model_count;
+                    $verified = $verified + $expense->verified_expense_count;
+                    $unverified = $unverified + ($expense->unverified_expense_count + $expense->pending_expense_count);
+                    $rejected = $rejected + $expense->rejected_expense_count;
+                }
 
-                    //Match weekly expense status/remarks base on condition expense status
+                // Set Default value of remark
+                $remark = "No Reimbursement";
+
+                //Match weekly expense status/remarks base on condition expense status
+                if($expense_count) {
                     switch (true) {
                         case $expense_count == $verified:
                             $remark = "Verified";
                             break;
-                        case $expense_count == $expense_count:
+                        case $expense_count == $unverified:
                             $remark = "Unverified";
                             break;
-                        case $unverified:
+                        case $expense_count == $rejected:
+                            $remark = "Rejected";
+                            break;
+                        case $expense_count > $unverified:
                             $remark = "Incomplete";
                             break;
                     }
-
                 }
 
                 //Assign remarks to user and its weeks column
