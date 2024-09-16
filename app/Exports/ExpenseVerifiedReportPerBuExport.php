@@ -51,8 +51,27 @@ class ExpenseVerifiedReportPerBuExport implements FromCollection, WithHeadings {
             $data['unverified_count'] = $item->unverified_expense_count + $item->pending_expense_count;
             $data['rejected_count'] = $item->rejected_expense_count;
             return $data;
+        })->groupBy('company');
+
+        // $expensesEntryPerBU = collect($expensesEntryData)->groupBy('company');
+        $expensesEntryPerBU = collect($expensesEntryData)->map(function($item) {
+
+            $expenses_count = $item->sum('expenses_count');
+            $verified_count = $item->sum('verified_count');
+            $unverified_count = $item->sum('unverified_count');
+            $rejected_count = $item->sum('rejected_count');
+            $completion_pecent = (($verified_count + $rejected_count) / $expenses_count) * 100;
+
+            return [
+                "bu" => $item[0]['company'],
+                "expenses_count" => $expenses_count,
+                "verified_count" => $verified_count,
+                "unverified_count" => $unverified_count,
+                "rejected_count" => $rejected_count,
+                "completion_pecent" => round($completion_pecent)
+            ];
         });
 
-        return $expensesEntryData;
+        return $expensesEntryPerBU;
     }
 }
