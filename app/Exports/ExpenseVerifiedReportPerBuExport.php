@@ -66,8 +66,8 @@ class ExpenseVerifiedReportPerBuExport implements FromCollection, WithHeadings {
                 "bu" => $item[0]['company'],
                 "expenses_count" => $expenses_count,
                 "verified_count" => $verified_count,
-                "unverified_count" => $unverified_count,
                 "rejected_count" => $rejected_count,
+                "unverified_count" => $unverified_count,
                 "completion_pecent" => round($completion_pecent)
             ];
         });

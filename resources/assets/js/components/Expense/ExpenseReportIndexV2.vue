@@ -87,8 +87,8 @@
                             <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">
                                 Clear Filter
                             </button> 
-                            <button class="btn btn-sm btn-success mt-4" @click="exportReport('user')"> Export Per User</button>
-                            <button class="btn btn-sm btn-success mt-4" @click="exportReport('bu')"> Export Per BU (%)</button>
+                            <button v-if="isItRole" class="btn btn-sm btn-success mt-4" @click="exportReport('user')"> Export Per User</button>
+                            <button v-if="isItRole" class="btn btn-sm btn-success mt-4" @click="exportReport('bu')"> Export Per BU (%)</button>
                         </div>
                     </div>
                 </div>

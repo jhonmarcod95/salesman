@@ -22,6 +22,7 @@ use App\{
 };
 use App\Exports\ExpenseVerifiedReportPerUserExport;
 use App\Exports\ExpenseVerifiedReportPerBuExport;
+use App\Exports\ExpenseDmsVerifiedReportPerBuExport;
 use DateTime;
 use App\Rules\ExpenseDeductionRule;
 use Carbon\Carbon;
@@ -1098,6 +1099,7 @@ class ExpenseController extends Controller
             return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "USER EXPENSE WEEKLY VERIFICATION STATUS REPORT - $today.xlsx");
         } else {
             $year = date("Y");
+            // return Excel::download(new ExpenseDmsVerifiedReportPerBuExport($request), "$year DMS RECEIVED VERIFICATION STATUS - $today.xlsx");
             return Excel::download(new ExpenseVerifiedReportPerBuExport($request), "$year SFA RECEIPT VERIFICATION STATUS - $today.xlsx");
         }
     }
