@@ -97,9 +97,9 @@
                                                 <td>{{ expense.month }}</td>
                                                 <td>{{ expense.year }}</td>
                                                 <td>
-                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ expense.expense_status.verified }}</div>
-                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ expense.expense_status.unverified }}</div>
-                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ expense.expense_status.rejected }}</div>
+                                                    <div class="mb-0" v-if="filterVerified"><span style="width:90px; display: inline-block;">Verified: </span>{{ expense.expense_status.verified }}</div>
+                                                    <div class="mb-0" v-if="filterUnverified"><span style="width:90px; display: inline-block;">Unverified: </span>{{ expense.expense_status.unverified }}</div>
+                                                    <div class="mb-0" v-if="filterRejected"><span style="width:90px; display: inline-block;">Rejected: </span>{{ expense.expense_status.rejected }}</div>
                                                     <!-- <div class="mb-0"><span style="width:90px; display: inline-block;">Not Verified: </span>{{ expense.expense_status.not_verified }}</div> -->
                                                 </td>
                                                 <td>{{ expense.expense_status.expense_count }}</td>
@@ -281,6 +281,15 @@ export default {
                 4,  // VP/Sales Head
             ];
             return _.includes(userRole, this.userRole);
+        },
+        filterVerified() {
+            return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '1';
+        },
+        filterUnverified() {
+            return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '2';
+        },
+        filterRejected() {
+            return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '3';
         }
     },
 }
