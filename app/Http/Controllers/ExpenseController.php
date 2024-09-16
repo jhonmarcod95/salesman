@@ -952,7 +952,30 @@ class ExpenseController extends Controller
     }
 
     public function dmsReceivedReportAll(Request $request) {
-        $expenseMonthlyDmsReceive = ($this->dmsReceivedReportCommonQuery($request))->with('user:id,name', 'user.companies', 'user.expenses')->paginate($request->limit);
+        $expenseMonthlyDmsReceive = ($this->dmsReceivedReportCommonQuery($request))
+            ->with('user:id,name', 'user.companies', 'user.expenses')
+            ->when(isset($request->expense_status), function($q) use($request){
+                $q->whereHas('user.expensesEntries', function($query) use($request){
+                    $first_of_month = date('Y-m-d', strtotime("first day of $request->month_year"));
+                    $last_of_month = date('Y-m-d', strtotime("last day of $request->month_year"));
+                    $start_date = "$first_of_month 00:00:01";
+                    $last_date = "$last_of_month 23:59:59";
+                    $query->whereBetween('created_at',[$start_date, $last_date]);
+                    switch ($request->expense_status) {
+                        case '1':
+                            $query->has('verifiedExpense');
+                            break;
+                        case '2':
+                            $query->has('unverifiedExpense')->has('pendingExpense');
+                            break;
+                        case '3':
+                            $query->has('rejectedExpense');
+                            break;
+                    }
+                });
+            })
+            ->paginate($request->limit);
+
         $expenseMonthlyDmsReceive->getCollection()->transform(function ($item) {
             $item['expense_status'] = $this->getUserStatPerMonth($item['user_id'], $item['month'], $item['year']);
             return $item;
@@ -1072,9 +1095,10 @@ class ExpenseController extends Controller
         $today = date_format(now(), "M-d-Y");
         if($request->type == 'user') {
             $date_range = $this->getWeekRangesOfMonthStartingMonday($request->month_year);
-            return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "User Weekly Expense Report - $today.xlsx");
+            return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "USER EXPENSE WEEKLY VERIFICATION STATUS REPORT - $today.xlsx");
         } else {
-            return Excel::download(new ExpenseVerifiedReportPerBuExport($request), "Reciept Verification Status - $today.xlsx");
+            $year = date("Y");
+            return Excel::download(new ExpenseVerifiedReportPerBuExport($request), "$year SFA RECEIPT VERIFICATION STATUS - $today.xlsx");
         }
     }
 

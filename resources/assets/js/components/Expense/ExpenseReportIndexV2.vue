@@ -80,7 +80,6 @@
                                 <select class="form-control" v-model="filterData.expense_verify_status" @input="searchKeyUp">
                                     <option value=""> All </option>
                                     <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
-                                    <option value="0">Pending</option>
                                 </select>
                             </div>
                         </div>

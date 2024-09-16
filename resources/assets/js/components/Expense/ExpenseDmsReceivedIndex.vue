@@ -33,10 +33,19 @@
                                         <app-select :options="users" v-model="filterData.user_id" label="name" @input="searchKeyUp"/>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <label for="start_date" class="form-control-label">Month Year</label> 
                                         <input type="month" class="form-control form-control-alternative" v-model="filterData.month_year" @input="searchKeyUp">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="end_date" class="form-control-label">Status</label> 
+                                        <select class="form-control" v-model="filterData.expense_status" @input="searchKeyUp">
+                                            <option value=""> All </option>
+                                            <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-1">
@@ -169,12 +178,14 @@ export default {
             expenseByTsr: {},
             users: [],
             companies: [],
-            tsrName: ''
+            tsrName: '',
+            expenseVerificationStatuses: []
         }
     },
     created(){
         this.getSelectOptions('companies', '/companies-all')	
         this.getSelectOptions('users', '/selection-users')
+        this.getSelectOptions('expenseVerificationStatuses', '/expense-verification-statuses')
         this.fetchList();
     },
     methods:{
