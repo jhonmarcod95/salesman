@@ -214,10 +214,20 @@ class UserController extends Controller
     }
 
     public function selectionUsers() {
-        return User::select(['id','name'])->whereHas('companies', function ($q) {
-            if(!Auth::user()->hasRole('it')) {
-                $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
-            }
+        return $this->getUsersWithExpense();
+    }
+
+    public function getUsersWithExpense($company_id = null) {
+        $user_control_access = Auth::user()->level() < 8  && !Auth::user()->hasRole('ap');
+
+        return User::select(['id', 'name'])->whereHas('companies', function ($q) use($company_id){
+            $q->when($company_id, function($companyQuery) use($company_id) {
+                $companyQuery->where('company_id', $company_id);
+            }, function($q) {
+                if (!Auth::user()->hasRole('it')) {
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                }
+            });
         })
         ->whereHas('roles', function ($q) {
             $q->whereIn('role_id', [4, 5, 6, 7, 8, 9, 10]);
