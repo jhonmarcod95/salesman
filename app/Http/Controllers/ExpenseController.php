@@ -1018,6 +1018,19 @@ class ExpenseController extends Controller
             ->when(isset($request->month_year), function($q) use($first_day, $last_day){
                 $q->whereBetween('created_at', [$first_day, $last_day]);
             })
+            ->when(isset($request->expense_status), function ($q) use ($request) {
+                switch ($request->expense_status) {
+                    case '1':
+                        $q->has('verifiedExpense');
+                        break;
+                    case '2':
+                        $q->has('unverifiedExpense')->has('pendingExpense');
+                        break;
+                    case '3':
+                        $q->has('rejectedExpense');
+                        break;
+                }
+            })
             ->whereHas('user', function ($q) use($company_id){
                 $q->whereHas('companies', function ($q) use($company_id){
                     if(isset($company_id)) {
