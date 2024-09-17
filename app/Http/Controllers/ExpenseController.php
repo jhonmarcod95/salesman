@@ -907,7 +907,7 @@ class ExpenseController extends Controller
         return view('expense.dms-received-index-report');
     }
 
-    public function getUserStatPerMonth($user_id, $month, $year) {
+    public function getUserStatPerMonth($user_id, $month, $year, $expense_status) {
         $dms_month_year = "$month $year";
         $first_of_month = date('Y-m-d', strtotime("first day of $dms_month_year"));
         $last_of_month = date('Y-m-d', strtotime("last day of $dms_month_year"));
@@ -967,35 +967,51 @@ class ExpenseController extends Controller
                     }
                 });
             });
+            
     }
 
     public function dmsReceivedReportAll(Request $request) {
         $expenseMonthlyDmsReceive = ($this->dmsReceivedReportCommonQuery($request))
-            ->with('user:id,name', 'user.companies', 'user.expenses')
-            ->when(isset($request->expense_status), function($q) use($request){
-                $q->whereHas('user.expensesEntries', function($query) use($request){
+            ->with('user:id,name', 'user.companies')
+            ->when(isset($request->expense_status), function ($q) use ($request) {
+                $q->whereHas('user', function ($userQuery) use ($request) {
                     $first_of_month = date('Y-m-d', strtotime("first day of $request->month_year"));
                     $last_of_month = date('Y-m-d', strtotime("last day of $request->month_year"));
                     $start_date = "$first_of_month 00:00:01";
                     $last_date = "$last_of_month 23:59:59";
-                    $query->whereBetween('created_at',[$start_date, $last_date]);
+
                     switch ($request->expense_status) {
                         case '1':
-                            $query->has('verifiedExpense');
+                            $userQuery->whereDoesntHave('expensesEntries', function ($query) use ($start_date, $last_date) {
+                                $query->whereBetween('created_at', [$start_date, $last_date]);
+                                $query->whereHas('expensesModel', function ($expenseQuery) {
+                                    $expenseQuery->whereIn('verified_status_id', [0, 2, 3]);
+                                });
+                            });
                             break;
                         case '2':
-                            $query->has('unverifiedExpense')->has('pendingExpense');
+                            $userQuery->whereDoesntHave('expensesEntries', function ($query) use ($start_date, $last_date) {
+                                $query->whereBetween('created_at', [$start_date, $last_date]);
+                                $query->whereHas('expensesModel', function ($expenseQuery) {
+                                    $expenseQuery->whereIn('verified_status_id', [0, 2]);
+                                });
+                            });
                             break;
-                        case '3':
-                            $query->has('rejectedExpense');
+                        case 3:
+                            $userQuery->whereHas('expensesEntries', function ($query) use ($start_date, $last_date) {
+                                $query->whereBetween('created_at', [$start_date, $last_date]);
+                                $query->whereHas('expensesModel', function ($expenseQuery) {
+                                    $expenseQuery->whereIn('verified_status_id', [0, 2]);
+                                });
+                            });
                             break;
                     }
                 });
             })
             ->paginate($request->limit);
 
-        $expenseMonthlyDmsReceive->getCollection()->transform(function ($item) {
-            $item['expense_status'] = $this->getUserStatPerMonth($item['user_id'], $item['month'], $item['year']);
+        $expenseMonthlyDmsReceive->getCollection()->transform(function ($item) use($request){
+            $item['expense_status'] = $this->getUserStatPerMonth($item['user_id'], $item['month'], $item['year'], $request->expense_status);
             return $item;
         });
 
@@ -1032,19 +1048,24 @@ class ExpenseController extends Controller
                 }
                 $q->whereNotIn('user_id', $expenseUserMonthlyDmsReceive);
             })
-            ->when(isset($request->month_year), function($q) use($first_day, $last_day){
-                $q->whereBetween('created_at', [$first_day, $last_day]);
-            })
+            ->whereBetween('created_at', [$first_day, $last_day])
             ->when(isset($request->expense_status), function ($q) use ($request) {
                 switch ($request->expense_status) {
                     case '1':
-                        $q->has('verifiedExpense');
+                        // $q->has('verifiedExpense');
+                        $q->whereDoesntHave('expensesModel', function($expenseQuery) {
+                            $expenseQuery->whereIn('verified_status_id', [0, 2, 3]);
+                        });
                         break;
                     case '2':
-                        $q->has('unverifiedExpense')->has('pendingExpense');
+                        $q->whereDoesntHave('expensesModel', function ($expenseQuery) {
+                            $expenseQuery->whereIn('verified_status_id', [0, 2]);
+                        });
                         break;
                     case '3':
-                        $q->has('rejectedExpense');
+                        $q->whereHas('expensesModel', function ($expenseQuery) {
+                            $expenseQuery->whereIn('verified_status_id', [0, 2]);
+                        });
                         break;
                 }
             })
@@ -1066,8 +1087,8 @@ class ExpenseController extends Controller
         //===================================================================
 
         $noDmsExpensesUser = User::select('id','name')->with('companies')->whereIn('id', $noDmsExpensesUserIds)->paginate($request->limit);
-        $noDmsExpensesUser->getCollection()->transform(function ($item) use($month, $year){
-            $item['expense_status'] = $this->getUserStatPerMonth($item['id'], $month, $year);
+        $noDmsExpensesUser->getCollection()->transform(function ($item) use($month, $year, $request){
+            $item['expense_status'] = $this->getUserStatPerMonth($item['id'], $month, $year, $request->expense_status);
             $item['month'] = $month;
             $item['year'] = $year;
             return $item;

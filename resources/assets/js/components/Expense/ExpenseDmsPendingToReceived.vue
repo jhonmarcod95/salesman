@@ -86,5 +86,16 @@
                 deep: true
             }
         },
+        computed:{
+            filterVerified() {
+                return this.filterParams.expense_status == null || this.filterParams.expense_status == '' || this.filterParams.expense_status == '1';
+            },
+            filterUnverified() {
+                return this.filterParams.expense_status == null || this.filterParams.expense_status == '' || this.filterParams.expense_status == '2';
+            },
+            filterRejected() {
+                return this.filterParams.expense_status == null || this.filterParams.expense_status == '' || this.filterParams.expense_status == '3';
+            }
+        },
     }
 </script>

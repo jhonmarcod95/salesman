@@ -19,20 +19,12 @@
                 <div class="mb-3">
                     <div class="row mx-2">
                         <div class="col-md-3">
-                            <!-- <div class="form-group">
-                                <label for="start_date" class="form-control-label">Start Date</label> 
-                                <input type="date" id="start_date" class="form-control form-control-alternative" v-model="filterData.start_date" @input="searchKeyUp">
-                            </div> -->
                             <div class="form-group">
                                 <label for="start_date" class="form-control-label">Month Year</label> 
                                 <input type="month" class="form-control form-control-alternative" v-model="filterData.month_year" @input="getWeekNumber">
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <!-- <div class="form-group">
-                                <label for="end_date" class="form-control-label">End Date</label> 
-                                <input type="date" id="end_date" class="form-control form-control-alternative" v-model="filterData.end_date" @input="searchKeyUp" :min="filterData.start_date"> 
-                            </div> -->
                             <div class="form-group">
                                 <label for="name" class="form-control-label">Week</label> 
                                 <app-select :options="weekRanges" v-model="filterData.week_id" label="name" @input="getSelectedWeekRange"/>

@@ -44,7 +44,10 @@
                                         <label for="end_date" class="form-control-label">Status</label> 
                                         <select class="form-control" v-model="filterData.expense_status" @input="searchKeyUp">
                                             <option value=""> All </option>
-                                            <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
+                                            <option value="1"> Completed </option>
+                                            <option value="2"> Partially Completed </option>
+                                            <option value="3"> Pending </option>
+                                            <!-- <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option> -->
                                         </select>
                                     </div>
                                 </div>
@@ -281,6 +284,15 @@ export default {
                 4,  // VP/Sales Head
             ];
             return _.includes(userRole, this.userRole);
+        },
+        filterVerified() {
+            return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '1';
+        },
+        filterUnverified() {
+            return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '2';
+        },
+        filterRejected() {
+            return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '3';
         }
     },
 }
