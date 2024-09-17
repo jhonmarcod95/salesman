@@ -32,9 +32,9 @@
                                 <td>{{ user.month }}</td>
                                 <td>{{ user.year }}</td>
                                 <td>
-                                    <div class="mb-0" v-if="filterVerified"><span style="width:90px; display: inline-block;">Verified: </span>{{ user.expense_status.verified }}</div>
-                                    <div class="mb-0" v-if="filterUnverified"><span style="width:90px; display: inline-block;">Unverified: </span>{{ user.expense_status.unverified }}</div>
-                                    <div class="mb-0" v-if="filterRejected"><span style="width:90px; display: inline-block;">Rejected: </span>{{ user.expense_status.rejected }}</div>
+                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ user.expense_status.verified }}</div>
+                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ user.expense_status.unverified }}</div>
+                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ user.expense_status.rejected }}</div>
                                     <!-- <div class="mb-0"><span style="width:90px; display: inline-block;">Not Verified: </span>{{ user.expense_status.not_verified }}</div> -->
                                 </td>
                                 <td>{{ user.expense_status.expense_count }}</td>

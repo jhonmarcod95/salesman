@@ -44,7 +44,10 @@
                                         <label for="end_date" class="form-control-label">Status</label> 
                                         <select class="form-control" v-model="filterData.expense_status" @input="searchKeyUp">
                                             <option value=""> All </option>
-                                            <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option>
+                                            <option value="1"> Completed </option>
+                                            <option value="2"> Partially Completed </option>
+                                            <option value="3"> Pending </option>
+                                            <!-- <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option> -->
                                         </select>
                                     </div>
                                 </div>
@@ -97,9 +100,9 @@
                                                 <td>{{ expense.month }}</td>
                                                 <td>{{ expense.year }}</td>
                                                 <td>
-                                                    <div class="mb-0" v-if="filterVerified"><span style="width:90px; display: inline-block;">Verified: </span>{{ expense.expense_status.verified }}</div>
-                                                    <div class="mb-0" v-if="filterUnverified"><span style="width:90px; display: inline-block;">Unverified: </span>{{ expense.expense_status.unverified }}</div>
-                                                    <div class="mb-0" v-if="filterRejected"><span style="width:90px; display: inline-block;">Rejected: </span>{{ expense.expense_status.rejected }}</div>
+                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ expense.expense_status.verified }}</div>
+                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ expense.expense_status.unverified }}</div>
+                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ expense.expense_status.rejected }}</div>
                                                     <!-- <div class="mb-0"><span style="width:90px; display: inline-block;">Not Verified: </span>{{ expense.expense_status.not_verified }}</div> -->
                                                 </td>
                                                 <td>{{ expense.expense_status.expense_count }}</td>
