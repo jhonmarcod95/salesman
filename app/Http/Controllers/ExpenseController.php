@@ -369,11 +369,13 @@ class ExpenseController extends Controller
 
         $expenses = Expense::with(
                 'expensesType', 
-                'payments', 
+                'payments',
                 'expenseVerificationStatus:id,name',
                 'expenseRejectedRemarks:id,remark',
                 'representaion:id,expense_id,attendees,purpose',
-                'verifier:id,name')
+                'verifier:id,name',
+                'routeTransportation:id,expense_id,from,to,transportation_id,remarks',
+                'routeTransportation.transportation:id,mode')
             ->where('user_id', $user_id)
             ->whereHas('expensesEntry', function ($q) use ($start_date, $end_date) {
                 $q->whereBetween('created_at', [$start_date, $end_date]);
@@ -954,44 +956,56 @@ class ExpenseController extends Controller
     }
 
     public function dmsReceivedReportAll(Request $request) {
-        $expenseMonthlyDmsReceive = ($this->dmsReceivedReportCommonQuery($request))
+        $dmsReceiveQuery = ($this->dmsReceivedReportCommonQuery($request))
             ->with('user:id,name', 'user.companies')
-            ->when(isset($request->expense_status), function ($q) use ($request) {
-                $q->whereHas('user', function ($userQuery) use ($request) {
-                    $first_of_month = date('Y-m-d', strtotime("first day of $request->month_year"));
-                    $last_of_month = date('Y-m-d', strtotime("last day of $request->month_year"));
-                    $start_date = "$first_of_month 00:00:01";
-                    $last_date = "$last_of_month 23:59:59";
+            ->with(['user.expensesEntries' => function ($userQuery) use ($request) {
+                $first_of_month = date('Y-m-d', strtotime("first day of $request->month_year"));
+                $last_of_month = date('Y-m-d', strtotime("last day of $request->month_year"));
+                $start_date = "$first_of_month 00:00:01";
+                $last_date = "$last_of_month 23:59:59";
 
-                    switch ($request->expense_status) {
-                        case '1':
-                            $userQuery->whereDoesntHave('expensesEntries', function ($query) use ($start_date, $last_date) {
-                                $query->whereBetween('created_at', [$start_date, $last_date]);
-                                $query->whereHas('expensesModel', function ($expenseQuery) {
-                                    $expenseQuery->whereIn('verified_status_id', [0, 2, 3]);
-                                });
-                            });
-                            break;
-                        case '2':
-                            $userQuery->whereDoesntHave('expensesEntries', function ($query) use ($start_date, $last_date) {
-                                $query->whereBetween('created_at', [$start_date, $last_date]);
-                                $query->whereHas('expensesModel', function ($expenseQuery) {
-                                    $expenseQuery->whereIn('verified_status_id', [0, 2]);
-                                });
-                            });
-                            break;
-                        case 3:
-                            $userQuery->whereHas('expensesEntries', function ($query) use ($start_date, $last_date) {
-                                $query->whereBetween('created_at', [$start_date, $last_date]);
-                                $query->whereHas('expensesModel', function ($expenseQuery) {
-                                    $expenseQuery->whereIn('verified_status_id', [0, 2]);
-                                });
-                            });
-                            break;
-                    }
-                });
-            })
-            ->paginate($request->limit);
+                $userQuery
+                ->whereBetween('created_at', [$start_date, $last_date])
+                ->withCount('verifiedExpense')
+                ->withCount('unverifiedExpense')
+                ->withCount('rejectedExpense')
+                ->withCount('pendingExpense')
+                ->withCount('expensesModel');
+            }]);
+
+
+        if(isset($request->expense_status)) {
+            //Get DMS monthly submitted without pagination
+            $expenseMonthlyDmsReceive = $dmsReceiveQuery->get();
+
+            //Get expenses that mmatches the status filter
+            $matched_status = [];
+            foreach($expenseMonthlyDmsReceive as $item) {
+                $unverified_count = $item->user->expensesEntries->sum('unverified_expense_count');
+                $pending_count = $item->user->expensesEntries->sum('pending_expense_count');
+                $count_data = [
+                    'receipt_count' => $item->user->expensesEntries->sum('expenses_model_count'),
+                    'verified_count' => $item->user->expensesEntries->sum('verified_expense_count'),
+                    'unverified_count' => $unverified_count,
+                    'pending_count' => $pending_count,
+                    'rejected_count' => $item->user->expensesEntries->sum('rejected_expense_count'),
+                    'total_unverified' => $unverified_count + $pending_count
+                ];
+
+                $matched_id = $this->getMatchedIds($count_data, $request->expense_status, $item->id);
+                if($matched_id) {
+                    $matched_status[] = $matched_id;
+                }
+            }
+
+            $expenseMonthlyDmsReceive = ExpenseMonthlyDmsReceive::whereIn('id', $matched_status)
+                ->with('user:id,name', 'user.companies')
+                ->paginate($request->limit);
+        }
+        else {
+            //Get DMS monthly submitted with pagination
+            $expenseMonthlyDmsReceive = $dmsReceiveQuery->paginate($request->limit);
+        }
 
         $expenseMonthlyDmsReceive->getCollection()->transform(function ($item) use($request){
             $item['expense_status'] = $this->getUserStatPerMonth($item['user_id'], $item['month'], $item['year'], $request->expense_status);
@@ -1023,8 +1037,7 @@ class ExpenseController extends Controller
                     //Filter invalid id to return null
                     $q->where('user_id', '--');
                 }
-            })
-            ->when(!isset($user_id), function($q) use($expenseUserMonthlyDmsReceive){
+            }, function($q) use($expenseUserMonthlyDmsReceive){
                 //Add default invalid user id if no dms received match
                 if (empty($expenseUserMonthlyDmsReceive)) {
                     $expenseUserMonthlyDmsReceive[0] = 0;
@@ -1032,26 +1045,6 @@ class ExpenseController extends Controller
                 $q->whereNotIn('user_id', $expenseUserMonthlyDmsReceive);
             })
             ->whereBetween('created_at', [$first_day, $last_day])
-            ->when(isset($request->expense_status), function ($q) use ($request) {
-                switch ($request->expense_status) {
-                    case '1':
-                        // $q->has('verifiedExpense');
-                        $q->whereDoesntHave('expensesModel', function($expenseQuery) {
-                            $expenseQuery->whereIn('verified_status_id', [0, 2, 3]);
-                        });
-                        break;
-                    case '2':
-                        $q->whereDoesntHave('expensesModel', function ($expenseQuery) {
-                            $expenseQuery->whereIn('verified_status_id', [0, 2]);
-                        });
-                        break;
-                    case '3':
-                        $q->whereHas('expensesModel', function ($expenseQuery) {
-                            $expenseQuery->whereIn('verified_status_id', [0, 2]);
-                        });
-                        break;
-                }
-            })
             ->whereHas('user', function ($q) use($company_id){
                 $q->whereHas('companies', function ($q) use($company_id){
                     if(isset($company_id)) {
@@ -1063,13 +1056,41 @@ class ExpenseController extends Controller
                     }
                 });
             })
-            ->get()
-            ->unique('user_id')
-            ->pluck('user_id')
-            ->toArray();
+            ->withCount('expensesModel')
+            ->withCount('verifiedExpense')
+            ->withCount('unverifiedExpense')
+            ->withCount('rejectedExpense')
+            ->withCount('pendingExpense')
+            ->get();
+
+        $matched_user_ids = [];
+        if(isset($request->expense_status)) {
+            $noDmsExpensesUserIds = $noDmsExpensesUserIds->groupBy('user_id');
+
+            foreach($noDmsExpensesUserIds as $key => $expenses) {
+                $unverified_count = $expenses->sum('unverified_expense_count');
+                $pending_count = $expenses->sum('pending_expense_count');
+                $count_data = [
+                    'receipt_count' => $expenses->sum('expenses_model_count'),
+                    'verified_count' => $expenses->sum('verified_expense_count'),
+                    'unverified_count' => $unverified_count,
+                    'pending_count' => $pending_count,
+                    'rejected_count' => $expenses->sum('rejected_expense_count'),
+                    'total_unverified' => $unverified_count + $pending_count
+                ];
+
+                $matched_id = $this->getMatchedIds($count_data, $request->expense_status, $key);
+                if ($matched_id) {
+                    $matched_user_ids[] = $matched_id;
+                }
+            }
+        } 
+        else {
+            $matched_user_ids = $noDmsExpensesUserIds->unique('user_id')->pluck('user_id');
+        }
         //===================================================================
 
-        $noDmsExpensesUser = User::select('id','name')->with('companies')->whereIn('id', $noDmsExpensesUserIds)->paginate($request->limit);
+        $noDmsExpensesUser = User::select('id','name')->with('companies')->whereIn('id', $matched_user_ids)->paginate($request->limit);
         $noDmsExpensesUser->getCollection()->transform(function ($item) use($month, $year, $request){
             $item['expense_status'] = $this->getUserStatPerMonth($item['id'], $month, $year, $request->expense_status);
             $item['month'] = $month;
@@ -1123,6 +1144,33 @@ class ExpenseController extends Controller
 
         return $noCalimedExpensesUser;
     }
+
+    public function getMatchedIds($expenses_entries, $status_filter, $item_id) {
+        $matched_id = null;
+        switch ($status_filter) {
+            case '1':
+                if ($expenses_entries['receipt_count'] == $expenses_entries['verified_count']) {
+                    $matched_id = $item_id;
+                }
+                break;
+            case '2':
+                if ($expenses_entries['verified_count'] > 0 && $expenses_entries['rejected_count'] > 0 && $expenses_entries['total_unverified'] == 0) {
+                    $matched_id = $item_id;
+                }
+                break;
+            case '3':
+                if ($expenses_entries['total_unverified'] > 0) {
+                    $matched_id = $item_id;
+                }
+                break;
+            case '4':
+                if ($expenses_entries['receipt_count'] == $expenses_entries['rejected_count']) {
+                    $matched_id = $item_id;
+                }
+                break;
+        }
+        return $matched_id;
+    }
     //====================================================================
 
     //Export Excel =======================================================
@@ -1133,9 +1181,14 @@ class ExpenseController extends Controller
             return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "USER EXPENSE WEEKLY VERIFICATION STATUS REPORT - $today.xlsx");
         } else {
             $year = date("Y");
-            // return Excel::download(new ExpenseDmsVerifiedReportPerBuExport($request), "$year DMS RECEIVED VERIFICATION STATUS - $today.xlsx");
             return Excel::download(new ExpenseVerifiedReportPerBuExport($request), "$year SFA RECEIPT VERIFICATION STATUS - $today.xlsx");
         }
+    }
+
+    public function exportDmsReport(Request $request) {
+        $today = date_format(now(), "M-d-Y");
+        $year = date("Y");
+        return Excel::download(new ExpenseDmsVerifiedReportPerBuExport($request), "$year DMS RECEIVED STATUS - $today.xlsx");
     }
 
     function getWeekRangesOfMonthStartingMonday($month_year){
