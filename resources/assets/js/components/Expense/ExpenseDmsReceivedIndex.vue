@@ -21,7 +21,7 @@
                         </div>
                         <div class="mb-3">
                             <div class="row ml-2">
-                                <div class="col-md-3 float-left">
+                                <div class="col-md-2 float-left">
                                     <div class="form-group">
                                         <label for="name" class="form-control-label">Company</label> 
                                         <app-select :options="companies" v-model="filterData.company_id" label="name" @input="searchKeyUp"/>
@@ -47,14 +47,14 @@
                                             <option value="1"> Completed </option>
                                             <option value="2"> Partially Completed </option>
                                             <option value="3"> Pending </option>
+                                            <option value="4"> Rejected </option>
                                             <!-- <option v-for="(item, index) in expenseVerificationStatuses" :key="index" :value="item.id">{{item.name}}</option> -->
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-1">
-                                    <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">
-                                        Clear Filter
-                                    </button> 
+                                <div class="col-md-3">
+                                    <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">Clear Filter</button> 
+                                    <button v-if="isItRole" class="btn btn-sm btn-success mt-4" @click="exportReport()"> Export Excel</button>
                                 </div>
                             </div>
                         </div>
@@ -261,6 +261,24 @@ export default {
                 month_year: moment().subtract(1, 'months').format('YYYY-MM')
             }
             this.fetchList();
+        },
+        exportReport() {
+            //=============
+            // Configuration object
+            let url = `${this.endpoint}/export`;
+            let params = this.filterData;
+            let queryString = new URLSearchParams(params).toString();
+
+            // Manually constructing the URI
+            const requestUri = `${url}?${queryString}`;
+            //=============
+
+            //link to download
+            let link = document.createElement("a");
+
+            //donload/export excel
+            link.href = requestUri;
+            link.click();
         }
     },
     computed:{
@@ -271,10 +289,12 @@ export default {
         expenseVerifierRole() {
             let userLevel = [
                 4, // Coordinator
-                9  // IT
             ];
 
             return _.includes(userLevel, this.userLevel) || this.expenseVerifier;
+        },
+        isItRole() {
+            return this.userRole == 1  // IT
         },
         salesHeadRole() {
             let userRole = [

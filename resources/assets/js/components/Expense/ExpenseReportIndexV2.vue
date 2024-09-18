@@ -353,6 +353,17 @@
                                             <div class="mt-1"><strong>Attendees</strong></div>
                                             {{expenseBy.representaion.attendees}}
                                         </div>
+
+                                        <div v-if="!isEmpty(expenseBy.route_transportation)">
+                                            <div class="mt-2"><strong>{{expenseBy.route_transportation.transportation.mode}}</strong></div> 
+                                            <div>From: {{expenseBy.route_transportation.from}}</div>
+                                            <div>To: {{expenseBy.route_transportation.to}}</div>
+
+                                            <div class="mt-2" v-if="!isEmpty(expenseBy.route_transportation.remarks)">
+                                                <strong>Remarks</strong>
+                                                <div>{{expenseBy.route_transportation.remarks}}</div>
+                                            </div> 
+                                        </div>
                                     </td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
@@ -633,14 +644,6 @@ export default {
             this.searchKeyUp();
         },
         exportReport(type) {
-            // axios.get(`${this.endpoint}/export`, {params: {type, ...this.filterData}})
-
-            //get request uri
-            // let params = {type, ...this.filterData};
-            // let url = `${this.endpoint}/export`; 
-            // let requestUri = axios.getUri({url, params})
-
-
             //=============
             // Configuration object
             let url = `${this.endpoint}/export`;
@@ -657,8 +660,6 @@ export default {
             //donload/export excel
             link.href = requestUri;
             link.click();
-
-            console.log(document.readyState);
         }
     },
     computed:{
