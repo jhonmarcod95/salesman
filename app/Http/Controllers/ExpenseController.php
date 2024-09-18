@@ -917,12 +917,7 @@ class ExpenseController extends Controller
         $last_date = "$last_of_month 23:59:59";
 
         $expenses_entry = ExpensesEntry::where('user_id', $user_id)
-            ->withCount('verifiedExpense')
-            ->withCount('unverifiedExpense')
-            ->withCount('rejectedExpense')
-            ->withCount('pendingExpense')
-            ->withCount('expensesModel')
-            ->whereBetween('created_at', [$start_date, $last_date])
+            ->expensePerMonth($start_date, $last_date)
             ->get();
 
         $verified_expense_count = 0;
@@ -973,21 +968,15 @@ class ExpenseController extends Controller
     }
 
     public function dmsReceivedReportAll(Request $request) {
+        $first_of_month = date('Y-m-d', strtotime("first day of $request->month_year"));
+        $last_of_month = date('Y-m-d', strtotime("last day of $request->month_year"));
+        $start_date = "$first_of_month 00:00:01";
+        $last_date = "$last_of_month 23:59:59";
+
         $dmsReceiveQuery = ($this->dmsReceivedReportCommonQuery($request))
             ->with('user:id,name', 'user.companies')
-            ->with(['user.expensesEntries' => function ($userQuery) use ($request) {
-                $first_of_month = date('Y-m-d', strtotime("first day of $request->month_year"));
-                $last_of_month = date('Y-m-d', strtotime("last day of $request->month_year"));
-                $start_date = "$first_of_month 00:00:01";
-                $last_date = "$last_of_month 23:59:59";
-
-                $userQuery
-                ->whereBetween('created_at', [$start_date, $last_date])
-                ->withCount('verifiedExpense')
-                ->withCount('unverifiedExpense')
-                ->withCount('rejectedExpense')
-                ->withCount('pendingExpense')
-                ->withCount('expensesModel');
+            ->with(['user.expensesEntries' => function ($userQuery) use ($start_date, $last_date) {
+                $userQuery->expensePerMonth($start_date, $last_date);
             }]);
 
 
@@ -1073,11 +1062,7 @@ class ExpenseController extends Controller
                     }
                 });
             })
-            ->withCount('expensesModel')
-            ->withCount('verifiedExpense')
-            ->withCount('unverifiedExpense')
-            ->withCount('rejectedExpense')
-            ->withCount('pendingExpense')
+            ->expensePerMonth($first_day, $last_day)
             ->get();
 
         $matched_user_ids = [];

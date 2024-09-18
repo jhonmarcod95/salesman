@@ -35,13 +35,8 @@ class ExpenseDmsVerifiedReportPerBuExport implements FromCollection, WithHeading
     }
 
     public function getData() {
-        $expensesEntry = ExpensesEntry::whereBetween('created_at', [$this->start_date, $this->end_date])
-            ->with('user:id,name', 'user.companies', 'expensesModel:id,expenses_entry_id,dms_reference')
-            ->withCount('expensesModel')
-            ->withCount('verifiedExpense')
-            ->withCount('unverifiedExpense')
-            ->withCount('rejectedExpense')
-            ->withCount('pendingExpense')
+        $expensesEntry = ExpensesEntry::with('user:id,name', 'user.companies', 'expensesModel:id,expenses_entry_id,dms_reference')
+            ->expensePerMonth($this->start_date, $this->end_date)
             ->get();
 
         $expensesEntryData = [];
