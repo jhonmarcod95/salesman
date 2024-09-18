@@ -86,12 +86,7 @@ class ExpenseVerifiedReportPerUserExport implements FromCollection, WithHeadings
             $user_expense = User::select('id', 'name')
                 ->whereIn('id', $user_ids)
                 ->with(['expensesEntries' => function ($q) use ($start_date, $end_date) {
-                    $q->whereBetween('created_at',  [$start_date, $end_date])
-                        ->withCount('expensesModel')
-                        ->withCount('verifiedExpense')
-                        ->withCount('unverifiedExpense')
-                        ->withCount('rejectedExpense')
-                        ->withCount('pendingExpense');
+                    $q->expensePerMonth($start_date, $end_date);
                 }])
                 ->orderBy('name', 'ASC')
                 ->get();

@@ -92,33 +92,39 @@ class ExpenseController extends Controller
             ->whereHas('roles', function($q) {
                 $q->whereIn('role_id', [4,5,6,7,8,9,10]);
             })
-            ->when($request->expense_option != 'all', function($q) use($request,$start_date, $end_date) {
-                if ($request->expense_option == 'with_expenses') {
-                    $q->has('expensesEntries')
-                    ->whereHas('expensesEntries', function ($query) use ($start_date, $end_date) {
-                        $query->whereBetween('created_at',  [$start_date, $end_date]);
-                     });
-                } else {
-                    $q->whereDoesntHave('expensesEntries');
-                }
-            })
-            ->with(['expensesEntries' => function($q) use($start_date, $end_date) {
-                $q->whereBetween('created_at',  [$start_date, $end_date])
-                ->withCount('expensesModel')
-                ->withCount('verifiedExpense')
-                ->withCount('unverifiedExpense')
-                ->withCount('rejectedExpense')
-                ->withCount('pendingExpense');
-            }])
+            ->when(isset($request->expense_option), function($expenseOptionQuery) use($request,$start_date, $end_date) {
+                if ($request->expense_option == 'with_expenses' || $request->expense_option == 'all') {
+                    $verify_status = $request->expense_verify_status;
 
-            //Require only users with Expenses Entries when filtering verify status
-            ->when(isset($verify_status), function($q) use($verify_status, $start_date, $end_date){
-                $q->whereHas('expensesEntries', function ($query) use ($verify_status, $start_date, $end_date) {
-                    $query->whereBetween('created_at',  [$start_date, $end_date])
-                     ->whereHas('expensesModel', function($q2) use($verify_status){
-                        $q2->where('verified_status_id',  $verify_status);
+                    $expenseOptionQuery
+                    // Filter all user with expenses
+                    ->when($request->expense_option == 'with_expenses', function($optionQuery) use($start_date, $end_date){
+                        $optionQuery
+                        ->has('expensesEntries')
+                        ->whereHas('expensesEntries', function ($query) use ($start_date, $end_date) {
+                            $query->whereHas('expensesModel', function($q2) use($start_date, $end_date){
+                                $q2->whereBetween('created_at',  [$start_date, $end_date]);
+                            });
+                        });
+                    })
+
+                    //Filter expenses per month
+                    ->with(['expensesEntries' => function ($expensesQuery) use ($start_date, $end_date) {
+                        $expensesQuery->expensePerMonth($start_date, $end_date);
+                    }])
+
+                    //Filter By Status
+                    ->when(isset($verify_status), function ($verifyQuery) use ($verify_status, $start_date, $end_date) {
+                        $verifyQuery->whereHas('expensesEntries', function ($query) use ($verify_status, $start_date, $end_date) {
+                            $query->whereHas('expensesModel', function ($q2) use ($verify_status, $start_date, $end_date) {
+                                $q2->where('verified_status_id',  $verify_status);
+                            });
+                        });
                     });
-                });
+                } else {
+                    // Filter all user without expenses
+                    $expenseOptionQuery->whereDoesntHave('expensesEntries');
+                }
             });
     }
 
@@ -377,9 +383,12 @@ class ExpenseController extends Controller
                 'routeTransportation:id,expense_id,from,to,transportation_id,remarks',
                 'routeTransportation.transportation:id,mode')
             ->where('user_id', $user_id)
-            ->whereHas('expensesEntry', function ($q) use ($start_date, $end_date) {
-                $q->whereBetween('created_at', [$start_date, $end_date]);
-            })
+            // ->whereHas('expensesEntry', function ($q) use ($start_date, $end_date) {
+                ->whereBetween('created_at', [$start_date, $end_date])
+                ->has('expensesEntry')
+            // })
+            // ->expensePerMonth($start_date, $end_date)
+
             ->get();
 
         return $expenses->transform(function($item) use($last_day_of_last_month, $first_day_of_last_month){

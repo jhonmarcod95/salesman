@@ -33,13 +33,8 @@ class ExpenseVerifiedReportPerBuExport implements FromCollection, WithHeadings {
     }
 
     public function getData() {
-        $expensesEntry = ExpensesEntry::whereBetween('created_at', [$this->start_date, $this->end_date])
-            ->with('user:id,name', 'user.companies')
-            ->withCount('expensesModel')
-            ->withCount('verifiedExpense')
-            ->withCount('unverifiedExpense')
-            ->withCount('rejectedExpense')
-            ->withCount('pendingExpense')
+        $expensesEntry = ExpensesEntry::with('user:id,name', 'user.companies')
+            ->expensePerMonth($this->start_date, $this->end_date)
             ->get();
 
         $expensesEntryData = $expensesEntry->transform(function($item) {
@@ -60,15 +55,15 @@ class ExpenseVerifiedReportPerBuExport implements FromCollection, WithHeadings {
             $verified_count = $item->sum('verified_count');
             $unverified_count = $item->sum('unverified_count');
             $rejected_count = $item->sum('rejected_count');
-            $completion_pecent = (($verified_count + $rejected_count) / $expenses_count) * 100;
+            $completion_pecent = $expenses_count ? (round((($verified_count + $rejected_count) / $expenses_count) * 100)) : '0';
 
             return [
                 "bu" => $item[0]['company'],
-                "expenses_count" => $expenses_count,
-                "verified_count" => $verified_count,
-                "rejected_count" => $rejected_count,
-                "unverified_count" => $unverified_count,
-                "completion_pecent" => round($completion_pecent)
+                "expenses_count" => $expenses_count ?: '0',
+                "verified_count" => $verified_count ?: '0',
+                "rejected_count" => $rejected_count ?: '0',
+                "unverified_count" => $unverified_count ?: '0',
+                "completion_pecent" => $completion_pecent ?: '0'
             ];
         });
 
