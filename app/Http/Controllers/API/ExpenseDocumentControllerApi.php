@@ -58,15 +58,16 @@ class ExpenseDocumentControllerApi extends Controller
                         ->whereHas('user', function ($query) use ($user_id) {
                             $query->where('id', $user_id);
                         })
-                        ->with(['expensesModel' => function ($q) {
-                            $q->whereNull('dms_reference');
-                        }])
+                        // ->with(['expensesModel' => function ($q) {
+                        //     $q->whereNull('dms_reference');
+                        // }])
                         ->has('expensesModel')
-                        ->withCount('verifiedExpense')
-                        ->withCount('unverifiedExpense')
-                        ->withCount('rejectedExpense')
-                        ->withCount('pendingExpense')
-                        ->withCount('expensesModel')
+                        ->expensePerMonth(Carbon::parse($startDate), Carbon::parse($endDate))
+                        // ->withCount('verifiedExpense')
+                        // ->withCount('unverifiedExpense')
+                        // ->withCount('rejectedExpense')
+                        // ->withCount('pendingExpense')
+                        // ->withCount('expensesModel')
                         ->get();
             
             foreach($expenses_entry as $expense) {
@@ -102,7 +103,6 @@ class ExpenseDocumentControllerApi extends Controller
             'verified_count' => $verified_expense_count,
             'unverified' => $unverified_expense_count,
             'rejected' => $rejected_expense_count,
-            // 'pending' => $pending_expense_count,
             'total_count' => $total_count,
             'total_expenses' => $total_expenses,
             'message' => $message,
