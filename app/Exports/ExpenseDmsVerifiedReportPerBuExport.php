@@ -53,7 +53,7 @@ class ExpenseDmsVerifiedReportPerBuExport implements FromCollection, WithHeading
                 $data['verified_count'] = $item->verified_expense_count;
                 $data['unverified_count'] = $item->unverified_expense_count + $item->pending_expense_count;
                 $data['rejected_count'] = $item->rejected_expense_count;
-                $data['dms_status'] = !empty($item->expensesModel[0]) ? ($item->expensesModel[0]['dms_reference'] ? 'DMS Received' : 'Pending For Sumission') : '';
+                $data['dms_status'] = !empty($item->expensesModel[0]) ? ($item->expensesModel[0]['dms_reference'] ? 'DMS Received' : 'Pending For Submission') : '';
                 $expensesEntryData[] = $data;
             }
         }

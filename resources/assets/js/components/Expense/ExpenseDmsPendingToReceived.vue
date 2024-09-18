@@ -1,7 +1,7 @@
 <template>
     <div class="card shadow">
         <div class="card-header">
-            <h3 class="mb-0">Pending For Sumission <span v-if="!isEmpty(items) && !isProcessing">({{ pagination.total }})</span></h3>
+            <h3 class="mb-0">Pending For Submission <span v-if="!isEmpty(items) && !isProcessing">({{ pagination.total }})</span></h3>
         </div>
         <div class="card-body">
             <div class="position-relative">

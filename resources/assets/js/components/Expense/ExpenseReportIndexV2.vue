@@ -644,14 +644,6 @@ export default {
             this.searchKeyUp();
         },
         exportReport(type) {
-            // axios.get(`${this.endpoint}/export`, {params: {type, ...this.filterData}})
-
-            //get request uri
-            // let params = {type, ...this.filterData};
-            // let url = `${this.endpoint}/export`; 
-            // let requestUri = axios.getUri({url, params})
-
-
             //=============
             // Configuration object
             let url = `${this.endpoint}/export`;
@@ -668,8 +660,6 @@ export default {
             //donload/export excel
             link.href = requestUri;
             link.click();
-
-            console.log(document.readyState);
         }
     },
     computed:{
