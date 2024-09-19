@@ -346,15 +346,21 @@ class ExpenseController extends Controller
             $end_date2 = $request->endDate;
         }
 
-        return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request,$end_date){
+        return PaymentHeader::with(['paymentDetail', 'checkVoucher.checkInfo','payments' => function($q) use($request,$end_date,$same_month,$end_date2){
                 $q->when($request->weekFilter == '1', function($q) use($request,$end_date){//Posting
                     $q->whereDate('created_at', '>=',  $request->startDate)
                     ->whereDate('created_at' ,'<=', $end_date);
                 })
-                ->when($request->weekFilter == '2', function($q) use($request,$end_date){//Expense
-                    $q->whereHas('expense',function($q) use($request,$end_date){
+                ->when($request->weekFilter == '2', function($q) use($request,$end_date,$same_month,$end_date2){//Expense
+                    $q->whereHas('expense',function($q) use($request,$end_date,$same_month,$end_date2){
                         $q->whereDate('created_at', '>=',  $request->startDate)
-                        ->whereDate('created_at' ,'<=', $end_date);
+                        ->whereDate('created_at' ,'<=', $end_date)
+                        ->orWhere(function ($q3)use($request,$same_month,$end_date2){
+                            $q3->when(!$same_month,function($q4) use($request,$end_date2){
+                                $q4->whereDate('created_at', '>=',  $request->startDate)
+                                ->whereDate('created_at' ,'<=', $end_date2);
+                            });                    
+                        });
                     });
                 })
                 ->with('expense');
