@@ -391,28 +391,35 @@ class ExpenseController extends Controller
 
             ->get();
 
-        return $expenses->transform(function($item) use($last_day_of_last_month, $first_day_of_last_month){
-            //Set default verification perion expired as false
-            $item['verification_perion_expired'] = 0;
-
-            //get expense date
-            $expense_date = date('Y-m-t h:m:s', strtotime($item->created_at));
-
-            //If expense date is past the first day of last month, the verification period will be expired
-            if (strtotime($first_day_of_last_month) > strtotime($expense_date)) {
-                $item['verification_perion_expired'] = 1;
-            }
-
-            if(date('d') > '07') {
-                //Today is past 7th day of current montt,
-                //If the expense date is past of last day of last month, the verification period will be expired
-                if(strtotime($last_day_of_last_month) > strtotime($expense_date)) {
-                    $item['verification_perion_expired'] = 1;
-                }
-            }
+        return $expenses->transform(function($item){
+            //Check if verification perion is expired
+            $item['verification_perion_expired'] = $this->isVerificationPeriodExpired($item->created_at);
 
             return $item;
         });
+    }
+
+    public function isVerificationPeriodExpired($created_date) {
+        $last_day_of_last_month = date("Y-m-t 23:59:59", strtotime("last day of last month"));
+        $first_day_of_last_month = date("Y-m-t 00:00:1", strtotime("first day of last month"));
+
+        //get expense date
+        $expense_date = date('Y-m-t h:m:s', strtotime($created_date));
+
+        //If expense date is past the first day of last month, the verification period will be expired
+        if (strtotime($first_day_of_last_month) > strtotime($expense_date)) {
+            return true;
+        }
+
+        if (date('d') > '07') {
+            //Today is past 7th day of current montt,
+            //If the expense date is past of last day of last month, the verification period will be expired
+            if (strtotime($last_day_of_last_month) > strtotime($expense_date)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -871,6 +878,19 @@ class ExpenseController extends Controller
             ]);
         }
 
+        //Get Expense Detail
+        $expense_data = Expense::find($expenseId);
+
+        //Check if verification period for this attachment is expire
+        $is_verification_period_expired = $this->isVerificationPeriodExpired($expense_data->created_at);
+
+        //Check id DMS Received
+        $is_dms_received = isset($expense_data->dms_reference);
+
+        //Do nothing if verification period is expired or already received in DMS
+        if($is_verification_period_expired || $is_dms_received) { return; }
+
+        //Do verify process
         $user_id =  Auth::user()->id;
         $rejected_id = null;
         $deducted_amount = null;
@@ -895,7 +915,7 @@ class ExpenseController extends Controller
                 break;
         }
 
-        Expense::find($expenseId)->update([
+        $expense_data->update([
             'verified_status_id' => $status,
             'expense_rejected_reason_id' => $rejected_id,
             'rejected_deducted_amount' => $deducted_amount,
@@ -1187,19 +1207,20 @@ class ExpenseController extends Controller
     //Export Excel =======================================================
     public function export(Request $request) {
         $today = date_format(now(), "M-d-Y");
+        $month_year = strtoupper(date('F Y', strtotime($request->month_year)));
         if($request->type == 'user') {
             $date_range = $this->getWeekRangesOfMonthStartingMonday($request->month_year);
-            return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "USER EXPENSE WEEKLY VERIFICATION STATUS REPORT - $today.xlsx");
+            return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "$month_year USER EXPENSE WEEKLY VERIFICATION STATUS REPORT - as of $today.xlsx");
         } else {
             $year = date("Y");
-            return Excel::download(new ExpenseVerifiedReportPerBuExport($request), "$year SFA RECEIPT VERIFICATION STATUS - $today.xlsx");
+            return Excel::download(new ExpenseVerifiedReportPerBuExport($request), "$month_year SFA RECEIPT VERIFICATION STATUS - as of $today.xlsx");
         }
     }
 
     public function exportDmsReport(Request $request) {
         $today = date_format(now(), "M-d-Y");
-        $year = date("Y");
-        return Excel::download(new ExpenseDmsVerifiedReportPerBuExport($request), "$year DMS RECEIVED STATUS - $today.xlsx");
+        $month_year = strtoupper(date('F Y', strtotime($request->month_year)));
+        return Excel::download(new ExpenseDmsVerifiedReportPerBuExport($request), "$month_year DMS RECEIVED STATUS - as of $today.xlsx");
     }
 
     function getWeekRangesOfMonthStartingMonday($month_year){
