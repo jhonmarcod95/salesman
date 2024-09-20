@@ -10,10 +10,7 @@
                 <div class="row justify-content-center">
                     <div class="col-md-6">
                         <div class="card shadow">
-                            <!-- <div class="card-header">
-                                
-                            </div> -->
-                            <div class="card-body" :class="accepted ? 'pb-5' : ''">
+                            <div class="card-body" :class="atd_data.atd_accepted ? 'pb-5' : ''">
                                 <div class="text-center mb-5">
                                     <img src="/img/brand/group-of-companies.png" class="mb-2" style="height: 80px">
                                     <h4>Salesforce App</h4>
@@ -21,7 +18,7 @@
                                 
                                 <h3 class="mb-3 text-center">Authority To Deduct</h3>
 
-                                <div v-if="!accepted">
+                                <div v-if="!atd_data.atd_accepted">
                                     <p class="text-justify">
                                         Hello <strong>{{ name }}</strong>. Lorem ipsum dolor sit amet, <strong>La Filipina Uy Gongco Group of Companies</strong>, 
                                         sed do eiusmod tempor incididunt ut labore et dolore magna
@@ -36,13 +33,18 @@
                                         deserunt mollit anim id est laborum.
                                     </p>
                                 </div>
-                                <div v-else class="text-center">
-                                    <i class="fa fa-check"></i>
-                                    Accepted!
+                                <div v-else class="text-center border p-3">
+                                    <div class="mb-1">
+                                        <i class="fa fa-check"></i>
+                                        <span v-if="atd_accepted">Already</span>
+                                        Authorized!
+                                    </div>
+                                    <div><small>{{ atd_data.atd_accepted_date | _date }}</small></div>
+                                    <div><small>{{ atd_data.name | _uppercase }}</small></div>
                                 </div>
                             </div>
-                            <div class="card-footer text-center" v-if="!accepted">
-                                <button class="btn btn-primary" @click="triggerAuthtentication">Accept</button>
+                            <div class="card-footer text-center" v-if="!atd_data.atd_accepted">
+                                <button class="btn btn-primary" @click="showAuthForm">Authorize</button>
                             </div>
                         </div>
                     </div>
@@ -52,12 +54,20 @@
         <!-- Begin: Authentication -->
         <div class="auth-container" v-if="openAuthForm">
             <div class="auth-form">
-                <div class="mb-4 mt-3">
-                    <strong>Authentication</strong>
+                <div class="my-3">
+                    <div class="mb-2"><strong>{{ name | _uppercase }}</strong></div>
+                    Please enter your Salesforce App password to authorize these changes.
                 </div>
-                <div class="mb-3">{{ name }}</div>
-                <input type="password" class="form-control mb-4" placeholder="Password">
-                <button class="btn btn-primary" @click="closeAuthForm">Authenticate</button>
+
+                <div class="form-group mb-0">
+                    <input type="password" class="form-control" :class="{'is-invalid': hasError}" placeholder="Password" v-model="loginData.password">
+                    <div class="text-danger mt-1" v-if="!isEmpty(errors)">{{ errors }}</div>
+                </div>
+
+                <div class="btn btn-primary mt-2 w-100" @click="authenticate" :disabled="authenticating">
+                    Submit
+                    <span v-if="authenticating">...</span>
+                </div>
             </div>
         </div>
         <!-- End: Authentication -->
@@ -65,23 +75,56 @@
 </template>
 <script>
     export default {
-        props: ['name','email'],
+        props: ['name','email','atd_accepted','atd_accepted_date'],
         data() {
             return {
                 openAuthForm: false,
-                accepted: false
+                authenticating: false,
+                loginData: {
+                    email: this.email,
+                    password: ''
+                },
+                errors: '',
+                atd_data: {}
+            }
+        },
+        created() {
+            this.atd_data = {
+                name: this.name,
+                user_email: this.email,
+                atd_accepted: this.atd_accepted,
+                atd_accepted_date: this.atd_accepted_date
             }
         },
         methods: {
-            triggerAuthtentication() {
+            showAuthForm() {
                 this.openAuthForm = true;
             },
-            closeAuthForm() {
-                this.openAuthForm = false;
-                this.accepted = true;
+            authenticate() {
+                this.authenticating = true,
+                axios.post('/authority-to-deduct/authenticate', this.loginData)
+                .then(response => {
+                    this.atd_data = response.data;
+                    this.authenticating = false,
+                    this.openAuthForm = false;
+                    this.errors = '';
+                })
+                .catch(error => {
+                    console.log(error.response.data);
+                    if(error.response.status === 401) {
+						this.errors = error.response.data.message;
+					} else if(error.response.status === 422) { 
+                        this.errors = error.response.data.errors.password[0];
+                    }
+					this.authenticating = false;
+                });
+            }
+        }, 
+        computed: {
+            hasError() {
+                return !_.isEmpty(this.errors);
             }
         }
-    
     }
 </script>
 
@@ -106,7 +149,7 @@
         border-radius: 5px;
         padding: 20px;
         width: 300px;
-        height: 270px;
+        height: auto;
         text-align: center;
     }
 

@@ -25,7 +25,7 @@ Route::get('/manualInsert/{tsrId}', 'TsrController@manuallyInsertUser');
 //Authority to deduct
 Route::group(['prefix' => 'authority-to-deduct'], function() {
     Route::get('/{id}', 'AuthorityToDeductController@index' );
-    Route::get('/authenticate', 'AuthorityToDeductController@authenticate' );
+    Route::post('/authenticate', 'AuthorityToDeductController@verifyUserCredential' );
 });
 
 Auth::routes();
