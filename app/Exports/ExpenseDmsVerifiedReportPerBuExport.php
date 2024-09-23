@@ -23,6 +23,7 @@ class ExpenseDmsVerifiedReportPerBuExport implements FromCollection, WithHeading
 
     public function headings(): array {
         return [
+            "BU",
             "Name",
             "Receipt Count",
             "Verified",
@@ -80,6 +81,7 @@ class ExpenseDmsVerifiedReportPerBuExport implements FromCollection, WithHeading
             }
 
             return [
+                "bu" => $item[0]['company'], // BU
                 "user" => $item[0]['user'], // Name
                 "expenses_count" => $expenses_count ?: '0', // Receipt
                 "verified_count" => $verified_count ?: '0', // Verified
