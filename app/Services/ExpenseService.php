@@ -63,4 +63,32 @@ class ExpenseService {
 
         // ]);
     }
+
+    public function computeVerifiedAndRejected($expenses)
+    {
+        $verified_amount = 0;
+        $rejected_amount = 0;
+        foreach ($expenses as $expense) {
+            if ($expense->verified_status_id == 1) {
+                $verified_amount = $verified_amount + $expense->amount;
+            }
+
+            if ($expense->verified_status_id == 3) {
+                // compute rejected with remarks no.4
+                if ($expense->expense_rejected_reason_id == 4) {
+                    $rejected_amount = $rejected_amount + $expense->rejected_deducted_amount;
+
+                    //Add remaining amount to approved amount after deduction
+                    $verified_amount = $verified_amount + ($expense->amount - $expense->rejected_deducted_amount);
+                } else {
+                    $rejected_amount = $rejected_amount + $expense->amount;
+                }
+            }
+        }
+
+        return [
+            'verified_amount' => $verified_amount,
+            'rejected_amount' => $rejected_amount
+        ];
+    }
 }

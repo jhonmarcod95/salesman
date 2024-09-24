@@ -163,7 +163,7 @@ class ExpenseController extends Controller
                     $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
                     $total_expenses           = $total_expenses + $expenses->totalExpenses;
 
-                    $verified = $this->computeVerifiedAndRejected($expenses->expensesModel);
+                    $verified = $this->expense_service->computeVerifiedAndRejected($expenses->expensesModel);
                     $verified_amount = $verified_amount + $verified['verified_amount'];
                     $rejected_amount = $rejected_amount + $verified['rejected_amount'];
                 }
