@@ -132,7 +132,7 @@ class PaymentAutoPosting extends Command
                     $posting_date = !$samePostingDate ? Carbon::parse($lastWeekSunday)->endOfMonth() : Carbon::now();
                 }
                 // Checking of submitted receipts from previous months(Should be completed)
-                $is_complete = $this->checkSubmittedReceipts($groupedExpenses[0]->user->id,$posting_date);     
+                $is_complete = $this->checkSubmittedReceipts($groupedExpenses[0]->user->id,$posting_date);
                 if($is_complete){
                     $expense_ids = [];
                     $items = [];
@@ -825,17 +825,17 @@ class PaymentAutoPosting extends Command
         $months = $this->generateMonths($start_month,$previous_month,$year,$user_id);
 
         // Convert month names to their respective digits
-        $month_digits = array_map(function ($month_name) {
-            return Carbon::parse($month_name)->month;
-        }, $months);
+        // $month_digits = array_map(function ($month_name) {
+        //     return Carbon::parse($month_name)->month;
+        // }, $months);
 
         $result = false;
-        if(!Expense::where('user_id',$user_id)
-            ->whereYear('created_at', $year)
-            ->whereIn(DB::raw('MONTH(created_at)'), $month_digits)
-            ->where('expenses_entry_id','!=',0)
-            ->whereIn('verified_status_id',[0,2,3])
-            ->first()){ //All months receipt must be fully
+        // if(!Expense::where('user_id',$user_id)
+        //     ->whereYear('created_at', $year)
+        //     ->whereIn(DB::raw('MONTH(created_at)'), $month_digits)
+        //     ->where('expenses_entry_id','!=',0)
+        //     ->whereIn('verified_status_id',[0,2,3])
+        //     ->first()){ //All months receipt must be fully
 
             $dms_submitteds = ExpenseMonthlyDmsReceive::where('user_id',$user_id)
                 ->whereIn('month',$months)
@@ -863,7 +863,7 @@ class PaymentAutoPosting extends Command
                     }
                 }
             }
-        }
+        // }
 
         return $result;
     }

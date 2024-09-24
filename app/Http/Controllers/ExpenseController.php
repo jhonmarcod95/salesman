@@ -117,7 +117,7 @@ class ExpenseController extends Controller
                     ->when(isset($verify_status), function ($verifyQuery) use ($verify_status, $start_date, $end_date) {
                         $verifyQuery->whereHas('expensesEntries', function ($query) use ($verify_status, $start_date, $end_date) {
                             $query->whereHas('expensesModel', function ($q2) use ($verify_status, $start_date, $end_date) {
-                                $q2->where('verified_status_id',  $verify_status);
+                                $q2->where('verified_status_id',  $verify_status)->whereBetween('created_at',  [$start_date, $end_date]);
                             });
                         });
                     });
@@ -411,8 +411,7 @@ class ExpenseController extends Controller
             return true;
         }
 
-        if (date('d') > '07') {
-            //Today is past 7th day of current montt,
+        if (date('d') > '10') {
             //If the expense date is past of last day of last month, the verification period will be expired
             if (strtotime($last_day_of_last_month) > strtotime($expense_date)) {
                 return true;
