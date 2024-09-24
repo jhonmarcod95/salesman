@@ -515,8 +515,11 @@ class AppAPIController extends Controller
     public function updateExpense(Request $request, Expense $expense)
     {
         $this->validate($request, [
-            'types' => 'required',
+            'restricted' => 'required', // restriction to update the entry
+             'types' => 'required',
             'amount' => [new AmountLimit($request->input('types'), $expense->id, $this->checkBudget($request->input('types'))), 'required'],
+        ],[
+            'restricted.required' => "Forbidden to update the expense entry."
         ]);
 
         // check if the expense type from old vs new is not match
