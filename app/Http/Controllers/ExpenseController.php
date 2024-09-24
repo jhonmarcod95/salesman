@@ -117,7 +117,7 @@ class ExpenseController extends Controller
                     ->when(isset($verify_status), function ($verifyQuery) use ($verify_status, $start_date, $end_date) {
                         $verifyQuery->whereHas('expensesEntries', function ($query) use ($verify_status, $start_date, $end_date) {
                             $query->whereHas('expensesModel', function ($q2) use ($verify_status, $start_date, $end_date) {
-                                $q2->where('verified_status_id',  $verify_status);
+                                $q2->where('verified_status_id',  $verify_status)->whereBetween('created_at',  [$start_date, $end_date]);
                             });
                         });
                     });
