@@ -411,8 +411,7 @@ class ExpenseController extends Controller
             return true;
         }
 
-        if (date('d') > '07') {
-            //Today is past 7th day of current montt,
+        if (date('d') > '10') {
             //If the expense date is past of last day of last month, the verification period will be expired
             if (strtotime($last_day_of_last_month) > strtotime($expense_date)) {
                 return true;
