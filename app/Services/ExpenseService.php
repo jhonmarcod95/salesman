@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Expense;
+use App\User;
 use DateTime;
 
 class ExpenseService {
@@ -54,5 +56,11 @@ class ExpenseService {
         }
 
         return $weekRanges;
+    }
+
+    public function getWeeklyVerifiedDetails() {
+        // $weekly_expense = User::where('id')->with([
+
+        // ]);
     }
 }
