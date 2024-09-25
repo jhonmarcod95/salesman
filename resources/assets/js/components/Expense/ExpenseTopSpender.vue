@@ -14,7 +14,7 @@
                                 </div>
                                 <div class="d-flex">
                                     <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-report"> Expenses Report</a></div>
-                                    <div v-if="salesHeadRole || isItRole"><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
+                                    <div v-if="salesHeadRole || isItRole || accessDmsReceived"><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
                                     <div><a class="btn btn-sm btn-default mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
                                 </div>
                             </div>
@@ -122,7 +122,7 @@
     import JsonExcel from 'vue-json-excel'
 
     export default {
-        props:['userLevel','userRole','expenseVerifier'],
+        props:['userLevel','userRole','expenseVerifier', 'accessDmsReceived'],
         components: {
             JsonExcel
         },

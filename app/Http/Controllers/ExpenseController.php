@@ -74,6 +74,7 @@ class ExpenseController extends Controller
         $verify_status = $request->expense_verify_status;
 
         return User::select('id', 'name', 'company_id', 'email')
+            ->userWithExpense()
             ->with('company:id,code,name', 'roles', 'expensesEntries')
             ->when(isset($request->user_id), function($q) use($request){
                 $q->where('id', $request->user_id);
@@ -88,9 +89,6 @@ class ExpenseController extends Controller
                         $companQuery->where('company_id', $company);
                     });
                 });
-            })
-            ->whereHas('roles', function($q) {
-                $q->whereIn('role_id', [4,5,6,7,8,9,10]);
             })
             ->when(isset($request->expense_option), function($expenseOptionQuery) use($request,$start_date, $end_date) {
                 if ($request->expense_option == 'with_expenses' || $request->expense_option == 'all') {
@@ -1148,6 +1146,7 @@ class ExpenseController extends Controller
         $year = date('Y', strtotime($date));
 
         $noCalimedExpensesUser =  User::select('id', 'name', 'company_id', 'email')
+            ->userWithExpense()
             ->with('company:id,code,name', 'roles', 'expensesEntries')
             ->when(isset($request->user_id), function($q) use($request){
                 $q->where('id', $request->user_id);
@@ -1162,9 +1161,6 @@ class ExpenseController extends Controller
                         $companQuery->where('company_id', $company_id);
                     });
                 });
-            })
-            ->whereHas('roles', function($q) {
-                $q->whereIn('role_id', [4,5,6,7,8,9,10]);
             })
             ->whereDoesntHave('expensesEntries', function($q) use($first_day, $last_day){
                 $q->whereBetween('created_at',  [$first_day, $last_day]);
