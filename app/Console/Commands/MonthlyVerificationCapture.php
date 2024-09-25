@@ -23,7 +23,7 @@ class MonthlyVerificationCapture extends Command
      *
      * @var string
      */
-    protected $description = 'Capture all Verified, Rejected, and Pendings per month per user.';
+    protected $description = 'Capture all monthly Verified, Rejected, and Pendings per user.';
 
     /**
      * Initialization of Expense Service
@@ -48,6 +48,8 @@ class MonthlyVerificationCapture extends Command
      */
     public function handle()
     {
+        $start = microtime(true);
+
         //Define last month
         $last_month = date("Y-m", strtotime("first day of last month"));
         $weekly_date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday($last_month);
@@ -57,6 +59,7 @@ class MonthlyVerificationCapture extends Command
         $month = $month_year[0];
         $year = $month_year[1];
 
+        $week_no = 1;
         foreach($weekly_date_range as $date_range) {
             $start_date = $date_range['start']. ' 00:00:01';
             $end_date = $date_range['end'] . ' 23:59:59';
@@ -66,14 +69,12 @@ class MonthlyVerificationCapture extends Command
             
             //Get user weekly verified stat and amount
             $userExpenses = User::select('id')->whereIn('id', $user_with_expense)
-                ->with('expensesEntries')
+                ->has('expensesEntries')
                 ->with(['expensesEntries' => function($query) use($start_date, $end_date){
                     $query->expensePerMonth($start_date, $end_date);
                 }])
-                ->limit(10)
                 ->get();
 
-            $week_no = 1;
             foreach($userExpenses as $user) {
                 //Check if user with month and year exist in employee monthly expense
                 $employee_monthly_expense_exists = EmployeeMonthlyExpense::where(['user_id' => $user->id, 'month' => $month, 'year' => $year])->exists();
@@ -99,41 +100,48 @@ class MonthlyVerificationCapture extends Command
                         $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
                         $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
                         $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
-                        $total_expenses           = $total_expenses + $expenses->totalExpenses;
+                        // $total_expenses           = $total_expenses + $expenses->totalExpenses;
 
                         $verified = $this->expense_service->computeVerifiedAndRejected($expenses->expensesModel);
+                        $total_expenses = $total_expenses + $verified['total_expense_amount'];
                         $verified_amount = $verified_amount + $verified['verified_amount'];
                         $rejected_amount = $rejected_amount + $verified['rejected_amount'];
                     }
 
-                    // Store employee weekly expense
-                    EmployeeWeeklyExpense::create([
-                        'employee_monthly_expense_id' => $employee_monthly_expense->id,
-                        'week_no' => $week_no,
-                        'user_id' => $user->id,
-                        'expense_count' => count($user->expensesEntries) ? $expenses_model_count : 0,
-                        'verified_count' => $verified_expense_count,
-                        'unverified_count' => $unverified_expense_count,
-                        'rejected_count' => $rejected_expense_count,
-                        'expense_amount' => $total_expenses,
-                        'verified_amount' => $verified_amount,
-                        'rejected_amount' => $rejected_amount
-                    ]);
+                    //Check if employee weekly expense exist
+                    $isEmployeeWeeklyExpenseExist = EmployeeWeeklyExpense::where(['employee_monthly_expense_id' => $employee_monthly_expense->id, 'week_no' => $week_no])->exists();
+                    if(!$isEmployeeWeeklyExpenseExist) {
+                        // Store employee weekly expense
+                        EmployeeWeeklyExpense::create([
+                            'employee_monthly_expense_id' => $employee_monthly_expense->id,
+                            'week_no' => $week_no,
+                            'user_id' => $user->id,
+                            'expense_count' => count($user->expensesEntries) ? $expenses_model_count : 0,
+                            'verified_count' => $verified_expense_count,
+                            'unverified_count' => $unverified_expense_count,
+                            'rejected_count' => $rejected_expense_count,
+                            'expense_amount' => $total_expenses,
+                            'verified_amount' => $verified_amount,
+                            'rejected_amount' => $rejected_amount
+                        ]);
 
-                    //Update employee monhtly expense
-                    $employee_monthly_expense->update([
-                        'expense_count' => $employee_monthly_expense->expense_count + count($user->expensesEntries) ? $expenses_model_count : 0,
-                        'verified_count' => $employee_monthly_expense->verified_count + $verified_expense_count,
-                        'unverified_count' => $employee_monthly_expense->unverified_count + $unverified_expense_count,
-                        'rejected_count' => $employee_monthly_expense->rejected_count + $rejected_expense_count,
-                        'expense_amount' => $employee_monthly_expense->expense_amount + $total_expenses,
-                        'verified_amount' => $employee_monthly_expense->verified_amount + $verified_amount,
-                        'rejected_amount' => $employee_monthly_expense->rejected_amount + $rejected_amount
-                    ]);
+                        //Update employee monhtly expense
+                        $employee_monthly_expense->update([
+                            'expense_count' => $employee_monthly_expense->expense_count + (count($user->expensesEntries) ? $expenses_model_count : 0),
+                            'verified_count' => $employee_monthly_expense->verified_count + $verified_expense_count,
+                            'unverified_count' => $employee_monthly_expense->unverified_count + $unverified_expense_count,
+                            'rejected_count' => $employee_monthly_expense->rejected_count + $rejected_expense_count,
+                            'expense_amount' => $employee_monthly_expense->expense_amount + $total_expenses,
+                            'verified_amount' => $employee_monthly_expense->verified_amount + $verified_amount,
+                            'rejected_amount' => $employee_monthly_expense->rejected_amount + $rejected_amount
+                        ]);
+                    }
                 }
             }
             $week_no++;
         }
+
+        // (microtime(true) - $start) / 60);
 
     }
 }

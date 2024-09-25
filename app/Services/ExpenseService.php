@@ -66,6 +66,7 @@ class ExpenseService {
 
     public function computeVerifiedAndRejected($expenses)
     {
+        $total_expense_amount = 0;
         $verified_amount = 0;
         $rejected_amount = 0;
         foreach ($expenses as $expense) {
@@ -84,9 +85,12 @@ class ExpenseService {
                     $rejected_amount = $rejected_amount + $expense->amount;
                 }
             }
+
+            $total_expense_amount = $total_expense_amount + $expense->amount;
         }
 
         return [
+            'total_expense_amount' => $total_expense_amount,
             'verified_amount' => $verified_amount,
             'rejected_amount' => $rejected_amount
         ];
