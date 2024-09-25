@@ -337,7 +337,7 @@
                                         <img v-if="expenseBy.attachment == 'attachments/default.jpg'" class="rounded-circle" :src="`${imgOrigin}/img/brand/no-image.png`" style="height: 70px; width: 90px;">
 
                                         <a v-else :href="imageLink+expenseBy.attachment" target="__blank" @click="markAsUnverified(expenseBy)">
-                                            <img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px;" @error="noImage">
+                                            <img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width:70px" @error="noImage">
                                         </a>
                                     </td>
                                     <td style="white-space:unset; max-width:250px">
