@@ -303,7 +303,7 @@
                                             <div v-if="!expenseBy.verification_perion_expired && (salesHeadRole || isItRole)" class="btn btn-light btn-sm mt-2" 
                                                 @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
                                         </div>
-                                        <div class="mt-2" v-if="isItRole && !isEmpty(expenseBy.verifier) && !isUnverified(expenseBy.verified_status_id)">
+                                        <div class="my-2" style="line-height: 1.3;" v-if="isItRole && !isEmpty(expenseBy.verifier) && !isUnverified(expenseBy.verified_status_id)">
                                             <div><small>{{expenseBy.verifier.name}}</small></div>
                                             <small>{{expenseBy.date_verified | _date}}</small>
                                         </div>
@@ -420,9 +420,9 @@ export default {
         }
     },
     created(){
+        this.getSelectOptions('companies', '/companies-all')
         this.defaultFilterData();
         this.getSelectOptions('users', '/selection-users')
-        this.getSelectOptions('companies', '/companies-all')
         this.getSelectOptions('rejectedRemarks', '/expense-rejected-remarks')
         this.getSelectOptions('expenseVerificationStatuses', '/expense-verification-statuses')
         // this.fetchInitialData();
