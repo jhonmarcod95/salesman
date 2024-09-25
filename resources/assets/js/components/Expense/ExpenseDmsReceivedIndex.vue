@@ -12,11 +12,7 @@
                                 <div class="col">
                                     <h3 class="mb-0">DMS Submitted Expenses Report</h3>
                                 </div>
-                                <div class="d-flex">
-                                    <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-report"> Expenses Report</a></div>
-                                    <div v-if="salesHeadRole || isItRole"><a class="btn btn-sm btn-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
-                                    <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
-                                </div>
+                                <expense-report-nav :user-role="userRole"/>
                             </div>
                         </div>
                         <div class="mb-3">
