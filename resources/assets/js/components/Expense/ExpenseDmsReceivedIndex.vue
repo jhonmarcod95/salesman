@@ -164,7 +164,7 @@ import ExpenseDmsPendingToReceived from './ExpenseDmsPendingToReceived.vue';
 import ExpenseDmsNoExpenses from './ExpenseDmsNoExpenses.vue';
 export default {
     mixins: [listFormMixins],
-    props:['userLevel','userRole','expenseVerifier'],
+    props:['userLevel','userRole','expenseVerifier','accessDmsReceived'],
     components: {ExpenseDmsPendingToReceived,ExpenseDmsNoExpenses},
     data(){
         return{

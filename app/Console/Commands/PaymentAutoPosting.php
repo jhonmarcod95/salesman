@@ -132,7 +132,7 @@ class PaymentAutoPosting extends Command
                     $posting_date = !$samePostingDate ? Carbon::parse($lastWeekSunday)->endOfMonth() : Carbon::now();
                 }
                 // Checking of submitted receipts from previous months(Should be completed)
-                $is_complete = $this->checkSubmittedReceipts($groupedExpenses[0]->user->id,$posting_date);     
+                $is_complete = $this->checkSubmittedReceipts($groupedExpenses[0]->user->id,$posting_date);
                 if($is_complete){
                     $expense_ids = [];
                     $items = [];
@@ -823,34 +823,48 @@ class PaymentAutoPosting extends Command
         if($year == '2024') $start_month = 8;
         //Generate months that has submitted expense
         $months = $this->generateMonths($start_month,$previous_month,$year,$user_id);
-   
-        $dms_submitteds = ExpenseMonthlyDmsReceive::where('user_id',$user_id)
-            ->whereIn('month',$months)
-            ->where('year',$year)
-            ->get();
+
+        // Convert month names to their respective digits
+        // $month_digits = array_map(function ($month_name) {
+        //     return Carbon::parse($month_name)->month;
+        // }, $months);
 
         $result = false;
-        // Complete receipt
-        if($dms_submitteds->count() == count($months)) $result = true;
-        // Exemption checking for 1 month only with no receipt and falls under 7 days leeway
-        if(!$result && intval(Carbon::now()->format('d')) < 8){
-            // With 1 month reimbursement and no submitted receipt(Must be in previous months, proceed due to 7 days leeway)
-            if(count($months) == 1){
-                if($previous_month == (intval(Carbon::createFromFormat('F', $months[0])->format('m')) -1)) $result = true;
-            }else{
-                //If total months that has reimbursement is more than 1,
-                // do additional checking, missing receipts must only be 1 month and must be previous month only.
-                // else will not proceed
-                if((count($months) - $dms_submitteds->count() == 1)){
-                    $previous_submitted = ExpenseMonthlyDmsReceive::where('user_id',$user_id)
-                        ->where('month',$previous_month)
-                        ->where('year',$year)
-                        ->first();
-                    
-                    $result = $previous_submitted ? false : true;
+        // if(!Expense::where('user_id',$user_id)
+        //     ->whereYear('created_at', $year)
+        //     ->whereIn(DB::raw('MONTH(created_at)'), $month_digits)
+        //     ->where('expenses_entry_id','!=',0)
+        //     ->whereIn('verified_status_id',[0,2,3])
+        //     ->first()){ //All months receipt must be fully
+
+            $dms_submitteds = ExpenseMonthlyDmsReceive::where('user_id',$user_id)
+                ->whereIn('month',$months)
+                ->where('year',$year)
+                ->get();
+
+            // Complete receipt
+            if($dms_submitteds->count() == count($months)) $result = true;
+            // Exemption checking for 1 month only with no receipt and falls under 7 days leeway
+            if(!$result && intval(Carbon::now()->format('d')) < 8){
+                // With 1 month reimbursement and no submitted receipt(Must be in previous months, proceed due to 7 days leeway)
+                if(count($months) == 1){
+                    if($previous_month == (intval(Carbon::createFromFormat('F', $months[0])->format('m')) -1)) $result = true;
+                }else{
+                    //If total months that has reimbursement is more than 1,
+                    // do additional checking, missing receipts must only be 1 month and must be previous month only.
+                    // else will not proceed
+                    if((count($months) - $dms_submitteds->count() == 1)){
+                        $previous_submitted = ExpenseMonthlyDmsReceive::where('user_id',$user_id)
+                            ->where('month',$previous_month)
+                            ->where('year',$year)
+                            ->first();
+                        
+                        $result = $previous_submitted ? false : true;
+                    }
                 }
             }
-        }
+        // }
+
         return $result;
     }
 

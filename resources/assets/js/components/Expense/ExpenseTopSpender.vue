@@ -118,7 +118,7 @@
     import JsonExcel from 'vue-json-excel'
 
     export default {
-        props:['userLevel','userRole','expenseVerifier'],
+        props:['userLevel','userRole','expenseVerifier', 'accessDmsReceived'],
         components: {
             JsonExcel
         },

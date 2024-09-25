@@ -31,6 +31,7 @@
                                     <th scope="col">Email</th>
                                     <th scope="col">Role</th>
                                     <th scope="col">Company</th>
+                                    <th scope="col">Status</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -55,7 +56,9 @@
                                                 {{ company.name }} <br/>
                                             </span>
                                         </td>
-                                        <td></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" @click="deleteUser(user.id)">Disable</button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -148,16 +151,18 @@ export default {
             })
         },
         deleteUser(id){
-            let userIndex = this.users.findIndex(item => item.id == id);
-            axios.delete(`/user/${id}`)
-            .then(response =>{
-                $('#deleteModal').modal('hide');
-                alart('User Succesfully deleted');
-            })
-            .catch(error => {
-                this.errors = error.response.data.error;
-            })
-            this.users.splice(userIndex,1);
+            if(confirm("Are you sure you want to delete this user?")) {
+                let userIndex = this.users.findIndex(item => item.id == id);
+                axios.delete(`/user/${id}`)
+                .then(response =>{
+                    $('#deleteModal').modal('hide');
+                    alart('User Succesfully deleted');
+                })
+                .catch(error => {
+                    this.errors = error.response.data.error;
+                })
+                this.users.splice(userIndex,1);
+            }
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;

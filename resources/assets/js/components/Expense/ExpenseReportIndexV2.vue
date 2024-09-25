@@ -379,7 +379,7 @@ import moment from 'moment';
 import listFormMixins from '../../list-form-mixins.vue';
 export default {
     mixins: [listFormMixins],
-    props:['userLevel','userRole','expenseVerifier'],
+    props:['userLevel','userRole','expenseVerifier','accessDmsReceived'],
     data(){
         return{
             expenseByTsr: [],
