@@ -63,7 +63,7 @@ Route::post('surveys/display','SurveysController@dataQuestionnaire');
 Route::post('surveys/edit-questionnaire','SurveysController@editQuestionnaire');
 
 // Admin Routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|approver|tax|finance-gl']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|approver|tax|finance-gl']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
@@ -243,13 +243,13 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
 });
 
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|tsr']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|tsr']], function () {
     Route::get('/surveys/home','SurveysController@surveyHome');
 });
 
 
 // For AAPC Survey
-Route::group(['middleware' => ['auth', 'role:it|tsr|coordinator|manager|vp|president']], function () {
+Route::group(['middleware' => ['auth', 'role:it|tsr|coordinator|coordinator-2|manager|vp|president']], function () {
 
     Route::get('/aapc-farmer','AapcFarmerMeetingController@index');
     Route::get('/aapc-farmer/create','AapcFarmerMeetingController@create');
@@ -293,7 +293,7 @@ Route::group(['middleware' => ['auth', 'role:ap|tax|audit|finance-gl']], functio
 });
 
 // Hr routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit|finance-gl']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|hr|tax|audit|finance-gl']], function () {
     // Attendance Report
     Route::get('/attendance-report', 'AttendanceReportController@index')->name('report_list');
     // fetch all Attendance Report
@@ -322,7 +322,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 });
 
 //Audit routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit|finance-gl']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|hr|tax|audit|finance-gl']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
@@ -333,7 +333,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
 
 // Request Routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver|coordinator-2']], function () {
 
     // Request to close a visit
     Route::get('/request-close','CloseVisitController@index');
@@ -355,7 +355,7 @@ Route::group(['middleware' => ['auth', 'role:it|finance-gl']], function () {
 });
 
 //Customer Master Role
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|customer-master|finance-gl']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|customer-master|finance-gl']], function () {
     //Customer
     // show customer page
     Route::get('/customers', 'CustomerController@index')->name('customers_list');
