@@ -73,6 +73,10 @@ class Expense extends Model implements Auditable
         return $this->hasOne(ExpenseRepresentation::class);
     }
 
+    public function grassroots(){
+        return $this->hasOne(Grassroot::class);
+    }
+
     public function verifier() {
         return $this->belongsTo(User::class, 'verified_by');
     }

@@ -370,13 +370,26 @@
                                         </a>
                                     </td>
                                     <td style="white-space:unset; max-width:250px">
-                                        <div>{{ expenseBy.expenses_type.name }}</div>
+                                        <div>
+                                            {{ expenseBy.expenses_type.name }}
+                                            <span v-if="!isEmpty(expenseBy.grassroots)">
+                                                <span v-if="!isEmpty(expenseBy.grassroots.grassroot_expense_type)">
+                                                    ({{expenseBy.grassroots.grassroot_expense_type.name}})
+                                                </span>
+                                            </span>
+                                        </div>
+                                        
                                         <div v-if="!isEmpty(expenseBy.representaion)">
                                             <div class="mt-2"><strong>Purpose</strong></div> 
                                             {{expenseBy.representaion.purpose}}
                                                 
                                             <div class="mt-1"><strong>Attendees</strong></div>
                                             {{expenseBy.representaion.attendees}}
+                                        </div>
+
+                                        <div v-if="!isEmpty(expenseBy.grassroots)">
+                                            <div class="mt-2"><strong>Remarks</strong></div> 
+                                            {{expenseBy.grassroots.remarks}}
                                         </div>
 
                                         <div v-if="!isEmpty(expenseBy.route_transportation)">
