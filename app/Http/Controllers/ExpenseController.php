@@ -7,6 +7,7 @@ use App\{
     Http\Controllers\APIController,
     Message,
     Expense,
+    ExpenseHistory,
     ExpenseMonthlyDmsReceive,
     ExpensesEntry,
     ExpensesType,
@@ -368,9 +369,6 @@ class ExpenseController extends Controller
         $start_date = "$request->start_date 00:00:01";
         $end_date = "$request->end_date 23:59:59";
 
-        $last_day_of_last_month = date("Y-m-t 23:59:59", strtotime("last day of last month"));
-        $first_day_of_last_month = date("Y-m-t 00:00:1", strtotime("first day of last month"));
-
         $expenses = Expense::with(
                 'expensesType', 
                 'payments',
@@ -379,14 +377,13 @@ class ExpenseController extends Controller
                 'representaion:id,expense_id,attendees,purpose',
                 'verifier:id,name',
                 'routeTransportation:id,expense_id,from,to,transportation_id,remarks',
-                'routeTransportation.transportation:id,mode')
+                'routeTransportation.transportation:id,mode',
+                'grassroots:id,grassroots_expense_type_id,expense_id,remarks',
+                'grassroots.grassrootExpenseType:id,name')
             ->where('user_id', $user_id)
-            // ->whereHas('expensesEntry', function ($q) use ($start_date, $end_date) {
-                ->whereBetween('created_at', [$start_date, $end_date])
-                ->has('expensesEntry')
-            // })
-            // ->expensePerMonth($start_date, $end_date)
-
+            ->whereBetween('created_at', [$start_date, $end_date])
+            ->has('expensesEntry')
+            ->withCount('history')
             ->get();
 
         return $expenses->transform(function($item){
@@ -898,23 +895,36 @@ class ExpenseController extends Controller
         $rejected_id = null;
         $deducted_amount = null;
         $date = now();
+        $history_action = "View Receipt.";
+        $history_detail = null;
 
         switch ($request->mode) {
             case 'unset':
                 $status = 0;
                 $user_id = null;
                 $date = null;
+                $history_action = "Reset receipt verification status.";
                 break;
             case 'verify':
                 $status = 1;
+                $history_action = "Mark receipt as VERIFIED.";
                 break;
             case 'unverify':
                 $status = 2;
+                if(!Auth::user()->hasRole('it')) {
+                    $history_action = "View Receipt.";
+                }
                 break;
             case 'reject':
                 $status = 3;
                 $rejected_id = isset($request->rejected_reason_id) ? $request->rejected_reason_id : null;
                 $deducted_amount = $rejected_id == 4 ? (double) $request->deducted_amount : null;
+                $history_action = "Mark receipt as REJECTED.";
+                $reject_remark = ExpenseVerificationRejectedRemarks::find($rejected_id);
+                $history_detail['Remark'] = "$reject_remark->remark";
+                if($request->rejected_reason_id == 4) {
+                    $history_detail['Deduction'] = "PHP ". number_format($deducted_amount, 2);
+                }
                 break;
         }
 
@@ -925,6 +935,8 @@ class ExpenseController extends Controller
             'verified_by' => $user_id,
             'date_verified' => $date,
         ]);
+
+        $this->logHistory($expenseId, $history_action, $history_detail);
     }
 
     public function getExpenseRejectedRemarks() {
@@ -933,6 +945,19 @@ class ExpenseController extends Controller
 
     public function getExpenseVerificationStatuses() {
         return ExpenseVerificationStatus::all(['id','name']);
+    }
+
+    public function logHistory($expense_id, $action, $detail){
+        $userId = Auth::user()->id;
+
+        $data = [
+            'expense_id' => $expense_id,
+            'user_id' => $userId,
+            'details' => $detail ? json_encode($detail) : '',
+            'action' => $action
+        ];
+
+        ExpenseHistory::create($data);
     }
 
     //DMS Received Report ================================================
@@ -1271,5 +1296,16 @@ class ExpenseController extends Controller
         return $weekRanges;
     }
     //====================================================================
+
+    public function getReceiptHistory($expense_id) {
+        $expenseHistory = ExpenseHistory::where('expense_id', $expense_id)->with('user')->get();
+        return $expenseHistory->transform(function($expense) {
+            $data['date'] = "$expense->created_at";
+            $data['verifier'] = $expense->user->name;
+            $data['action'] = $expense->action;
+            $data['details'] = (array) json_decode($expense->details);
+            return $data;
+        });
+    }
 
 }

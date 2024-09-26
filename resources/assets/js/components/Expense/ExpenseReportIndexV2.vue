@@ -259,6 +259,35 @@
             </div>
         </div>
 
+        <div class="custom-modal-container" :class="isHistoryModalOpen ? 'display-block' : ''" tabindex="0" role="dialog">
+            <div class="modal border" style="margin-top: 100px;">
+                <div class="modal-header px-5 pt-5 align-items-center jsutify-content-between">
+                    <h4 class="modal-title" id="addCompanyLabel">Expense History</h4>
+                    <button type="button" class="close" @click="closeHistoryModal"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body px-5">
+                    <div class="d-flex" v-for="(history, index) in expenseHistory" :key="index">
+                        <div><small>{{history.date}}</small></div>
+                        <div class="border-left mx-4 text-lg">
+                            <span class="m--1">•</span>
+                        </div>
+                        <div class="pb-4">
+                            <h6 class="mb-0 text-primary font-weight-bold text-sm">{{history.action}}</h6>
+                            <small class="font-weight-bold">{{history.verifier}}</small>
+                            <div class="mt-1">
+                                <div style="line-height: 1;" v-for="(detail, key, detailIndex) in history.details" :key="detailIndex">
+                                    <small>{{key}}: {{detail}}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-round btn-fill" @click="closeHistoryModal">Close</button>
+                </div>
+            </div>
+        </div>
+
         <!-- View Expense Modal -->
         <div class="modal fade" id="viewModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <span class="closed" data-dismiss="modal">&times;</span>
@@ -299,7 +328,7 @@
                                             <div v-if="!expenseBy.verification_perion_expired && (salesHeadRole || isItRole)" class="btn btn-light btn-sm mt-2" 
                                                 @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
                                         </div>
-                                        <div class="my-2" style="line-height: 1.3;" v-if="isItRole && !isEmpty(expenseBy.verifier) && !isUnverified(expenseBy.verified_status_id)">
+                                        <div class="mt-2" style="line-height: 1.3;" v-if="isItRole && !isEmpty(expenseBy.verifier) && !isUnverified(expenseBy.verified_status_id)">
                                             <div><small>{{expenseBy.verifier.name}}</small></div>
                                             <small>{{expenseBy.date_verified | _date}}</small>
                                         </div>
@@ -328,6 +357,10 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div class="mt-2">
+                                            <a href="javascript:;" v-if="expenseBy.history_count" @click="fetchHistory(expenseBy.id)">History</a>
+                                        </div> 
                                     </td>
                                     <td> 
                                         <img v-if="expenseBy.attachment == 'attachments/default.jpg'" class="rounded-circle" :src="`${imgOrigin}/img/brand/no-image.png`" style="height: 70px; width: 90px;">
@@ -412,7 +445,9 @@ export default {
             selectedExpense: {},
             rejectedExpense: {},
             rejectExpenseError: {},
-            isRejecModalOpen: false
+            isRejecModalOpen: false,
+            isHistoryModalOpen: false,
+            expenseHistory: []
         }
     },
     created(){
@@ -655,6 +690,16 @@ export default {
         },
         isUnverified(status_id) {
             return status_id == 0 || status_id == 2
+        },
+        fetchHistory(expense_id) {
+            axios.get(`${this.endpoint}/receipt-history/${expense_id}`)
+            .then( res => {
+                this.isHistoryModalOpen = true;
+                this.expenseHistory = res.data;
+            })
+        },
+        closeHistoryModal() {
+            this.isHistoryModalOpen = !this.isHistoryModalOpen;
         }
     },
     computed:{

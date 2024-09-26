@@ -76,4 +76,8 @@ class Expense extends Model implements Auditable
     public function verifier() {
         return $this->belongsTo(User::class, 'verified_by');
     }
+
+    public function history() {
+        return $this->hasMany(ExpenseHistory::class);
+    }
 }
