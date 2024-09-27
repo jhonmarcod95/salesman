@@ -20,7 +20,7 @@ class FaqsControllerAPI extends Controller
     {
 
         $this->validate($request,[
-            'test' => 'test'
+            'test' => 'required'
         ]);
 
         $externalUrl = 'googlechrome://salesforce.lafilgroup.net:8666';
