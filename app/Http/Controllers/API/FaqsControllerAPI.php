@@ -18,8 +18,8 @@ class FaqsControllerAPI extends Controller
      */
     public function index()
     {
-
-        return redirect()->away('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
+        return redirect('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
+        // return redirect()->away('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
         // $faqs = Faq::all();
         // return FaqResource::collection($faqs);
     }
