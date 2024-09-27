@@ -895,7 +895,7 @@ class ExpenseController extends Controller
         $rejected_id = null;
         $deducted_amount = null;
         $date = now();
-        $history_action = "View Receipt.";
+        $history_action = null;
         $history_detail = null;
 
         switch ($request->mode) {
@@ -936,7 +936,9 @@ class ExpenseController extends Controller
             'date_verified' => $date,
         ]);
 
-        $this->logHistory($expenseId, $history_action, $history_detail);
+        if (!empty($history_action)) {
+            $this->logHistory($expenseId, $history_action, $history_detail);
+        }
     }
 
     public function getExpenseRejectedRemarks() {

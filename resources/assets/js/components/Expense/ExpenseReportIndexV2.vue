@@ -557,6 +557,9 @@ export default {
             }
         },
         markAsUnverified(expense) {
+            //Return if role is IT
+            if((this.isItRole)) { return; }
+
             //Return if already verified
             if(!(this.expenseVerifierRole)) { return; }
 
