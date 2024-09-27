@@ -188,6 +188,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
         Route::get('/receipt-history/{rexpense_id}', 'ExpenseController@getReceiptHistory');
     });
 
+    //Coordinator Report
+    Route::group(['prefix' => '/coordinator-report'], function () {
+        Route::get('/', 'CoordinatorReportController@index');
+    });
+
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
     Route::post('/expense-io-report-data', 'ExpenseController@expenseIOReportData');
 
