@@ -106,6 +106,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::delete('/user/{id}', 'UserController@destroy');
     //selection user
     Route::get('/selection-users', 'UserController@selectionUsers');
+    Route::get('/selection-coordinators/{company_id}', 'UserController@selectionCoordinators');
 
 
     Route::get('/selection-users/show/{id}', 'UserController@show');

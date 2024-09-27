@@ -26,24 +26,22 @@
                                 <app-select :options="weekRanges" v-model="filterData.week_id" label="name" @input="getSelectedWeekRange"/>
                             </div>
                         </div>
-                        <div class="col-md-2" v-if="companies.length > 1">
+                        <div class="col-md-2">
                             <div class="form-group">
                                 <label class="form-control-label" for="role">Company</label>
-                                <app-select :options="companies" v-model="filterData.company" label="name" @input="searchKeyUp"/>
+                                <app-select :options="companies" v-model="filterData.company" label="name" @input="selectCompanyCoordinator"/>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="name" class="form-control-label">User</label> 
-                                <app-select :options="users" v-model="filterData.user_id" label="name" @input="searchKeyUp"/>
+                                <label for="name" class="form-control-label">Coordinator</label> 
+                                <app-select :options="coordinators" v-model="filterData.coordinator_id" label="name" @input="searchKeyUp"/>
                             </div>
                         </div>
                         <div class="col-md-2">
                             <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">
                                 Clear Filter
-                            </button> 
-                            <!-- <button v-if="isItRole" class="btn btn-sm btn-success mt-4" @click="exportReport('user')"> Export Per User</button>
-                            <button v-if="isItRole" class="btn btn-sm btn-success mt-4" @click="exportReport('bu')"> Export Per BU (%)</button> -->
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -62,7 +60,7 @@
                             <div class="row text-center">
                                 <div class="col">
                                     <div class="font-weight-bold text-sm">
-                                        Attachment
+                                       Validated Receipt
                                     </div>
                                     <span>{{ verifiedExpenseStats.expenses_model_count || 0 }} </span>
                                 </div>
@@ -99,7 +97,7 @@
                             </button>
                             <div class="row">
                                 <div class="col"><div class="font-weight-bold text-sm">
-                                        Total Expenses
+                                        Validated Expenses
                                     </div>
                                     <span>PHP {{ verifiedExpenseStats.total_expenses || 0 | _amount }} </span>
                                 </div>
@@ -176,52 +174,6 @@
                     <!--begin::Pagination-->
                     <table-pagination v-if="items.length > 0" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
                     <!--end::Pagination-->
-                </div>
-            </div>
-        </div>
-
-        <div class="custom-modal-container" :class="isRejecModalOpen ? 'display-block' : ''" tabindex="0" role="dialog">
-            <div class="modal border border-danger">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addCompanyLabel">Reject Expense</h5>
-                </div>
-                <div class="modal-body" v-if="!isEmpty(selectedExpense)">
-                    <div class="d-flex mb-4 p-3 border">
-                        <div class="col">
-                            <span><strong>Amount:</strong></span> 
-                            <br> PHP {{selectedExpense.amount | _amount}}
-                        </div>
-                        <div class="col">
-                            <span><strong>Expense Type:</strong></span> 
-                            <br> {{selectedExpense.expenses_type.name}}
-                        </div>
-                        <div class="col">
-                            <span><strong>Entry Date:</strong></span> 
-                            <br> {{selectedExpense.created_at | _date }}
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-control-label">Select Reject Reason  (<em class="text-danger">* required</em>)</label> 
-                        <app-select :options="rejectedRemarks" v-model="rejectedExpense.rejected_reason_id" label="remark"/>
-                    </div>
-
-                    <div class="form-group" v-if="rejectedExpense.rejected_reason_id == 4">
-                        <label class="form-control-label">Enter Amount To Deduct (<em class="text-danger">* required</em>)</label> 
-                        <input type="number" class="form-control" v-model="rejectedExpense.deducted_amount">
-                    </div>
-                    
-                    <!-- Start: Error Message-->
-                    <error-messages :form-errors="rejectExpenseError" v-if="!isEmpty(rejectExpenseError)"/>
-                    <!-- End: Error Message -->    
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-round btn-fill" @click="closeRejectExpenseModal">Close</button>
-                    <button type="button" class="btn btn-danger btn-round btn-fill" @click="verifyExpense(selectedExpense, 'reject')">
-                        Submit Reject
-                        <span v-if="verifiyingId">...</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -383,7 +335,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -406,14 +357,12 @@ export default {
             endpoint: '/expenses-report',
             items: [],
             companies: [],
-            rejectedRemarks: [],
-            expenseVerificationStatuses: [],
             users: [],
+            coordinators: [],
             verifiedExpenseStats: [],
             fetchingExpenseStats: false,
 
             filterData: {
-                expense_option: 'all',
                 week_id: 1,
                 month_year: moment().format('YYYY-MM'),
                 start_date: moment().startOf('month').format('YYYY-MM-DD'),
@@ -423,9 +372,6 @@ export default {
             imgOrigin: window.location.origin,
             selectedUser: {},
             selectedExpense: {},
-            rejectedExpense: {},
-            rejectExpenseError: {},
-            isRejecModalOpen: false,
             isHistoryModalOpen: false,
             expenseHistory: []
         }
@@ -433,10 +379,8 @@ export default {
     created(){
         this.getSelectOptions('companies', '/companies-all')
         this.defaultFilterData();
-        this.getSelectOptions('users', '/selection-users')
-        this.getSelectOptions('rejectedRemarks', '/expense-rejected-remarks')
-        this.getSelectOptions('expenseVerificationStatuses', '/expense-verification-statuses')
-        // this.fetchInitialData();
+        // this.getSelectOptions('users', '/selection-users')
+        this.getSelectOptions('coordinators', '/selection-coordinators/all')
         this.getWeekNumber();
     },
     methods:{
@@ -447,7 +391,6 @@ export default {
         },
         defaultFilterData() {
             this.filterData = {
-                expense_option: 'all',
                 week_id: 1,
                 month_year: moment().format('YYYY-MM'),
                 start_date: moment().startOf('month').format('YYYY-MM-DD'),
@@ -537,19 +480,6 @@ export default {
             .then(res => {
                 this.doFetchExpenseByTsr(expense.user_id)
             })
-        },
-        openRejectExpenseModal(expense){
-            this.selectedExpense = expense;
-            this.rejectedExpense = {};
-            this.rejectExpenseError = {};
-            this.isRejecModalOpen = true
-            // $('#rejectModal').modal('show');
-        },
-        closeRejectExpenseModal() {
-            this.selectedExpense = {};
-            this.rejectedExpense = {};
-            this.rejectExpenseError = {};
-            this.isRejecModalOpen = false
         },
         expenseStatus(item) {
             let {verified_expense_count, unverified_expense_count, rejected_expense_count, pending_expense_count, expenses_model_count} = item;
@@ -653,24 +583,6 @@ export default {
 
             this.searchKeyUp();
         },
-        exportReport(type) {
-            //=============
-            // Configuration object
-            let url = `${this.endpoint}/export`;
-            let params = {type, ...this.filterData};
-            let queryString = new URLSearchParams(params).toString();
-
-            // Manually constructing the URI
-            const requestUri = `${url}?${queryString}`;
-            //=============
-
-            //link to download
-            let link = document.createElement("a");
-
-            //donload/export excel
-            link.href = requestUri;
-            link.click();
-        },
         isUnverified(status_id) {
             return status_id == 0 || status_id == 2
         },
@@ -683,6 +595,10 @@ export default {
         },
         closeHistoryModal() {
             this.isHistoryModalOpen = !this.isHistoryModalOpen;
+        },
+        selectCompanyCoordinator(coor_id) {
+            this.getSelectOptions('coordinators', `/selection-coordinators/${coor_id}`)
+            this.searchKeyUp()
         }
     },
     computed:{
