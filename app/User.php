@@ -149,4 +149,13 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(FarmerMeeting::class);
     }
+
+    public function scopeUserWithExpense($query) {
+        $query
+        ->where('is_sales', 1)
+        ->where('is_act_user', 0)
+        ->whereHas('roles', function($q) {
+            $q->where('with_expense', 1);
+        });
+    }
 }

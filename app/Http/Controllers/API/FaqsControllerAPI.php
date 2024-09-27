@@ -16,10 +16,19 @@ class FaqsControllerAPI extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $faqs = Faq::all();
-        return FaqResource::collection($faqs);
+
+        $this->validate($request, [
+            'atd' => 'required'
+        ],[
+            'atd.required' => 'You are in the FAQ page'
+        ]);
+
+        return redirect('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
+        // return redirect()->away('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
+        // $faqs = Faq::all();
+        // return FaqResource::collection($faqs);
     }
 
     /**

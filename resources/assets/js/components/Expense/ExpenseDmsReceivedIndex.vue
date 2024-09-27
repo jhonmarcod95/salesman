@@ -12,11 +12,7 @@
                                 <div class="col">
                                     <h3 class="mb-0">DMS Submitted Expenses Report</h3>
                                 </div>
-                                <div class="d-flex">
-                                    <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-report"> Expenses Report</a></div>
-                                    <div v-if="salesHeadRole"><a class="btn btn-sm btn-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
-                                    <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
-                                </div>
+                                <expense-report-nav :user-role="userRole"/>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -168,7 +164,7 @@ import ExpenseDmsPendingToReceived from './ExpenseDmsPendingToReceived.vue';
 import ExpenseDmsNoExpenses from './ExpenseDmsNoExpenses.vue';
 export default {
     mixins: [listFormMixins],
-    props:['userLevel','userRole','expenseVerifier'],
+    props:['userLevel','userRole','expenseVerifier','accessDmsReceived'],
     components: {ExpenseDmsPendingToReceived,ExpenseDmsNoExpenses},
     data(){
         return{
@@ -296,14 +292,15 @@ export default {
         isItRole() {
             return this.userRole == 1  // IT
         },
-        salesHeadRole() {
+        presidentRole() {
             let userRole = [
-                1,  // IT,
                 2,  // President,
-                3,  // EVP,
-                4,  // VP/Sales Head
+                // 3,  // EVP,
             ];
             return _.includes(userRole, this.userRole);
+        },
+        salesHeadRole() {
+            return this.userRole == 4  // VP/Sales Head
         },
         filterVerified() {
             return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '1';

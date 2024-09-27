@@ -141,7 +141,8 @@ class MonthlyVerificationCapture extends Command
             $week_no++;
         }
 
-        // (microtime(true) - $start) / 60);
+        $end_time = (microtime(true) - $start) / 60;
+        echo "finished with $end_time time.";
 
     }
 }

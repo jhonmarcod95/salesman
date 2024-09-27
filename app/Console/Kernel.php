@@ -38,34 +38,34 @@ class Kernel extends ConsoleKernel
         $schedule->command('payment:autopostingreprocessing LFUG')
             ->weekly()
             ->tuesdays()
-            ->at('00:01');
+            ->at('15:05');
         
         $schedule->command('payment:autopostingreprocessing HANA')
             ->weekly()
             ->tuesdays()
-            ->at('00:15');
+            ->at('15:25');
 
         $schedule->command('payment:autoposting LFUG')
             ->weekly()
             ->tuesdays()
-            ->at('00:30');
+            ->at('15:45');
 
         $schedule->command('payment:autoposting HANA')
             ->weekly()
             ->tuesdays()
-            ->at('00:45');
+            ->at('16:00');
 
         // auto cv
         $schedule->command('payment:autocv')
             ->weekly()
             ->tuesdays()
-            ->at('00:30');
+            ->at('16:10');
 
         // auto check
         $schedule->command('payment:autocheck')
             ->weekly()
             ->tuesdays()
-            ->at('00:35');
+            ->at('16:15');
 
         /* end:: every tuesday **********************/
 

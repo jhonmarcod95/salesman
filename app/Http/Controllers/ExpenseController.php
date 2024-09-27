@@ -7,6 +7,7 @@ use App\{
     Http\Controllers\APIController,
     Message,
     Expense,
+    ExpenseHistory,
     ExpenseMonthlyDmsReceive,
     ExpensesEntry,
     ExpensesType,
@@ -82,6 +83,7 @@ class ExpenseController extends Controller
         $verify_status = $request->expense_verify_status;
 
         return User::select('id', 'name', 'company_id', 'email')
+            ->userWithExpense()
             ->with('company:id,code,name', 'roles', 'expensesEntries')
             ->when(isset($request->user_id), function($q) use($request){
                 $q->where('id', $request->user_id);
@@ -96,9 +98,6 @@ class ExpenseController extends Controller
                         $companQuery->where('company_id', $company);
                     });
                 });
-            })
-            ->whereHas('roles', function($q) {
-                $q->whereIn('role_id', [4,5,6,7,8,9,10]);
             })
             ->when(isset($request->expense_option), function($expenseOptionQuery) use($request,$start_date, $end_date) {
                 if ($request->expense_option == 'with_expenses' || $request->expense_option == 'all') {
@@ -125,7 +124,7 @@ class ExpenseController extends Controller
                     ->when(isset($verify_status), function ($verifyQuery) use ($verify_status, $start_date, $end_date) {
                         $verifyQuery->whereHas('expensesEntries', function ($query) use ($verify_status, $start_date, $end_date) {
                             $query->whereHas('expensesModel', function ($q2) use ($verify_status, $start_date, $end_date) {
-                                $q2->where('verified_status_id',  $verify_status);
+                                $q2->where('verified_status_id',  $verify_status)->whereBetween('created_at',  [$start_date, $end_date]);
                             });
                         });
                     });
@@ -378,9 +377,6 @@ class ExpenseController extends Controller
         $start_date = "$request->start_date 00:00:01";
         $end_date = "$request->end_date 23:59:59";
 
-        $last_day_of_last_month = date("Y-m-t 23:59:59", strtotime("last day of last month"));
-        $first_day_of_last_month = date("Y-m-t 00:00:1", strtotime("first day of last month"));
-
         $expenses = Expense::with(
                 'expensesType', 
                 'payments',
@@ -389,14 +385,13 @@ class ExpenseController extends Controller
                 'representaion:id,expense_id,attendees,purpose',
                 'verifier:id,name',
                 'routeTransportation:id,expense_id,from,to,transportation_id,remarks',
-                'routeTransportation.transportation:id,mode')
+                'routeTransportation.transportation:id,mode',
+                'grassroots:id,grassroots_expense_type_id,expense_id,remarks',
+                'grassroots.grassrootExpenseType:id,name')
             ->where('user_id', $user_id)
-            // ->whereHas('expensesEntry', function ($q) use ($start_date, $end_date) {
-                ->whereBetween('created_at', [$start_date, $end_date])
-                ->has('expensesEntry')
-            // })
-            // ->expensePerMonth($start_date, $end_date)
-
+            ->whereBetween('created_at', [$start_date, $end_date])
+            ->has('expensesEntry')
+            ->withCount('history')
             ->get();
 
         return $expenses->transform(function($item){
@@ -419,8 +414,7 @@ class ExpenseController extends Controller
             return true;
         }
 
-        if (date('d') > '07') {
-            //Today is past 7th day of current montt,
+        if (date('d') > '10') {
             //If the expense date is past of last day of last month, the verification period will be expired
             if (strtotime($last_day_of_last_month) > strtotime($expense_date)) {
                 return true;
@@ -909,23 +903,36 @@ class ExpenseController extends Controller
         $rejected_id = null;
         $deducted_amount = null;
         $date = now();
+        $history_action = "View Receipt.";
+        $history_detail = null;
 
         switch ($request->mode) {
             case 'unset':
                 $status = 0;
                 $user_id = null;
                 $date = null;
+                $history_action = "Reset receipt verification status.";
                 break;
             case 'verify':
                 $status = 1;
+                $history_action = "Mark receipt as VERIFIED.";
                 break;
             case 'unverify':
                 $status = 2;
+                if(!Auth::user()->hasRole('it')) {
+                    $history_action = "View Receipt.";
+                }
                 break;
             case 'reject':
                 $status = 3;
                 $rejected_id = isset($request->rejected_reason_id) ? $request->rejected_reason_id : null;
                 $deducted_amount = $rejected_id == 4 ? (double) $request->deducted_amount : null;
+                $history_action = "Mark receipt as REJECTED.";
+                $reject_remark = ExpenseVerificationRejectedRemarks::find($rejected_id);
+                $history_detail['Remark'] = "$reject_remark->remark";
+                if($request->rejected_reason_id == 4) {
+                    $history_detail['Deduction'] = "PHP ". number_format($deducted_amount, 2);
+                }
                 break;
         }
 
@@ -936,6 +943,8 @@ class ExpenseController extends Controller
             'verified_by' => $user_id,
             'date_verified' => $date,
         ]);
+
+        $this->logHistory($expenseId, $history_action, $history_detail);
     }
 
     public function getExpenseRejectedRemarks() {
@@ -944,6 +953,19 @@ class ExpenseController extends Controller
 
     public function getExpenseVerificationStatuses() {
         return ExpenseVerificationStatus::all(['id','name']);
+    }
+
+    public function logHistory($expense_id, $action, $detail){
+        $userId = Auth::user()->id;
+
+        $data = [
+            'expense_id' => $expense_id,
+            'user_id' => $userId,
+            'details' => $detail ? json_encode($detail) : '',
+            'action' => $action
+        ];
+
+        ExpenseHistory::create($data);
     }
 
     //DMS Received Report ================================================
@@ -1157,6 +1179,7 @@ class ExpenseController extends Controller
         $year = date('Y', strtotime($date));
 
         $noCalimedExpensesUser =  User::select('id', 'name', 'company_id', 'email')
+            ->userWithExpense()
             ->with('company:id,code,name', 'roles', 'expensesEntries')
             ->when(isset($request->user_id), function($q) use($request){
                 $q->where('id', $request->user_id);
@@ -1171,9 +1194,6 @@ class ExpenseController extends Controller
                         $companQuery->where('company_id', $company_id);
                     });
                 });
-            })
-            ->whereHas('roles', function($q) {
-                $q->whereIn('role_id', [4,5,6,7,8,9,10]);
             })
             ->whereDoesntHave('expensesEntries', function($q) use($first_day, $last_day){
                 $q->whereBetween('created_at',  [$first_day, $last_day]);
@@ -1238,11 +1258,20 @@ class ExpenseController extends Controller
     }
     //====================================================================
 
-    //Export Excel =======================================================
+    //Rejected Expense ===================================================
     public function rejectedExpenseIndex() {
         return view('expense.index-rejected-report');
     }
     //====================================================================
 
-
+    public function getReceiptHistory($expense_id) {
+        $expenseHistory = ExpenseHistory::where('expense_id', $expense_id)->with('user')->get();
+        return $expenseHistory->transform(function($expense) {
+            $data['date'] = "$expense->created_at";
+            $data['verifier'] = $expense->user->name;
+            $data['action'] = $expense->action;
+            $data['details'] = (array) json_decode($expense->details);
+            return $data;
+        });
+    }
 }

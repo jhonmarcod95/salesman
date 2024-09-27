@@ -104,12 +104,14 @@ class SurveyControllerApi extends Controller
      */
     public function index()
     {
-        $surveys = Survey::orderBy('id','ASC')
-                        ->where('user_id', Auth::user()->id)
-                        ->take(5)
-                        ->get();
+        return redirect('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
 
-        return SurveyResource::collection($surveys);
+        // $surveys = Survey::orderBy('id','ASC')
+        //                 ->where('user_id', Auth::user()->id)
+        //                 ->take(5)
+        //                 ->get();
+
+        // return SurveyResource::collection($surveys);
     }
 
     /**

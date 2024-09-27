@@ -141,6 +141,9 @@ class UserController extends Controller
         $user->name = $request->name;
         $user->email= $request->email;
         $user->is_expense_approver= $request->is_expense_approver;
+        $user->is_act_user= $request->is_act_user;
+        $user->is_sales= $request->is_sales;
+        $user->access_dms_received= $request->access_dms_received;
 
         if($user->save()){
             // Assigning of role
@@ -218,8 +221,6 @@ class UserController extends Controller
     }
 
     public function getUsersWithExpense($company_id = null) {
-        $user_control_access = Auth::user()->level() < 8  && !Auth::user()->hasRole('ap');
-
         return User::select(['id', 'name'])->whereHas('companies', function ($q) use($company_id){
             $q->when($company_id, function($companyQuery) use($company_id) {
                 $companyQuery->where('company_id', $company_id);
@@ -229,9 +230,10 @@ class UserController extends Controller
                 }
             });
         })
-        ->whereHas('roles', function ($q) {
-            $q->whereIn('role_id', [4, 5, 6, 7, 8, 9, 10]);
-        })
+        ->UserWithExpense()
+        // ->whereHas('roles', function ($q) {
+        //     $q->whereIn('role_id', [4, 5, 6, 7, 8, 9, 10]);
+        // })
         ->orderBy('name', 'ASC')
         ->get();
     }

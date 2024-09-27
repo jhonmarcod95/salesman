@@ -9,11 +9,7 @@
                         <div class="col">
                             <h3 class="mb-0">Expenses Report</h3>
                         </div>
-                        <div class="d-flex">
-                            <div><a class="btn btn-sm btn-default mr-2" href="/expenses-report"> Expenses Report</a></div>
-                            <div v-if="salesHeadRole"><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
-                            <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
-                        </div>
+                        <expense-report-nav :user-role="userRole"/>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -60,7 +56,7 @@
                                 <app-select :options="users" v-model="filterData.user_id" label="name" @input="searchKeyUp"/>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" v-if="companies.length > 1">
                             <div class="form-group">
                                 <label class="form-control-label" for="role">Company</label>
                                 <app-select :options="companies" v-model="filterData.company" label="name" @input="searchKeyUp"/>
@@ -263,6 +259,35 @@
             </div>
         </div>
 
+        <div class="custom-modal-container" :class="isHistoryModalOpen ? 'display-block' : ''" tabindex="0" role="dialog">
+            <div class="modal border" style="margin-top: 100px;">
+                <div class="modal-header px-5 pt-5 align-items-center jsutify-content-between">
+                    <h4 class="modal-title" id="addCompanyLabel">Expense History</h4>
+                    <button type="button" class="close" @click="closeHistoryModal"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body px-5">
+                    <div class="d-flex" v-for="(history, index) in expenseHistory" :key="index">
+                        <div><small>{{history.date}}</small></div>
+                        <div class="border-left mx-4 text-lg">
+                            <span class="m--1">•</span>
+                        </div>
+                        <div class="pb-4">
+                            <h6 class="mb-0 text-primary font-weight-bold text-sm">{{history.action}}</h6>
+                            <small class="font-weight-bold">{{history.verifier}}</small>
+                            <div class="mt-1">
+                                <div style="line-height: 1;" v-for="(detail, key, detailIndex) in history.details" :key="detailIndex">
+                                    <small>{{key}}: {{detail}}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-round btn-fill" @click="closeHistoryModal">Close</button>
+                </div>
+            </div>
+        </div>
+
         <!-- View Expense Modal -->
         <div class="modal fade" id="viewModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <span class="closed" data-dismiss="modal">&times;</span>
@@ -283,7 +308,7 @@
                         <table class="table align-items-center table-flush">
                             <thead class="thead-light">
                             <tr>
-                                <th scope="col" v-if="expenseVerifierRole || salesHeadRole || isItRole">Verify</th>
+                                <th scope="col" v-if="expenseVerifierRole || salesHeadRole || isItRole || presidentRole">Verify</th>
                                 <th scope="col">Attachment</th>
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Entry Date</th>
@@ -292,34 +317,30 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(expenseBy, e) in expenseByTsr" v-bind:key="e">
-                                    <td v-if="expenseVerifierRole || salesHeadRole || isItRole">
-                                        <div v-if="!isEmpty(expenseBy.dms_reference)">
-                                            <div v-if="!expenseBy.verified_status_id">
-                                                <em>Did Not Verified</em>
+                                    <td v-if="expenseVerifierRole || salesHeadRole || isItRole || presidentRole">
+                                        <div v-if="!isUnverified(expenseBy.verified_status_id)">
+                                            <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': 'text-danger'">{{ expenseBy.expense_verification_status.name }}</strong></div>
+                                            <div style="text-wrap: wrap;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
+                                                {{ expenseBy.expense_rejected_remarks.remark }}
+                                                <div v-if="expenseBy.expense_rejected_reason_id == 4">(Deduct PHP{{ expenseBy.rejected_deducted_amount | _amount }}) </div>
                                             </div>
-                                            <div v-else>
-                                                <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': 'text-danger'">{{ expenseBy.expense_verification_status.name }}</strong></div>
-                                                <div style="text-wrap: wrap;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
-                                                    {{ expenseBy.expense_rejected_remarks.remark }}
-                                                </div>
+
+                                            <div v-if="!expenseBy.verification_perion_expired && (salesHeadRole || isItRole)" class="btn btn-light btn-sm mt-2" 
+                                                @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
+                                        </div>
+                                        <div class="mt-2" style="line-height: 1.3;" v-if="isItRole && !isEmpty(expenseBy.verifier) && !isUnverified(expenseBy.verified_status_id)">
+                                            <div><small>{{expenseBy.verifier.name}}</small></div>
+                                            <small>{{expenseBy.date_verified | _date}}</small>
+                                        </div>
+
+                                        <div v-if="!isEmpty(expenseBy.dms_reference)">
+                                            <div v-if="isUnverified(expenseBy.verified_status_id)">
+                                                <em>Did Not Verified</em>
                                             </div>
                                             <div><small><em>-DMS Received-</em></small></div>
                                         </div>
                                         <div v-else>
-                                            <div v-if="!(expenseBy.verified_status_id == 0 || expenseBy.verified_status_id == 2)">
-                                                <div><strong :class="expenseBy.verified_status_id == 1 ? 'text-success': 'text-danger'">{{ expenseBy.expense_verification_status.name }}</strong></div>
-                                                <div style="text-wrap: wrap;" v-if="expenseBy.expense_verification_status.id == 3 /**Rejected */">
-                                                    {{ expenseBy.expense_rejected_remarks.remark }}
-                                                    <div v-if="expenseBy.expense_rejected_reason_id == 4">(Deduct PHP{{ expenseBy.rejected_deducted_amount | _amount }}) </div>
-                                                </div>
-                                                <div class="mt-2" v-if="isItRole">
-                                                    <div><small>{{expenseBy.verifier.name}}</small></div>
-                                                    <small>{{expenseBy.date_verified | _date}}</small>
-                                                </div>
-
-                                                <div v-if="!expenseBy.verification_perion_expired && salesHeadRole" class="btn btn-light btn-sm mt-2" @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
-                                            </div>
-                                            <div v-else>
+                                            <div v-if="isUnverified(expenseBy.verified_status_id)">
                                                 <div v-if="expenseBy.verification_perion_expired">
                                                     <small>Verification Period Expired</small>
                                                 </div>
@@ -336,22 +357,39 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div class="mt-2">
+                                            <a href="javascript:;" v-if="expenseBy.history_count" @click="fetchHistory(expenseBy.id)">History</a>
+                                        </div> 
                                     </td>
                                     <td> 
                                         <img v-if="expenseBy.attachment == 'attachments/default.jpg'" class="rounded-circle" :src="`${imgOrigin}/img/brand/no-image.png`" style="height: 70px; width: 90px;">
 
                                         <a v-else :href="imageLink+expenseBy.attachment" target="__blank" @click="markAsUnverified(expenseBy)">
-                                            <img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width: 70px" @error="noImage">
+                                            <img class="rounded-circle" :src="imageLink+expenseBy.attachment" style="height: 70px; width:70px" @error="noImage">
                                         </a>
                                     </td>
                                     <td style="white-space:unset; max-width:250px">
-                                        <div>{{ expenseBy.expenses_type.name }}</div>
+                                        <div>
+                                            {{ expenseBy.expenses_type.name }}
+                                            <span v-if="!isEmpty(expenseBy.grassroots)">
+                                                <span v-if="!isEmpty(expenseBy.grassroots.grassroot_expense_type)">
+                                                    ({{expenseBy.grassroots.grassroot_expense_type.name}})
+                                                </span>
+                                            </span>
+                                        </div>
+                                        
                                         <div v-if="!isEmpty(expenseBy.representaion)">
                                             <div class="mt-2"><strong>Purpose</strong></div> 
                                             {{expenseBy.representaion.purpose}}
                                                 
                                             <div class="mt-1"><strong>Attendees</strong></div>
                                             {{expenseBy.representaion.attendees}}
+                                        </div>
+
+                                        <div v-if="!isEmpty(expenseBy.grassroots)">
+                                            <div class="mt-2"><strong>Remarks</strong></div> 
+                                            {{expenseBy.grassroots.remarks}}
                                         </div>
 
                                         <div v-if="!isEmpty(expenseBy.route_transportation)">
@@ -387,7 +425,7 @@ import moment from 'moment';
 import listFormMixins from '../../list-form-mixins.vue';
 export default {
     mixins: [listFormMixins],
-    props:['userLevel','userRole','expenseVerifier'],
+    props:['userLevel','userRole','expenseVerifier','accessDmsReceived'],
     data(){
         return{
             expenseByTsr: [],
@@ -420,13 +458,15 @@ export default {
             selectedExpense: {},
             rejectedExpense: {},
             rejectExpenseError: {},
-            isRejecModalOpen: false
+            isRejecModalOpen: false,
+            isHistoryModalOpen: false,
+            expenseHistory: []
         }
     },
     created(){
+        this.getSelectOptions('companies', '/companies-all')
         this.defaultFilterData();
         this.getSelectOptions('users', '/selection-users')
-        this.getSelectOptions('companies', '/companies-all')
         this.getSelectOptions('rejectedRemarks', '/expense-rejected-remarks')
         this.getSelectOptions('expenseVerificationStatuses', '/expense-verification-statuses')
         // this.fetchInitialData();
@@ -660,6 +700,19 @@ export default {
             //donload/export excel
             link.href = requestUri;
             link.click();
+        },
+        isUnverified(status_id) {
+            return status_id == 0 || status_id == 2
+        },
+        fetchHistory(expense_id) {
+            axios.get(`${this.endpoint}/receipt-history/${expense_id}`)
+            .then( res => {
+                this.isHistoryModalOpen = true;
+                this.expenseHistory = res.data;
+            })
+        },
+        closeHistoryModal() {
+            this.isHistoryModalOpen = !this.isHistoryModalOpen;
         }
     },
     computed:{
@@ -677,14 +730,15 @@ export default {
         isItRole() {
             return this.userRole == 1  // IT
         },
-        salesHeadRole() {
+        presidentRole() {
             let userRole = [
-                1,  // IT,
                 2,  // President,
-                3,  // EVP,
-                4,  // VP/Sales Head
+                // 3,  // EVP,
             ];
             return _.includes(userRole, this.userRole);
+        },
+        salesHeadRole() {
+            return this.userRole == 4  // VP/Sales Head
         }
     },
 }

@@ -40,7 +40,10 @@ class CompanyController extends Controller
      */
 
     public function indexData(){
-        return Company::orderBy('id', 'desc')->get();
+        return Company::when(!Auth::user()->hasRole('it'), function($q) {
+            $q->whereIn('id', Auth::user()->companies->pluck('id'));
+        })
+        ->orderBy('id', 'desc')->get();;
     }
 
     /**
