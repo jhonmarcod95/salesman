@@ -131,8 +131,8 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-link" href="{{ url('/expenses-report') }}">
-                                        <i class="fa fa-window-close text-danger"></i> Rejected Expense Approval
+                                    <a class="nav-link" href="{{ url('/rejected-expenses-report') }}">
+                                        <i class="fa fa-window-close text-danger"></i> Rejected Expense Monitoring
                                     </a>
                                 </li>
                                 <li class="nav-item">

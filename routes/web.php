@@ -188,6 +188,17 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
         Route::get('/receipt-history/{rexpense_id}', 'ExpenseController@getReceiptHistory');
     });
 
+    //Rejected Expense Monitoring
+    Route::group(['prefix' => '/rejected-expenses-report'], function () {
+        Route::get('/', 'ExpenseController@rejectedExpenseIndex');
+        // Route::get('/all', 'ExpenseController@getExpensePerUser');
+        // Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
+        // Route::get('/expenses/{user_id}',
+        //     'ExpenseController@show2'
+        // );
+        // Route::get('/export', 'ExpenseController@export');
+    });
+
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
     Route::post('/expense-io-report-data', 'ExpenseController@expenseIOReportData');
 

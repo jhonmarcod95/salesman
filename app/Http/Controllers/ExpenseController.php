@@ -1308,4 +1308,9 @@ class ExpenseController extends Controller
         });
     }
 
+    //Export Excel =======================================================
+    public function rejectedExpenseIndex() {
+        return view('expense.index-rejected-report');
+    }
+    //====================================================================
 }
