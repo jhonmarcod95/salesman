@@ -80,13 +80,19 @@
         <div class="auth-container" v-if="openAuthForm">
             <div class="auth-form">
                 <div class="my-3">
-                    <div class="mb-2"><strong>{{ name | _uppercase }}</strong></div>
-                    Please enter your Salesforce App password to authorize these changes.
+                    <div class="mb-2"><strong>Accept Terms of Use</strong></div>
+                    Please enter your Salesforce App credential to authorize these changes.
+                </div>
+
+                <div class="form-group mb-2">
+                    <input type="emai" class="form-control" placeholder="Email" v-model="loginData.email">
+                    <div class="text-danger mt-0" v-if="!isEmpty(errors.email)"><small>{{ errors.email[0] }}</small></div>
                 </div>
 
                 <div class="form-group mb-0">
-                    <input type="password" class="form-control" :class="{'is-invalid': hasError}" placeholder="Password" v-model="loginData.password">
-                    <div class="text-danger mt-1" v-if="!isEmpty(errors)">{{ errors }}</div>
+                    <input type="password" class="form-control" placeholder="Password" v-model="loginData.password">
+                    <div class="text-danger mt-0" v-if="!isEmpty(errors.password)"><small>{{ errors.password[0] }}</small></div>
+                    <div class="text-danger mt-0" v-if="!isEmpty(errors.message)"><small>{{ errors.message }}</small></div>
                 </div>
 
                 <div class="btn btn-primary mt-2 w-100" @click="authenticate" :disabled="authenticating">
@@ -106,7 +112,7 @@
                 openAuthForm: false,
                 authenticating: false,
                 loginData: {
-                    email: this.email,
+                    email: '',
                     password: ''
                 },
                 errors: '',
@@ -137,9 +143,9 @@
                 .catch(error => {
                     console.log(error.response.data);
                     if(error.response.status === 401) {
-						this.errors = error.response.data.message;
+						this.errors = error.response.data;
 					} else if(error.response.status === 422) { 
-                        this.errors = error.response.data.errors.password[0];
+                        this.errors = error.response.data.errors;
                     }
 					this.authenticating = false;
                 });
@@ -154,7 +160,7 @@
 </script>
 
 <style scopep>
-    p { text-indent: 25px; }
+    /* p { text-indent: 25px; } */
 
     .auth-container {
         position: absolute;
@@ -173,7 +179,7 @@
         margin-top: 100px;
         border-radius: 5px;
         padding: 20px;
-        width: 300px;
+        width: 400px;
         height: auto;
         text-align: center;
     }
