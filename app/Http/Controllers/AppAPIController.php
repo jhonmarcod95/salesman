@@ -459,7 +459,7 @@ class AppAPIController extends Controller
     public function storeExpenses(Request $request)
     {
         // check if the user is accepted the aggreement
-        if(Auth::user()->atd_accepted != null && Auth::user()->atd_accepted == 1) {
+        if(Auth::user()->atd_accepted == null && Auth::user()->atd_accepted == 0) {
             $this->validate($request, [
                 'atd_accept' => 'required'
             ],[
