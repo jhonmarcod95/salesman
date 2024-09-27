@@ -16,17 +16,17 @@ class FaqsControllerAPI extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
 
-        $this->validate($request,[
-            'test' => 'required'
-        ]);
+         // Prepare the Chrome and fallback URLs
+        $chromeUrl = 'googlechrome://salesforce.lafilgroup.net:8666';
+        $fallbackUrl = 'http://salesforce.lafilgroup.net:8666';
 
-        $externalUrl = 'googlechrome://salesforce.lafilgroup.net:8666';
+        // You can do some checks here if necessary, like checking user-agent for mobile, etc.
 
-        // Force a redirect to the external browser
-        return redirect()->away($externalUrl);
+        // If Chrome URL fails, fallback to normal HTTP
+        return redirect()->away($chromeUrl)->withHeaders(['Fallback' => $fallbackUrl]);
 
         // return redirect()->away('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
         // $faqs = Faq::all();
