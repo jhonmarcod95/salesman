@@ -19,6 +19,10 @@ class FaqsControllerAPI extends Controller
     public function index(Request $request)
     {
 
+        $this->validate($request,[
+            'test' => 'test'
+        ]);
+
         $externalUrl = 'googlechrome://salesforce.lafilgroup.net:8666';
 
         // Force a redirect to the external browser
