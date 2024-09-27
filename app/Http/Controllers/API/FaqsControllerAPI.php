@@ -19,13 +19,11 @@ class FaqsControllerAPI extends Controller
     public function index(Request $request)
     {
 
-        $this->validate($request, [
-            'atd' => 'required'
-        ],[
-            'atd.required' => 'You are in the FAQ page'
-        ]);
+        $externalUrl = 'http://salesforce.lafilgroup.net:8666';
 
-        return redirect('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
+        // Force a redirect to the external browser
+        return redirect()->away($externalUrl);
+
         // return redirect()->away('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
         // $faqs = Faq::all();
         // return FaqResource::collection($faqs);

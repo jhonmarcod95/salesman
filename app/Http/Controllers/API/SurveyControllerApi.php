@@ -104,14 +104,12 @@ class SurveyControllerApi extends Controller
      */
     public function index()
     {
-        return redirect('http://salesforce.lafilgroup.net:8666/authority-to-deduct/'.Auth::user()->id);
+        $surveys = Survey::orderBy('id','ASC')
+                        ->where('user_id', Auth::user()->id)
+                        ->take(5)
+                        ->get();
 
-        // $surveys = Survey::orderBy('id','ASC')
-        //                 ->where('user_id', Auth::user()->id)
-        //                 ->take(5)
-        //                 ->get();
-
-        // return SurveyResource::collection($surveys);
+        return SurveyResource::collection($surveys);
     }
 
     /**
