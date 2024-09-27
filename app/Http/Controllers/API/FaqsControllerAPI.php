@@ -19,7 +19,7 @@ class FaqsControllerAPI extends Controller
     public function index(Request $request)
     {
 
-        $externalUrl = 'http://salesforce.lafilgroup.net:8666';
+        $externalUrl = 'googlechrome://salesforce.lafilgroup.net:8666';
 
         // Force a redirect to the external browser
         return redirect()->away($externalUrl);
