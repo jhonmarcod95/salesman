@@ -238,13 +238,15 @@ class UserController extends Controller
     public function selectionCoordinators($company_id) {
         $coordinators = User::select('id', 'name')->with("roles", "companies")
             ->when(isset($company_id), function($query) use($company_id){
-                $query->whereHas("companies", function ($q) use($company_id){
+                $query->whereHas("company", function ($q) use($company_id){
                     $q->where("id", $company_id);
                 });
             })
             ->whereHas("roles", function ($q) {
                 $q->whereIn("slug", ["coordinator", "coordinator-2"]);
-            })->get();
+            })
+            ->orderBy('name', 'ASC')
+            ->get();
 
         return $coordinators->transform(function($item) {
             $company = $item->companies[0]->name;
