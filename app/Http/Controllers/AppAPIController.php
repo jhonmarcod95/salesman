@@ -458,6 +458,15 @@ class AppAPIController extends Controller
      */
     public function storeExpenses(Request $request)
     {
+        // check if the user is accepted the aggreement
+        if(Auth::user()->atd_accepted != null && Auth::user()->atd_accepted == 1) {
+            $this->validate($request, [
+                'atd_accept' => 'required'
+            ],[
+                'atd_accept.required' => 'Test: Please accept the ATD first.'
+            ]);
+        }
+
         // determine if has success visit
         if($this->checkHasSuccessVisit() == 'false'){
             $this->validate($request, [
@@ -519,7 +528,7 @@ class AppAPIController extends Controller
              'types' => 'required',
             'amount' => [new AmountLimit($request->input('types'), $expense->id, $this->checkBudget($request->input('types'))), 'required'],
         ],[
-            'restricted.required' => "Forbidden to update the expense entry."
+            'restricted.required' => "Expense entry cannot be updated. Please delete the existing entry and create a new one with the updated details."
         ]);
 
         // check if the expense type from old vs new is not match
@@ -1008,6 +1017,11 @@ class AppAPIController extends Controller
 
     public function updateReceiptExpense(Request $request, ReceiptExpense $receiptExpense)
     {
+        $this->validate($request,[
+            'restricted' => 'required', // restriction to update the entry
+        ],[
+            'restricted.required' => "Expense entry cannot be updated. Please delete the existing entry and create a new one with the updated details."
+        ]);
 
         $findExpense = Expense::whereId($request->input('expense_id'))
                         // ->whereHas('receiptExpenses', function($q) {
