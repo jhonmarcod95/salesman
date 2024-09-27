@@ -20,17 +20,27 @@
 
                                 <div v-if="!atd_data.atd_accepted">
                                     <p class="text-justify">
-                                        Hello <strong>{{ name }}</strong>. Lorem ipsum dolor sit amet, <strong>La Filipina Uy Gongco Group of Companies</strong>, 
-                                        sed do eiusmod tempor incididunt ut labore et dolore magna
-                                        aliqua. Ut enim ad minim veniam, quis nostrud exercitation 
-                                        ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+                                       Finally, you agree that only legitimate and authentic receipts or invoices 
+                                       shall be uploaded to the SFA to support your requests for reimbursement 
+                                       from the Employer. Discrepancies between the uploaded receipts or invoices 
+                                       and their hard copies and/or any other irregularities in the submitted 
+                                       receipts or invoices shall be a ground for the Employer to disallow 
+                                       any reimbursement. Knowingly submitting a falsified, forged, bogus or 
+                                       simulated receipts or invoices is a ground for disciplinary action, 
+                                       among others. If reimbursement has already been paid, the Employer 
+                                       shall have the right to recover the same by deducting the disallowed 
+                                       amount of reimbursement from any wages and/or other receivables of the 
+                                       User from the Employer. <strong>Your agreement to this Terms of Use shall 
+                                       serve as an authority to deduct the amount of the disallowed reimbursement 
+                                       from such wages and/or other receivables</strong> . In the event that your wages and/or 
+                                       other receivables are insufficient to cover the disallowed reimbursements, 
+                                       the Employer reserves the right to collect the shortfall through other means allowed by law.
                                     </p>
                                     
                                     <p class="text-justify">
-                                        Duis aute irure dolor in reprehenderit in voluptate velit 
-                                        esse cillum dolore eu fugiat nulla pariatur. Excepteur sint 
-                                        occaecat cupidatat non proident, sunt in culpa qui officia 
-                                        deserunt mollit anim id est laborum.
+                                        Your agreement to these Terms of Use shall serve as an authority to 
+                                        deduct any amount that is deemed as <strong><u>non-reimbursable</u></strong> 
+                                        based on guidelines from your wages and/or other receivables.
                                     </p>
                                 </div>
                                 <div v-else class="text-center border p-3">
