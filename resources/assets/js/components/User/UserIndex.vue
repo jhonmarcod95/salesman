@@ -18,8 +18,13 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <div class="col-md-4 float-left">
-                                <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                            <div class="row mx-2">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                                </div>
+                                <div class="col-md-3">
+                                    <app-select :options="roles" v-model="filter_role" placeholder="Roles"/>
+                                </div>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -116,10 +121,12 @@ export default {
     data(){
         return{
             users:[],
+            roles:[],
             errors:[],
             keywords: '',
             user_id: '',
             role: '',
+            filter_role: '',
             currentPage: 0,
             itemsPerPage: 10,
         }
@@ -127,6 +134,7 @@ export default {
     created(){
         this.fectUsers();
         this.getAuthRole();
+        this.getSelectOptions('roles', '/selection-roles')
     },
     methods:{
         getUserId(id){
@@ -140,6 +148,15 @@ export default {
                 .catch(error => {
                     this.errors = error.response.data.errors;
                 })
+        },
+        fectRoles(){
+            axios.get('/selection-roles')
+            .then(response => {
+                this.roles = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
         },
         fectUsers(){
             axios.get('/users-all')
@@ -184,8 +201,9 @@ export default {
         filteredUsers(){
             let self = this;
             return self.users.filter(user => {
-                return user.name.toLowerCase().includes(this.keywords.toLowerCase()) ||
-                       user.email.toLowerCase().includes(this.keywords.toLowerCase())
+                let user_name = user.name.toLowerCase().includes(this.keywords.toLowerCase());
+                let user_email = user.name.toLowerCase().includes(this.keywords.toLowerCase());
+                return (user_name || user_email) &&  (this.filter_role ? user.roles[0].id == this.filter_role : true);
             });
         },
         totalPages() {

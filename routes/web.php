@@ -107,6 +107,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     //selection user
     Route::get('/selection-users', 'UserController@selectionUsers');
     Route::get('/selection-coordinators/{company_id}', 'UserController@selectionCoordinators');
+    Route::get('/selection-roles', 'UserController@selectionRole');
 
     Route::get('/selection-users/show/{id}', 'UserController@show');
     Route::patch('/users/update/{id}', 'UserController@update');

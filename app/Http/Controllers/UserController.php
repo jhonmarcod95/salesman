@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Auth;
 use App\User;
 use App\Message;
+use App\Role;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -214,6 +215,10 @@ class UserController extends Controller
     public function getRole(){
         $role = Auth::user()->roles()->get();
         return $role[0]->name;
+    }
+
+    public function selectionRole() {
+        return Role::orderBy('name')->get(['id', 'name']);
     }
 
     public function selectionUsers() {
