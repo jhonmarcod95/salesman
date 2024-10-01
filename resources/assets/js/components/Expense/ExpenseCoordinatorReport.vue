@@ -43,7 +43,7 @@
                                 Clear Filter
                             </button>
                             <button class="btn btn-sm btn-primary mt-4" @click="exportReport">
-                                export
+                                Export
                             </button>
                         </div>
                     </div>
