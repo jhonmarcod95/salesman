@@ -1252,7 +1252,7 @@ class ExpenseController extends Controller
         return Excel::download(new ExpenseDmsVerifiedReportPerBuExport($request), "$month_year DMS RECEIVED STATUS - as of $today.xlsx");
     }
 
-    function getWeekRangesOfMonthStartingMonday($month_year){
+    public function getWeekRangesOfMonthStartingMonday($month_year){
 
         $month_date = explode('-', $month_year);
         $year = $month_date[0];

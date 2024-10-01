@@ -195,6 +195,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
         Route::get('/all', 'CoordinatorReportController@all');
         Route::get('/verified-stat', 'CoordinatorReportController@getValidatedExpenseStat');
         Route::get('/validated-expenses/{user_id}', 'CoordinatorReportController@show');
+        Route::get('/export', 'CoordinatorReportController@export');
     });
 
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');

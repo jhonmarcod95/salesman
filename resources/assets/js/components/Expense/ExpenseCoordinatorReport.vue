@@ -42,6 +42,9 @@
                             <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">
                                 Clear Filter
                             </button>
+                            <button class="btn btn-sm btn-primary mt-4" @click="exportReport">
+                                export
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -141,7 +144,7 @@
                                         </td>
                                         <td>
                                             <strong>{{ user.name }}</strong> <br>
-                                            <span>{{ user.company.name }}</span>
+                                            <span>{{ user.company }}</span>
                                         </td>
                                         <td>{{ user.validated_expense_count }}</td>
                                         <td>
@@ -574,7 +577,25 @@ export default {
 
             //Trigger search
             this.searchKeyUp()
-        }
+        },
+        exportReport(type) {
+            //=============
+            // Configuration object
+            let url = `${this.endpoint}/export`;
+            let params = {type, ...this.filterData};
+            let queryString = new URLSearchParams(params).toString();
+
+            // Manually constructing the URI
+            const requestUri = `${url}?${queryString}`;
+            //=============
+
+            //link to download
+            let link = document.createElement("a");
+
+            //donload/export excel
+            link.href = requestUri;
+            link.click();
+        },
     },
     computed:{
         imageLink(){

@@ -242,7 +242,7 @@ class UserController extends Controller
 
     public function selectionCoordinators($company_id) {
         $coordinators = User::select('id', 'name')->with("roles", "companies")
-            ->when($company_id != 'all', function($query) use($company_id){
+            ->when($company_id != 'all' && isset($company_id), function($query) use($company_id){
                 $query->whereHas("company", function ($q) use($company_id){
                     $q->where("id", $company_id);
                 });
@@ -254,8 +254,10 @@ class UserController extends Controller
             ->get();
 
         return $coordinators->transform(function($item) {
+            // dd($item->company);
             $data['id'] = $item->id;
             $data['name'] = $item->name;
+            $data['company'] = $item->companies[0]->name;
             return $data;
         });
     }

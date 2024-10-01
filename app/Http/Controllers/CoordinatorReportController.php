@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Expense;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CoordinatorValidatedReportExport;
 
 class CoordinatorReportController extends Controller
 {
@@ -28,41 +30,13 @@ class CoordinatorReportController extends Controller
             ->whereHas("roles", function ($q) {
                 $q->whereIn("slug", ["coordinator", "coordinator-2"]);
             })
-            ->when(isset($company_id), function($query) use($company_id){
-                $query->whereHas('companies', function ($verifierCompanyQuery) use ($company_id) {
-                    $verifierCompanyQuery->where('company_id', $company_id);
-                });
-            })
-            ->with(['validatedExpenses' => function($query) use ($coordinator_id, $start_date, $end_date) {
-                $query->when(isset($coordinator_id), function ($coordinatorQuery) use ($coordinator_id) {
-                    $coordinatorQuery->where('verified_by', $coordinator_id);
-                })
-                ->whereBetween('date_verified', [$start_date, $end_date]);
-            }])
-            ->withCount(['validatedExpenses' => function ($query) use ($coordinator_id, $start_date, $end_date) {
-                $query->when(isset($coordinator_id), function ($coordinatorQuery) use ($coordinator_id) {
-                    $coordinatorQuery->where('verified_by', $coordinator_id);
-                })
-                ->whereBetween('date_verified', [$start_date, $end_date]);
-            }])
-            ->withCount(['rejectedExpenses' => function ($query) use ($coordinator_id, $start_date, $end_date) {
-                $query->when(isset($coordinator_id), function ($coordinatorQuery) use ($coordinator_id) {
-                    $coordinatorQuery->where('verified_by', $coordinator_id);
-                })
-                    ->whereBetween('date_verified', [$start_date, $end_date]);
-            }])
-            ->withCount(['verifiedExpenses' => function ($query) use ($coordinator_id, $start_date, $end_date) {
-                $query->when(isset($coordinator_id), function ($coordinatorQuery) use ($coordinator_id) {
-                    $coordinatorQuery->where('verified_by', $coordinator_id);
-                })
-                    ->whereBetween('date_verified', [$start_date, $end_date]);
-            }])
             ->whereHas('validatedExpenses', function($validatedQuery) use($coordinator_id, $start_date, $end_date) {
                 $validatedQuery->when(isset($coordinator_id), function($coordinatorQuery) use($coordinator_id){
                     $coordinatorQuery->where('verified_by', $coordinator_id);
                 })
                 ->whereBetween('date_verified', [$start_date, $end_date]);
-            });
+            })
+            ->coordinatorValidatedExpense($start_date, $end_date, $company_id, $coordinator_id);
     }
 
     /**
@@ -175,5 +149,12 @@ class CoordinatorReportController extends Controller
         });
 
         return $expenses;
+    }
+
+    public function export(Request $request) {
+        $today = date_format(now(), "M-d-Y");
+        $month_year = strtoupper(date('F Y', strtotime($request->month_year)));
+        $date_range = (new ExpenseController())->getWeekRangesOfMonthStartingMonday($request->month_year);
+        return Excel::download(new CoordinatorValidatedReportExport($request, $date_range), "$month_year COORDINATOR VALIDATION REPORT - as of $today.xlsx");
     }
 }
