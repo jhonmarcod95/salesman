@@ -46,6 +46,18 @@ class User extends Authenticatable implements Auditable
         return $this->hasMany(Expense::class);
     }
 
+    public function validatedExpenses() {
+        return $this->hasMany(Expense::class, 'verified_by')->whereIn('verified_status_id', [1,3]);
+    }
+
+    public function verifiedExpenses(){
+        return $this->hasMany(Expense::class, 'verified_by')->where('verified_status_id', 1);
+    }
+
+    public function rejectedExpenses(){
+        return $this->hasMany(Expense::class, 'verified_by')->where('verified_status_id', 3);
+    }
+
     public function expensesEntries() {
         return $this->hasMany(ExpensesEntry::class);
     }

@@ -108,7 +108,6 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/selection-users', 'UserController@selectionUsers');
     Route::get('/selection-coordinators/{company_id}', 'UserController@selectionCoordinators');
 
-
     Route::get('/selection-users/show/{id}', 'UserController@show');
     Route::patch('/users/update/{id}', 'UserController@update');
 
@@ -192,6 +191,9 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     //Coordinator Report
     Route::group(['prefix' => '/coordinator-report'], function () {
         Route::get('/', 'CoordinatorReportController@index');
+        Route::get('/all', 'CoordinatorReportController@all');
+        Route::get('/verified-stat', 'CoordinatorReportController@getValidatedExpenseStat');
+        Route::get('/validated-expenses/{user_id}', 'CoordinatorReportController@show');
     });
 
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');

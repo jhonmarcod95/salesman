@@ -62,19 +62,13 @@
                                     <div class="font-weight-bold text-sm">
                                        Validated Receipt
                                     </div>
-                                    <span>{{ verifiedExpenseStats.expenses_model_count || 0 }} </span>
+                                    <span>{{ verifiedExpenseStats.validated_expense_count || 0 }} </span>
                                 </div>
                                 <div class="col">
                                     <div class="font-weight-bold text-sm">
                                         Verified ({{verifiedExpenseStats.verified_percentage || 0}}%)
                                     </div>
                                     <span>{{ verifiedExpenseStats.verified_expense_count || 0 }} </span>
-                                </div>
-                                <div class="col">
-                                    <div class="font-weight-bold text-sm">
-                                        Unverified ({{verifiedExpenseStats.unverified_percentage || 0}}%)
-                                    </div>
-                                    <span>{{ verifiedExpenseStats.unverified_expense_count || 0 }} </span>
                                 </div>
                                 <div class="col text-warning">
                                     <div class="font-weight-bold text-sm">
@@ -99,7 +93,7 @@
                                 <div class="col"><div class="font-weight-bold text-sm">
                                         Validated Expenses
                                     </div>
-                                    <span>PHP {{ verifiedExpenseStats.total_expenses || 0 | _amount }} </span>
+                                    <span>PHP {{ verifiedExpenseStats.total_validated_amount || 0 | _amount }} </span>
                                 </div>
                                 <div class="col"><div class="font-weight-bold text-sm">
                                         Approved Claims
@@ -130,10 +124,9 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
-                                    <th scope="col">Expense Entry</th>
-                                    <th scope="col">Expense Submitted</th>
+                                    <th scope="col">Total Validated</th>
                                     <th scope="col">Receipt Status</th>
-                                    <th scope="col">Total Expenses</th>
+                                    <th scope="col">Amount Validated</th>
                                     <th scope="col">Verified</th>
                                     <th scope="col">Rejected</th>
                                 </tr>
@@ -144,21 +137,18 @@
                                     </tr>
                                     <tr v-else v-for="(user, e) in items" v-bind:key="e">
                                         <td class="text-right" v-if="userLevel != 5">
-                                            <button v-if="user.expenses_model_count" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(user)">View</button>
+                                            <button v-if="user.validated_expense_count" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(user)">View</button>
                                         </td>
-                                        <td v-else></td>
                                         <td>
                                             <strong>{{ user.name }}</strong> <br>
-                                            <span>{{ user.company }}</span>
+                                            <span>{{ user.company.name }}</span>
                                         </td>
-                                        <td>{{ user.expense_entry_count }}</td>
-                                        <td>{{ user.expenses_model_count }}</td>
+                                        <td>{{ user.validated_expense_count }}</td>
                                         <td>
-                                            <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ user.unverified_expense_count }}</div>
                                             <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ user.verified_expense_count }}</div>
                                             <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ user.rejected_expense_count }}</div>
                                         </td>
-                                        <td>PHP {{ user.total_expenses | _amount }}</td>
+                                        <td>PHP {{ user.total_validated_amount | _amount }}</td>
                                         <td>PHP {{ user.verified_amount | _amount }}</td>
                                         <td>PHP {{ user.rejected_amount | _amount }}</td>
                                     </tr>
@@ -243,9 +233,6 @@
                                                 {{ expenseBy.expense_rejected_remarks.remark }}
                                                 <div v-if="expenseBy.expense_rejected_reason_id == 4">(Deduct PHP{{ expenseBy.rejected_deducted_amount | _amount }}) </div>
                                             </div>
-
-                                            <div v-if="!expenseBy.verification_perion_expired && (salesHeadRole || isItRole)" class="btn btn-light btn-sm mt-2" 
-                                                @click="verifyExpense(expenseBy,'unset')">Reset Verification</div>
                                         </div>
                                         <div class="mt-2" style="line-height: 1.3;" v-if="isItRole && !isEmpty(expenseBy.verifier) && !isUnverified(expenseBy.verified_status_id)">
                                             <div><small>{{expenseBy.verifier.name}}</small></div>
@@ -257,24 +244,6 @@
                                                 <em>Did Not Verified</em>
                                             </div>
                                             <div><small><em>-DMS Received-</em></small></div>
-                                        </div>
-                                        <div v-else>
-                                            <div v-if="isUnverified(expenseBy.verified_status_id)">
-                                                <div v-if="expenseBy.verification_perion_expired">
-                                                    <small>Verification Period Expired</small>
-                                                </div>
-                                                <div v-else>
-                                                    <button type="button" class="btn btn-primary btn-sm" @click="verifyExpense(expenseBy,'verify')" :disabled="verifiyingId">
-                                                        Verify
-                                                        <span v-if="verifiyingId == expenseBy.id">...</span>
-                                                    </button>
-
-                                                    <button type="button" class="btn btn-danger btn-sm" @click="openRejectExpenseModal(expenseBy)" :disabled="verifiyingId">
-                                                        Reject
-                                                        <span v-if="verifiyingId == expenseBy.id">...</span>
-                                                    </button>
-                                                </div>
-                                            </div>
                                         </div>
 
                                         <div class="mt-2">
@@ -354,7 +323,7 @@ export default {
                 unverifiedCount: 0,
             },
             
-            endpoint: '/expenses-report',
+            endpoint: '/coordinator-report',
             items: [],
             companies: [],
             users: [],
@@ -413,7 +382,7 @@ export default {
                 start_date: this.filterData.start_date,
                 end_date: this.filterData.end_date
             }
-            axios.get(`${this.endpoint}/expenses/${user.id}`, {params: date_params})
+            axios.get(`${this.endpoint}/validated-expenses/${user.id}`, {params: date_params})
             .then(response => { 
                 this.expenseByTsr = response.data;
                 // this.date = created;
@@ -587,7 +556,7 @@ export default {
             return status_id == 0 || status_id == 2
         },
         fetchHistory(expense_id) {
-            axios.get(`${this.endpoint}/receipt-history/${expense_id}`)
+            axios.get(`/expenses-report/receipt-history/${expense_id}`)
             .then( res => {
                 this.isHistoryModalOpen = true;
                 this.expenseHistory = res.data;
@@ -597,7 +566,13 @@ export default {
             this.isHistoryModalOpen = !this.isHistoryModalOpen;
         },
         selectCompanyCoordinator(coor_id) {
+            //Reset coordinator value
+            this.filterData = _.omit(this.filterData, ['coordinator_id']);
+
+            //Fetch coordinator base on company
             this.getSelectOptions('coordinators', `/selection-coordinators/${coor_id}`)
+
+            //Trigger search
             this.searchKeyUp()
         }
     },

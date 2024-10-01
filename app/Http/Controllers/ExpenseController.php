@@ -247,7 +247,8 @@ class ExpenseController extends Controller
 
         return [
             'verified_amount' => $verified_amount,
-            'rejected_amount' => $rejected_amount
+            'rejected_amount' => $rejected_amount,
+            'total_amount' => $verified_amount + $rejected_amount,
         ];
      }
     
