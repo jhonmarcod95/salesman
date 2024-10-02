@@ -51,7 +51,9 @@ Vue.component('company-index', require('./components/Company/CompanyIndex.vue'))
 
 // Expenses
 Vue.component('expense-index', require('./components/Expense/ExpenseIndex.vue'));
+Vue.component('expense-coordinator-report-index', require('./components/Expense/ExpenseCoordinatorReport.vue'));
 // Vue.component('expense-report-index', require('./components/Expense/ExpenseReportIndex.vue'));
+
 
 
 Vue.component('expense-report-index', require('./components/Expense/ExpenseReportIndexV2.vue'));

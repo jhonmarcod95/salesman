@@ -7,6 +7,13 @@
                 Expenses Report
             </a>
         </div>
+        <div v-if="isItRole">
+            <a class="btn btn-sm mr-2" 
+                href="/coordinator-report" 
+                :class="pathName == '/coordinator-report' ? 'btn-default' : 'btn-outline-default'">
+                Coordinator Report
+            </a>
+        </div>
         <div v-if="salesHeadRole || isItRole">
             <a class="btn btn-sm mr-2" 
                 href="/dms-received-expense" 

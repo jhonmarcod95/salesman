@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Auth;
 use App\User;
 use App\Message;
+use App\Role;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -216,6 +217,10 @@ class UserController extends Controller
         return $role[0]->name;
     }
 
+    public function selectionRole() {
+        return Role::orderBy('name')->get(['id', 'name']);
+    }
+
     public function selectionUsers() {
         return $this->getUsersWithExpense();
     }
@@ -231,10 +236,29 @@ class UserController extends Controller
             });
         })
         ->UserWithExpense()
-        // ->whereHas('roles', function ($q) {
-        //     $q->whereIn('role_id', [4, 5, 6, 7, 8, 9, 10]);
-        // })
         ->orderBy('name', 'ASC')
         ->get();
+    }
+
+    public function selectionCoordinators($company_id) {
+        $coordinators = User::select('id', 'name')->with("roles", "companies")
+            ->when($company_id != 'all' && isset($company_id), function($query) use($company_id){
+                $query->whereHas("company", function ($q) use($company_id){
+                    $q->where("id", $company_id);
+                });
+            })
+            ->whereHas("roles", function ($q) {
+                $q->whereIn("slug", ["coordinator", "coordinator-2"]);
+            })
+            ->orderBy('name', 'ASC')
+            ->get();
+
+        return $coordinators->transform(function($item) {
+            // dd($item->company);
+            $data['id'] = $item->id;
+            $data['name'] = $item->name;
+            $data['company'] = $item->companies[0]->name;
+            return $data;
+        });
     }
 }

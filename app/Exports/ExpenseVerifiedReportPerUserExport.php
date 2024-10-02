@@ -66,7 +66,7 @@ class ExpenseVerifiedReportPerUserExport implements FromCollection, WithHeadings
         foreach ($users as $user) {
             $data = [];
             $data[] = $user->name;
-            $data[] = isset($this->company_id) ? $company->name : $user->companies[0]->name;
+            $data[] = isset($this->company_id) ? $company->name : $user->company;
             $user_data[] = $data;
         }
         

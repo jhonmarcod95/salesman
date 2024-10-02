@@ -247,7 +247,8 @@ class ExpenseController extends Controller
 
         return [
             'verified_amount' => $verified_amount,
-            'rejected_amount' => $rejected_amount
+            'rejected_amount' => $rejected_amount,
+            'total_amount' => $verified_amount + $rejected_amount,
         ];
      }
     
@@ -895,7 +896,7 @@ class ExpenseController extends Controller
         $rejected_id = null;
         $deducted_amount = null;
         $date = now();
-        $history_action = "View Receipt.";
+        $history_action = null;
         $history_detail = null;
 
         switch ($request->mode) {
@@ -936,7 +937,9 @@ class ExpenseController extends Controller
             'date_verified' => $date,
         ]);
 
-        $this->logHistory($expenseId, $history_action, $history_detail);
+        if (!empty($history_action)) {
+            $this->logHistory($expenseId, $history_action, $history_detail);
+        }
     }
 
     public function getExpenseRejectedRemarks() {
@@ -1249,7 +1252,7 @@ class ExpenseController extends Controller
         return Excel::download(new ExpenseDmsVerifiedReportPerBuExport($request), "$month_year DMS RECEIVED STATUS - as of $today.xlsx");
     }
 
-    function getWeekRangesOfMonthStartingMonday($month_year){
+    public function getWeekRangesOfMonthStartingMonday($month_year){
 
         $month_date = explode('-', $month_year);
         $year = $month_date[0];
