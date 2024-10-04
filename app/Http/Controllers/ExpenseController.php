@@ -24,6 +24,7 @@ use App\{
 use App\Exports\ExpenseVerifiedReportPerUserExport;
 use App\Exports\ExpenseVerifiedReportPerBuExport;
 use App\Exports\ExpenseDmsVerifiedReportPerBuExport;
+use App\Services\ExpenseService;
 use DateTime;
 use App\Rules\ExpenseDeductionRule;
 use Carbon\Carbon;
@@ -41,6 +42,13 @@ use ZipArchive;
 
 class ExpenseController extends Controller
 {
+
+    private $expense_service;
+    public function __construct(ExpenseService $expense_service)
+    {
+        $this->expense_service = $expense_service;
+    }
+
 
     /**
      * Display a listing of the resource.
@@ -154,7 +162,7 @@ class ExpenseController extends Controller
                     $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
                     $total_expenses           = $total_expenses + $expenses->totalExpenses;
 
-                    $verified = $this->computeVerifiedAndRejected($expenses->expensesModel);
+                    $verified = $this->expense_service->computeVerifiedAndRejected($expenses->expensesModel);
                     $verified_amount = $verified_amount + $verified['verified_amount'];
                     $rejected_amount = $rejected_amount + $verified['rejected_amount'];
                 }
@@ -1238,7 +1246,7 @@ class ExpenseController extends Controller
         $today = date_format(now(), "M-d-Y");
         $month_year = strtoupper(date('F Y', strtotime($request->month_year)));
         if($request->type == 'user') {
-            $date_range = $this->getWeekRangesOfMonthStartingMonday($request->month_year);
+            $date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday($request->month_year);
             return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "$month_year USER EXPENSE WEEKLY VERIFICATION STATUS REPORT - as of $today.xlsx");
         } else {
             $year = date("Y");
@@ -1251,9 +1259,9 @@ class ExpenseController extends Controller
         $month_year = strtoupper(date('F Y', strtotime($request->month_year)));
         return Excel::download(new ExpenseDmsVerifiedReportPerBuExport($request), "$month_year DMS RECEIVED STATUS - as of $today.xlsx");
     }
+    //====================================================================
 
     public function getWeekRangesOfMonthStartingMonday($month_year){
-
         $month_date = explode('-', $month_year);
         $year = $month_date[0];
         $month = $month_date[1];
@@ -1298,6 +1306,11 @@ class ExpenseController extends Controller
 
         return $weekRanges;
     }
+
+    //Rejected Expense ===================================================
+    public function rejectedExpenseIndex() {
+        return view('expense.index-rejected-report');
+    }
     //====================================================================
 
     public function getReceiptHistory($expense_id) {
@@ -1310,5 +1323,4 @@ class ExpenseController extends Controller
             return $data;
         });
     }
-
 }

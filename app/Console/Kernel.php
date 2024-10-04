@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
         Commands\GetCustomerOrder::class,
         Commands\SapCustomerCode::class,
         Commands\FetchHaciendaFromSap::class,
-        Commands\UpdateIODetails::class,
+        Commands\UpdateIODetails::class
     ];
 
     /**

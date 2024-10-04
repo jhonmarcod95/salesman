@@ -130,6 +130,11 @@
                                         <i class="ni ni-collection text-indigo"></i> Expense Report
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="nav-link" href="{{ url('/rejected-expenses-report') }}">
+                                        <i class="fa fa-window-close text-danger"></i> Rejected Expense Monitoring
+                                    </a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ url('/visited-customer') }}">
                                         <i class="ni ni-spaceship text-indigo"></i>Visited Customer
