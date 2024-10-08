@@ -6,6 +6,7 @@ use App\GlAccount;
 use App\Http\Controllers\APIController;
 use App\SalesmanInternalOrder;
 use App\SapServer;
+use App\CronLog;
 use App\SapUser;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -44,8 +45,7 @@ class UpdateIODetails extends Command
      */
     public function handle()
     {
-        //
-
+        CronLog::create(['name' => $this->signature]);
         $salesman_ios = SalesmanInternalOrder::get();
         foreach ($salesman_ios as $salesman_io){
 
@@ -66,10 +66,9 @@ class UpdateIODetails extends Command
             ], null);
 
             if ($io_detail){
-
                 $gl_account = str_pad($io_detail['O_GLACCOUNT'], '10', '0', STR_PAD_LEFT);
                 $gl_account_id = GlAccount::where('code', $gl_account)->pluck('id')->first();
-                $uom = $this->toUnconverted($io_detail['O_UNIT']);
+                $uom = $this->getSapUomValueConversion($io_detail['O_UNIT'],$sap_connection);
 
                 $update_io = SalesmanInternalOrder::find($salesman_io->id);
                 $update_io->gl_account_id = $gl_account_id;
@@ -80,16 +79,13 @@ class UpdateIODetails extends Command
 
     }
 
-    private function toUnconverted($uom){
-        if ($uom == 'DAY'){
-            $uom = 'TAG';
-        }
-        else if ($uom == 'D'){
-            $uom = '10';
-        }
-        else if ($uom == 'PC'){
-            $uom = 'ST';
-        }
-        return $uom;
+    /**
+     * Get UOM conversion in SAP
+     *
+     */
+    private function getSapUomValueConversion($uom,$sap_connection){
+        return APIController::executeSapFunction($sap_connection,'ZCONVERSION_EXIT_CUNIT_INPUT',[
+            'INPUT' => $uom
+        ],null);
     }
 }
