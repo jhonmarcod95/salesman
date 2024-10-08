@@ -8,6 +8,7 @@ use App\Http\Resources\TransportationResource;
 use App\RouteTransportation;
 use App\Transportation;
 use Illuminate\Support\Facades\Auth;
+use App\Expense;
 
 class RouteTransportationsController extends Controller
 {
@@ -43,6 +44,16 @@ class RouteTransportationsController extends Controller
             'to' => 'required',
             // 'fare' => 'required',
         ]);
+
+        // find if route has a image before adding recipt details
+        $fare_expense = Expense::where('id', $request->expense_id)->first();
+        if($fare_expense->attachment == "attachments/default.jpg") {
+            $this->validate($request,[
+                'receipt_image' => 'required'
+            ],[
+                'receipt_image.required' => "Please upload fare receipt photo first."
+            ]);
+        }
 
         // $routeTransportation =  = Auth::user()->routeTransportations()->create($request->all());
         $routeTransportation = new RouteTransportation;
