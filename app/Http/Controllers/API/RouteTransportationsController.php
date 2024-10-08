@@ -46,14 +46,14 @@ class RouteTransportationsController extends Controller
         ]);
 
         // find if route has a image before adding recipt details
-        $fare_expense = Expense::where('id', $request->expense_id)->first();
-        if($fare_expense->attachment == "attachments/default.jpg") {
-            $this->validate($request,[
-                'receipt_image' => 'required'
-            ],[
-                'receipt_image.required' => "Please upload fare receipt photo first."
-            ]);
-        }
+        // $fare_expense = Expense::where('id', $request->expense_id)->first();
+        // if($fare_expense->attachment == "attachments/default.jpg") {
+        //     $this->validate($request,[
+        //         'receipt_image' => 'required'
+        //     ],[
+        //         'receipt_image.required' => "Please upload fare receipt photo first."
+        //     ]);
+        // }
 
         // $routeTransportation =  = Auth::user()->routeTransportations()->create($request->all());
         $routeTransportation = new RouteTransportation;
