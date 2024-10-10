@@ -29,7 +29,7 @@ class MonthlyVerificationCapture extends Command
     /**
      * Initialization of Expense Service
      */
-    private $expense_service, $last_week_date_range;
+    private $expense_service, $last_week_date_range, $month_weekly_date_range, $is_ninth_of_temonth, $date_today, $date_last_month;
 
     /**
      * Create a new command instance.
@@ -40,7 +40,16 @@ class MonthlyVerificationCapture extends Command
     {
         parent::__construct();
         $this->expense_service = $expense_service;
+        $this->month_weekly_date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday(date("Y-m"));
         $this->last_week_date_range = $this->getLastWeekMonth();
+
+        $this->date_today = date('F Y');
+        $this->date_last_month = date("F Y", strtotime("first day of last month"));
+
+        $this->is_ninth_of_temonth = (now()->format('d') == '09') ? true : false;
+        $this->is_ninth_of_temonth = true;
+
+        $this->webexNotification();
     }
 
     /**
@@ -50,31 +59,23 @@ class MonthlyVerificationCapture extends Command
      */
     public function handle()
     {
-        $start = microtime(true);
-        // $this->webexNotification(1021);
         // return;
-
-        #==============================================================
-        #TODAY is MONDAY
-
-        #1. Check last weeks date.
-        //If last's week month is same as today, run only this month
-        //If last's week date is mixed, run last month's verified and last week's verified to current month
-
-        #2. Run webex notification function to user
-        //Loop month and get all rejected expense recorded for month
-        #==============================================================
-        // $last_month = date("Y-m", strtotime("first day of last month"));
-        //Define last month
-        $weekly_date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday(date("Y-m"));
+        $start = microtime(true);
 
         //Define month and year
         $month_year = explode(' ', date('F Y'));
         $month = $month_year[0];
         $year = $month_year[1];
 
+        //Get monthly verified entry ids
+        $monthlyExpenseIds = EmployeeMonthlyExpense::where(['month' => $month, 'year' => $year])->get(['id'])->pluck('id');
+        //Delete existing weekly verified data with month and year
+        EmployeeWeeklyExpense::whereIn('employee_monthly_expense_id', $monthlyExpenseIds)->forceDelete();
+        //Delete existing monthly verified data with month and year
+        EmployeeMonthlyExpense::where(['month' => $month, 'year' => $year])->forceDelete();
+
         $week_no = 1;
-        foreach($weekly_date_range as $date_range) {
+        foreach($this->month_weekly_date_range as $date_range) {
             $start_date = $date_range['start']. ' 00:00:01';
             $end_date = $date_range['end'] . ' 23:59:59';
 
@@ -96,21 +97,6 @@ class MonthlyVerificationCapture extends Command
                 $employee_monthly_expense_exists = EmployeeMonthlyExpense::where($parameter)->exists();
                 if($employee_monthly_expense_exists) {
                     $employee_monthly_expense = EmployeeMonthlyExpense::where($parameter)->first();
-                    
-                    //If week 1, reset all data (need to reset the data to store new updated data)
-                    if ($week_no == 1) {
-                        $employee_monthly_expense->update([
-                            'expense_count' => null,
-                            'verified_count' => null,
-                            'unverified_count' => null,
-                            'rejected_count' => null,
-                            'expense_amount' => null,
-                            'verified_amount' => null,
-                            'rejected_amount' => null,
-                            'balance_rejected_amount' => null
-                        ]);
-                    }
-
                 } else {
                     $employee_monthly_expense = EmployeeMonthlyExpense::create($parameter);
                 }
@@ -122,6 +108,7 @@ class MonthlyVerificationCapture extends Command
                 $rejected_expense_count = 0;
                 $total_expenses         = 0;
                 $verified_amount        = 0;
+                $unverified_amount      = 0;
                 $rejected_amount        = 0;
 
                 if (count($user->expensesEntries)) {
@@ -130,14 +117,18 @@ class MonthlyVerificationCapture extends Command
                         $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
                         $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
                         $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
-                        $rejected_expense_count   = $rejected_expense_count + ($expenses->rejected_expense_count + $unverified_expense_count);
-                        $total_expenses           = $total_expenses + $expenses->totalExpenses;
+                        $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
 
                         $verified = $this->expense_service->computeVerifiedAndRejected($expenses->expensesModel);
                         $total_expenses = $total_expenses + $verified['total_expense_amount'];
                         $verified_amount = $verified_amount + $verified['verified_amount'];
-                        $rejected_amount = $rejected_amount + ($verified['total_expense_amount'] - $verified['verified_amount']);
+                        $unverified_amount = $unverified_amount + $verified['unverified_amount'];
+                        $rejected_amount = $rejected_amount + $verified['rejected_amount'];
                     }
+
+                    // if($user->id == 62) {
+                    //     dd($user->expensesEntries, $rejected_expense_count, $unverified_expense_count, $expenses_model_count);
+                    // }
 
                     //Prepare weekly verified data
                     $employeeWeeklyExpenseData = [
@@ -148,9 +139,10 @@ class MonthlyVerificationCapture extends Command
                         'verified_count' => $verified_expense_count,
                         'unverified_count' => $unverified_expense_count,
                         'rejected_count' => $rejected_expense_count,
-                        'expense_amount' => $total_expenses,
-                        'verified_amount' => $verified_amount,
-                        'rejected_amount' => $rejected_amount
+                        'expense_amount' => (double) $total_expenses,
+                        'verified_amount' => (double) $verified_amount,
+                        'unverified_amount' => (double) $unverified_amount,
+                        'rejected_amount' => (double) $rejected_amount
                     ];
 
                     //Check if employee weekly expense exist
@@ -171,46 +163,217 @@ class MonthlyVerificationCapture extends Command
                         'unverified_count' => $employee_monthly_expense->unverified_count + $unverified_expense_count,
                         'rejected_count' => $employee_monthly_expense->rejected_count + $rejected_expense_count,
                         'expense_amount' => $employee_monthly_expense->expense_amount + $total_expenses,
-                        'verified_amount' => $employee_monthly_expense->verified_amount + $verified_amount,
-                        'rejected_amount' => $employee_monthly_expense->rejected_amount + $rejected_amount,
-                        'balance_rejected_amount' => $employee_monthly_expense->rejected_amount + $rejected_amount
+                        'verified_amount' => (double) $employee_monthly_expense->verified_amount + $verified_amount,
+                        'unverified_amount' => (double) $employee_monthly_expense->unverified_amount + $unverified_amount,
+                        'rejected_amount' => (double) $employee_monthly_expense->rejected_amount + $rejected_amount,
+                        'balance_rejected_amount' => (double) $employee_monthly_expense->rejected_amount + ($unverified_amount + $rejected_amount)
                     ]);
                 }
-                $this->webexNotification($user->id, $week_no);
             }
             $week_no++;
         }
+
+        //Send Webex notification
+        // $this->webexNotification();
 
         $end_time = (microtime(true) - $start) / 60;
         echo "finished with $end_time time.";
     }
 
-    public function webexNotification($user_id, $week_no) {
-        // dd($this->last_week_date_range, $user_id, $week_no);
-        foreach($this->last_week_date_range as $last_week) {
-            //Define month and year
-            $month_year = explode(' ', $last_week['month']);
-            $month = $month_year[0];
-            $year = $month_year[1];
+    public function webexNotification() {
 
-            //Get last months rejected expense
-            $employee_monthly_expense = EmployeeMonthlyExpense::where(['user_id' => $user_id, 'month' => $month, 'year' => $year])->first();
-            
-            if($employee_monthly_expense) {
-                if($employee_monthly_expense->rejected_count > 0) {
-                    // dd($employee_monthly_expense);
+        //Define month and year
+        $month_year = explode(' ', $this->date_today);
+        $month = $month_year[0];
+        $year = $month_year[1];
 
-                    if ($last_week['type'] == 'present_month') {
-                        $employee_weekly_expense = EmployeeWeeklyExpense::where(['employee_monthly_expense_id' => $employee_monthly_expense->id, 'week_no' => $week_no])->first();
+        //Get monthly verified entry user ids
+        $userMonthlyExpenseIds = EmployeeMonthlyExpense::where(['month' => $month, 'year' => $year])->get(['user_id'])->pluck('user_id');
 
-                        $message = "<b>Last Week's Expense:</b>: <br> 
-                                    October 13, 2024 - October 21, 2024
-                                    Rejected count: 5 receipts
-                                    Rejected amount: PHP 1,234.00   
-                                    ";
-                        dd($message);
+        foreach($userMonthlyExpenseIds as $user_id) {
+            //Define webex card array
+            $monthlyRejectedExpensesCard = [];
+            $lastWeekRejectedExpensesCard = [];
+
+            if ($this->is_ninth_of_temonth) { 
+                #Send Only last month summary if today is 9th day of the month
+                //Define month and year
+                $month_year = explode(' ', $this->date_last_month);
+                $month = $month_year[0];
+                $year = $month_year[1];
+                
+                //Get verification summary from last month's expenses
+                $employee_monthly_expense = EmployeeMonthlyExpense::where(['user_id' => $user_id, 'month' => $month, 'year' => $year])->first();
+
+                //Assign monthly rejected card
+                if ($employee_monthly_expense->rejected_count > 0 || $employee_monthly_expense->unverified_count > 0) {
+                    $monthlyRejectedExpensesCard = $this->formatMonthlyCard($employee_monthly_expense, $this->date_last_month);
+                } else {
+                    continue;
+                }
+            } else {
+                //Loop last week date range
+                foreach($this->last_week_date_range as $last_week) {
+                    // dd($this->last_week_date_range);
+                    //Define month and year
+                    $month_year = explode(' ', $last_week['month']);
+                    $month = $month_year[0];
+                    $year = $month_year[1];
+
+                    //Get last months rejected expense
+                    $employee_monthly_expense = EmployeeMonthlyExpense::where(['user_id' => $user_id, 'month' => $month, 'year' => $year])->first();
+                    
+                    if($employee_monthly_expense) {
+                        if($employee_monthly_expense->rejected_count > 0 || $employee_monthly_expense->unverified_count > 0) {
+
+                            //Set MOnthly rejected Card ===============
+                            $monthlyRejectedExpensesCard = array_merge($monthlyRejectedExpensesCard, $this->formatMonthlyCard($employee_monthly_expense, $last_week['month']));
+
+                            if ($last_week['type'] == 'present_month') {
+
+                                $employee_weekly_expense = EmployeeWeeklyExpense::where(['employee_monthly_expense_id' => $employee_monthly_expense->id, 'week_no' => $last_week['week_no']])->first();
+
+                                if($employee_weekly_expense) {
+                                    $range = date('F d Y', strtotime($last_week['range']['start'])) . " - " . date('F d Y', strtotime($last_week['range']['end']));
+                                    $rejected_count = $employee_weekly_expense->rejected_count;
+                                    $rejected_amount = number_format($employee_weekly_expense->rejected_amount, 2);
+                                    $unverified_count = $employee_weekly_expense->unverified_count;
+                                    $unverified_amount = number_format($employee_weekly_expense->unverified_amount, 2);
+
+                                    //Set Weekly rejected Card ===============
+                                    $lastWeekRejectedExpensesCard[] = [
+                                        "type" => "TextBlock",
+                                        "text" => "Last Week's Expense", //MONTH
+                                        "size" => "Default",
+                                        "weight" => "Bolder",
+                                        "wrap" => true,
+                                        "spacing" => "Large",
+                                        "horizontalAlignment" => "Left",
+                                        "maxLines" => 5
+                                    ];
+                                    $lastWeekRejectedExpensesCard[] = [
+                                        "type" => "TextBlock",
+                                        "text" => "$range", //Last Week Date Range
+                                        "size" => "Default",
+                                        "wrap" => true,
+                                        "spacing" => "None"
+                                    ];
+                                    $lastWeekRejectedExpensesCard[] = [
+                                        "type" => "TextBlock",
+                                        "text" => "Unverified count: $unverified_count receipts", //Unverified Count
+                                        "size" => "Default",
+                                        "wrap" => true,
+                                        "spacing" => "None"
+                                    ];
+                                    $lastWeekRejectedExpensesCard[] = [
+                                        "type" => "TextBlock",
+                                        "text" => "Unverified amount: PHP $unverified_amount", //Unverified Amount
+                                        "size" => "Default",
+                                        "wrap" => true,
+                                        "spacing" => "None"
+                                    ];
+                                    $lastWeekRejectedExpensesCard[] = [
+                                        "type" => "TextBlock",
+                                        "text" => "Rejected count: $rejected_count receipts", //Rejected Count
+                                        "size" => "Default",
+                                        "wrap" => true,
+                                        "spacing" => "None"
+                                    ];
+                                    $lastWeekRejectedExpensesCard[] = [
+                                        "type" => "TextBlock",
+                                        "text" => "Rejected amount: PHP $rejected_amount", //Rejected Amount
+                                        "size" => "Default",
+                                        "wrap" => true,
+                                        "spacing" => "None"
+                                    ];
+                                }
+                            }
+                        } else {
+                            continue;
+                        }
                     }
                 }
+            }
+
+            //Card header ===============
+            $user_name = (User::find($user_id))->name;
+            $cardHeader = [
+                [
+                    "type" => "TextBlock",
+                    "text" => "SALESFORCE APP ($user_name)",
+                    "size" => "Default",
+                    "color" => "Light"
+                ],
+                [
+                    "type" => "TextBlock",
+                    "text" => "REJECTED EXPENSES",
+                    "color" => "Attention",
+                    "weight" => "Bolder",
+                    "size" => "ExtraLarge",
+                    "spacing" => "None"
+                ],
+                [
+                    "type" => "TextBlock",
+                    "text" => "As of October 10, 2024 5:05PM",
+                    "isSubtle" => true,
+                    "spacing" => "None",
+                    "size" => "Small"
+                ],
+                [
+                    "type" => "Container",
+                    "spacing" => "Default",
+                    "separator" => true
+                ],
+            ];
+
+            //Deduction Notice ============
+            $noticeInfoCard = [];
+            if ($this->is_ninth_of_temonth) {
+                $noticeInfoCard = [
+                    [
+                        "type" => "TextBlock",
+                        "text" => "IMPORTANT: All rejected and unverified expenses will be subjected to ATD. Changes can be made if the coordinator validate expense until tomorrow.", //MONTH
+                        "size" => "Default",
+                        "weight" => "Default",
+                        "wrap" => true,
+                        "spacing" => "Large",
+                        "horizontalAlignment" => "Left",
+                        "maxLines" => 5
+                    ],
+                ];
+            }
+            //Merge all extracted data
+            $rejected_data_card = array_merge($monthlyRejectedExpensesCard, $lastWeekRejectedExpensesCard, $noticeInfoCard);
+
+            if(!empty($rejected_data_card)) {
+                //Merge all cards
+                $cardItems = array_merge($cardHeader, $rejected_data_card);
+                
+                $webexCard = [
+                    array(
+                        "contentType" => "application/vnd.microsoft.card.adaptive",
+                        "content" =>  [
+                            "type" => "AdaptiveCard",
+                            "body" => [
+                                [
+                                    "type" => "ColumnSet",
+                                    "columns" => [
+                                        [
+                                            "type" => "Column",
+                                            "width" => 2,
+                                            "items" => $cardItems
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            '$schema' => "http://adaptivecards.io/schemas/adaptive-card.json",
+                            "version" => "1.2"
+                        ]
+                    )
+                ];
+
+                //Send Webex Notif
+                ExpenseService::sendSingleWebexNotif('archeal.anie@lafilgroup.com', $webexCard);
             }
         }
     }
@@ -218,69 +381,129 @@ class MonthlyVerificationCapture extends Command
     public function getLastWeekMonth() {
         // Get today's date
         $today = new DateTime();
-        // $today = new DateTime("2024-09-16");
 
-        // Find the most recent Sunday (which could be today)
-        $lastSunday = clone $today;
-        if ($today->format('N') != 7) {
-            $lastSunday->modify('last sunday');
+        // Find the most recent Saturday
+        $lastSaturday = clone $today;
+        if ($today->format('N') != 6) {
+            $lastSaturday->modify('last saturday');
         }
 
-        // Find the Sunday from the previous week
-        $previousSunday = clone $lastSunday;
-        $previousSunday->modify('-7 days');
-
-        // Get week number forlast Sunday
-        $lastSundayWeekOfMonth = $this->getWeekOfMonth($lastSunday);
+        // Find the Sunday before the last Saturday
+        $lastSunday = clone $lastSaturday;
+        $lastSunday->modify('last sunday');
 
         //Define date array
         $lastWeekDates = [];
 
         // Check if the date range spans two different months
-        if ($previousSunday->format('m') !== $lastSunday->format('m')) {
+        if ($lastSunday->format('m') !== $lastSaturday->format('m')) {
             // Group by two months
-            $startMonth = $previousSunday->format('F Y');
-            $endMonth = $lastSunday->format('F Y');
+            $startMonth = $lastSunday->format('F Y');
+            $endMonth = $lastSaturday->format('F Y');
+            $startOfNextMonth = clone $lastSaturday;
+            $startOfNextMonth->modify('first day of this month');
 
             //Push month 1
             $dateRangeData = [];
             $dateRangeData['month'] = $startMonth;
-            $dateRangeData['range']['start_date'] = $previousSunday->format('Y-m-01');
-            $dateRangeData['range']['end_date'] = $previousSunday->format('Y-m-t 23:59:59');
+            $dateRangeData['range']['start'] = $lastSunday->format('Y-m-01');
+            $dateRangeData['range']['end'] = $lastSunday->format('Y-m-t');
             $dateRangeData['type'] = "last_month";
             $dateRangeData['week_no'] = null;
             $lastWeekDates[] = $dateRangeData;
 
+
             //Push month 2
             $dateRangeData = [];
             $dateRangeData['month'] = $endMonth;
-            $dateRangeData['range']['start_date'] = $lastSunday->format('Y-m-01');
-            $dateRangeData['range']['end_date'] = $lastSunday->format('Y-m-d 23:59:59');
-            $dateRangeData['week_no'] = $lastSundayWeekOfMonth;
+            $dateRangeData['range']['start'] = $startOfNextMonth->format('Y-m-d');
+            $dateRangeData['range']['end'] = $lastSaturday->format('Y-m-d');
+            $dateRangeData['week_no'] = 1;
             $dateRangeData['type'] = "present_month";
             $lastWeekDates[] = $dateRangeData;
         } else {
-            // Get month
+            // Single month range
             $month = $lastSunday->format('F Y');
-
-            $week_no = ($lastSundayWeekOfMonth - 1) == 0 ? 1 : ($lastSundayWeekOfMonth - 1);
 
             //Push single month range
             $dateRangeData = [];
             $dateRangeData['month'] = $month;
-            $dateRangeData['range']['start_date'] = $previousSunday->format('Y-m-d');
-            $dateRangeData['range']['end_date'] = $lastSunday->format('Y-m-d 23:59:59');
-            $dateRangeData['week_no'] = $week_no;
+            $dateRangeData['range']['start'] = $lastSunday->format('Y-m-d');
+            $dateRangeData['range']['end'] = $lastSaturday->format('Y-m-d');
+            $dateRangeData['week_no'] = $this->getWeekNo($this->month_weekly_date_range, $lastSunday->format('Y-m-d'), $lastSaturday->format('Y-m-d'));
             $dateRangeData['type'] = "present_month";
             $lastWeekDates[] = $dateRangeData;
         }
-
+        
         return $lastWeekDates;
+
     }
 
-    // Function to calculate week number of the month
-    public function getWeekOfMonth($date) {$firstDayOfMonth = clone $date;
+    // Function to calculate week number of the month based on date
+    public function getWeekOfMonth($date) {
+        $firstDayOfMonth = clone $date;
         $firstDayOfMonth->modify('first day of this month');
         return intval(ceil(($date->format('d') + $firstDayOfMonth->format('N') - 1) / 7));
+    }
+
+    public function getWeekNo($monthRange, $start, $end) {
+        $week_no = null;
+        foreach ($monthRange as $key => $range) {
+            if ($range['start'] === $start && $range['end'] === $end) {
+                $week_no = $key + 1;
+                break; // Stop after finding the first match
+            }
+        }
+        return $week_no;
+    }
+
+    public function formatMonthlyCard($data, $month_year) {
+        $expense_month = $month_year;
+        $rejected_count = $data->rejected_count;
+        $rejected_amount = number_format($data->rejected_amount, 2);
+        $unverified_count = $data->unverified_count;
+        $unverified_amount = number_format($data->unverified_amount, 2);
+        //Set MOnthly rejected Card ===============
+        $monthlyRejectedExpensesCard = [];
+        $monthlyRejectedExpensesCard[] = [
+            "type" => "TextBlock",
+            "text" => $expense_month, //MONTH
+            "size" => "Default",
+            "weight" => "Bolder",
+            "wrap" => true,
+            "spacing" => "Large",
+            "horizontalAlignment" => "Left",
+            "maxLines" => 5
+        ];
+        $monthlyRejectedExpensesCard[] = [
+            "type" => "TextBlock",
+            "text" => "Unverified count: $unverified_count receipts", //Unverified Count
+            "size" => "Default",
+            "wrap" => true,
+            "spacing" => "None"
+        ];
+        $monthlyRejectedExpensesCard[] = [
+            "type" => "TextBlock",
+            "text" => "Unverified amount: PHP $unverified_amount", //Unverified Amount
+            "size" => "Default",
+            "wrap" => true,
+            "spacing" => "None"
+        ];
+        $monthlyRejectedExpensesCard[] = [
+            "type" => "TextBlock",
+            "text" => "Rejected count: $rejected_count receipts", //Rejected Count
+            "size" => "Default",
+            "wrap" => true,
+            "spacing" => "None"
+        ];
+        $monthlyRejectedExpensesCard[] = [
+            "type" => "TextBlock",
+            "text" => "Rejected amount: PHP $rejected_amount", //Rejected Amount
+            "size" => "Default",
+            "wrap" => true,
+            "spacing" => "None"
+        ];
+
+        return $monthlyRejectedExpensesCard;
     }
 }

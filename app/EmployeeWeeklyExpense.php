@@ -16,6 +16,7 @@ class EmployeeWeeklyExpense extends Model
         'rejected_count',
         'expense_amount',
         'verified_amount',
+        'unverified_amount',
         'rejected_amount'
     ];
 

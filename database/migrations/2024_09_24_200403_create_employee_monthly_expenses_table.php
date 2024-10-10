@@ -24,6 +24,7 @@ class CreateEmployeeMonthlyExpensesTable extends Migration
             $table->integer('rejected_count')->nullable();
             $table->double('expense_amount', 8, 2)->nullable();
             $table->double('verified_amount', 8, 2)->nullable();
+            $table->double('unverified_amount', 8, 2)->nullable();
             $table->double('rejected_amount', 8, 2)->nullable();
             $table->double('balance_rejected_amount', 8, 2)->nullable();
             $table->dateTime('date_notified')->nullable();

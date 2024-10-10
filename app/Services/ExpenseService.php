@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
-use App\Expense;
 use App\User;
 use DateTime;
+use App\Expense;
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 
 class ExpenseService {
     /**
@@ -68,6 +70,7 @@ class ExpenseService {
     {
         $total_expense_amount = 0;
         $verified_amount = 0;
+        $unverified_amount = 0;
         $rejected_amount = 0;
         foreach ($expenses as $expense) {
             if ($expense->verified_status_id == 1) {
@@ -86,13 +89,50 @@ class ExpenseService {
                 }
             }
 
+            $unverified_statuses = [0,2];
+            if(in_array($expense->verified_status_id, $unverified_statuses)) {
+                $unverified_amount = $unverified_amount + $expense->amount;
+            }
+
             $total_expense_amount = $total_expense_amount + $expense->amount;
         }
 
         return [
             'total_expense_amount' => $total_expense_amount,
             'verified_amount' => $verified_amount,
+            'unverified_amount' => $unverified_amount,
             'rejected_amount' => $rejected_amount
         ];
     }
+
+    public static function sendSingleWebexNotif($email, $webexCard, $accessToken = false) {
+        try {
+            $httpClient = new Client();
+            $webexBotAPI = 'https://api.ciscospark.com/v1/messages';
+            $accessToken = env('WEBEX_NOTIF_ACCESS_TOKEN');
+
+            $body = [
+                'toPersonEmail' => $email,
+                "text" => "SALESFORCE APP",
+                "attachments" =>  $webexCard
+            ];
+
+            $httpClient->post(
+                $webexBotAPI,
+                [
+                    RequestOptions::BODY => json_encode($body),
+                    RequestOptions::HEADERS => [
+                        'Content-Type' => 'application/json',
+                        'Authorization' => "Bearer $accessToken"
+                    ]
+                ]
+            );
+            return true;
+        } catch (\Throwable $th) {
+            // Error::create(['message' => $th->getMessage(),'model' => 'App\DocumentInbuond','user_id' => Auth::user()->id]);
+            return false;
+        }
+    }
+
+
 }
