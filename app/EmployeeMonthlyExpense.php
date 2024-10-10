@@ -17,6 +17,7 @@ class EmployeeMonthlyExpense extends Model
         'expense_amount',
         'verified_amount',
         'rejected_amount',
+        'balance_rejected_amount',
         'date_notified',
         'is_acknowledge',
         'acknowledge_date'

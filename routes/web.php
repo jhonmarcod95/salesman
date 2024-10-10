@@ -208,8 +208,9 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     //Rejected Expense Monitoring
     Route::group(['prefix' => '/rejected-expenses-report'], function () {
-        Route::get('/', 'ExpenseController@rejectedExpenseIndex');
-        // Route::get('/all', 'ExpenseController@getExpensePerUser');
+        Route::get('/', 'RejectedExpenseController@index');
+        Route::get('/all', 'RejectedExpenseController@all');
+        Route::get('/month-expense', 'RejectedExpenseController@show');
         // Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
         // Route::get('/expenses/{user_id}',
         //     'ExpenseController@show2'

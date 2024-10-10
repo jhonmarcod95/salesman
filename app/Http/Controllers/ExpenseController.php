@@ -1307,12 +1307,6 @@ class ExpenseController extends Controller
         return $weekRanges;
     }
 
-    //Rejected Expense ===================================================
-    public function rejectedExpenseIndex() {
-        return view('expense.index-rejected-report');
-    }
-    //====================================================================
-
     public function getReceiptHistory($expense_id) {
         $expenseHistory = ExpenseHistory::where('expense_id', $expense_id)->with('user')->get();
         return $expenseHistory->transform(function($expense) {
