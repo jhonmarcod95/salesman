@@ -20,7 +20,8 @@ class Kernel extends ConsoleKernel
         Commands\GetCustomerOrder::class,
         Commands\SapCustomerCode::class,
         Commands\FetchHaciendaFromSap::class,
-        Commands\UpdateIODetails::class
+        Commands\UpdateIODetails::class,
+        Commands\MonthlyVerificationCapture::class
     ];
 
     /**
@@ -31,6 +32,26 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+
+        /* begin:: every monday *******************/
+
+        #Capture verified expenses
+        $schedule->command('capture:monthly-verified')
+            ->weekly()
+            ->mondays()
+            ->at('23:30');
+
+        /* end:: every monday *********************/
+
+        
+        /* begin:: every month *********************/
+
+        #Capture verified expenses
+        $schedule->command('capture:monthly-verified')
+            ->monthlyOn(9, '23:30');
+
+        /* end:: every month ***********************/
+
 
         /* begin:: every tuesday *******************/
 

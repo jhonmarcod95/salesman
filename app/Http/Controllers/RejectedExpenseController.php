@@ -24,23 +24,13 @@ class RejectedExpenseController extends Controller
                 'user:id,name,company_id',
                 'user.company:id,code,name'
             )
-            // ->whereHas('user', function($userQuery) use($company){
-            //     $userQuery
-            //     ->when(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap'), function ($q) {
-            //         $q->whereHas('companies', function ($companQuery) {
-            //             $companQuery->whereIn('company_id', Auth::user()->companies->pluck('id'));
-            //         });
-            //     }, function ($q) use ($company) {
-            //         $q->when($company, function ($query) use ($company) {
-            //             $query->whereHas('companies', function ($companQuery) use ($company) {
-            //                 $companQuery->where('company_id', $company);
-            //             });
-            //         });
-            //     });
-            // })
-            // ->where('user_id', Auth::user()->id)
-            ->where(['month' => $month, 'year' => $year])
-            ->where('rejected_count', '>', 0)
+            // ->where(['month' => $month, 'year' => $year])
+            ->where('user_id', Auth::user()->id)
+            ->where(function($query) {
+                $query->where('rejected_count', '>', 0)
+                    ->orWhere('unverified_count', '>', 0);
+            })
+            ->orderBy('created_at', 'DESC')
             ->paginate($request->limit);
 
         $monthly_validated->getCollection()->transform(function($item) {
@@ -50,6 +40,8 @@ class RejectedExpenseController extends Controller
             $data['name'] = $item->user->name;
             $data['company'] = isset($item->user->company) ? $item->user->company->name : '';
             $data['receipt_count'] = $item->expense_count;
+            $data['unverified_count'] = $item->unverified_count;
+            $data['unverified_amount'] = $item->unverified_amount;
             $data['rejected_count'] = $item->rejected_count;
             $data['rejected_amount'] = $item->rejected_amount;
             return $data;
@@ -76,7 +68,11 @@ class RejectedExpenseController extends Controller
             ->whereBetween('created_at', [$firstDay, $lastDay])
             ->where('user_id', $request->user_id)
             ->where('expenses_entry_id', '!=', 0)
-            ->where('verified_status_id', 3 /**Rejected */)
+            ->where(function($query) {
+                $query
+                ->where('verified_status_id', 3 /**Rejected */)
+                ->orWhereIn('verified_status_id', [0,2] /**Unverirfied */);
+            })
             ->get();
     }
 }
