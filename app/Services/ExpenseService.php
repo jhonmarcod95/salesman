@@ -105,11 +105,34 @@ class ExpenseService {
         ];
     }
 
-    public static function sendSingleWebexNotif($email, $webexCard, $accessToken = false) {
+    public static function sendSingleWebexNotif($email, $cardItems, $accessToken = false) {
         try {
             $httpClient = new Client();
             $webexBotAPI = 'https://api.ciscospark.com/v1/messages';
             $accessToken = env('WEBEX_NOTIF_ACCESS_TOKEN');
+
+            $webexCard = [
+                array(
+                    "contentType" => "application/vnd.microsoft.card.adaptive",
+                    "content" =>  [
+                        "type" => "AdaptiveCard",
+                        "body" => [
+                            [
+                                "type" => "ColumnSet",
+                                "columns" => [
+                                    [
+                                        "type" => "Column",
+                                        "width" => 2,
+                                        "items" => $cardItems
+                                    ]
+                                ]
+                            ]
+                        ],
+                        '$schema' => "http://adaptivecards.io/schemas/adaptive-card.json",
+                        "version" => "1.2"
+                    ]
+                )
+            ];
 
             $body = [
                 'toPersonEmail' => $email,

@@ -29,7 +29,12 @@ class MonthlyVerificationCapture extends Command
     /**
      * Initialization of Expense Service
      */
-    private $expense_service, $last_week_date_range, $month_weekly_date_range, $is_ninth_of_temonth, $date_today, $date_last_month;
+    private $expense_service, 
+            $last_week_date_range, 
+            $month_weekly_date_range, 
+            $is_ninth_of_temonth, 
+            $date_today, 
+            $date_last_month;
 
     /**
      * Create a new command instance.
@@ -40,14 +45,21 @@ class MonthlyVerificationCapture extends Command
     {
         parent::__construct();
         $this->expense_service = $expense_service;
-        $this->month_weekly_date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday(date("Y-m"));
+
+        //Get date range per week this month
+        $this->month_weekly_date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday(date("Y-m", strtotime("first day of last month")));
+
+        //Get daterange last week
         $this->last_week_date_range = $this->getLastWeekMonth();
 
-        $this->date_today = date('F Y');
+        //Initialize date today
+        $this->date_today = date('F Y', strtotime("first day of last month"));
+        
+        //Initialize last month
         $this->date_last_month = date("F Y", strtotime("first day of last month"));
 
+        //Initialize if today is 9th day of month
         $this->is_ninth_of_temonth = (now()->format('d') == '09') ? true : false;
-        // $this->is_ninth_of_temonth = true;
     }
 
     /**
@@ -61,7 +73,7 @@ class MonthlyVerificationCapture extends Command
         $start = microtime(true);
 
         //Define month and year
-        $month_year = explode(' ', date('F Y'));
+        $month_year = explode(' ', $this->date_today);
         $month = $month_year[0];
         $year = $month_year[1];
 
@@ -251,34 +263,38 @@ class MonthlyVerificationCapture extends Command
                                         "wrap" => true,
                                         "spacing" => "None"
                                     ];
-                                    $lastWeekRejectedExpensesCard[] = [
-                                        "type" => "TextBlock",
-                                        "text" => "Unverified count: $unverified_count receipts", //Unverified Count
-                                        "size" => "Default",
-                                        "wrap" => true,
-                                        "spacing" => "None"
-                                    ];
-                                    $lastWeekRejectedExpensesCard[] = [
-                                        "type" => "TextBlock",
-                                        "text" => "Unverified amount: PHP $unverified_amount", //Unverified Amount
-                                        "size" => "Default",
-                                        "wrap" => true,
-                                        "spacing" => "None"
-                                    ];
-                                    $lastWeekRejectedExpensesCard[] = [
-                                        "type" => "TextBlock",
-                                        "text" => "Rejected count: $rejected_count receipts", //Rejected Count
-                                        "size" => "Default",
-                                        "wrap" => true,
-                                        "spacing" => "None"
-                                    ];
-                                    $lastWeekRejectedExpensesCard[] = [
-                                        "type" => "TextBlock",
-                                        "text" => "Rejected amount: PHP $rejected_amount", //Rejected Amount
-                                        "size" => "Default",
-                                        "wrap" => true,
-                                        "spacing" => "None"
-                                    ];
+                                    if($unverified_count > 0) {
+                                        $lastWeekRejectedExpensesCard[] = [
+                                            "type" => "TextBlock",
+                                            "text" => "Unverified count: $unverified_count receipts", //Unverified Count
+                                            "size" => "Default",
+                                            "wrap" => true,
+                                            "spacing" => "None"
+                                        ];
+                                        $lastWeekRejectedExpensesCard[] = [
+                                            "type" => "TextBlock",
+                                            "text" => "Unverified amount: PHP $unverified_amount", //Unverified Amount
+                                            "size" => "Default",
+                                            "wrap" => true,
+                                            "spacing" => "None"
+                                        ];
+                                    }
+                                    if($rejected_count > 0) {
+                                        $lastWeekRejectedExpensesCard[] = [
+                                            "type" => "TextBlock",
+                                            "text" => "Rejected count: $rejected_count receipts", //Rejected Count
+                                            "size" => "Default",
+                                            "wrap" => true,
+                                            "spacing" => "None"
+                                        ];
+                                        $lastWeekRejectedExpensesCard[] = [
+                                            "type" => "TextBlock",
+                                            "text" => "Rejected amount: PHP $rejected_amount", //Rejected Amount
+                                            "size" => "Default",
+                                            "wrap" => true,
+                                            "spacing" => "None"
+                                        ];
+                                    }
                                 }
                             }
                         } else {
@@ -289,17 +305,17 @@ class MonthlyVerificationCapture extends Command
             }
 
             //Card header ===============
-            $user_name = (User::find($user_id))->name;
+            $user = User::find($user_id);
             $cardHeader = [
                 [
                     "type" => "TextBlock",
-                    "text" => "SALESFORCE APP ($user_name)",
+                    "text" => "SALESFORCE APP ($user->name)",
                     "size" => "Default",
                     "color" => "Light"
                 ],
                 [
                     "type" => "TextBlock",
-                    "text" => "REJECTED EXPENSES",
+                    "text" => "ATD EXPENSES",
                     "color" => "Attention",
                     "weight" => "Bolder",
                     "size" => "ExtraLarge",
@@ -335,38 +351,17 @@ class MonthlyVerificationCapture extends Command
                     ],
                 ];
             }
+
             //Merge all extracted data
             $rejected_data_card = array_merge($monthlyRejectedExpensesCard, $lastWeekRejectedExpensesCard, $noticeInfoCard);
 
             if(!empty($rejected_data_card)) {
                 //Merge all cards
                 $cardItems = array_merge($cardHeader, $rejected_data_card);
-                
-                $webexCard = [
-                    array(
-                        "contentType" => "application/vnd.microsoft.card.adaptive",
-                        "content" =>  [
-                            "type" => "AdaptiveCard",
-                            "body" => [
-                                [
-                                    "type" => "ColumnSet",
-                                    "columns" => [
-                                        [
-                                            "type" => "Column",
-                                            "width" => 2,
-                                            "items" => $cardItems
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            '$schema' => "http://adaptivecards.io/schemas/adaptive-card.json",
-                            "version" => "1.2"
-                        ]
-                    )
-                ];
 
                 //Send Webex Notif
-                ExpenseService::sendSingleWebexNotif('demetrio.viray@lafilgroup.com', $webexCard);
+                ExpenseService::sendSingleWebexNotif($user->email, $cardItems);
+                // ExpenseService::sendSingleWebexNotif('archeal.anie@lafilgroup.com', $cardItems);
             }
         }
     }
@@ -468,34 +463,38 @@ class MonthlyVerificationCapture extends Command
             "horizontalAlignment" => "Left",
             "maxLines" => 5
         ];
-        $monthlyRejectedExpensesCard[] = [
-            "type" => "TextBlock",
-            "text" => "Unverified count: $unverified_count receipts", //Unverified Count
-            "size" => "Default",
-            "wrap" => true,
-            "spacing" => "None"
-        ];
-        $monthlyRejectedExpensesCard[] = [
-            "type" => "TextBlock",
-            "text" => "Unverified amount: PHP $unverified_amount", //Unverified Amount
-            "size" => "Default",
-            "wrap" => true,
-            "spacing" => "None"
-        ];
-        $monthlyRejectedExpensesCard[] = [
-            "type" => "TextBlock",
-            "text" => "Rejected count: $rejected_count receipts", //Rejected Count
-            "size" => "Default",
-            "wrap" => true,
-            "spacing" => "None"
-        ];
-        $monthlyRejectedExpensesCard[] = [
-            "type" => "TextBlock",
-            "text" => "Rejected amount: PHP $rejected_amount", //Rejected Amount
-            "size" => "Default",
-            "wrap" => true,
-            "spacing" => "None"
-        ];
+        if($unverified_count) {
+            $monthlyRejectedExpensesCard[] = [
+                "type" => "TextBlock",
+                "text" => "Unverified count: $unverified_count receipts", //Unverified Count
+                "size" => "Default",
+                "wrap" => true,
+                "spacing" => "None"
+            ];
+            $monthlyRejectedExpensesCard[] = [
+                "type" => "TextBlock",
+                "text" => "Unverified amount: PHP $unverified_amount", //Unverified Amount
+                "size" => "Default",
+                "wrap" => true,
+                "spacing" => "None"
+            ];
+        }
+        if($rejected_count) {
+            $monthlyRejectedExpensesCard[] = [
+                "type" => "TextBlock",
+                "text" => "Rejected count: $rejected_count receipts", //Rejected Count
+                "size" => "Default",
+                "wrap" => true,
+                "spacing" => "None"
+            ];
+            $monthlyRejectedExpensesCard[] = [
+                "type" => "TextBlock",
+                "text" => "Rejected amount: PHP $rejected_amount", //Rejected Amount
+                "size" => "Default",
+                "wrap" => true,
+                "spacing" => "None"
+            ];
+        }
 
         return $monthlyRejectedExpensesCard;
     }

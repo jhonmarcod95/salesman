@@ -67,8 +67,8 @@
                                     <th scope="col">User</th>
                                     <th scope="col">Month Year</th>
                                     <th scope="col">Receipt Count</th>
-                                    <th scope="col">Rejected Count</th>
-                                    <th scope="col">Rejected Amount</th>
+                                    <th scope="col">Rejected</th>
+                                    <th scope="col">Unverified</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -77,7 +77,7 @@
                                     </tr>
                                     <tr v-else v-for="(user, e) in items" v-bind:key="e">
                                         <td class="text-right" v-if="userLevel != 5">
-                                            <button v-if="user.rejected_count" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(user)">View</button>
+                                            <button v-if="hsRejectedExpense(user)" class="btn btn-sm text-black-50" @click="fetchExpenseByTsr(user)">View</button>
                                         </td>
                                         <td v-else></td>
                                         <td>
@@ -86,8 +86,14 @@
                                         </td>
                                         <td>{{ user.month_year }}</td>
                                         <td>{{ user.receipt_count }}</td>
-                                        <td>{{ user.rejected_count }}</td>
-                                        <td>PHP {{ user.rejected_amount | _amount }}</td>
+                                        <td>
+                                            <div>Rejected: {{ user.rejected_count }}</div>
+                                            <div>Amount: PHP {{ user.rejected_amount | _amount }}</div>
+                                        </td>
+                                        <td>
+                                            <div>Unverified: {{ user.unverified_count }}</div>
+                                            <div>Amount: PHP {{ user.unverified_amount | _amount }}</div>
+                                        </td>
                                     </tr>
                                     <tr v-if="isEmpty(items) && !isProcessing">
                                         <td>No data available in the table</td>
@@ -172,12 +178,12 @@
                                             </div>
                                         </div>
 
-                                        <div v-if="!isEmpty(expenseBy.dms_reference)">
+                                        <!-- <div v-if="!isEmpty(expenseBy.dms_reference)"> -->
                                             <div v-if="isUnverified(expenseBy.verified_status_id)">
                                                 <em>Did Not Verified</em>
                                             </div>
-                                            <div><small><em>-DMS Received-</em></small></div>
-                                        </div>
+                                            <!-- <div><small><em>-DMS Received-</em></small></div> -->
+                                        <!-- </div> -->
 
                                         <div class="mt-2">
                                             <a href="javascript:;" v-if="expenseBy.history_count" @click="fetchHistory(expenseBy.id)">History</a>
@@ -425,6 +431,9 @@ export default {
         },
         closeHistoryModal() {
             this.isHistoryModalOpen = !this.isHistoryModalOpen;
+        },
+        hsRejectedExpense(user) {
+            return user.unverified_amount > 0 || user.rejected_count > 0;
         }
     },
     computed:{
