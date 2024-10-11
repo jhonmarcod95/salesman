@@ -47,13 +47,13 @@ class MonthlyVerificationCapture extends Command
         $this->expense_service = $expense_service;
 
         //Get date range per week this month
-        $this->month_weekly_date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday(date("Y-m", strtotime("first day of last month")));
+        $this->month_weekly_date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday(date("Y-m"));
 
         //Get daterange last week
         $this->last_week_date_range = $this->getLastWeekMonth();
 
         //Initialize date today
-        $this->date_today = date('F Y', strtotime("first day of last month"));
+        $this->date_today = date('F Y');
         
         //Initialize last month
         $this->date_last_month = date("F Y", strtotime("first day of last month"));
@@ -172,7 +172,7 @@ class MonthlyVerificationCapture extends Command
                         'verified_amount' => (double) $employee_monthly_expense->verified_amount + $verified_amount,
                         'unverified_amount' => (double) $employee_monthly_expense->unverified_amount + $unverified_amount,
                         'rejected_amount' => (double) $employee_monthly_expense->rejected_amount + $rejected_amount,
-                        'balance_rejected_amount' => (double) $employee_monthly_expense->rejected_amount + ($unverified_amount + $rejected_amount)
+                        'balance_rejected_amount' => (double) $employee_monthly_expense->balance_rejected_amount + ($unverified_amount + $rejected_amount)
                     ]);
                 }
             }
