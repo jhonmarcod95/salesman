@@ -17,7 +17,9 @@ use App\{CronLog,
     Payment,
     PaymentHeader,
     PaymentHeaderError,
-    ExpenseMonthlyDmsReceive};
+    ExpenseMonthlyDmsReceive,
+    ExpenseDeduction
+};
 use Illuminate\Support\Facades\Storage;
 
 class PaymentAutoPosting extends Command
@@ -105,18 +107,21 @@ class PaymentAutoPosting extends Command
             $baseline_date = '';
             foreach($expense as $key => $e){
                 $month = date('n', strtotime($e->created_at));
-                //Group entries by month
-                if (!isset($groupedArrayExpenses[$month])) {
-                    $groupedArrayExpenses[$month][0] = $e;
-                }else{
-                    $groupedArrayExpenses[$month][$key] = $e;
-                }
-                // Get baseline date
-                if (!$baseline_date) { // set date first to  $baseline_date
-                    $baseline_date = $e->created_at;
-                }else{
-                    if($baseline_date->greaterThan($e->created_at)){ // compare $baseline_date to current created_at to get most recent date
+                // Check if user has pending amount for deduction
+                if($this->checkPendingAmountForDeduction($e)){
+                    //Group entries by month
+                    if (!isset($groupedArrayExpenses[$month])) {
+                        $groupedArrayExpenses[$month][0] = $e;
+                    }else{
+                        $groupedArrayExpenses[$month][$key] = $e;
+                    }
+                    // Get baseline date
+                    if (!$baseline_date) { // set date first to  $baseline_date
                         $baseline_date = $e->created_at;
+                    }else{
+                        if($baseline_date->greaterThan($e->created_at)){ // compare $baseline_date to current created_at to get most recent date
+                            $baseline_date = $e->created_at;
+                        }
                     }
                 }
             }
@@ -896,5 +901,58 @@ class PaymentAutoPosting extends Command
                 'expense_grouping' => $posting_date->format('y-m-d').'+'.$grouped_expenses[0]->user_id.'+'.$index,
                 'status_id' => 2
             ]);
+    }
+
+    /**
+     *  Check if user has pending amount for deduction
+     *
+     */
+    public function checkPendingAmountForDeduction($expense){
+        if(intval(Carbon::now()->format('d')) < 11){    
+            $month = Carbon::parse($expense->created_at)->format('F');
+            $year = Carbon::parse($expense->created_at)->format('Y');
+
+            $monthly_expenses = EmployeeMonthlyExpense::where('user_id',$expense->user->id)
+                ->where('balance_rejected_amount','>',0)
+                ->where('month','!=',$month)
+                ->where('year','!=',$year)
+                ->get();
+            
+            if($monthly_expenses->isNotEmpty()){
+                $expense_amount = $expense->amount;
+                foreach($monthly_expenses as $monthly_expense){
+                    if($expense_amount > 0){
+                        $balance_rejected_amount = $monthly_expense->balance_rejected_amount;
+                        $to_amount = 0;
+                        $deducted_amount = $balance_rejected_amount;
+
+                        if($balance_rejected_amount > $expense_amount){
+                            $to_amount = $balance_rejected_amount - $expense_amount;
+                            $deducted_amount = $balance_rejected_amount - $to_amount;
+                        }
+
+                        ExpenseDeduction::create([
+                            'expense_id' => $expense->id,
+                            'employee_monthly_expense_id' => $monthly_expense->id,
+                            'balance_from_amount' => $balance_rejected_amount,
+                            'balance_to_amount' => $to_amount,
+                            'balance_deducted_amount' => $deducted_amount,
+                            'expense_from_amount' => $expense_amount,
+                            'expense_to_amount' => $expense_amount = ($expense_amount - $deducted_amount)
+                        ]);
+
+                        $monthly_expense->update([
+                            'balance_rejected_amount' => $to_amount
+                        ]);
+
+                        // Return expense 
+                        // Change status to deducted for 0 amount
+                    }
+                }
+                return $expense_amount > 0 ? true : false;
+            }    
+            return true;
+        }
+        return true;
     }
 }
