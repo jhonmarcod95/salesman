@@ -61,13 +61,37 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-3">
                                             <label class="checkbox form-control-label">
                                                 <input type="checkbox" v-model="user[0].is_expense_approver"/>
                                                 <span></span>
                                                 Expense Verifier
                                             </label>
                                             <span class="text-danger" v-if="errors.is_expense_approver">{{ errors.is_expense_approver[0] }}</span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="checkbox form-control-label">
+                                                <input type="checkbox" v-model="user[0].is_act_user"/>
+                                                <span></span>
+                                                ACT User
+                                            </label>
+                                            <span class="text-danger" v-if="errors.is_act_user">{{ errors.is_act_user[0] }}</span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="checkbox form-control-label">
+                                                <input type="checkbox" v-model="user[0].is_sales"/>
+                                                <span></span>
+                                                Sales User
+                                            </label>
+                                            <span class="text-danger" v-if="errors.is_sales">{{ errors.is_sales[0] }}</span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="checkbox form-control-label">
+                                                <input type="checkbox" v-model="user[0].access_dms_received"/>
+                                                <span></span>
+                                                Access DMS Received Page
+                                            </label>
+                                            <span class="text-danger" v-if="errors.access_dms_received">{{ errors.access_dms_received[0] }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -154,7 +178,10 @@ export default {
                 email: user.email,
                 role: user.roles[0].id,
                 company: comapanyids,
-                is_expense_approver: user.is_expense_approver
+                is_expense_approver: user.is_expense_approver,
+                is_act_user: user.is_act_user,
+                is_sales: user.is_sales,
+                access_dms_received: user.access_dms_received
             })
             .then(response => {
                 window.location.href = response.data.redirect;

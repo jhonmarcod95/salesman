@@ -51,8 +51,13 @@ Vue.component('company-index', require('./components/Company/CompanyIndex.vue'))
 
 // Expenses
 Vue.component('expense-index', require('./components/Expense/ExpenseIndex.vue'));
-Vue.component('expense-report-index', require('./components/Expense/ExpenseReportIndex.vue'));
+Vue.component('expense-coordinator-report-index', require('./components/Expense/ExpenseCoordinatorReport.vue'));
+
+
+
+Vue.component('expense-report-index', require('./components/Expense/ExpenseReportIndexV2.vue'));
 Vue.component('expense-submitted-index', require('./components/Expense/ExpenseSubmittedIndex.vue'));
+Vue.component('rejected-expense-report-index', require('./components/Expense/RejectedExpenseReportIndex.vue'));
 
 Vue.component('historical-expense-index', require('./components/Expense/HistoricalExpense.vue'));
 
@@ -131,11 +136,15 @@ Vue.component('aapc-farmer-create', require('./components/AapcFarmer/AapcFarmerC
 
 Vue.component('aapc-farmer-index', require('./components/AapcFarmer/AapcFarmerIndex.vue'));
 
+// Authority To Deduct
+Vue.component('authority-to-deduct-index', require('./components/AuthorityToDeduct/AuthorityToDeductIndex.vue'));
+
 //Common
 Vue.component('table-pagination', require('./components/Common/TablePagination.vue'));
 Vue.component('app-block-ui', require('./components/Common/BlockUi.vue'));
 Vue.component('app-select', require('./components/Common/Select2.vue'));
 Vue.component('error-messages', require('./components/Common/ErrorMessage.vue'));
+Vue.component('expense-report-nav', require('./components/Common/ExpenseReportNav.vue'));
 
 const app = new Vue({
     el: '#app',

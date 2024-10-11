@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Auth;
 use App\User;
 use App\Message;
+use App\Role;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -141,6 +142,9 @@ class UserController extends Controller
         $user->name = $request->name;
         $user->email= $request->email;
         $user->is_expense_approver= $request->is_expense_approver;
+        $user->is_act_user= $request->is_act_user;
+        $user->is_sales= $request->is_sales;
+        $user->access_dms_received= $request->access_dms_received;
 
         if($user->save()){
             // Assigning of role
@@ -213,13 +217,48 @@ class UserController extends Controller
         return $role[0]->name;
     }
 
+    public function selectionRole() {
+        return Role::orderBy('name')->get(['id', 'name']);
+    }
+
     public function selectionUsers() {
-        return User::select(['id','name'])->whereHas('companies', function ($q) {
-            if(!Auth::user()->hasRole('it')) {
-                $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
-            }
+        return $this->getUsersWithExpense();
+    }
+
+    public function getUsersWithExpense($company_id = null) {
+        return User::select(['id', 'name'])->whereHas('companies', function ($q) use($company_id){
+            $q->when($company_id, function($companyQuery) use($company_id) {
+                $companyQuery->where('company_id', $company_id);
+            }, function($q) {
+                if (!Auth::user()->hasRole('it')) {
+                    $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+                }
+            });
         })
+        ->UserWithExpense()
         ->orderBy('name', 'ASC')
         ->get();
+    }
+
+    public function selectionCoordinators($company_id) {
+        $coordinators = User::select('id', 'name')->with("roles", "companies")
+            ->when($company_id != 'all' && isset($company_id), function($query) use($company_id){
+                $query->whereHas("company", function ($q) use($company_id){
+                    $q->where("id", $company_id);
+                });
+            })
+            ->whereHas("roles", function ($q) {
+                $q->whereIn("slug", ["coordinator", "coordinator-2"]);
+            })
+            ->orderBy('name', 'ASC')
+            ->get();
+
+        return $coordinators->transform(function($item) {
+            // dd($item->company);
+            $data['id'] = $item->id;
+            $data['name'] = $item->name;
+            $data['company'] = $item->companies[0]->name;
+            return $data;
+        });
     }
 }

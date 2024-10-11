@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
         Commands\GetCustomerOrder::class,
         Commands\SapCustomerCode::class,
         Commands\FetchHaciendaFromSap::class,
-        Commands\UpdateIODetails::class,
+        Commands\UpdateIODetails::class
     ];
 
     /**
@@ -59,13 +59,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('payment:autocv')
             ->weekly()
             ->tuesdays()
-            ->at('00:30');
+            ->at('01:00');
 
         // auto check
         $schedule->command('payment:autocheck')
             ->weekly()
             ->tuesdays()
-            ->at('00:35');
+            ->at('01:15');
 
         /* end:: every tuesday **********************/
 

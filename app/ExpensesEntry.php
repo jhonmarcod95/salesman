@@ -49,4 +49,30 @@ class ExpensesEntry extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function scopeExpensePerMonth($query, $start_date, $last_date) {
+
+        return $query
+        ->whereHas('expensesModel', function ($expenseQuery) use ($start_date, $last_date) {
+                $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
+        })
+        ->with(['expensesModel' => function ($expenseQuery) use ($start_date, $last_date) {
+            $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
+        }])
+        ->withCount(['verifiedExpense' => function ($expenseQuery) use ($start_date, $last_date) {
+            $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
+        }])
+        ->withCount(['unverifiedExpense' => function ($expenseQuery) use ($start_date, $last_date) {
+            $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
+        }])
+        ->withCount(['rejectedExpense' => function ($expenseQuery) use ($start_date, $last_date) {
+            $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
+        }])
+        ->withCount(['pendingExpense' => function ($expenseQuery) use ($start_date, $last_date) {
+            $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
+        }])
+        ->withCount(['expensesModel' => function ($expenseQuery) use ($start_date, $last_date) {
+            $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
+        }]);
+    }
+
 }

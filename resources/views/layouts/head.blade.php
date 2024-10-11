@@ -36,6 +36,9 @@
 <!-- Mapbox GL DRAW CSS -->
 <link rel='stylesheet' href="{{ url('css/mapbox-gl-draw.css') }}" type='text/css'/>
 
+{{-- <link href='/public/css/all.css' rel='stylesheet' /> --}}
+<link href="{{ asset('/css/all.css') . '?v=' . filemtime(base_path() . '/public/css/all.css') }}" rel="stylesheet" type="text/css">
+
 
 {{-- Loading Screen --}}
 <style>

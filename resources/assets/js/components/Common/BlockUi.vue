@@ -6,7 +6,8 @@
             align-items: center;
             display: flex;
             justify-content: center;
-            color: white;"
+            color: white;
+            z-index: 1;"
         >
         <span class="py-1 px-3 bg-dark rounded">
             <i class="fa fa-hourglass-start mr-2" aria-hidden="true"></i>

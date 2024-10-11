@@ -21,6 +21,13 @@ use GuzzleHttp\Exception\BadResponseException;
 //});
 Route::get('/manualInsert/{tsrId}', 'TsrController@manuallyInsertUser');
 
+
+//Authority to deduct
+Route::group(['prefix' => 'authority-to-deduct'], function() {
+    Route::get('/', 'AuthorityToDeductController@index' );
+    Route::post('/authenticate', 'AuthorityToDeductController@verifyUserCredential' );
+});
+
 Auth::routes();
 
 Route::get('/', 'HomeController@index')->name('home');
@@ -63,7 +70,7 @@ Route::post('surveys/display','SurveysController@dataQuestionnaire');
 Route::post('surveys/edit-questionnaire','SurveysController@editQuestionnaire');
 
 // Admin Routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|approver|tax|finance-gl']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|approver|tax|finance-gl']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
@@ -106,7 +113,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::delete('/user/{id}', 'UserController@destroy');
     //selection user
     Route::get('/selection-users', 'UserController@selectionUsers');
-
+    Route::get('/selection-coordinators/{company_id}', 'UserController@selectionCoordinators');
+    Route::get('/selection-roles', 'UserController@selectionRole');
 
     Route::get('/selection-users/show/{id}', 'UserController@show');
     Route::patch('/users/update/{id}', 'UserController@update');
@@ -160,7 +168,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Get all expenses
     Route::get('/expenses-all', 'ExpenseController@indexExpenseData');
     // Show Expense Report page
-    Route::get('/expenses-report', 'ExpenseController@index');
+    // Route::get('/expenses-report', 'ExpenseController@index');
 
     Route::get('/historical-expenses-report', 'ExpenseController@historicalExpenseReport');
     Route::get('/historical-expenses-report-data', 'ExpenseController@historicalExpenseReportData');
@@ -174,6 +182,40 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
         Route::get('/', 'ExpenseController@dmsReceivedReportIndex');
         Route::get('/all', 'ExpenseController@dmsReceivedReportAll');
         Route::get('/not-received-expense', 'ExpenseController@dmsPendingReceivedReportAll');
+        Route::get('/no-claimed-expenses', 'ExpenseController@noClaimedExpenses');
+        Route::get('/export', 'ExpenseController@exportDmsReport');
+    });
+
+    //Expense v2
+    Route::group(['prefix' => '/expenses-report'], function() {
+        Route::get('/', 'ExpenseController@index');
+        Route::get('/all', 'ExpenseController@getExpensePerUser');
+        Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
+        Route::get('/expenses/{user_id}', 'ExpenseController@show2');
+        Route::get('/export', 'ExpenseController@export');
+        Route::get('/receipt-history/{rexpense_id}', 'ExpenseController@getReceiptHistory');
+    });
+
+
+    //Coordinator Report
+    Route::group(['prefix' => '/coordinator-report'], function () {
+        Route::get('/', 'CoordinatorReportController@index');
+        Route::get('/all', 'CoordinatorReportController@all');
+        Route::get('/verified-stat', 'CoordinatorReportController@getValidatedExpenseStat');
+        Route::get('/validated-expenses/{user_id}', 'CoordinatorReportController@show');
+        Route::get('/export', 'CoordinatorReportController@export');
+    });
+
+    //Rejected Expense Monitoring
+    Route::group(['prefix' => '/rejected-expenses-report'], function () {
+        Route::get('/', 'RejectedExpenseController@index');
+        Route::get('/all', 'RejectedExpenseController@all');
+        Route::get('/month-expense', 'RejectedExpenseController@show');
+        // Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
+        // Route::get('/expenses/{user_id}',
+        //     'ExpenseController@show2'
+        // );
+        // Route::get('/export', 'ExpenseController@export');
     });
 
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
@@ -182,12 +224,10 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     //Checker
     Route::get('/expense-io-checker', 'ExpenseController@expenseIOChecker');
 
-    // Fetch expense report by date
-    Route::post('/expense-report-bydate', 'ExpenseController@generateBydate');
     // Fetch expense report by date per user
     Route::get('/expense-report-bydate-peruser/{ids}', 'ExpenseController@generateBydatePerUser');
     // Fetch expense report by date
-    Route::get('/expense-report/{id}', 'ExpenseController@show');
+    Route::get('/expense-report/{id}', 'ExpenseController@show'); //TODO: Remove
     // Add Expenses
     Route::post('/expenses', 'ExpenseController@store');
     // Update Expenses
@@ -233,13 +273,13 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
 });
 
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|tsr']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|tsr']], function () {
     Route::get('/surveys/home','SurveysController@surveyHome');
 });
 
 
 // For AAPC Survey
-Route::group(['middleware' => ['auth', 'role:it|tsr|coordinator|manager|vp|president']], function () {
+Route::group(['middleware' => ['auth', 'role:it|tsr|coordinator|coordinator-2|manager|vp|president']], function () {
 
     Route::get('/aapc-farmer','AapcFarmerMeetingController@index');
     Route::get('/aapc-farmer/create','AapcFarmerMeetingController@create');
@@ -283,7 +323,7 @@ Route::group(['middleware' => ['auth', 'role:ap|tax|audit|finance-gl']], functio
 });
 
 // Hr routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit|finance-gl']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|hr|tax|audit|finance-gl']], function () {
     // Attendance Report
     Route::get('/attendance-report', 'AttendanceReportController@index')->name('report_list');
     // fetch all Attendance Report
@@ -312,7 +352,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 });
 
 //Audit routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|ap|hr|tax|audit|finance-gl']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|hr|tax|audit|finance-gl']], function () {
     //Schedules
     Route::get('/schedules', 'ScheduleController@index');
     Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
@@ -323,7 +363,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
 
 // Request Routes
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|approver|coordinator-2']], function () {
 
     // Request to close a visit
     Route::get('/request-close','CloseVisitController@index');
@@ -345,7 +385,7 @@ Route::group(['middleware' => ['auth', 'role:it|finance-gl']], function () {
 });
 
 //Customer Master Role
-Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|manager|customer-master|finance-gl']], function () {
+Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|customer-master|finance-gl']], function () {
     //Customer
     // show customer page
     Route::get('/customers', 'CustomerController@index')->name('customers_list');

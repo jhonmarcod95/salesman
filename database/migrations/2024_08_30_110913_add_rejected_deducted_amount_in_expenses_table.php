@@ -14,7 +14,7 @@ class AddRejectedDeductedAmountInExpensesTable extends Migration
     public function up()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->double('rejected_deducted_amount')->nullable()->after('expense_rejected_reason_id');
+            $table->double('rejected_deducted_amount', 8, 2)->nullable()->after('expense_rejected_reason_id');
         });
     }
 

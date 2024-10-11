@@ -41,7 +41,15 @@ class PaymentAutoPostingReprocessing extends Command
         CronLog::create(['name' => $this->signature]);
 
         $sap_server = $this->argument('sap_server');
-        $paymentAutoPosting = new PaymentAutoPosting();
-        $paymentAutoPosting->generateExpense('2024-08-05','2024-08-11', $sap_server,true);
+        $back_dates = [
+            '1st_week' => ['2024-09-02','2024-09-08',true],
+            '2nd_week' => ['2024-09-09','2024-09-15',true],
+            '3rd_week' => ['2024-09-16','2024-09-22',true],
+        ];
+
+        foreach($back_dates as $back_date){
+            $paymentAutoPosting = new PaymentAutoPosting();
+            $paymentAutoPosting->generateExpense($back_date[0],$back_date[1], $sap_server,$back_date[2]);
+        }
     }
 }

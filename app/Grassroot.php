@@ -32,6 +32,6 @@ class Grassroot extends Model
      */
     public function grassrootExpenseType()
     {
-        return $this->belongsTo(GrassrootsExpenseType::class);
+        return $this->belongsTo(GrassrootsExpenseType::class, 'grassroots_expense_type_id');
     }
 }

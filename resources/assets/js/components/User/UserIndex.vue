@@ -18,8 +18,13 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <div class="col-md-4 float-left">
-                                <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                            <div class="row mx-2">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                                </div>
+                                <div class="col-md-3">
+                                    <app-select :options="roles" v-model="filter_role" placeholder="Roles"/>
+                                </div>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -31,6 +36,7 @@
                                     <th scope="col">Email</th>
                                     <th scope="col">Role</th>
                                     <th scope="col">Company</th>
+                                    <th scope="col">Status</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -55,7 +61,9 @@
                                                 {{ company.name }} <br/>
                                             </span>
                                         </td>
-                                        <td></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" @click="deleteUser(user.id)">Disable</button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -113,10 +121,12 @@ export default {
     data(){
         return{
             users:[],
+            roles:[],
             errors:[],
             keywords: '',
             user_id: '',
             role: '',
+            filter_role: '',
             currentPage: 0,
             itemsPerPage: 10,
         }
@@ -124,6 +134,7 @@ export default {
     created(){
         this.fectUsers();
         this.getAuthRole();
+        this.getSelectOptions('roles', '/selection-roles')
     },
     methods:{
         getUserId(id){
@@ -138,6 +149,15 @@ export default {
                     this.errors = error.response.data.errors;
                 })
         },
+        fectRoles(){
+            axios.get('/selection-roles')
+            .then(response => {
+                this.roles = response.data;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
         fectUsers(){
             axios.get('/users-all')
             .then(response => {
@@ -148,16 +168,18 @@ export default {
             })
         },
         deleteUser(id){
-            let userIndex = this.users.findIndex(item => item.id == id);
-            axios.delete(`/user/${id}`)
-            .then(response =>{
-                $('#deleteModal').modal('hide');
-                alart('User Succesfully deleted');
-            })
-            .catch(error => {
-                this.errors = error.response.data.error;
-            })
-            this.users.splice(userIndex,1);
+            if(confirm("Are you sure you want to delete this user?")) {
+                let userIndex = this.users.findIndex(item => item.id == id);
+                axios.delete(`/user/${id}`)
+                .then(response =>{
+                    $('#deleteModal').modal('hide');
+                    alart('User Succesfully deleted');
+                })
+                .catch(error => {
+                    this.errors = error.response.data.error;
+                })
+                this.users.splice(userIndex,1);
+            }
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -179,8 +201,9 @@ export default {
         filteredUsers(){
             let self = this;
             return self.users.filter(user => {
-                return user.name.toLowerCase().includes(this.keywords.toLowerCase()) ||
-                       user.email.toLowerCase().includes(this.keywords.toLowerCase())
+                let user_name = user.name.toLowerCase().includes(this.keywords.toLowerCase());
+                let user_email = user.name.toLowerCase().includes(this.keywords.toLowerCase());
+                return (user_name || user_email) &&  (this.filter_role ? user.roles[0].id == this.filter_role : true);
             });
         },
         totalPages() {

@@ -12,11 +12,7 @@
                                 <div class="col">
                                     <h3 class="mb-0">Expense Top Spender</h3>
                                 </div>
-                                <div class="d-flex">
-                                    <div><a class="btn btn-sm btn-outline-default mr-2" href="/expenses-report"> Expenses Report</a></div>
-                                    <div v-if="salesHeadRole"><a class="btn btn-sm btn-outline-default mr-2" href="/dms-received-expense"> DMS Submitted Expense</a></div>
-                                    <div><a class="btn btn-sm btn-default mr-2" href="/expenses-top-spender-report"> Expense Top Spender</a></div>
-                                </div>
+                                <expense-report-nav :user-role="userRole"/>
                             </div>
                         </div>
 
@@ -122,7 +118,7 @@
     import JsonExcel from 'vue-json-excel'
 
     export default {
-        props:['userLevel','userRole','expenseVerifier'],
+        props:['userLevel','userRole','expenseVerifier', 'accessDmsReceived'],
         components: {
             JsonExcel
         },
@@ -327,6 +323,9 @@
 
                 return queues_array;
             },
+            isItRole() {
+                return this.userRole == 1  // IT
+            },
             expenseVerifierRole() {
                 let userLevel = [
                     4, // Coordinator
@@ -335,14 +334,15 @@
 
                 return _.includes(userLevel, this.userLevel) || this.expenseVerifier;
             },
-            salesHeadRole() {
+            presidentRole() {
                 let userRole = [
-                    1,  // IT,
                     2,  // President,
-                    3,  // EVP,
-                    4,  // VP/Sales Head
+                    // 3,  // EVP,
                 ];
                 return _.includes(userRole, this.userRole);
+            },
+            salesHeadRole() {
+                return this.userRole == 4  // VP/Sales Head
             }
         }
     }

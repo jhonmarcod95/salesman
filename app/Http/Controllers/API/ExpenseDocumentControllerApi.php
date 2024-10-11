@@ -58,38 +58,27 @@ class ExpenseDocumentControllerApi extends Controller
                         ->whereHas('user', function ($query) use ($user_id) {
                             $query->where('id', $user_id);
                         })
-                        ->with(['expensesModel' => function ($q) {
-                            $q->whereNull('dms_reference');
-                        }])
                         ->has('expensesModel')
-                        ->withCount('verifiedExpense')
-                        ->withCount('unverifiedExpense')
-                        ->withCount('rejectedExpense')
-                        ->withCount('pendingExpense')
-                        ->withCount('expensesModel')
+                        ->expensePerMonth(Carbon::parse($startDate), Carbon::parse($endDate))
                         ->get();
             
             foreach($expenses_entry as $expense) {
                 $verified_expense_count = $verified_expense_count + $expense->verified_expense_count;
                 $unverified_expense_count = $unverified_expense_count + ($expense->unverified_expense_count + $expense->pending_expense_count);
                 $rejected_expense_count = $rejected_expense_count + $expense->rejected_expense_count;
-                // $pending_expense_count = $pending_expense_count + $expense->pending_expense_count;
                 $total_count = $total_count + $expense->expenses_model_count;
                 $total_expenses = $total_expenses + $expense->totalExpenses;
 
-                // if(!empty($expense->verifiedExpense)) { //TEMPORARY ACCEPT(DMS) UNVERIFIED EXPENSE
-                    // foreach ($expense->verifiedExpense as $verified) { //TEMPORARY ACCEPT(DMS) UNVERIFIED EXPENSE
-                    foreach ($expense->expensesModel as $verified) {
-                        if(!empty($verified->expenses_entry_id)) {
-                            $data = [];
-                            $data['id'] = $verified->id;
-                            $data['expenses_entry_id'] = $verified->expenses_entry_id;
-                            $data['attachment'] = $verified->attachment;
-                            $data['expenses_type'] = $verified->expensesType->name;
-                            $expense_attachments[] = $data;
-                        }
+                foreach ($expense->expensesModel as $verified) {
+                    if(!empty($verified->expenses_entry_id)) {
+                        $data = [];
+                        $data['id'] = $verified->id;
+                        $data['expenses_entry_id'] = $verified->expenses_entry_id;
+                        $data['attachment'] = $verified->attachment;
+                        $data['expenses_type'] = $verified->expensesType->name;
+                        $expense_attachments[] = $data;
                     }
-                // }
+                }
             }
         } else {
             $message = 'Already Received';
@@ -102,7 +91,6 @@ class ExpenseDocumentControllerApi extends Controller
             'verified_count' => $verified_expense_count,
             'unverified' => $unverified_expense_count,
             'rejected' => $rejected_expense_count,
-            // 'pending' => $pending_expense_count,
             'total_count' => $total_count,
             'total_expenses' => $total_expenses,
             'message' => $message,
