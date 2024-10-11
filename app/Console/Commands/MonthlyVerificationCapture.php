@@ -47,9 +47,7 @@ class MonthlyVerificationCapture extends Command
         $this->date_last_month = date("F Y", strtotime("first day of last month"));
 
         $this->is_ninth_of_temonth = (now()->format('d') == '09') ? true : false;
-        $this->is_ninth_of_temonth = true;
-
-        $this->webexNotification();
+        // $this->is_ninth_of_temonth = true;
     }
 
     /**
@@ -126,10 +124,6 @@ class MonthlyVerificationCapture extends Command
                         $rejected_amount = $rejected_amount + $verified['rejected_amount'];
                     }
 
-                    // if($user->id == 62) {
-                    //     dd($user->expensesEntries, $rejected_expense_count, $unverified_expense_count, $expenses_model_count);
-                    // }
-
                     //Prepare weekly verified data
                     $employeeWeeklyExpenseData = [
                         'employee_monthly_expense_id' => $employee_monthly_expense->id,
@@ -174,14 +168,13 @@ class MonthlyVerificationCapture extends Command
         }
 
         //Send Webex notification
-        // $this->webexNotification();
+        $this->webexNotification();
 
         $end_time = (microtime(true) - $start) / 60;
         echo "finished with $end_time time.";
     }
 
     public function webexNotification() {
-
         //Define month and year
         $month_year = explode(' ', $this->date_today);
         $month = $month_year[0];
@@ -373,7 +366,7 @@ class MonthlyVerificationCapture extends Command
                 ];
 
                 //Send Webex Notif
-                ExpenseService::sendSingleWebexNotif('archeal.anie@lafilgroup.com', $webexCard);
+                ExpenseService::sendSingleWebexNotif('demetrio.viray@lafilgroup.com', $webexCard);
             }
         }
     }
