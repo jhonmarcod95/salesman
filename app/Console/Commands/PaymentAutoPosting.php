@@ -245,60 +245,62 @@ class PaymentAutoPosting extends Command
                         }
                     }
 
-                    // Generate last line of the entry for I7 or I3
-                    $gl_account_i7 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I7')->first();
+                    if(count($items) > 1){
+                        // Generate last line of the entry for I7 or I3
+                        $gl_account_i7 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I7')->first();
 
-                    if($tax_amountI7){
-                        array_push($items, [
-                            'item_no' =>  $item = $item + 1,
-                            'item_text' => '',
-                            'gl_account' => $gl_account_i7->gl_account,
-                            'gl_description' => $gl_account_i7->gl_description,
-                            'assignment' => '',
-                            'input_tax_code' => 'I7',
-                            'internal_order' => '',
-                            'uom' => '',
-                            'amount' => $tax_amountI7,
-                            'charge_type' => '',
-                            'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
-                            'or_number' => '',
-                            'supplier_name' => '',
-                            'address' => '',
-                            'tin_number' => '',
-                            'tag' => 'tax'
-                        ]);
-                        $acc_amount_first_index = $acc_amount_first_index + $tax_amountI7;
+                        if($tax_amountI7){
+                            array_push($items, [
+                                'item_no' =>  $item = $item + 1,
+                                'item_text' => '',
+                                'gl_account' => $gl_account_i7->gl_account,
+                                'gl_description' => $gl_account_i7->gl_description,
+                                'assignment' => '',
+                                'input_tax_code' => 'I7',
+                                'internal_order' => '',
+                                'uom' => '',
+                                'amount' => $tax_amountI7,
+                                'charge_type' => '',
+                                'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
+                                'or_number' => '',
+                                'supplier_name' => '',
+                                'address' => '',
+                                'tin_number' => '',
+                                'tag' => 'tax'
+                            ]);
+                            $acc_amount_first_index = $acc_amount_first_index + $tax_amountI7;
+                        }
+
+                        $gl_account_i3 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I3')->first();
+                        if($tax_amountI3){
+                            array_push($items, [
+                                'item_no' =>  $item = $item + 1,
+                                'item_text' => '',
+                                'gl_account' => $gl_account_i3->gl_account,
+                                'gl_description' => $gl_account_i3->gl_description,
+                                'assignment' => '',
+                                'input_tax_code' => 'I3',
+                                'internal_order' => '',
+                                'uom' => '',
+                                'amount' => $tax_amountI3,
+                                'charge_type' => '',
+                                'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
+                                'or_number' => '',
+                                'supplier_name' => '',
+                                'address' => '',
+                                'tin_number' => '',
+                                'tag' => 'tax'
+                            ]);
+                            $acc_amount_first_index = $acc_amount_first_index + $tax_amountI3;
+                        }
+
+                        //Place total amount to be reimburse in the first index of @acc_amount
+                        $items[0]['amount'] = number_format($acc_amount_first_index * -1, 2, '.', "");
+                        // Get SAP server
+                        $sapCredential = $this->simulateExpenseSubmitted($groupedExpenses[0]->expenses_entry_id);
+                        // Post Simulated Expeses to SAP
+                        $this->postSimulatedExpenses($items,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date, $lastWeekMonday, $lastWeekSunday);
                     }
-
-                    $gl_account_i3 = $groupedExpenses[0]->user->companies[0]->glTaxcode->where('tax_code', 'I3')->first();
-                    if($tax_amountI3){
-                        array_push($items, [
-                            'item_no' =>  $item = $item + 1,
-                            'item_text' => '',
-                            'gl_account' => $gl_account_i3->gl_account,
-                            'gl_description' => $gl_account_i3->gl_description,
-                            'assignment' => '',
-                            'input_tax_code' => 'I3',
-                            'internal_order' => '',
-                            'uom' => '',
-                            'amount' => $tax_amountI3,
-                            'charge_type' => '',
-                            'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
-                            'or_number' => '',
-                            'supplier_name' => '',
-                            'address' => '',
-                            'tin_number' => '',
-                            'tag' => 'tax'
-                        ]);
-                        $acc_amount_first_index = $acc_amount_first_index + $tax_amountI3;
-                    }
-
-                    //Place total amount to be reimburse in the first index of @acc_amount
-                    $items[0]['amount'] = number_format($acc_amount_first_index * -1, 2, '.', "");
-                    // Get SAP server
-                    $sapCredential = $this->simulateExpenseSubmitted($groupedExpenses[0]->expenses_entry_id);
-                    // Post Simulated Expeses to SAP
-                    $this->postSimulatedExpenses($items,$groupedExpenses[0]->user,$gl_account_i7, $gl_account_i3, $expense_ids, $sapCredential, $posting_date,$baseline_date, $lastWeekMonday, $lastWeekSunday);
                 }else{
                     $this->recordForReposting($index,$groupedExpenses,$lastWeekMonday,$lastWeekSunday,$posting_date);
                 }
