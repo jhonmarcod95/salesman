@@ -18,7 +18,8 @@ use App\{CronLog,
     PaymentHeader,
     PaymentHeaderError,
     ExpenseMonthlyDmsReceive,
-    ExpenseDeduction
+    ExpenseDeduction,
+    EmployeeMonthlyExpense
 };
 use Illuminate\Support\Facades\Storage;
 
@@ -108,7 +109,7 @@ class PaymentAutoPosting extends Command
             foreach($expense as $key => $e){
                 $month = date('n', strtotime($e->created_at));
                 // Check if user has pending amount for deduction
-                if($this->checkPendingAmountForDeduction($e)){
+                // if($this->checkPendingAmountForDeduction($e)){
                     //Group entries by month
                     if (!isset($groupedArrayExpenses[$month])) {
                         $groupedArrayExpenses[$month][0] = $e;
@@ -123,7 +124,7 @@ class PaymentAutoPosting extends Command
                             $baseline_date = $e->created_at;
                         }
                     }
-                }
+                // }
             }
             $posting_date = '';
             $sameMonth = date("n",  strtotime($lastWeekMonday)) == date("n", strtotime($lastWeekSunday));
@@ -172,75 +173,76 @@ class PaymentAutoPosting extends Command
                     ]);
 
                     foreach($groupedExpenses as $expense){ // Loop entry per month. This will generate line 2 to the nth line
+                        if($expense = $this->checkPendingAmountForDeduction($expense,$posting_date)){
+                            $company_code = $expense->user->companies[0]->code;
 
-                        $company_code = $expense->user->companies[0]->code;
-
-                        array_push($expense_ids,$expense->id);
-                        $filteredGL = $expense->expensesType->expenseChargeType->chargeType->expenseGl->where('charge_type', $expense->expensesType->expenseChargeType->chargeType->name)
-                            ->where('company_code', $expense->user->companies[0]->code)->first(); //Loop to get correct GL base on the charge type and user company code
-                        $filteredInternalOrders = $expense->user->internalOrders->where('charge_type',$expense->expensesType->expenseChargeType->chargeType->name)->first(); //Loop to get correct IO base on the charge type of expense
-
-                        // Hard coded  for special scenario for specific company
-                        $amount = '';
-                        $tax_code = '';
-                        $or_number = '';
-                        $supplier_name = '';
-                        $supplier_address = '';
-                        $bol_tax_amount = false;
-
-                        if($company_code == '1100' || $company_code == 'CSCI'){ // NON-VAT
-                            $amount = $expense->amount;
-                            $tax_code = 'IX';
+                            array_push($expense_ids,$expense->id);
+                            $filteredGL = $expense->expensesType->expenseChargeType->chargeType->expenseGl->where('charge_type', $expense->expensesType->expenseChargeType->chargeType->name)
+                                ->where('company_code', $expense->user->companies[0]->code)->first(); //Loop to get correct GL base on the charge type and user company code
+                            $filteredInternalOrders = $expense->user->internalOrders->where('charge_type',$expense->expensesType->expenseChargeType->chargeType->name)->first(); //Loop to get correct IO base on the charge type of expense
+    
+                            // Hard coded  for special scenario for specific company
+                            $amount = '';
+                            $tax_code = '';
+                            $or_number = '';
+                            $supplier_name = '';
+                            $supplier_address = '';
                             $bol_tax_amount = false;
-                        }else if($company_code == '2100' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){ // NON-VAT
-                            $amount = $expense->amount;
-                            $tax_code = 'IX';
-                        }else{
-                            $tax_code = $expense->receiptExpenses ? $expense->receiptExpenses->receiptType->tax_code : 'IX';
-
-                            if($tax_code  == 'IX'){ // NON-VAT
-                                $amount = number_format($expense->amount, 2, '.', "");
-                                $tax_amount = number_format($expense->amount, 2, '.', "");
+    
+                            if($company_code == '1100' || $company_code == 'CSCI'){ // NON-VAT
+                                $amount = $expense->amount;
+                                $tax_code = 'IX';
+                                $bol_tax_amount = false;
+                            }else if($company_code == '2100' && substr($filteredBusinessArea->business_area, 0, 2) == 'FD'){ // NON-VAT
+                                $amount = $expense->amount;
+                                $tax_code = 'IX';
                             }else{
-                                $amount = number_format($expense->amount / 1.12, 2, '.', "");
-                                $tax_amount = number_format($expense->amount - ($expense->amount / 1.12), 2, '.', "");
-                                $bol_tax_amount = true;
+                                $tax_code = $expense->receiptExpenses ? $expense->receiptExpenses->receiptType->tax_code : 'IX';
+    
+                                if($tax_code  == 'IX'){ // NON-VAT
+                                    $amount = number_format($expense->amount, 2, '.', "");
+                                    $tax_amount = number_format($expense->amount, 2, '.', "");
+                                }else{
+                                    $amount = number_format($expense->amount / 1.12, 2, '.', "");
+                                    $tax_amount = number_format($expense->amount - ($expense->amount / 1.12), 2, '.', "");
+                                    $bol_tax_amount = true;
+                                }
                             }
+                            $acc_amount_first_index = $acc_amount_first_index + $amount;
+    
+                            $internal_order = $filteredInternalOrders ? $filteredInternalOrders->internal_order : '';
+                            $uom = $filteredInternalOrders ? $filteredInternalOrders->uom : '';
+    
+                            // populate gl account
+                            $gl_account_code = $filteredInternalOrders->gl_account->code ?? null; // gl from IO master
+                            $gl_account_name = $filteredInternalOrders->gl_account->name ?? null;
+    
+                            array_push($items, [
+                                'item_no' =>  $item = $item + 1,
+                                'item_text' => 'SALESFORCE ' . strtoupper($expense->expensesType->name . ' ' . $expense->created_at->format('m/d/Y')),
+                                'gl_account' =>  $gl_account_code,
+                                'gl_description' => $gl_account_name,
+                                'assignment' => '',
+                                'input_tax_code' => $tax_code,
+                                'internal_order' =>  $internal_order,
+                                'uom' => $uom,
+                                'amount' => $amount,
+                                'charge_type' => $expense->expensesType->expenseChargeType->chargeType->name,
+                                'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
+                                'or_number' => $expense->receiptExpenses && $expense->receiptExpenses->receipt_number ? $expense->receiptExpenses->receipt_number : '',
+                                'supplier_name' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_name ? $expense->receiptExpenses->vendor_name : '',
+                                'address' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_address ? $expense->receiptExpenses->vendor_address : '',
+                                'tin_number' => $expense->receiptExpenses && $expense->receiptExpenses->tin_number ? $expense->receiptExpenses->tin_number : '',
+                                'expense_date' => $expense->created_at->format('Y-m-d'),
+                                'tag' => 'gl'
+                            ]);
+    
+                            if($bol_tax_amount && $expense->receiptExpenses->receiptType->tax_code == 'I3'){
+                                $tax_amountI3 = number_format($tax_amountI3 + $tax_amount, 2, '.', "");
+                            }elseif($bol_tax_amount && $expense->receiptExpenses->receiptType->tax_code == 'I7'){
+                                $tax_amountI7 = number_format($tax_amountI7 + $tax_amount, 2, '.', "");
+                            }else{}
                         }
-                        $acc_amount_first_index = $acc_amount_first_index + $amount;
-
-                        $internal_order = $filteredInternalOrders ? $filteredInternalOrders->internal_order : '';
-                        $uom = $filteredInternalOrders ? $filteredInternalOrders->uom : '';
-
-                        // populate gl account
-                        $gl_account_code = $filteredInternalOrders->gl_account->code ?? null; // gl from IO master
-                        $gl_account_name = $filteredInternalOrders->gl_account->name ?? null;
-
-                        array_push($items, [
-                            'item_no' =>  $item = $item + 1,
-                            'item_text' => 'SALESFORCE ' . strtoupper($expense->expensesType->name . ' ' . $expense->created_at->format('m/d/Y')),
-                            'gl_account' =>  $gl_account_code,
-                            'gl_description' => $gl_account_name,
-                            'assignment' => '',
-                            'input_tax_code' => $tax_code,
-                            'internal_order' =>  $internal_order,
-                            'uom' => $uom,
-                            'amount' => $amount,
-                            'charge_type' => $expense->expensesType->expenseChargeType->chargeType->name,
-                            'business_area' => $filteredBusinessArea->business_area ? $filteredBusinessArea->business_area : '',
-                            'or_number' => $expense->receiptExpenses && $expense->receiptExpenses->receipt_number ? $expense->receiptExpenses->receipt_number : '',
-                            'supplier_name' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_name ? $expense->receiptExpenses->vendor_name : '',
-                            'address' => $expense->receiptExpenses && $expense->receiptExpenses->vendor_address ? $expense->receiptExpenses->vendor_address : '',
-                            'tin_number' => $expense->receiptExpenses && $expense->receiptExpenses->tin_number ? $expense->receiptExpenses->tin_number : '',
-                            'expense_date' => $expense->created_at->format('Y-m-d'),
-                            'tag' => 'gl'
-                        ]);
-
-                        if($bol_tax_amount && $expense->receiptExpenses->receiptType->tax_code == 'I3'){
-                            $tax_amountI3 = number_format($tax_amountI3 + $tax_amount, 2, '.', "");
-                        }elseif($bol_tax_amount && $expense->receiptExpenses->receiptType->tax_code == 'I7'){
-                            $tax_amountI7 = number_format($tax_amountI7 + $tax_amount, 2, '.', "");
-                        }else{}
                     }
 
                     // Generate last line of the entry for I7 or I3
@@ -921,19 +923,19 @@ class PaymentAutoPosting extends Command
      *  Check if user has pending amount for deduction
      *
      */
-    public function checkPendingAmountForDeduction($expense){
-        if(intval(Carbon::now()->format('d')) < 11){    
-            $month = Carbon::parse($expense->created_at)->format('F');
-            $year = Carbon::parse($expense->created_at)->format('Y');
-
-            $monthly_expenses = EmployeeMonthlyExpense::where('user_id',$expense->user->id)
+    public function checkPendingAmountForDeduction($expense,$posting_date){
+        // Activate deduction from previous months after 10 days leeway
+        if(intval(Carbon::parse($posting_date)->format('d')) > 10){    
+            $monthly_expenses = EmployeeMonthlyExpense::where('user_id',$expense->user_id)
                 ->where('balance_rejected_amount','>',0)
-                ->where('month','!=',$month)
-                ->where('year','!=',$year)
+                ->where(function($q) use($posting_date){
+                    $q->where('month','!=',Carbon::parse($posting_date)->format('F'))
+                    ->orWhere('year','!=',Carbon::parse($posting_date)->format('Y'));
+                })
                 ->get();
             
             if($monthly_expenses->isNotEmpty()){
-                $expense_amount = $expense->amount;
+                $expense_amount = ($expense->expense_rejected_reason_id == 4) ? ($expense->amount - $expense->rejected_deducted_amount) : $expense->amount;
                 foreach($monthly_expenses as $monthly_expense){
                     if($expense_amount > 0){
                         $balance_rejected_amount = $monthly_expense->balance_rejected_amount;
@@ -958,15 +960,27 @@ class PaymentAutoPosting extends Command
                         $monthly_expense->update([
                             'balance_rejected_amount' => $to_amount
                         ]);
-
-                        // Return expense 
-                        // Change status to deducted for 0 amount
                     }
                 }
-                return $expense_amount > 0 ? true : false;
+
+                // If expense amount is less than 1, Tagged expense as deducted,
+                // else process remaining balanace
+                if($expense_amount < 1){
+                    Expense::find($expense->id)->update([
+                        'status_id' => 4
+                    ]);
+                    return false;
+                }else{
+                    Expense::find($expense->id)->update([
+                        'posted_amount' => $expense_amount
+                    ]);
+
+                    $expense->amount = $expense_amount;
+                    return $expense;
+                }
             }    
-            return true;
+            return $expense;
         }
-        return true;
+        return $expense;
     }
 }

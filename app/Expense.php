@@ -11,6 +11,7 @@ class Expense extends Model implements Auditable
 
     protected $fillable = [
         'amount',
+        'posted_amount',
         'attachment',
         'remarks',
         'dms_reference',

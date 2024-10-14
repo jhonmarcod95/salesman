@@ -17,9 +17,9 @@ class CreateExpenseDeductionsTable extends Migration
             $table->increments('id');
             $table->bigInteger('expense_id')->unsigned();
             $table->bigInteger('employee_monthly_expense_id')->unsigned();
-            $table->decimal('from_amount', 15, 2);
-            $table->decimal('to_amount', 15, 2);
-            $table->decimal('deducted_amount', 15, 2);
+            $table->decimal('balance_from_amount', 15, 2);
+            $table->decimal('balance_to_amount', 15, 2);
+            $table->decimal('balance_deducted_amount', 15, 2);
             $table->decimal('expense_from_amount', 15, 2);
             $table->decimal('expense_to_amount', 15, 2);
             $table->timestamps();
