@@ -160,7 +160,7 @@ class ExpenseController extends Controller
                     $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
                     $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
                     $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
-                    $total_expenses           = $total_expenses + $expenses->totalExpenses;
+                    $total_expenses           = $total_expenses + $expenses->expensesModel->sum('amount');
 
                     $verified = $this->expense_service->computeVerifiedAndRejected($expenses->expensesModel);
                     $verified_amount = $verified_amount + $verified['verified_amount'];
@@ -205,7 +205,7 @@ class ExpenseController extends Controller
                     $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
                     $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
                     $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
-                    $total_expenses           = $total_expenses + $expenses->totalExpenses;
+                    $total_expenses           = $total_expenses + $expenses->expensesModel->sum('amount');
 
                     $verified = $this->computeVerifiedAndRejected($expenses->expensesModel);
                     $verified_amount = $verified_amount + $verified['verified_amount'];

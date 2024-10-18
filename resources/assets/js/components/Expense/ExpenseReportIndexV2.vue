@@ -741,7 +741,11 @@ export default {
             return _.includes(userRole, this.userRole);
         },
         salesHeadRole() {
-            return this.userRole == 4  // VP/Sales Head
+            let userRole = [
+                4,  // VP/Sales Head
+                19, // Coordinator 2 (VP Shadow)
+            ];
+            return _.includes(userRole, this.userRole);
         }
     },
 }
