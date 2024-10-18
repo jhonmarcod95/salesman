@@ -1317,4 +1317,15 @@ class ExpenseController extends Controller
             return $data;
         });
     }
+
+
+     /**
+     * Show Expense page
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexExpenseDeduction(){
+        session(['header_text' => 'Expense Deduction']);
+        return view('expense.expense-deduction-index-report');
+    }
 }
