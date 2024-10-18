@@ -30,4 +30,4 @@ mix.sass('resources/assets/sass/app.scss', 'public/css/scss-app.css')
     'public/vendor/chart.js/dist/Chart.extension.js',
     'public/js/argon.js?'
 ], 'public/js/all.js')
-.browserSync('http://salesman.local');
+.browserSync('http://sfa.local');

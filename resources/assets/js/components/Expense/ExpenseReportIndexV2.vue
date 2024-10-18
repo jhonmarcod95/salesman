@@ -262,7 +262,7 @@
         <div class="custom-modal-container" :class="isHistoryModalOpen ? 'display-block' : ''" tabindex="0" role="dialog">
             <div class="modal border" style="margin-top: 100px;">
                 <div class="modal-header px-5 pt-5 align-items-center jsutify-content-between">
-                    <h4 class="modal-title" id="addCompanyLabel">Expense History</h4>
+                    <h4 class="modal-title" id="addCompanyLabel">Verification History</h4>
                     <button type="button" class="close" @click="closeHistoryModal"><span aria-hidden="true">×</span></button>
                 </div>
                 <div class="modal-body px-5">
@@ -277,6 +277,28 @@
                             <div class="mt-1">
                                 <div style="line-height: 1;" v-for="(detail, key, detailIndex) in history.details" :key="detailIndex">
                                     <small>{{key}}: {{detail}}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+                <div v-if="isItRole">
+                    <div class="modal-header align-items-center jsutify-content-between">
+                        <h4 class="modal-title" id="addCompanyLabel">Creation History</h4>
+                    </div>
+                    <div class="modal-body px-5">
+                        <div class="d-flex" v-for="(history, index) in auditHistory" :key="index">
+                            <div><small>{{history.created_at}}</small></div>
+                            <div class="border-left mx-4 text-lg">
+                                <span class="m--1">•</span>
+                            </div>
+                            <div class="pb-4">
+                                <h6 class="mb-0 text-primary font-weight-bold text-sm">{{history.event}}</h6>
+                                <div class="mt-1">
+                                    <div style="line-height: 1;" v-for="(detail, key, detailIndex) in history.new_values" :key="detailIndex">
+                                        <small>{{key}}: {{detail}}</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -711,7 +733,8 @@ export default {
             axios.get(`${this.endpoint}/receipt-history/${expense_id}`)
             .then( res => {
                 this.isHistoryModalOpen = true;
-                this.expenseHistory = res.data;
+                this.expenseHistory = res.data.expense_histories;
+                this.auditHistory = res.data.audit_histories;
             })
         },
         closeHistoryModal() {

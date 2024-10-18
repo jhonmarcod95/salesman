@@ -19,7 +19,8 @@ use App\{
     SalesmanInternalOrder,
     ExpenseSapIoBudget,
     ExpenseVerificationStatus,
-    ExpenseVerificationRejectedRemarks
+    ExpenseVerificationRejectedRemarks,
+    Audit
 };
 use App\Exports\ExpenseVerifiedReportPerUserExport;
 use App\Exports\ExpenseVerifiedReportPerBuExport;
@@ -1302,13 +1303,28 @@ class ExpenseController extends Controller
 
     public function getReceiptHistory($expense_id) {
         $expenseHistory = ExpenseHistory::where('expense_id', $expense_id)->with('user')->get();
-        return $expenseHistory->transform(function($expense) {
+        $auditHistory = Audit::select('event','old_values','new_values','created_at')->where('auditable_id',$expense_id)->where('auditable_type','App\Expense')->get();
+        
+        $expenseHistory = $expenseHistory->transform(function($expense) {
             $data['date'] = "$expense->created_at";
             $data['verifier'] = $expense->user->name;
             $data['action'] = $expense->action;
             $data['details'] = (array) json_decode($expense->details);
             return $data;
         });
+
+        $auditHistory = $auditHistory->transform(function($audit) {
+            $data['event'] = $audit->event;
+            $data['created_at'] = $audit->getOriginal('created_at');
+            $data['old_values'] = (array) json_decode($audit->old_values);
+            $data['new_values'] = (array) json_decode($audit->new_values);
+            return $data;
+        });
+
+        return [
+            'expense_histories' => $expenseHistory,
+            'audit_histories' => $auditHistory
+        ];
     }
 
 }
