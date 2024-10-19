@@ -380,7 +380,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="mt-2">
+                                        <div v-if="isItRole" class="mt-2">
                                             <a href="javascript:;" v-if="expenseBy.history_count" @click="fetchHistory(expenseBy.id)">History</a>
                                         </div> 
                                     </td>
