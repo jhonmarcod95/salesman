@@ -46,7 +46,7 @@ class PaymentAutoPostingReprocessing extends Command
             // '2nd_week' => ['2024-09-09','2024-09-15',true],
             // '3rd_week' => ['2024-09-16','2024-09-22',true],
             // '4th_week' => ['2024-09-23','2024-09-30',true],
-            // '5th_week' => ['2024-09-30','2024-10-06',true],
+            '5th_week' => ['2024-09-30','2024-10-06',true],
             '6th_week' => ['2024-10-07','2024-10-13',true]
         ];
 
