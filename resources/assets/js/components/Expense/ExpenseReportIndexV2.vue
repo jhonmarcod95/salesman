@@ -484,7 +484,8 @@ export default {
             rejectExpenseError: {},
             isRejecModalOpen: false,
             isHistoryModalOpen: false,
-            expenseHistory: []
+            expenseHistory: [],
+            auditHistory: []
         }
     },
     created(){
