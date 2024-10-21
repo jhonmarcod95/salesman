@@ -261,27 +261,29 @@
 
         <div class="custom-modal-container" :class="isHistoryModalOpen ? 'display-block' : ''" tabindex="0" role="dialog">
             <div class="modal border" style="margin-top: 100px;">
-                <div class="modal-header px-5 pt-5 align-items-center jsutify-content-between">
-                    <h4 class="modal-title" id="addCompanyLabel">Verification History</h4>
-                    <button type="button" class="close" @click="closeHistoryModal"><span aria-hidden="true">×</span></button>
-                </div>
-                <div class="modal-body px-5">
-                    <div class="d-flex" v-for="(history, index) in expenseHistory" :key="index">
-                        <div><small>{{history.date}}</small></div>
-                        <div class="border-left mx-4 text-lg">
-                            <span class="m--1">•</span>
-                        </div>
-                        <div class="pb-4">
-                            <h6 class="mb-0 text-primary font-weight-bold text-sm">{{history.action}}</h6>
-                            <small class="font-weight-bold">{{history.verifier}}</small>
-                            <div class="mt-1">
-                                <div style="line-height: 1;" v-for="(detail, key, detailIndex) in history.details" :key="detailIndex">
-                                    <small>{{key}}: {{detail}}</small>
+                <div v-if="expenseHistory.length">
+                    <div class="modal-header px-5 pt-5 align-items-center jsutify-content-between">
+                        <h4 class="modal-title" id="addCompanyLabel">Verification History</h4>
+                        <button type="button" class="close" @click="closeHistoryModal"><span aria-hidden="true">×</span></button>
+                    </div>
+                    <div class="modal-body px-5">
+                        <div class="d-flex" v-for="(history, index) in expenseHistory" :key="index">
+                            <div><small>{{history.date}}</small></div>
+                            <div class="border-left mx-4 text-lg">
+                                <span class="m--1">•</span>
+                            </div>
+                            <div class="pb-4">
+                                <h6 class="mb-0 text-primary font-weight-bold text-sm">{{history.action}}</h6>
+                                <small class="font-weight-bold">{{history.verifier}}</small>
+                                <div class="mt-1">
+                                    <div style="line-height: 1;" v-for="(detail, key, detailIndex) in history.details" :key="detailIndex">
+                                        <small>{{key}}: {{detail}}</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <hr>
                     </div>
-                    <hr>
                 </div>
                 <div v-if="isItRole">
                     <div class="modal-header align-items-center jsutify-content-between">
@@ -380,8 +382,8 @@
                                             </div>
                                         </div>
 
-                                        <div v-if="isItRole" class="mt-2">
-                                            <a href="javascript:;" v-if="expenseBy.history_count" @click="fetchHistory(expenseBy.id)">History</a>
+                                        <div class="mt-2">
+                                            <a href="javascript:;" @click="fetchHistory(expenseBy.id)">History</a>
                                         </div> 
                                     </td>
                                     <td> 
@@ -482,7 +484,8 @@ export default {
             rejectExpenseError: {},
             isRejecModalOpen: false,
             isHistoryModalOpen: false,
-            expenseHistory: []
+            expenseHistory: [],
+            auditHistory: []
         }
     },
     created(){
