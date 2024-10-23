@@ -235,7 +235,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-control-label">Select Reject Reason  (<em class="text-danger">* required</em>)</label> 
+                        <label class="form-control-label"> Select Reject Reason  (<em class="text-danger">* required</em>)</label> 
                         <app-select :options="rejectedRemarks" v-model="rejectedExpense.rejected_reason_id" label="remark"/>
                     </div>
 
