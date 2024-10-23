@@ -602,12 +602,14 @@ export default {
             this.rejectExpenseError = {};
             this.isRejecModalOpen = true
             // $('#rejectModal').modal('show');
+            $('#viewModal').modal('hide');
         },
         closeRejectExpenseModal() {
             this.selectedExpense = {};
             this.rejectedExpense = {};
             this.rejectExpenseError = {};
-            this.isRejecModalOpen = false
+            this.isRejecModalOpen = false;
+            $('#viewModal').modal('show');
         },
         expenseStatus(item) {
             let {verified_expense_count, unverified_expense_count, rejected_expense_count, pending_expense_count, expenses_model_count} = item;
