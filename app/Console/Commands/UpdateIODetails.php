@@ -65,14 +65,14 @@ class UpdateIODetails extends Command
                 'I_YEAR' => Carbon::now()->format('Y'),
             ], null);
 
-            if ($io_detail){
+            if ($io_detail['O_UNIT']){
                 $gl_account = str_pad($io_detail['O_GLACCOUNT'], '10', '0', STR_PAD_LEFT);
                 $gl_account_id = GlAccount::where('code', $gl_account)->pluck('id')->first();
                 $uom = $this->getSapUomValueConversion($io_detail['O_UNIT'],$sap_connection);
 
                 $update_io = SalesmanInternalOrder::find($salesman_io->id);
                 $update_io->gl_account_id = $gl_account_id;
-                $update_io->uom = $uom;
+                $update_io->uom = $uom ? $uom['OUTPUT'] : $io_detail['O_UNIT'];
                 $update_io->save();
             }
         }

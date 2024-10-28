@@ -100,7 +100,7 @@ class Kernel extends ConsoleKernel
         // update IO details
         $schedule->command('update:IODetails')
             ->weekly()
-            ->mondays();
+            ->at('22:00');
     }
 
     /**
