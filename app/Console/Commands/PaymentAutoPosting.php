@@ -927,13 +927,33 @@ class PaymentAutoPosting extends Command
      *
      */
     public function checkPendingAmountForDeduction($expense,$posting_date){
+        $day = intval(Carbon::parse($posting_date)->format('d'));
+        $posting_month = Carbon::parse($posting_date)->format('F');
+        $posting_year = Carbon::parse($posting_date)->format('Y');
+        $previous_posting_month = Carbon::parse($posting_date)->subMonthsNoOverflow(1)->format('F');
+        $previous_posting_year = Carbon::parse($posting_date)->subMonthsNoOverflow(1)->format('Y');
+
         // Activate deduction from previous months after 10 days leeway
-        if(intval(Carbon::parse($posting_date)->format('d')) > 10){    
+        // if(intval(Carbon::parse($posting_date)->format('d')) > 10){    
             $monthly_expenses = EmployeeMonthlyExpense::where('user_id',$expense->user_id)
                 ->where('balance_rejected_amount','>',0)
-                ->where(function($q) use($posting_date){
-                    $q->where('month','!=',Carbon::parse($posting_date)->format('F'))
-                    ->orWhere('year','!=',Carbon::parse($posting_date)->format('Y'));
+                ->when($day > 10,function($query) use($posting_month,$posting_year){
+                    $query->where(function($q) use($posting_month,$posting_year){
+                        $q->where('month','!=',$posting_month)
+                        ->orWhere('year','!=',$posting_year);
+                    });
+                })
+                ->when($day < 10,function($query) use($posting_month,$posting_year){
+                    $query->where(function($q) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
+                        $q->where(function($q2) use($posting_month,$posting_year){
+                            $q2->where('month','!=',$posting_month)
+                            ->where('year','!=',$posting_year);
+                        })
+                        ->where(function($q2) use($previous_posting_month,$previous_posting_year){
+                            $q2->where('month','!=',$previous_posting_month)
+                            ->where('year','!=',$previous_posting_year);
+                        });
+                    });
                 })
                 ->get();
             
@@ -983,7 +1003,7 @@ class PaymentAutoPosting extends Command
                 }
             }    
             return $expense;
-        }
+        // }
         return $expense;
     }
 }
