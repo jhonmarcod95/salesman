@@ -943,7 +943,7 @@ class PaymentAutoPosting extends Command
                         ->orWhere('year','!=',$posting_year);
                     });
                 })
-                ->when($day < 10,function($query) use($posting_month,$posting_year){
+                ->when($day < 10,function($query) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
                     $query->where(function($q) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
                         $q->where(function($q2) use($posting_month,$posting_year){
                             $q2->where('month','!=',$posting_month)
