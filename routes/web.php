@@ -1,6 +1,12 @@
 <?php
 use App\CustomerOrder;
 use App\TsrSapCustomer;
+use App\User;
+use App\Expense;
+use App\EmployeeMonthlyExpense;
+use App\EmployeeWeeklyExpense;
+use Carbon\Carbon;
+use App\Services\ExpenseService;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
@@ -20,6 +26,152 @@ use GuzzleHttp\Exception\BadResponseException;
 //    return view('welcome');
 //});
 Route::get('/manualInsert/{tsrId}', 'TsrController@manuallyInsertUser');
+
+
+Route::get('sample', function(){
+    if(intval(Carbon::now()->format('d')) > 10){
+        $previous_month = Carbon::now()->subMonthsNoOverflow(1);
+        $month_name = $previous_month->format('F');
+        $year_name = $previous_month->format('Y');
+
+        // $employee_monthly_expenses = EmployeeMonthlyExpense::where('month',$month_name)
+        //     ->where('year',$year_name)
+        //     // ->whereDate('updated_at','<', Carbon::now()->startOfMonth()->addDays(11))
+        //     ->update([
+        //         'expense_count' => 0,
+        //         'verified_count' => 0,
+        //         'unverified_count' => 0,
+        //         'rejected_count' => 0,
+        //         'expense_amount' => 0,
+        //         'verified_amount' => 0,
+        //         'unverified_amount' => 0,
+        //         'unverified_amount' => 0,
+        //         'rejected_amount' => 0,
+        //         'balance_rejected_amount' => 0,
+        //     ]);
+        // dd('here');
+
+        $employee_monthly_expenses = EmployeeMonthlyExpense::where('month',$month_name)
+            ->where('year',$year_name)
+            ->whereDate('updated_at','<', Carbon::now()->startOfMonth()->addDays(10))
+            ->get();
+
+        foreach($employee_monthly_expenses as $employee_monthly_expense){
+            $date_ranges = [
+                [
+                    'week_no' => '1',
+                    'start_date' => '2024-10-01 00:00:01',
+                    'end_date' => '2024-10-05 23:59:59',
+                ],
+                [
+                    'week_no' => '2',
+                    'start_date' => '2024-10-06 00:00:01',
+                    'end_date' => '2024-10-12 23:59:59',
+                ],
+                [
+                    'week_no' => '3',
+                    'start_date' => '2024-10-13 00:00:01',
+                    'end_date' => '2024-10-19 23:59:59',
+                ],
+                [
+                    'week_no' => '4',
+                    'start_date' => '2024-10-20 00:00:01',
+                    'end_date' => '2024-10-26 23:59:59',
+                ],
+                [
+                    'week_no' => '5',
+                    'start_date' => '2024-10-27 00:00:01',
+                    'end_date' => '2024-10-31 23:59:59',
+                ]
+            ];
+
+            foreach($date_ranges as $date_range){
+                $user = User::select('id')->where('id', $employee_monthly_expense->user_id)
+                    ->has('expensesEntries')
+                    ->with(['expensesEntries' => function($query) use($date_range){
+                        $query->expensePerMonth($date_range['start_date'], $date_range['end_date']);
+                    }])
+                    ->first();
+                    
+                //Define expenses total variable per week
+                $expenses_model_count   = 0;
+                $verified_expense_count = 0;
+                $unverified_expense_count = 0;
+                $rejected_expense_count = 0;
+                $total_expenses         = 0;
+                $verified_amount        = 0;
+                $unverified_amount      = 0;
+                $rejected_amount        = 0;
+
+                if ($user && count($user->expensesEntries)) {
+                    foreach ($user->expensesEntries as $expenses) {
+                        //Compute expenses total
+                        $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
+                        $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
+                        $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
+                        $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
+
+                        $expense_service = new ExpenseService;
+                        $verified = $expense_service->computeVerifiedAndRejected($expenses->expensesModel);
+                        $total_expenses = $total_expenses + $verified['total_expense_amount'];
+                        $verified_amount = $verified_amount + $verified['verified_amount'];
+                        $unverified_amount = $unverified_amount + $verified['unverified_amount'];
+                        $rejected_amount = $rejected_amount + $verified['rejected_amount'];
+                    }
+
+                    //Prepare weekly verified data
+                    $employeeWeeklyExpenseData = [
+                        'employee_monthly_expense_id' => $employee_monthly_expense->id,
+                        'week_no' => $date_range['week_no'],
+                        'user_id' => $user->id,
+                        'expense_count' => count($user->expensesEntries) ? $expenses_model_count : 0,
+                        'verified_count' => $verified_expense_count,
+                        'unverified_count' => $unverified_expense_count,
+                        'rejected_count' => $rejected_expense_count,
+                        'expense_amount' => (double) $total_expenses,
+                        'verified_amount' => (double) $verified_amount,
+                        'unverified_amount' => (double) $unverified_amount,
+                        'rejected_amount' => (double) $rejected_amount
+                    ];
+
+                    //Check if employee weekly expense exist
+                    $isEmployeeWeeklyExpenseExist = EmployeeWeeklyExpense::where(['employee_monthly_expense_id' => $employee_monthly_expense->id, 'week_no' => $date_range['week_no']])->exists();
+                    if(!$isEmployeeWeeklyExpenseExist) {
+                        // Store employee weekly expense
+                        EmployeeWeeklyExpense::create($employeeWeeklyExpenseData);
+                    } else {
+                        // Update employee weekly expense
+                        $employeeWeeklyExpense = EmployeeWeeklyExpense::where(['employee_monthly_expense_id' => $employee_monthly_expense->id, 'week_no' => $date_range['week_no']])->first();
+                        $employeeWeeklyExpense->update($employeeWeeklyExpenseData);
+                    }
+
+                    //Update employee monhtly expense
+                    $employee_monthly_expense->update([
+                        'expense_count' => $employee_monthly_expense->expense_count + (count($user->expensesEntries) ? $expenses_model_count : 0),
+                        'verified_count' => $employee_monthly_expense->verified_count + $verified_expense_count,
+                        'unverified_count' => $employee_monthly_expense->unverified_count + $unverified_expense_count,
+                        'rejected_count' => $employee_monthly_expense->rejected_count + $rejected_expense_count,
+                        'expense_amount' => $employee_monthly_expense->expense_amount + $total_expenses,
+                        'verified_amount' => (double) $employee_monthly_expense->verified_amount + $verified_amount,
+                        'unverified_amount' => (double) $employee_monthly_expense->unverified_amount + $unverified_amount,
+                        'rejected_amount' => (double) $employee_monthly_expense->rejected_amount + $rejected_amount,
+                        'balance_rejected_amount' => (double) $employee_monthly_expense->balance_rejected_amount + ($unverified_amount + $rejected_amount)
+                    ]);
+                }
+            }
+            // $expenses = Expense::where('user_id',$mothly_expense->user_id)
+            //     ->where('expenses_entry_id','>',0)
+            //     ->whereMonth('created_at',$previous_month->month)
+            //     ->whereYear('created_at',$previous_month->year)
+            //     ->get();
+            // return count($expenses);
+        }
+        return count($employee_monthly_expenses);
+
+        dd('here');
+    }
+  });
+
 
 
 //Authority to deduct
@@ -697,5 +849,3 @@ Route::get('/get-all-customer-hana', function () {
     return $hana_data;
 
 });
-
-
