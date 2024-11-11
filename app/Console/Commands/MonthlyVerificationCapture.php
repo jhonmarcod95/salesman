@@ -180,7 +180,7 @@ class MonthlyVerificationCapture extends Command
         }
 
         //Send Webex notification
-        $this->webexNotification();
+        // $this->webexNotification();
 
         $end_time = (microtime(true) - $start) / 60;
         echo "finished with $end_time time.";
@@ -360,7 +360,7 @@ class MonthlyVerificationCapture extends Command
                 $cardItems = array_merge($cardHeader, $rejected_data_card);
 
                 //Send Webex Notif
-                ExpenseService::sendSingleWebexNotif($user->email, $cardItems);
+                // ExpenseService::sendSingleWebexNotif($user->email, $cardItems);
                 // ExpenseService::sendSingleWebexNotif('archeal.anie@lafilgroup.com', $cardItems);
             }
         }

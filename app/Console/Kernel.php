@@ -39,7 +39,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('capture:monthly-verified')
             ->weekly()
             ->mondays()
-            ->at('23:30');
+            ->at('12:00');
 
         /* end:: every monday *********************/
 
