@@ -49,6 +49,8 @@ class PaymentAutoPostingReprocessing extends Command
             // '5th_week' => ['2024-09-30','2024-10-06',true],
             // '6th_week' => ['2024-10-07','2024-10-13',true],
             //  '7th_week' => ['2024-10-28','2024-11-03',true]
+             '8th_week' => ['2024-11-04','2024-11-10',true],
+             '9th_week' => ['2024-11-11','2024-11-17',true]
         ];
 
         foreach($back_dates as $back_date){
