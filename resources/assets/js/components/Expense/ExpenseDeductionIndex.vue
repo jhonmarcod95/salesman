@@ -59,7 +59,7 @@
                     <div class="card shadow mb-4">
                         <div class="card-header">
                             <h3 class="mb-0">
-                                DMS Submitted Expenses
+                                Expense Deductions
                                 <span v-if="!isEmpty(items) && !isProcessing">({{ pagination.total }})</span>
                             </h3>
                         </div>
@@ -73,13 +73,12 @@
                                     <table class="table align-items-center table-flush">
                                         <thead class="thead-light">
                                         <tr>
+                                            <th scope="col"></th>
                                             <th scope="col">TSR</th>
-                                            <!-- <th scope="col">Company</th> -->
                                             <th scope="col">Month</th>
                                             <th scope="col">Year</th>
-                                            <th scope="col">Expense Status</th>
-                                            <th scope="col">Expense Count</th>
-                                            <th scope="col">Date Submitted</th>
+                                            <th scope="col">Amount for Deduction</th>
+                                            <th scope="col">Expense Deducted Count</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -87,23 +86,17 @@
                                                 <td colspan="10">Loading Data...</td>
                                             </tr>
                                             <tr v-else v-for="(expense, e) in items" v-bind:key="e">
+                                                <td class="text-right">
+                                                    <button class="btn btn-sm text-black-50">View</button>
+                                                </td>
                                                 <td>
                                                     <strong>{{ expense.user.name }}</strong> <br>
                                                     <span>{{ expense.user.companies ? expense.user.companies[0].name : '' }}</span>
                                                 </td>
-                                                <!-- <td>{{ expense.user.companies ? expense.user.companies[0].name : '' }}</td> -->
                                                 <td>{{ expense.month }}</td>
                                                 <td>{{ expense.year }}</td>
-                                                <td>
-                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Verified: </span>{{ expense.expense_status.verified }}</div>
-                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Unverified: </span>{{ expense.expense_status.unverified }}</div>
-                                                    <div class="mb-0"><span style="width:90px; display: inline-block;">Rejected: </span>{{ expense.expense_status.rejected }}</div>
-                                                    <!-- <div class="mb-0"><span style="width:90px; display: inline-block;">Not Verified: </span>{{ expense.expense_status.not_verified }}</div> -->
-                                                </td>
-                                                <td>{{ expense.expense_status.expense_count }}</td>
-                                                <td>
-                                                    {{ expense.created_at | _date}}
-                                                </td>
+                                                <td>{{ expense.unverified_amount + expense.rejected_amount }}</td>
+                                                <td>{{ expense.deductions.length }}</td>
                                             </tr>
                                             <tr v-if="isEmpty(items) && !isProcessing">
                                                 <td>No data available in the table</td>
@@ -122,16 +115,7 @@
                             <!--end::Pagination-->
                         </div>
                     </div>
-                    <!-- End: DMS Submitted -->
-
-                    <!-- Begin: Pending For Submission -->
-                    <ExpenseDmsPendingToReceived :filterParams="filterData" class="mb-4"/>
-                    <!-- End: Pending For Submission -->
-
-                    <!-- Begin: Pending For Submission -->
-                    <ExpenseDmsNoExpenses :filterParams="filterData"/>
-                    <!-- End: Pending For Submission -->
-                    
+                    <!-- End: DMS Submitted --> 
                 </div>
             </div>
         </div>
@@ -159,15 +143,12 @@
 <script>
 import moment from 'moment';
 import listFormMixins from '../../list-form-mixins.vue';
-import ExpenseDmsPendingToReceived from './ExpenseDmsPendingToReceived.vue';
-import ExpenseDmsNoExpenses from './ExpenseDmsNoExpenses.vue';
 export default {
     mixins: [listFormMixins],
     props:['userLevel','userRole','expenseVerifier','accessDmsReceived'],
-    components: {ExpenseDmsPendingToReceived,ExpenseDmsNoExpenses},
     data(){
         return{
-            endpoint: '/dms-received-expense',
+            endpoint: '/expenses-deduction-report',
             items: [],
             filterData: {
                 month_year: moment().subtract(1, 'months').format('YYYY-MM')
@@ -183,7 +164,6 @@ export default {
     created(){
         this.getSelectOptions('companies', '/companies-all')	
         this.getSelectOptions('users', '/selection-users')
-        this.getSelectOptions('expenseVerificationStatuses', '/expense-verification-statuses')
         this.fetchList();
     },
     methods:{
@@ -313,7 +293,3 @@ export default {
     },
 }
 </script>
-
-<style>
-
-</style>

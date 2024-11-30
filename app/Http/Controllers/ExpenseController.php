@@ -19,7 +19,8 @@ use App\{
     SalesmanInternalOrder,
     ExpenseSapIoBudget,
     ExpenseVerificationStatus,
-    ExpenseVerificationRejectedRemarks
+    ExpenseVerificationRejectedRemarks,
+    EmployeeMonthlyExpense
 };
 use App\Exports\ExpenseVerifiedReportPerUserExport;
 use App\Exports\ExpenseVerifiedReportPerBuExport;
@@ -1320,12 +1321,24 @@ class ExpenseController extends Controller
 
 
      /**
-     * Show Expense page
+     * Show Expense Deduction page
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexExpenseDeduction(){
+    public function expenseDeductionReportIndex(){
         session(['header_text' => 'Expense Deduction']);
         return view('expense.expense-deduction-index-report');
+    }
+
+    public function expenseDeductionReportAll(Request $request) {
+        $month_year = explode("-", $request->month_year);
+        $month = Carbon::createFromDate(null, $month_year[1])->format('F');
+        $year =  $month_year[0];
+
+        return EmployeeMonthlyExpense::whereHas('deductions')
+            ->with('user.companies','deductions')
+            ->where('month',$month)
+            ->where('year',$year)
+            ->paginate($request->limit);
     }
 }
