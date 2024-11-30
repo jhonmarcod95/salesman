@@ -928,6 +928,8 @@ class PaymentAutoPosting extends Command
      */
     public function checkPendingAmountForDeduction($expense,$posting_date){
         $day = intval(Carbon::parse($posting_date)->format('d'));
+        $current_month = Carbon::now()->format('F');
+        $current_year = Carbon::now()->format('Y');
         $posting_month = Carbon::parse($posting_date)->format('F');
         $posting_year = Carbon::parse($posting_date)->format('Y');
         $previous_posting_month = Carbon::parse($posting_date)->subMonthsNoOverflow(1)->format('F');
@@ -943,7 +945,7 @@ class PaymentAutoPosting extends Command
                         ->orWhere('year','!=',$posting_year);
                     });
                 })
-                ->when($day < 10,function($query) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
+                ->when($day <= 10,function($query) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
                     $query->where(function($q) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
                         $q->where(function($q2) use($posting_month,$posting_year){
                             $q2->where('month','!=',$posting_month)
@@ -953,7 +955,10 @@ class PaymentAutoPosting extends Command
                             $q2->where('month','!=',$previous_posting_month)
                             ->where('year','!=',$previous_posting_year);
                         });
-                    });
+                    })
+                    ->where('month','!=',$current_month)
+                    ->where('year','!=',$current_year)
+                    ->where();
                 })
                 ->get();
             
