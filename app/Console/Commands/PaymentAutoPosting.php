@@ -955,11 +955,10 @@ class PaymentAutoPosting extends Command
                             $q2->where('month','!=',$previous_posting_month)
                             ->where('year','!=',$previous_posting_year);
                         });
-                    })
-                    ->where('month','!=',$current_month)
-                    ->where('year','!=',$current_year)
-                    ->where();
+                    });
                 })
+                ->where('month','!=',$current_month)
+                ->where('year','!=',$current_year)
                 ->get();
             
             if($monthly_expenses->isNotEmpty()){
