@@ -89,10 +89,10 @@ class PaymentAutoPosting extends Command
                 ->whereDate('created_at' ,'<=', $dateTo)
                 ->where('expenses_entry_id', '!=', 0)
                 ->when(!$isReprocessing, function($q){
-                    $q->where('status_id',0);//Not posted
+                    $q->where('status_id',4);//Not posted
                 })
                 ->when($isReprocessing, function($q){
-                    $q->where('status_id',2);//For reprocessing 
+                    $q->where('status_id',4);//For reprocessing 
                 })
                 ->get()
                 ->groupBy('user.id');
