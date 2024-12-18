@@ -48,7 +48,11 @@ class Kernel extends ConsoleKernel
 
         #Capture verified expenses
         $schedule->command('capture:monthly-verified')
-            ->monthlyOn(10, '23:30');
+            ->monthlyOn(9, '23:30');
+
+
+        $schedule->command('capture:monthly-verified')
+            ->monthlyOn(10, '23:50');
 
         /* end:: every month ***********************/
 

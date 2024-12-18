@@ -32,7 +32,8 @@ class MonthlyVerificationCapture extends Command
     private $expense_service, 
             $last_week_date_range, 
             $month_weekly_date_range, 
-            $is_ninth_of_temonth, 
+            $is_ninth_of_temonth,
+            $is_tenth_of_temonth, 
             $date_today, 
             $date_last_month;
 
@@ -46,14 +47,22 @@ class MonthlyVerificationCapture extends Command
         parent::__construct();
         $this->expense_service = $expense_service;
 
+        //Initialize date today
+        $this->date_today = date('F Y');
+        $date = date("Y-m");
+
+        $this->is_tenth_of_temonth = (now()->format('d') == '10') ? true : false;
+        // Final recomputation of total amount for deduction
+        if($this->is_tenth_of_temonth){
+            $this->date_today = date('F Y', strtotime('-1 month'));
+            $date = date('Y-m', strtotime('-1 month'));
+        }
+
         //Get date range per week this month
-        $this->month_weekly_date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday(date("Y-m"));
+        $this->month_weekly_date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday($date);
 
         //Get daterange last week
         $this->last_week_date_range = $this->getLastWeekMonth();
-
-        //Initialize date today
-        $this->date_today = date('F Y');
         
         //Initialize last month
         $this->date_last_month = date("F Y", strtotime("first day of last month"));
@@ -180,7 +189,7 @@ class MonthlyVerificationCapture extends Command
         }
 
         //Send Webex notification
-        $this->webexNotification();
+        if(!$this->is_tenth_of_temonth) $this->webexNotification();
 
         $end_time = (microtime(true) - $start) / 60;
         echo "finished with $end_time time.";

@@ -957,8 +957,10 @@ class PaymentAutoPosting extends Command
                         });
                     });
                 })
-                ->where('month','!=',$current_month)
-                ->where('year','!=',$current_year)
+                ->where(function($q)use($current_month,$current_year){
+                    $q->where('month','!=',$current_month)
+                    ->orWhere('year','!=',$current_year);
+                })
                 ->get();
             
             if($monthly_expenses->isNotEmpty()){
