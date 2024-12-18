@@ -459,13 +459,13 @@ class AppAPIController extends Controller
     public function storeExpenses(Request $request)
     {
         // check if the user is accepted the aggreement
-        // if(Auth::user()->atd_accepted == null && Auth::user()->atd_accepted == 0) {
-        //     $this->validate($request, [
-        //         'atd_accept' => 'required'
-        //     ],[
-        //         'atd_accept.required' => 'Test: Please accept the ATD first.'
-        //     ]);
-        // }
+        if(Auth::user()->atd_accepted == null && Auth::user()->atd_accepted == 0) {
+            $this->validate($request, [
+                'atd_accept' => 'required'
+            ],[
+                'atd_accept.required' => 'Notice: Please accept the authority to deduct first to continue with your expense claim submission.'
+            ]);
+        }
 
         // determine if has success visit
         if($this->checkHasSuccessVisit() == 'false'){
