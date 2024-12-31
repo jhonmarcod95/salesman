@@ -886,7 +886,7 @@ class PaymentAutoPosting extends Command
         $month_number = $start_month;
 
         for ($x = $start_month; $x <= $end_month; $x++) {
-            if($this->checkIfHasSubmittedExpense($month_number,$year,$user_id)) $months[] = Carbon::createFromFormat('m', $month_number)->format('F');
+            if($this->checkIfHasSubmittedExpense($month_number,$year,$user_id)) $months[] = Carbon::createFromFormat('Y-m-d', $year.'-'.$month_number.'-1')->format('F');
             $month_number += 1;
         }
         return $months;
