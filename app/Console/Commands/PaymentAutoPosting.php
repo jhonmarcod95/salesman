@@ -818,10 +818,10 @@ class PaymentAutoPosting extends Command
      *
      */
     public function checkSubmittedReceipts($user_id,$posting_date){
-        $month = Carbon::parse($posting_date)->format('F');
-        $year = Carbon::parse($posting_date)->format('Y');
+        $month = Carbon::now()->format('F');
+        $year = Carbon::now()->format('Y');
         $start_month = 1;
-        $end_month = intval(Carbon::parse($posting_date)->format('m'));
+        $end_month = intval(Carbon::now()->format('m'));
         $previous_month = ($end_month - 1); 
         
         if($month == 'January'){
