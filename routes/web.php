@@ -39,6 +39,11 @@ Route::get('logout', function(){
     return redirect('/');
   });
 
+Route::group(['prefix' => 'version-release'], function () {
+    Route::get('/main', 'VersionReleaseController@index')->name('version-release');
+    Route::get('/all', 'VersionReleaseController@all');
+});
+
 // Authenticated Routes
 Route::group(['middleware' => 'auth'], function(){
     // Provinces
@@ -697,5 +702,4 @@ Route::get('/get-all-customer-hana', function () {
     return $hana_data;
 
 });
-
 
