@@ -91,7 +91,7 @@ class PaymentAutoCv extends Command
                 'E_DOC_NUM' => 'document_number',
                 'RESULT' => 'result',
                 'RETURN' => 'return'
-            ]);
+            ],$sap_server->sap_server);
 
             //result
             if ($posted_cv['result'] == 'S'){

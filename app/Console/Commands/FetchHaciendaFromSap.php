@@ -59,7 +59,7 @@ class FetchHaciendaFromSap extends Command
             'passwd' => "welcome69+",
         ];
 
-        $planters = APIController::executeSapFunction($connection, 'ZFM_CMS', [], null);
+        $planters = APIController::executeSapFunction($connection, 'ZFM_CMS', [], null,'PFMC');
 
         $collecPlanters = collect($planters['CMS_OUT'])->sortBy('PL_ID', SORT_NATURAL);
 

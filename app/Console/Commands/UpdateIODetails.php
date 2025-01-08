@@ -63,12 +63,12 @@ class UpdateIODetails extends Command
                 'I_AUFNR' => $salesman_io->internal_order,
                 'I_PERIOD' => Carbon::now()->format('m'),
                 'I_YEAR' => Carbon::now()->format('Y'),
-            ], null);
+            ], null,$sap_server->sap_server);
 
             if ($io_detail['O_UNIT']){
                 $gl_account = str_pad($io_detail['O_GLACCOUNT'], '10', '0', STR_PAD_LEFT);
                 $gl_account_id = GlAccount::where('code', $gl_account)->pluck('id')->first();
-                $uom = $this->getSapUomValueConversion($io_detail['O_UNIT'],$sap_connection);
+                $uom = $this->getSapUomValueConversion($io_detail['O_UNIT'],$sap_connection,$sap_server->sap_server);
 
                 $update_io = SalesmanInternalOrder::find($salesman_io->id);
                 $update_io->gl_account_id = $gl_account_id;
@@ -83,9 +83,9 @@ class UpdateIODetails extends Command
      * Get UOM conversion in SAP
      *
      */
-    private function getSapUomValueConversion($uom,$sap_connection){
+    private function getSapUomValueConversion($uom,$sap_connection,$sap_server){
         return APIController::executeSapFunction($sap_connection,'ZCONVERSION_EXIT_CUNIT_INPUT',[
             'INPUT' => $uom
-        ],null);
+        ],null,$sap_server);
     }
 }

@@ -89,7 +89,7 @@ class GetSapIoBudget extends Command
                         $budget = APIController::executeSapFunction($sapConnection, 'ZFI_BUDGET_CHK_INTEG', [
                             'P_AUFNR' => $io,
                             'P_BUDAT' => $year . $month . '01',    
-                        ],null);
+                        ],null,$sap_server_pfmc);
                     }catch (RequestException $e){
                         $budget = [];
                     }
@@ -162,7 +162,7 @@ class GetSapIoBudget extends Command
                         $budget = APIController::executeSapFunction($sapConnection, 'ZFI_BUDGET_CHK_INTEG', [
                             'P_AUFNR' => $io,
                             'P_BUDAT' => $year . $month . '01',    
-                        ],null);
+                        ],null,$sap_server_lfug);
                     }catch (RequestException $e){
                         $budget = [];
                     }

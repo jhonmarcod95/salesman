@@ -70,7 +70,7 @@ class PaymentAutoCheck extends Command
             $fiscal_year = Carbon::now()->format('Y');
             $house_bank = $bankCheck->house_bank;
             $account_id = $bankCheck->account_id;
-            $check_number = $this->checkNumber($connection, $company_code, $bankCheck);
+            $check_number = $this->checkNumber($connection, $company_code, $bankCheck,$sap_server);
 
             //api cv posting
             $posted_check = APIController::executeSapFunction($connection, 'ZFI_CHECKINFO', [
@@ -83,7 +83,7 @@ class PaymentAutoCheck extends Command
             ], [
                 'RESULT' => 'result',
                 'RETURN' => 'return'
-            ]);
+            ],$sap_server->sap_server);
 
             //result
             if ($posted_check['result'] == 'S'){
@@ -108,7 +108,7 @@ class PaymentAutoCheck extends Command
         return;
     }
 
-    private function checkNumber($sap_connection, $company_code, $bankCheck){
+    private function checkNumber($sap_connection, $company_code, $bankCheck,$sap_server){
 
         $check_info = APIController::readSapTableApi($sap_connection, [
             'table' => ['PCEC' => 'check_info'],
@@ -123,7 +123,7 @@ class PaymentAutoCheck extends Command
                 ['TEXT' => "HKTID = '$bankCheck->account_id' AND "],
                 ['TEXT' => "STAPL = '$bankCheck->check_lot'"],
             ]
-        ])->first();
+            ],$sap_server)->first();
 
         if ($check_info->check_number_status == ''){
             return $check_info->check_number_from;
@@ -139,7 +139,7 @@ class PaymentAutoCheck extends Command
                     'ACCT_ID' => $bankCheck->account_id,
                     'CHECK_FR' => $check_info->check_number_from,
                     'CHECK_TO' => $check_info->check_number_to,
-                ], ['LATEST_CHECK' => 'check_number'])->first() + 1;
+                ], ['LATEST_CHECK' => 'check_number'],$sap_server)->first() + 1;
             }
 
         }

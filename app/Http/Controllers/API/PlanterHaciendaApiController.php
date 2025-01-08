@@ -123,7 +123,7 @@ class PlanterHaciendaApiController extends Controller
             'passwd' => "welcome69+",
         ];
 
-        $planters = APIController::executeSapFunction($connection, 'ZFM_CMS', [], null);
+        $planters = APIController::executeSapFunction($connection, 'ZFM_CMS', [], null,'PFMC');
 
         return $planters['CMS_OUT'];
     }

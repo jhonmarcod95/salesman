@@ -370,7 +370,7 @@ class PaymentAutoPosting extends Command
                         'AMOUNT' => 'amount',
                     ]
                 ]
-            ]);
+            ],$sap_server);
 
             //for balance history table
             $last_io_balances[] = [
@@ -555,7 +555,7 @@ class PaymentAutoPosting extends Command
 
         try{
             //sap posting
-            $paymentPosting = APIController::executeSapFunction($sapConnection, 'BAPI_ACC_DOCUMENT_POST', $payment, null);
+            $paymentPosting = APIController::executeSapFunction($sapConnection, 'BAPI_ACC_DOCUMENT_POST', $payment, null,$sap_server);
             $postingResults = $paymentPosting['RETURN'];
 
             foreach ($postingResults as $postingResult){
@@ -618,7 +618,7 @@ class PaymentAutoPosting extends Command
                                             $curr_io_balance = APIController::executeSapFunction($sapConnection, 'ZFI_BUDGET_CHK_INTEG', [
                                                 'P_AUFNR' => $item['internal_order'],
                                                 'P_BUDAT' => $posting_date->format('Ymd'),
-                                            ], ['GV_OUTPUT' => 'total_amount'])['total_amount'];
+                                            ], ['GV_OUTPUT' => 'total_amount'],$sap_server)['total_amount'];
 
                                             $array_balance = [
                                                 'internal_order' => $item['internal_order'],
@@ -704,7 +704,7 @@ class PaymentAutoPosting extends Command
                         ];
 
                         $textLines = ['TEXT_LINES' => $textLines];
-                        APIController::executeSapFunction($sapConnection, 'RFC_SAVE_TEXT', $textLines, null);
+                        APIController::executeSapFunction($sapConnection, 'RFC_SAVE_TEXT', $textLines, null,$sap_server);
                     }
                     /* ************************************************************************************************/
                     break;

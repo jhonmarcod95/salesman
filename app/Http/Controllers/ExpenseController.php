@@ -855,7 +855,7 @@ class ExpenseController extends Controller
                         $budget = APIController::executeSapFunction($sapConnection, 'ZFI_BUDGET_CHK_INTEG', [
                             'P_AUFNR' => $io,
                             'P_BUDAT' => $year . $month . '01',    
-                        ],null);
+                        ],null,'PFMC');
                     }catch (RequestException $e){
                         return $budget = [];
                     }
