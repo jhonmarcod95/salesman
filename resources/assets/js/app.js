@@ -146,6 +146,10 @@ Vue.component('app-select', require('./components/Common/Select2.vue'));
 Vue.component('error-messages', require('./components/Common/ErrorMessage.vue'));
 Vue.component('expense-report-nav', require('./components/Common/ExpenseReportNav.vue'));
 
+//Version Release
+Vue.component('version-release', require('./components/VersionRelease/VersionRelease.vue'));
+Vue.component('app-breadcrumbs', require('./components/Common/Breadcrumbs.vue'));
+
 const app = new Vue({
     el: '#app',
 });
