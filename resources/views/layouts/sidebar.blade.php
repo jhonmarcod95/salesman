@@ -227,7 +227,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-link" href="version-release/main">
+                                    <a class="nav-link" href="{{ url('version-release/main') }}">
                                         <i class=""></i> Version Release
                                     </a>
                                 </li>
