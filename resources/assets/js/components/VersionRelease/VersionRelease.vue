@@ -26,7 +26,7 @@
 
 							<!--begin::Nav-->
 							<div class="navi navi-bold navi-hover navi-active navi-link-rounded">
-								<div class="navi-item mb-4" v-for="(item, index) in items" :key="index">
+								<div class="navi-item mb-4" v-for="(item, index) in items.slice().reverse()" :key="index">
 									<a class="navi-link py-4 cursor-pointer" :class="{'active':selectedVersion.id == item.id}" @click="viewVersion(item)">
 										<span class="navi-icon mr-2">
 											<span class="svg-icon">
@@ -42,7 +42,7 @@
 											</span>
 										</span>
 										<span class="navi-text font-size-lg">{{ `Vsn ${item.version}` }}</span>
-										<span class="navi-label" v-if="index == items.length - 1 && pagination.current_page == 1">
+										<span class="navi-label" v-if="index == 0 && pagination.current_page == 1">
 											<span class="label label-light-success label-inline font-weight-bold">new</span>
 										</span>
 									</a>
@@ -139,7 +139,7 @@
                 },
 				data: {},
 				items: [],
-				page_limit: 5,
+				page_limit: 10,
 				selectedVersion: {}
 			}
 		},
