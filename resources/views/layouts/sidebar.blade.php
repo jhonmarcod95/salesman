@@ -228,7 +228,7 @@
                                 </li>
                                 <li>
                                     <a class="nav-link" href="{{ url('version-release/main') }}">
-                                        <i class=""></i> Version Release
+                                        <i class="ni ni-tv-2 text-black"></i> Version Release
                                     </a>
                                 </li>
                             </ul>

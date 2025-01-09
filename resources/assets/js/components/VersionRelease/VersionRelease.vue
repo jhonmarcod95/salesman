@@ -2,7 +2,7 @@
 	<div>
 		
 		<app-breadcrumbs :breadcrumbs="breadcrumbs">
-			<div class="btn btn-white font-weight-bold py-3 px-6 ml-5" 
+			<div class="btn btn-white font-weight-bold p-3 mr-3" 
 				v-if="isAdministrator"
 				@click="showModal('form_modal')">
 				Add New Version
@@ -42,7 +42,7 @@
 											</span>
 										</span>
 										<span class="navi-text font-size-lg">{{ `Vsn ${item.version}` }}</span>
-										<span class="navi-label" v-if="index == 0 && pagination.current_page == 1">
+										<span class="navi-label" v-if="index == items.length - 1 && pagination.current_page == 1">
 											<span class="label label-light-success label-inline font-weight-bold">new</span>
 										</span>
 									</a>
