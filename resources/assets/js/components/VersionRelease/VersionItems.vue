@@ -60,7 +60,7 @@ export default {
                 type: this.selectedItem.type,
                 description,
             }
-            axios.post('/master-data/version-release/submit-item',data)
+            axios.post('submit-item',data)
             .then(res => {
                 this.toggelInput();
                 this.$emit('submitSuccess');

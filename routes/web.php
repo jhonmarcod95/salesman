@@ -47,10 +47,9 @@ Route::group(['prefix' => 'version-release'], function () {
     Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|approver|tax|finance-gl']], function () {
         Route::post('/store', 'VersionReleaseController@store');
         Route::post('/submit-item', 'VersionReleaseController@submitItem');
+        //Route::post('/update/{$id}', 'VersionReleaseController@submitItem');
     });
 });
-
-//Route::post('master-data/version-release/store','VersionReleaseController@store');
 
 // Authenticated Routes
 Route::group(['middleware' => 'auth'], function(){

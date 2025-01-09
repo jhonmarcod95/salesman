@@ -26,7 +26,7 @@
 
 							<!--begin::Nav-->
 							<div class="navi navi-bold navi-hover navi-active navi-link-rounded">
-								<div class="navi-item mb-1" v-for="(item, index) in items" :key="index">
+								<div class="navi-item mb-4" v-for="(item, index) in items" :key="index">
 									<a class="navi-link py-4 cursor-pointer" :class="{'active':selectedVersion.id == item.id}" @click="viewVersion(item)">
 										<span class="navi-icon mr-2">
 											<span class="svg-icon">
@@ -58,7 +58,7 @@
 						<!--end::Body-->
 						<div class="card-footer py-2">
 							<!--begin::Pagination-->
-							<table-pagination v-if="items.length > 0" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
+							<table-pagination-basic v-if="items.length > 0" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
 							<!--end::Pagination-->
 						</div>
 					</div>
@@ -66,7 +66,7 @@
 				</div>
 				<!--end::Aside-->
 				<!--begin::Content-->
-				<div class="flex-row-fluid ml-lg-8">
+				<div class="flex-row-fluid ml-8 col-8">
 					<!--begin::Advance Table: Widget 7-->
 					<div class="card card-custom card-stretch px-8">
 						<!--begin::Header-->
@@ -133,7 +133,7 @@
 				breadcrumbs: {
                     title: 'Version Release',
                     items: [
-						//'Master Data',
+						'Master Data',
                         'Version Release'
                     ]
                 },
