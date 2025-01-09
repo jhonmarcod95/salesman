@@ -12,7 +12,7 @@
 		<div class="container">
 			<div class="d-flex flex-row">
 				<!--begin::Aside-->
-				<div class="flex-row-auto offcanvas-mobile w-300px w-xl-350px min-h-550px" id="kt_profile_aside">
+				<div class="flex-row offcanvas-mobile w-300px w-xl-350px min-h-550px" id="kt_profile_aside">
 					<!--begin::Profile Card-->
 					<div class="card card-custom card-stretch">
 						<div class="card-header border-0 pt-10 pl-15">
@@ -43,7 +43,7 @@
 										</span>
 										<span class="navi-text font-size-lg">{{ `Vsn ${item.version}` }}</span>
 										<span class="navi-label" v-if="index == 0 && pagination.current_page == 1">
-											<span class="label label-light-success label-inline font-weight-bold">new</span>
+											<span class="label px-1 label-inline font-weight-bold bg-green rounded">new</span>
 										</span>
 									</a>
 								</div> 
@@ -66,7 +66,7 @@
 				</div>
 				<!--end::Aside-->
 				<!--begin::Content-->
-				<div class="flex-row-fluid ml-8 col-8">
+				<div class="flex-row-fluid col-9">
 					<!--begin::Advance Table: Widget 7-->
 					<div class="card card-custom card-stretch px-8">
 						<!--begin::Header-->
