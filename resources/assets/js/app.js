@@ -15,6 +15,9 @@ require('./mixins.js'); // Global reusable functions
 import Multiselect from 'vue-multiselect';
 Vue.component('multiselect', Multiselect);
 
+import VModal from 'vue-js-modal';
+Vue.use(VModal);
+
 import HighchartsVue from 'highcharts-vue'
 Vue.use(HighchartsVue)
 
