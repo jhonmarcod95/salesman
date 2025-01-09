@@ -20,7 +20,6 @@
 						</div>
 						<!--begin::Body-->
 						<div class="card-body pt-4 position-relative">
-
 							<!--begin::Block UI spinner-->
 							<table-spinner v-if="isProcessing && items.length"/>
 							<!--end::Block UI spinner-->
@@ -59,7 +58,7 @@
 						<!--end::Body-->
 						<div class="card-footer py-2">
 							<!--begin::Pagination-->
-							<table-pagination-basic v-if="items.length > 0" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
+							<table-pagination v-if="items.length > 0" :pagination="pagination" v-on:updatePage="goToPage" v-on:doChangeLimit="changePageCount"/>
 							<!--end::Pagination-->
 						</div>
 					</div>
@@ -134,7 +133,7 @@
 				breadcrumbs: {
                     title: 'Version Release',
                     items: [
-						'Master Data',
+						//'Master Data',
                         'Version Release'
                     ]
                 },
@@ -150,9 +149,9 @@
 		methods: {
 			submit(data) {
 				if(this.formAction == 'add') {
-					this.submitData(`/master-data${this.endpoint}/store`, data);
+					this.submitData(`${this.endpoint}/store`, data);
 				} else {
-					this.submitData(`master-data${this.endpoint}/update/${data.id}`, data);
+					this.submitData(`${this.endpoint}/update/${data.id}`, data);
 				}
 			},
 			listFetched(selectedIndex = null) {
@@ -177,7 +176,8 @@
 		},
 		computed: {
 			isAdministrator() {
-				return this.authenticated && this.hasRole('ADMINISTRATOR');
+				return this.authenticated && (this.userRoles == "It" || this.userRoles == "Admin");
+				// return true;
 			}
 		}
 	}

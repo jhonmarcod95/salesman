@@ -152,6 +152,8 @@ Vue.component('expense-report-nav', require('./components/Common/ExpenseReportNa
 //Version Release
 Vue.component('version-release', require('./components/VersionRelease/VersionRelease.vue'));
 Vue.component('app-breadcrumbs', require('./components/Common/Breadcrumbs.vue'));
+Vue.component('spinner', require('./components/Common/Spinner.vue'));
+Vue.component('table-spinner', require('./components/Common/SpinnerBlockUI.vue'));
 
 const app = new Vue({
     el: '#app',

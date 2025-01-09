@@ -20,7 +20,7 @@ export default {
 				defaultDataValue: {},
                 errors: {},
 				requestProcessing: false,
-				//activeModal: ''
+				activeModal: ''
 			}
 		},		
 		created() {
@@ -155,15 +155,15 @@ export default {
 			},
 
 			//Modal methods =============================
-			// showModal(modalName) {
-			// 	this.activeModal = modalName;
-			// 	this.$modal.show(modalName);
-			// },
-			// closeModal() {
-			// 	this.$modal.hide(this.activeModal);
-			// 	this.activeModal = '';
-			// 	this.doResetData();
-			// },
+			showModal(modalName) {
+				this.activeModal = modalName;
+				this.$modal.show(modalName);
+			},
+			closeModal() {
+				this.$modal.hide(this.activeModal);
+				this.activeModal = '';
+				this.doResetData();
+			},
 			//===========================================
 
 			//Pagination methods =============================
