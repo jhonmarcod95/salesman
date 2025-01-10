@@ -71,6 +71,10 @@
                                 <button type="submit" class="btn btn-primary my-4">Sign in</button>
                             </div>
                         </form>
+                        
+                        </div>
+                            <a class="nav-link h-6 color-secondary" href="{{ url('version-release/plain') }}"> Version Release </a>
+                        </div>
 
                     </div>
                 </div>

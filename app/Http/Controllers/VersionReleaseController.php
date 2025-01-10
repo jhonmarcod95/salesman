@@ -21,6 +21,12 @@ class VersionReleaseController extends Controller
         return view('version-release.index');
     }
 
+    //Version release without nav and sidebar
+    public function indexPlain()
+    {
+        return view('version-release.index2');
+    }
+
     public function all(Request $request) {
         $versionRelease = VersionRelease::select('id','version','release_date')
             ->with('releaseNotes:id,version_release_id,description,type')
@@ -48,8 +54,13 @@ class VersionReleaseController extends Controller
 
     public function store(Request $request) {
         $request->validate([
-            'version' => 'required',
-            'release_date' => 'required'
+            'version' => 'required|regex:/(.+).(.+)\.(.+)/i',
+            'release_date' => 'required',
+            'new_features' => '',
+            'updates' => 'required',
+            'fixes' => 'required'
+        ],[
+            'version.regex' => 'Invalid version format (please use year.version.fixes)'
         ]);
 
         //Get release notes
@@ -58,9 +69,9 @@ class VersionReleaseController extends Controller
         $fixes = $this->getReleaseNotes($request->fixes, 'fixes');
 
         //Validate empty notes
-        if(empty($new_features) && empty($updates) && empty($fixes)) {
-            throw ValidationException::withMessages(['release_note' => 'Version description is required. Indicate what is your changes.']);
-        }
+        // if(empty($new_features) && empty($updates) && empty($fixes)) {
+        //     throw ValidationException::withMessages(['release_note' => 'Version description is required. Indicate what is your changes.']);
+        // }
 
         //Merge all notes
         $formattedArrayNotes = array_merge($new_features, $updates, $fixes);

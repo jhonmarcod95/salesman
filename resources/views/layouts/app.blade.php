@@ -12,7 +12,7 @@
     <div class="main-content">
         <div class="pb-6"> @include('layouts.nav') </div>
 
-        <div class="p-1"> @yield('content') </div>
+        <div> @yield('content') </div>
 
         @include('layouts.footer')
     </div>
