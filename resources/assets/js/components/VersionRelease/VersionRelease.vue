@@ -26,7 +26,7 @@
 
 							<!--begin::Nav-->
 							<div class="navi navi-bold navi-hover navi-active navi-link-rounded">
-								<div class="navi-item mb-4" v-for="(item, index) in items.slice().reverse()" :key="index">
+								<div class="navi-item mb-4" v-for="(item, index) in items" :key="index">
 									<a class="btn active border-0 navi-link py-4" @click="viewVersion(item)">
 										<span class="navi-icon mr-2">
 											<span class="svg-icon">
