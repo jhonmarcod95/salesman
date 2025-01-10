@@ -27,7 +27,7 @@
 							<!--begin::Nav-->
 							<div class="navi navi-bold navi-hover navi-active navi-link-rounded">
 								<div class="navi-item mb-4" v-for="(item, index) in items.slice().reverse()" :key="index">
-									<a class="navi-link py-4 cursor-pointer" :class="{'active':selectedVersion.id == item.id}" @click="viewVersion(item)">
+									<a class="btn active border-0 navi-link py-4" @click="viewVersion(item)">
 										<span class="navi-icon mr-2">
 											<span class="svg-icon">
 												<!--begin::Svg Icon | path:assets/media/svg/icons/Design/Layers.svg-->
@@ -155,7 +155,7 @@
 				}
 			},
 			listFetched(selectedIndex = null) {
-				let index = 0
+				let index = this.items.length-1;
 				if(!_.isEmpty(this.selectedVersion)) {
 					let selectedIndex = _.findIndex(this.items, ['id', this.selectedVersion.id]);
 					index = selectedIndex >= 0 ? selectedIndex : 0
