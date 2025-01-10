@@ -14,7 +14,7 @@
                         VERSION RELEASE
                     </h4>
                 </div>
-                <span class="pt-8" @click="closeModal()"><i class="flaticon2-cross font-size-sm"></i></span>
+                <!-- <span class="pt-8" @click="closeModal()"><i class="far fa-window-close"></i></span> -->
             </div>
             <div class="card-body">
                 <div class="row">
@@ -39,46 +39,46 @@
                     </div>
                 </div>
 
-                <div class="mb-8">
+                <div class="mb-4">
                     <div class="mb-2"><strong>New Feature: </strong></div>
                     <div class="input-group mb-2" v-for="(item, index) in formData.new_features" :key="index">
                         <input type="text" class="form-control" v-model="item.description" :placeholder="`New ${index+1}...`">
                         <div class="input-group-append">
                             <span class="input-group-text cursor-pointer" @click="newItem('new_features')">
-                                <i class="flaticon2-plus icon-nm"></i>
+                                <i class="fas fa-plus"></i>
                             </span>
                             <span class="input-group-text cursor-pointer" @click="removeItem('new_features', index)">
-                                <i class="flaticon2-cross icon-nm"></i>
+                                <i class="fas fa-minus"></i>
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-8">
+                <div class="mb-4">
                     <div class="mb-2"><strong>Enhancement:</strong></div>
                     <div class="input-group mb-2" v-for="(item, index) in formData.updates" :key="index">
                         <input type="text" class="form-control" v-model="item.description" :placeholder="`Update ${index+1}...`">
                         <div class="input-group-append">
                             <span class="input-group-text cursor-pointer" @click="newItem('updates')">
-                                <i class="flaticon2-plus icon-nm"></i>
+                                <i class="fas fa-plus"></i>
                             </span>
                             <span class="input-group-text cursor-pointer" @click="removeItem('updates', index)">
-                                <i class="flaticon2-cross icon-nm"></i>
+                                <i class="fas fa-minus"></i>
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-8">
+                <div class="mb-4">
                     <div class="mb-2"><strong>Fixes:</strong></div>
                     <div class="input-group mb-2" v-for="(item, index) in formData.fixes" :key="index">
                         <input type="text" class="form-control" v-model="item.description" :placeholder="`Fix ${index+1}...`">
                         <div class="input-group-append">
                             <span class="input-group-text cursor-pointer" @click="newItem('fixes')">
-                                <i class="flaticon2-plus icon-nm"></i>
+                                <i class="fas fa-plus"></i>
                             </span>
                             <span class="input-group-text cursor-pointer" @click="removeItem('fixes', index)">
-                                <i class="flaticon2-cross icon-nm"></i>
+                                <i class="fas fa-minus"></i>
                             </span>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 <template>
 	<div>
-		
+        <div class="header bg-green pb-6 pt-5 pt-md-6 mb--6"></div>
 		<app-breadcrumbs :breadcrumbs="breadcrumbs">
 			<div class="btn btn-white font-weight-bold p-3 mr-3" 
 				v-if="isAdministrator"
@@ -26,8 +26,8 @@
 
 							<!--begin::Nav-->
 							<div class="navi navi-bold navi-hover navi-active navi-link-rounded">
-								<div class="navi-item mb-4" v-for="(item, index) in items" :key="index">
-									<a class="btn active border-0 navi-link py-4" @click="viewVersion(item)">
+								<div class="navi-item mb-1" v-for="(item, index) in items" :key="index">
+									<a class="btn active border-0 navi-link py-1" @click="viewVersion(item)">
 										<span class="navi-icon mr-2">
 											<span class="svg-icon">
 												<!--begin::Svg Icon | path:assets/media/svg/icons/Design/Layers.svg-->
@@ -43,7 +43,7 @@
 										</span>
 										<span class="navi-text font-size-lg">{{ `Vsn ${item.version}` }}</span>
 										<span class="navi-label" v-if="index == 0 && pagination.current_page == 1">
-											<span class="label px-1 label-inline font-weight-bold bg-green rounded">new</span>
+											<span class="label p-1 label-inline text-white bg-green rounded">new</span>
 										</span>
 									</a>
 								</div> 
@@ -133,8 +133,8 @@
 				breadcrumbs: {
                     title: 'Version Release',
                     items: [
-						'Master Data',
-                        'Version Release'
+						// 'Master Data',
+                        // 'Version Release'
                     ]
                 },
 				data: {},

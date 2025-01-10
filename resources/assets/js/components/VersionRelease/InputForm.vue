@@ -2,8 +2,8 @@
     <div class="input-group mb-0">
         <input type="text" class="form-control" placeholder="Input description..." v-model="description" autofocus/>
         <div class="input-group-append">
-            <button class="btn btn-primary" type="button" @click="submit()">Submit</button>
-            <button class="btn btn-secondary" type="button" @click="close()"><i class="flaticon2-cross icon-sm"></i></button>
+            <button class="btn btn-sm btn-primary" type="button" @click="submit()">Submit</button>
+            <button class="btn btn-sm btn-secondary text-gray" type="button" @click="close()">Cancel</button>
         </div>
     </div>
 </template>

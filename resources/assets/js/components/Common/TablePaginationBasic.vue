@@ -9,11 +9,11 @@
             </select>
         </div>
         <div class="d-flex flex-wrap py-2">
-            <a class="btn btn-icon btn-sm btn-primary mr-2 my-1" @click="goToPage(pagination.first_page_url)"><i class="ki ki-bold-double-arrow-back icon-xs"></i></a>
-            <a class="btn btn-sm btn-primary mr-2 my-1" @click="goToPage(pagination.prev_page_url)"><i class="ki ki-bold-arrow-back icon-xs"></i> Prev</a>
+            <a class="btn btn-icon btn-sm bg-green mr-2 my-1 text-white" @click="goToPage(pagination.first_page_url)"><i class="fas fa-angle-double-left icon-xs"></i></a>
+            <a class="btn btn-sm bg-green mr-2 my-1 text-white" @click="goToPage(pagination.prev_page_url)"><i class="fas fa-angle-left icon-xs"></i> Prev</a>
 
-            <a class="btn btn-sm btn-primary mr-2 my-1" @click="goToPage(pagination.next_page_url)">Next <i class="ki ki-bold-arrow-next icon-xs"></i></a>
-            <a class="btn btn-icon btn-sm btn-primary mr-2 my-1" @click="goToPage(pagination.last_page_url)"><i class="ki ki-bold-double-arrow-next icon-xs"></i></a>
+            <a class="btn btn-sm bg-green mr-2 my-1 text-white" @click="goToPage(pagination.next_page_url)">Next <i class="fas fa-angle-right icon-xs"></i></a>
+            <a class="btn btn-icon btn-sm bg-green mr-2 my-1 text-white" @click="goToPage(pagination.last_page_url)"><i class="fas fa-angle-double-right icon-xs"></i></a>
         </div>
     </div>
 </template>

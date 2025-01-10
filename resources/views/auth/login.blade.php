@@ -73,7 +73,7 @@
                         </form>
                         
                         </div>
-                            <a class="nav-link h-6 color-secondary" href="{{ url('version-release/plain') }}"> Version Release </a>
+                            <a class="text-xs text-muted" href="{{ url('version-release/plain') }}"> Version Release </a>
                         </div>
 
                     </div>
