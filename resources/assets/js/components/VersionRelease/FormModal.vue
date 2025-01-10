@@ -21,6 +21,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Version (<em>year.version.fixes</em>)</label>
+                            <label class="text-danger">*</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">{{ currentYear }}</span>
@@ -32,6 +33,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Release Date</label>
+                            <label class="text-danger">*</label>
                             <input type="date" class="form-control" :max="maxDay" v-model="formData.release_date">
                         </div>
                     </div>
@@ -90,8 +92,8 @@
                 <div class="btn btn-sm btn-secondary" @click="closeModal()">Cancel</div>
 
                 <div class="btn btn-sm btn-primary"
-                     :class="{ 'spinner spinner-primary spinner-right': requestProcessing }"
                      @click="submit()">
+                     <span :class="{ 'spinner spinner-primary spinner-right': requestProcessing }"></span>
                     Submit
                 </div>
             </div>
@@ -106,7 +108,7 @@ import moment from 'moment';
         props: [ 
             'data', 
             'formErrors', 
-            'formAction' ,
+            'formAction',
             'requestProcessing'
         ],
 
@@ -125,8 +127,8 @@ import moment from 'moment';
 
         methods: {
             submit() {
-                //Format version
-                this.formData.version = '';
+                // Format version
+                //this.formData.version = '';
                 this.formData.version = `${this.currentYear}.${this.version}`
 
                 //Submit data
@@ -171,4 +173,5 @@ import moment from 'moment';
             }
         }
     }
+    
 </script>

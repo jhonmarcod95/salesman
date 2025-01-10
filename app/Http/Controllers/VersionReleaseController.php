@@ -56,18 +56,21 @@ class VersionReleaseController extends Controller
         $request->validate([
             'version' => 'required|regex:/(.+).(.+)\.(.+)/i',
             'release_date' => 'required',
-            'new_features' => '',
-            'updates' => 'required',
-            'fixes' => 'required'
+            'new_features.*.*' => 'required_without_all:updates.*.*,fixes.*.*',
+            'updates.*.*' => 'required_without_all:new_features.*.*,fixes.*.*',
+            'fixes.*.*' => 'required_without_all:new_features.*.*,updates.*.*'
         ],[
-            'version.regex' => 'Invalid version format (please use year.version.fixes)'
+            'version.regex' => 'Invalid version format (please use year.version.fixes).',
+            'new_features.*.*.required_without_all' => 'Please indicate your changes.',
+            'updates.*.*.required_without_all' => 'Please indicate your changes.',
+            'fixes.*.*.required_without_all' => 'Please indicate your changes.'
         ]);
 
         //Get release notes
         $new_features = $this->getReleaseNotes($request->new_features, 'new');
         $updates = $this->getReleaseNotes($request->updates, 'updates');
         $fixes = $this->getReleaseNotes($request->fixes, 'fixes');
-
+        
         //Validate empty notes
         // if(empty($new_features) && empty($updates) && empty($fixes)) {
         //     throw ValidationException::withMessages(['release_note' => 'Version description is required. Indicate what is your changes.']);
@@ -79,14 +82,14 @@ class VersionReleaseController extends Controller
         try {
             DB::transaction(function () use($request, $formattedArrayNotes) {
                 //Store version release item
-                $verion_release = VersionRelease::create([
+                $version_release = VersionRelease::create([
                     'version' => $request->version,
                     'release_date' => $request->release_date
                 ]);
 
                 //Store version release notes
                 foreach ($formattedArrayNotes as $note) {
-                    $versionNote = Arr::add($note, 'version_release_id', $verion_release->id);
+                    $versionNote = Arr::add($note, 'version_release_id', $version_release->id);
                     VersionReleaseNote::create($versionNote);
                 }
             });
