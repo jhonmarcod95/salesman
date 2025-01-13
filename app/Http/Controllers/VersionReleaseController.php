@@ -30,7 +30,8 @@ class VersionReleaseController extends Controller
     public function all(Request $request) {
         $versionRelease = VersionRelease::select('id','version','release_date')
             ->with('releaseNotes:id,version_release_id,description,type')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('release_date', 'desc')
+            ->orderBy('id','desc') //doesnt sort by date properly for some reason
             ->paginate($request->limit);
 
         $versionRelease->getCollection()->transform(function($item) {
