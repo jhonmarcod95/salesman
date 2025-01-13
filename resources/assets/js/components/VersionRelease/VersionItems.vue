@@ -69,6 +69,11 @@ export default {
                 // toastr.success('Data submitted successfuly.', 'Success');
             })
         }
+    },
+    watch:{
+        version_release_id:function(){
+            this.inputOpen=false; //close input tabs when clicking a new version release
+        }
     }
     
 }
