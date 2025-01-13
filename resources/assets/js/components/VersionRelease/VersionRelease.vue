@@ -1,6 +1,6 @@
 <template>
 	<div>
-        <div class="header bg-green pb-6 pt-5 pt-md-6 mb--6"></div>
+        <div class="header bg-green pb-6 pt-5 pt-md-6 mb--8"></div>
 		<app-breadcrumbs :breadcrumbs="breadcrumbs">
 			<div class="btn btn-white font-weight-bold p-3 mr-3" 
 				v-if="isAdministrator"
@@ -14,7 +14,7 @@
 				<!--begin::Aside-->
 				<div class="flex-row offcanvas-mobile w-300px w-xl-350px min-h-550px" id="kt_profile_aside">
 					<!--begin::Profile Card-->
-					<div class="card card-custom card-stretch">
+					<div class="card card-custom card-stretch shadow-sm">
 						<div class="card-header border-0 pt-10 pl-15">
 							<h3 class="card-title font-weight-bolder text-dark">Version Release</h3>
 						</div>
@@ -68,7 +68,7 @@
 				<!--begin::Content-->
 				<div class="flex-row-fluid col-9">
 					<!--begin::Advance Table: Widget 7-->
-					<div class="card card-custom card-stretch px-8">
+					<div class="card card-custom card-stretch px-8 shadow-sm">
 						<!--begin::Header-->
 						<div class="card-header border-0 pt-10">
 							<h3 class="card-title align-items-start flex-column">

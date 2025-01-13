@@ -3,7 +3,7 @@
 <head>
     @include('layouts.head')
 </head>
-<body class="bg-default">
+<body>
 
 <div id="app">
 <version-release :authenticated="false" :user-roles="[]"></version-release>
