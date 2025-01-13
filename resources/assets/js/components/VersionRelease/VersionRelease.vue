@@ -155,7 +155,7 @@
 				}
 			},
 			listFetched(selectedIndex = null) {
-				let index = this.items.length-1;
+				let index = 0;
 				if(!_.isEmpty(this.selectedVersion)) {
 					let selectedIndex = _.findIndex(this.items, ['id', this.selectedVersion.id]);
 					index = selectedIndex >= 0 ? selectedIndex : 0
