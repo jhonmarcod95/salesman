@@ -79,16 +79,19 @@
 						<!--end::Header-->
 						<!--begin::Body-->
 						<div class="card-body">
-							<div v-if="!isEmpty(selectedVersion)">
-								<div class="mb-10" v-if="!isEmpty(selectedVersion.release_note.new)">
-									<VersionItems title="New" :items="selectedVersion.release_note.new" @submitSuccess="submitSuccess" :isAdministrator="isAdministrator"/>
-								</div>
-								<div class="mb-10" v-if="!isEmpty(selectedVersion.release_note.updates)">
-									<VersionItems title="Enhancement" :items="selectedVersion.release_note.updates" @submitSuccess="submitSuccess" :isAdministrator="isAdministrator"/>
-								</div>
-								<div class="mb-10" v-if="!isEmpty(selectedVersion.release_note.fixes)">
-									<VersionItems title="Fixes" :items="selectedVersion.release_note.fixes" @submitSuccess="submitSuccess" :isAdministrator="isAdministrator"/>
-								</div>
+							<div class="mb-10" v-if="!isEmpty(selectedVersion)">
+								<!--New features-->
+								<VersionItems type="new" :version_release_id="selectedVersion.id"
+								:items="selectedVersion.release_note.new" @submitSuccess="submitSuccess"
+								:isAdministrator="isAdministrator"/>
+								<!--Updates-->
+								<VersionItems type="updates" :version_release_id="selectedVersion.id"
+								:items="selectedVersion.release_note.updates" @submitSuccess="submitSuccess"
+								:isAdministrator="isAdministrator"/>
+								<!--Fixes-->
+								<VersionItems type="fixes" :version_release_id="selectedVersion.id"
+								:items="selectedVersion.release_note.fixes" @submitSuccess="submitSuccess"
+								:isAdministrator="isAdministrator"/>
 							</div>
 							<div v-else>
 								<span class="spinner spinner-primary mr-10"></span>
