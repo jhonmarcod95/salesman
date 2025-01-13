@@ -7,18 +7,18 @@
                 <i class="fas fa-wrench mr-2" v-if="title == 'Fixes'"></i>
                 {{ title }}
             </div>
-            <a href="javascript:;" @click="toggelInput()" v-if="isAdministrator">Add Item<i class="fas fa-plus ml-2"></i></a>
+            <a href="javascript:;" @click="toggleInput()" v-if="isAdministrator">Add Item<i class="fas fa-plus ml-2"></i></a>
         </div>
         <ul class="my-5">
             <li class="mb-2" v-for="(item, index) in items" :key="index">
-                <InputForm v-if="(inputOpen && selectedItem.id == item.id) && isAdministrator" :data="item.description" @submit="submit" @close="toggelInput()"/>
+                <InputForm v-if="(inputOpen && selectedItem.id == item.id) && isAdministrator" :data="item.description" @submit="submit" @close="toggleInput()"/>
                 <span v-else>
                     <span>{{ item.description }}</span>
-                    <a href="javascript:;" @click="toggelInput(item)" v-if="isAdministrator"><i class="fas fa-edit icon-xs"></i></a>
+                    <a href="javascript:;" @click="toggleInput(item)" v-if="isAdministrator"><i class="fas fa-edit icon-xs"></i></a>
                 </span>
             </li>
             <li v-if="(inputOpen && inputMode == 'add') && isAdministrator">
-                <InputForm @submit="submit" @close="toggelInput()"/>
+                <InputForm @submit="submit" @close="toggleInput()"/>
             </li>
         </ul>
     </div>
@@ -40,7 +40,7 @@ export default {
         }
     },
     methods: {
-        toggelInput(data = null) {
+        toggleInput(data = null) {
             this.inputOpen = !this.inputOpen
             this.inputMode = 'add';
             this.selectedItem = {
@@ -62,7 +62,7 @@ export default {
             }
             axios.post('submit-item',data)
             .then(res => {
-                this.toggelInput();
+                this.toggleInput();
                 this.$emit('submitSuccess');
                 toastr.success('Data submitted successfuly.', 'Success');
             })
