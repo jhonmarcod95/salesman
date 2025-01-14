@@ -73,7 +73,7 @@
                         </form>
                         <!--Version release-->
                         </div>
-                            <a class="text-xs text-muted" href="{{ url('version-release/plain') }}"> Check the latest version </a>
+                            <a class="text-xs text-gray m-2" href="{{ url('version-release/plain') }}">Check the latest version </a>
                         </div>
 
                     </div>

@@ -3,7 +3,7 @@
         <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
             <div class="font-size-lg font-weight-bold">
                 <div v-if="type == 'new'"><i class="fas fa-info-circle mr-2"></i>New Features</div>
-                <div v-else-if="type == 'updates'"><i class="fas fa-sync-alt mr-2"></i>Updates</div>
+                <div v-else-if="type == 'updates'"><i class="fas fa-cogs mr-2"></i>Updates</div>
                 <div v-else-if="type == 'fixes'"><i class="fas fa-wrench mr-2"></i>Fixes</div>
             </div>
             <a href="javascript:;" @click="toggleInput()" v-if="isAdministrator">Add Item<i class="fas fa-plus ml-2"></i></a>
