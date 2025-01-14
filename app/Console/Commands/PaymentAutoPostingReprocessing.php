@@ -57,7 +57,8 @@ class PaymentAutoPostingReprocessing extends Command
             //  '13th_week' => ['2024-12-09','2024-12-15',true],
             //  '14th_week' => ['2024-12-16','2024-12-22',true],
             //  '15th_week' => ['2024-12-23','2024-12-29',true],
-             '16th_week' => ['2024-12-30','2025-01-05',true],
+            //  '16th_week' => ['2024-12-30','2025-01-05',true],
+             '17th_week' => ['2025-01-06','2025-01-12',true],
 
         ];
 
