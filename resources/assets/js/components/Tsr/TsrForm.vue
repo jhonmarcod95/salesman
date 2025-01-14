@@ -20,15 +20,15 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-username">Last Name</label>
-                                                <input type="text" id="input-username" class="form-control form-control-alternative" v-model="tsr.last_name">
+                                                <label class="form-control-label" for="input-last_name">Last Name</label>
+                                                <input type="text" id="input-last_name" class="form-control form-control-alternative" v-model="tsr.last_name">
                                                 <span class="text-danger small" v-if="errors.last_name">{{ errors.last_name[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-email">First Name</label>
-                                                <input type="email" id="input-email" class="form-control form-control-alternative" v-model="tsr.first_name">
+                                                <label class="form-control-label" for="input-first_name">First Name</label>
+                                                <input type="text" id="input-first_name" class="form-control form-control-alternative" v-model="tsr.first_name">
                                                 <span class="text-danger small" v-if="errors.first_name">{{ errors.first_name[0] }}</span>
                                             </div>
                                         </div>
@@ -36,22 +36,22 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-first-name">Middle Name</label>
-                                                <input type="text" id="input-first-name" class="form-control form-control-alternative" v-model="tsr.middle_name">
+                                                <label class="form-control-label" for="input-middle_name">Middle Name</label>
+                                                <input type="text" id="input-middle_name" class="form-control form-control-alternative" v-model="tsr.middle_name">
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="middle_initial">Middle Initial</label>
-                                                <input type="text" id="middle_initial" class="form-control form-control-alternative" v-model="tsr.middle_initial">
+                                                <label class="form-control-label" for="input-middle_initial">Middle Initial</label>
+                                                <input type="text" id="input-middle_initial" class="form-control form-control-alternative" v-model="tsr.middle_initial">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-last-name">Suffix</label>
-                                                <input type="text" id="input-last-name" class="form-control form-control-alternative" v-model="tsr.suffix">
+                                                <label class="form-control-label" for="input-suffix">Suffix</label>
+                                                <input type="text" id="input-last-suffix" class="form-control form-control-alternative" v-model="tsr.suffix">
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -76,8 +76,8 @@
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-last-name">Vendor Code</label>
-                                                <input type="text" id="vendor-code" class="form-control form-control-alternative" v-model="tsr.vendor_code">
+                                                <label class="form-control-label" for="input-vendor_code">Vendor Code</label>
+                                                <input type="text" id="input-vendor_code" class="form-control form-control-alternative" v-model="tsr.vendor_code">
                                             </div>
                                         </div>
                                     </div>
@@ -97,8 +97,8 @@
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-city">Email</label>
-                                                <input type="text" id="input-city" class="form-control form-control-alternative" v-model="tsr.email">
+                                                <label class="form-control-label" for="input-email">Email</label>
+                                                <input type="email" id="input-email" class="form-control form-control-alternative" v-model="tsr.email">
                                                 <span class="text-danger small" v-if="errors.email">{{ errors.email[0] }}</span>
                                             </div>
                                         </div>
@@ -106,14 +106,14 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-country">Contact Number</label>
-                                                <input type="text" id="input-country" class="form-control form-control-alternative" v-model="tsr.contact_number">
+                                                <label class="form-control-label" for="input-contact_number">Contact Number</label>
+                                                <input type="text" id="input-contact_number" class="form-control form-control-alternative" v-model="tsr.contact_number">
                                                 <span class="text-danger small" v-if="errors.contact_number">{{ errors.contact_number[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-city">Bithday</label>
+                                                <label class="form-control-label" for="input-date_of_birth">Birthday</label>
                                                 <input type="date" id="date_of_birth" class="form-control form-control-alternative" v-model="tsr.date_of_birth">
                                                 <span class="text-danger small" v-if="errors.date_of_birth">{{ errors.date_of_birth[0] }}</span>
                                             </div>
@@ -122,37 +122,37 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-city">Date Hired</label>
-                                                <input type="date" id="date_hired" class="form-control form-control-alternative" v-model="tsr.date_hired">
+                                                <label class="form-control-label" for="input-date_hired">Date Hired</label>
+                                                <input type="date" id="input-date_hired" class="form-control form-control-alternative" v-model="tsr.date_hired">
                                                 <span class="text-danger small" v-if="errors.date_hired">{{ errors.date_hired[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="contact_person">Contact Person</label>
-                                                <input type="text" id="contact_person" class="form-control form-control-alternative" v-model="tsr.contact_person">
+                                                <label class="form-control-label" for="input-contact_person">Contact Person</label>
+                                                <input type="text" id="input-contact_person" class="form-control form-control-alternative" v-model="tsr.contact_person">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="personal_email">Personal Email</label>
-                                                <input type="text" id="personal_email" class="form-control form-control-alternative" v-model="tsr.personal_email">
+                                                <label class="form-control-label" for="input-personal_email">Personal Email</label>
+                                                <input type="email" id="input-personal_email" class="form-control form-control-alternative" v-model="tsr.personal_email">
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="plate_number">Plate Number</label>
-                                                <input type="text" id="plate_number" class="form-control form-control-alternative" v-model="tsr.plate_number">
+                                                <label class="form-control-label" for="input-plate_number">Plate Number</label>
+                                                <input type="text" id="input-plate_number" class="form-control form-control-alternative" v-model="tsr.plate_number">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="monthly_qouta">Monthly Qouta</label>
-                                                <input type="text" id="monthly_qouta" class="form-control form-control-alternative" v-model="tsr.monthly_qouta">
+                                                <label class="form-control-label" for="input-monthly_qouta">Monthly Qouta</label>
+                                                <input type="text" id="input-monthly_qouta" class="form-control form-control-alternative" v-model="tsr.monthly_qouta">
                                             </div>
                                         </div>
                                     </div>
