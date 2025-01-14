@@ -58,24 +58,17 @@ class VersionReleaseController extends Controller
             'version' => 'required|regex:/(.+).(.+)\.(.+)/i',
             'release_date' => 'required',
             'new_features.*.*' => 'required_without_all:updates.*.*,fixes.*.*',
-            'updates.*.*' => 'required_without_all:new_features.*.*,fixes.*.*',
-            'fixes.*.*' => 'required_without_all:new_features.*.*,updates.*.*'
+            // 'updates.*.*' => 'required_without_all:new_features.*.*,fixes.*.*',
+            // 'fixes.*.*' => 'required_without_all:new_features.*.*,updates.*.*'
         ],[
             'version.regex' => 'Invalid version format (please use year.version.fixes).',
-            'new_features.*.*.required_without_all' => 'Please indicate your changes.',
-            'updates.*.*.required_without_all' => 'Please indicate your changes.',
-            'fixes.*.*.required_without_all' => 'Please indicate your changes.'
+            'required_without_all' => 'Please indicate your changes'
         ]);
 
         //Get release notes
         $new_features = $this->getReleaseNotes($request->new_features, 'new');
         $updates = $this->getReleaseNotes($request->updates, 'updates');
         $fixes = $this->getReleaseNotes($request->fixes, 'fixes');
-        
-        //Validate empty notes
-        // if(empty($new_features) && empty($updates) && empty($fixes)) {
-        //     throw ValidationException::withMessages(['release_note' => 'Version description is required. Indicate what is your changes.']);
-        // }
 
         //Merge all notes
         $formattedArrayNotes = array_merge($new_features, $updates, $fixes);
