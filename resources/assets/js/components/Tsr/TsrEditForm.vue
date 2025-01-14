@@ -54,7 +54,7 @@
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="role">Company</label>
+                                                <label class="form-control-label">Company</label>
                                                 <select class="form-control" :disabled="defaultFields" v-model="tsr.company_id">
                                                     <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
                                                 </select>
@@ -65,7 +65,7 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="role">Location</label>
+                                                <label class="form-control-label">Location</label>
                                                 <select class="form-control" :disabled="defaultFields" v-model="tsr.user.location[0].id">
                                                     <option v-for="(location,l) in locations" v-bind:key="l" :value="location.id"> {{ location.name }}</option>
                                                 </select>
@@ -151,7 +151,8 @@
                                     </div>
                                     <div class="row">
                                         <div class="text">
-                                            <button @click="updateTsr(tsr)"  type="button" class="btn btn-primary mt-4">Save</button>
+                                            <button @click="updateTsr(tsr)"  type="button" class="btn btn-primary m-2">Save</button>
+                                            <!-- <a href="/tsr"  type="button" class="btn btn-primary m-2">Cancel</a> -->
                                         </div>
                                     </div>
                                 </div>

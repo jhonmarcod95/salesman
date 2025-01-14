@@ -51,12 +51,12 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-suffix">Suffix</label>
-                                                <input type="text" id="input-last-suffix" class="form-control form-control-alternative" v-model="tsr.suffix">
+                                                <input type="text" id="input-suffix" class="form-control form-control-alternative" v-model="tsr.suffix">
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="role">Company</label>
+                                                <label class="form-control-label">Company</label>
                                                 <select class="form-control" v-model="tsr.company">
                                                     <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
                                                 </select>
@@ -67,7 +67,7 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="role">Location</label>
+                                                <label class="form-control-label">Location</label>
                                                 <select class="form-control" v-model="tsr.location">
                                                     <option v-for="(location,l) in locations" v-bind:key="l" :value="location.id"> {{ location.name }}</option>
                                                 </select>
@@ -114,7 +114,7 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-control-label" for="input-date_of_birth">Birthday</label>
-                                                <input type="date" id="date_of_birth" class="form-control form-control-alternative" v-model="tsr.date_of_birth">
+                                                <input type="date" id="input-date_of_birth" class="form-control form-control-alternative" v-model="tsr.date_of_birth">
                                                 <span class="text-danger small" v-if="errors.date_of_birth">{{ errors.date_of_birth[0] }}</span>
                                             </div>
                                         </div>
@@ -158,7 +158,8 @@
                                     </div>
                                     <div class="row">
                                         <div class="text">
-                                            <button @click="addTsr(tsr)"  type="button" class="btn btn-primary mt-4">Save</button>
+                                            <button @click="addTsr(tsr)"  type="button" class="btn btn-primary m-2">Save</button>
+                                            <!-- <a href="/tsr"  type="button" class="btn btn-primary m-2">Cancel</a> -->
                                         </div>
                                     </div>
                                 </div>
@@ -221,7 +222,7 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-    addTsr(tsr){
+        addTsr(tsr){
             axios.post('/tsr', {
                 last_name: tsr.last_name,
                 first_name: tsr.first_name,
