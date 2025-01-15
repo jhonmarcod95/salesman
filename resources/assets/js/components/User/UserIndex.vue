@@ -44,7 +44,6 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+user.id">Edit</a>
                                                     <a class="dropdown-item" href="javascript:;"
-                                                    v-if="user.dormant_days>=90&&(user.remarks!=null||user.remarks!='')"
                                                     @click="reactivateAccount(user.id,user.name)">Reactivate</a>
                                                     <a class="dropdown-item text-danger" href="#deleteModal"
                                                     data-toggle="modal" @click="SelectUser(user.id,user.name)">Delete</a>
@@ -169,13 +168,28 @@ export default {
         },
         reactivateAccount(id, name){
             // console.log(id);
-            axios.patch(`/user/reactivate/${id}`)
-            .then(Swal.fire({
+            Swal.fire({
+            title: "Account Reactivation",
+            text: "Are you sure you want to reactivate " + name + "'s account?",
+            showCancelButton: true,
+            cancelButtonColor: "#666666",
+            confirmButtonColor: "#111166",
+            confirmButtonText: "Confirm"
+            }).then(response =>{
+                if (response.isConfirmed)
+                {
+                    axios.patch(`/user/reactivate/${id}`);
+                    this.accountReactivated(name);
+                }
+            });
+        },
+        accountReactivated(name) {
+            Swal.fire({
             title: "Account reactivated!",
             text: "User " + name + " has been successfully reactivated.",
             confirmButtonColor: "#666666",
             confirmButtonText: "Okay"
-            }));
+            });
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
