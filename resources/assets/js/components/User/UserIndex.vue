@@ -11,7 +11,7 @@
                             <div class="row align-items-center">
                                 <div class="col">
                                     <h3 class="mb-0">User List</h3>
-                                </div>`
+                                </div>
                                 <div class="col text-right">
                                     <a :href="addLink" class="btn btn-sm btn-primary">Add New</a>
                                 </div>
@@ -29,8 +29,8 @@
                                     <th scope="col"></th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Email</th>
-                                    <th scope="col">Role</th>
-                                    <th scope="col">Company</th>
+                                    <!-- <th scope="col">Role</th>
+                                    <th scope="col">Company</th> -->
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -43,20 +43,20 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+user.id">Edit</a>
-                                                    <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getUserId(user.id)">Delete</a>
-                                                    <a class="dropdown-item" href="#reactivateAcc" data-toggle="modal" @click="getUserId(user.id)">Reactivate</a>
+                                                    <a class="dropdown-item" href="javascript:;" @click="reactivateAccount(user.id,user.name)">Reactivate</a>
+                                                    <a class="dropdown-item text-danger" href="#deleteModal" data-toggle="modal" @click="SelectUser(user.id,user.name)">Delete</a>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email }}</td>
-                                        <td>{{ user.roles[0].name }}</td>
+                                        <!-- <td>{{ user.roles[0].name }}</td>
                                         <td>
                                             <span v-for="(company, c) in user.companies" :key="c">
                                                 {{ company.name }} <br/>
                                             </span>
                                         </td>
-                                        <td></td>
+                                        <td></td> -->
                                     </tr>
                                 </tbody>
                             </table>
@@ -94,7 +94,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    Are you sure you want to delete this User?
+                                    Are you sure you want to delete {{ username }}?
                                 </div>
                             </div>
                         </div>
@@ -107,28 +107,11 @@
             </div>
         </div>
 
-        <!--Reactivate account-->
-        <div class="modal fade" id="reactivateAcc" role="dialog">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <div class="h4">Reactivate Account</div>
-                    </div>
-                    <div class="modal-body">
-                        <div class="h2 text-center">Are you sure you want to reactivate this account?</div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss='modal'>No</button>
-                        <button class="btn btn-primary" data-dismiss='modal' @click="reactivateAccount(user_id)">Yes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 </template>
 
 <script>
+import Swal from "sweetalert2";
 export default {
     data(){
         return{
@@ -136,6 +119,7 @@ export default {
             errors:[],
             keywords: '',
             user_id: '',
+            username: '',
             role: '',
             currentPage: 0,
             itemsPerPage: 10,
@@ -146,8 +130,9 @@ export default {
         this.getAuthRole();
     },
     methods:{
-        getUserId(id){
-            return this.user_id = id;
+        SelectUser(id, name){
+            this.user_id = id;
+            this.username = name;
         },
         getAuthRole(){
             axios.get('/auth-role')
@@ -172,16 +157,22 @@ export default {
             axios.delete(`/user/${id}`)
             .then(response =>{
                 $('#deleteModal').modal('hide');
-                alart('User Succesfully deleted');
+                alert('User' + this.username + 'succesfully deleted.');
             })
             .catch(error => {
                 this.errors = error.response.data.error;
             })
             this.users.splice(userIndex,1);
         },
-        reactivateAccount(id){
+        reactivateAccount(id, name){
             // console.log(id);
-            axios.patch(`/user/reactivate/${id}`).then(response=>{alert('Account has been reactivated')});
+            axios.patch(`/user/reactivate/${id}`)
+            .then(Swal.fire({
+            title: "Account reactivated!",
+            text: "User " + name + " has been successfully reactivated.",
+            confirmButtonColor: "#666666",
+            confirmButtonText: "Okay"
+            }));
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
