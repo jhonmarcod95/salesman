@@ -190,7 +190,7 @@ export default {
             text: "User " + name + " has been successfully reactivated.",
             confirmButtonColor: "#666666",
             confirmButtonText: "Okay"
-            });
+            }).then(window.location.reload());
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;

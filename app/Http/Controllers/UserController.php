@@ -111,17 +111,20 @@ class UserController extends Controller
 
         return view('user.edit', compact('id', 'notification'));
     }
-
-    //Reactivate dormant account
+    
+    /**
+     * Reactivate dormant account
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function reactivate($id)
     {
         $user=User::find($id);
         $user->dormant_days = 0;
-        $user->remarks='';
+        $user->remarks=null;
 
         $user->save();
-
-        return ['redirect' => route('users_list')];
     }
 
     /**
