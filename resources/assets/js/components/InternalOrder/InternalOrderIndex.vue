@@ -27,7 +27,7 @@
                             <table class="table align-items-center table-flush">
                                 <thead class="thead-light">
                                 <tr>
-<!--                                    <th scope="col"></th>-->
+                                   <th scope="col"></th>
                                     <th scope="col">ID</th>
                                     <th scope="col">User</th>
                                     <th scope="col">Expense Type</th>
@@ -39,18 +39,18 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="(internalOrder,i) in filteredQueues" v-bind:key="i">
-<!--                                        <td class="text-right">-->
-<!--                                            <div class="dropdown">-->
-<!--                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"-->
-<!--                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-<!--                                                    <i class="fas fa-ellipsis-v"></i>-->
-<!--                                                </a>-->
-<!--                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">-->
-<!--                                                    <a class="dropdown-item" href="#editModal" data-toggle="modal" @click="copyObject(internalOrder)">Edit</a>-->
-<!--                                                    <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getInternalOrderId(internalOrder.id)">Delete</a>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
-<!--                                        </td>-->
+                                        <td class="text-right">
+                                            <div class="dropdown">
+                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                    <a class="dropdown-item" href="#editModal" data-toggle="modal" @click="copyObject(internalOrder)">Edit</a>
+                                                    <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getInternalOrderId(internalOrder.id)">Delete</a>
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td>{{ internalOrder.id }}</td>
                                         <td>{{ internalOrder.user.name }}</td>
                                         <td>{{ internalOrder.charge_type.expense_charge_type.expense_type.name }}</td>
@@ -247,6 +247,54 @@
 <!--                </div>-->
 <!--            </div>-->
 <!--        </div>-->
+
+<!-- edit modal -->
+        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+           <div class="modal-dialog modal-dialog-centered" role="document">
+               <div class="modal-content">
+                   <div class="modal-header">
+                       <h5 class="modal-title" id="exampleModalLabel">Edit Internal Order</h5>
+                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                           <span aria-hidden="true">&times;</span>
+                       </button>
+                   </div>
+                   <div class="modal-body">
+                       <!-- <div class="row"> -->
+                        
+                           <div class="col-lg-12">
+                               <div class="form-group bmd-form-group">
+                                   <label class="form-control-label" for="classification">User</label>
+                                   <select id="user_id" class="form-control" v-model="internal_order_copied.user_id" disabled>
+                                       <option v-for="(tsr, t) in tsrs" :key="t" :value="tsr.user_id">{{ tsr.first_name + ' ' + tsr.last_name}}</option> 
+                                   </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                               <div class="form-group bmd-form-group">
+                                   <label class="form-control-label" for="classification">Expense Type</label> 
+                                   <select class="form-control" v-model="internal_order_copied_charge_type">
+                                       <option v-for="(expense_type, e) in expense_types" :key="e" :value="expense_type.expense_charge_type.charge_type.name">{{ expense_type.name }}</option> 
+                                   </select>
+                                   <span class="text-danger small" v-if="errors.charge_type">{{ errors.charge_type[0] }}</span>
+                               </div>
+                           </div>
+                           <div class="col-md-12">
+                               <div class="form-group">
+                                   <label class="form-control-label" for="internal_order">Internal Order</label>
+                                   <input type="text" id="internal_order" class="form-control form-control-alternative" v-model="internal_order_copied.internal_order">
+                                   <span class="text-danger small" v-if="errors.internal_order">{{ errors.internal_order[0] }}</span>
+                               </div>
+                           </div>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
+                        <button class="btn btn-primary" @click="updateInternalOrder(internal_order_copied, internal_order_copied_charge_type, default_amount)">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -292,6 +340,7 @@ export default {
             this.internal_order_copied = Object.assign({}, internalOrder);
             this.internal_order_copied_charge_type = this.internal_order_copied.charge_type.name;
             this.default_expense_type = internalOrder.charge_type.expense_charge_type.expense_type.id;
+            console.log(this.default_expense_type);
             this.default_amount = this.getExpenseRate(internalOrder);
         },
         getInternalOrderId(id){
@@ -351,18 +400,18 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        updateInternalOrder(internal_order_copied,internal_order_copied_charge_type,default_amount){
+        updateInternalOrder(internal_order_copied,internal_order_copied_charge_type,default_amount, default_expense_type){
             this.errors = [];
             var index = this.internal_orders.findIndex(item => item.id == internal_order_copied.id);
+            console.log(internal_order_copied);
 
             axios.post(`/internal-order/${internal_order_copied.id}`,{
-                'user_id': internal_order_copied.user_id,
-                'charge_type': internal_order_copied_charge_type, 
-                'internal_order': internal_order_copied.internal_order,
-                'sap_server': internal_order_copied.sap_server,
-                'amount' : default_amount,
-                'default_expense_type': this.default_expense_type,
-                '_method': 'PATCH'
+                user_id: internal_order_copied.user_id,
+                charge_type: internal_order_copied_charge_type, 
+                internal_order: internal_order_copied.internal_order,
+                sap_server: internal_order_copied.sap_server,
+                amount : default_amount,
+                default_expense_type: default_expense_type,
             })
             .then(response => {
                 $('#editModal').modal('hide');
