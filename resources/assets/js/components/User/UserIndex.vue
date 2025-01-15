@@ -44,6 +44,7 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+user.id">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getUserId(user.id)">Delete</a>
+                                                    <a class="dropdown-item" href="#reactivateAcc" data-toggle="modal" @click="getUserId(user.id)">Reactivate</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -105,6 +106,25 @@
                 </div>
             </div>
         </div>
+
+        <!--Reactivate account-->
+        <div class="modal fade" id="reactivateAcc" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="h4">Reactivate Account</div>
+                    </div>
+                    <div class="modal-body">
+                        <div class="h2 text-center">Are you sure you want to reactivate this account?</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal'>No</button>
+                        <button class="btn btn-primary" data-dismiss='modal' @click="reactivateAccount(user_id)">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -158,6 +178,10 @@ export default {
                 this.errors = error.response.data.error;
             })
             this.users.splice(userIndex,1);
+        },
+        reactivateAccount(id){
+            // console.log(id);
+            axios.patch(`/user/reactivate/${id}`).then(response=>{alert('Account has been reactivated')});
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;

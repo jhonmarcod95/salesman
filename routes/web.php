@@ -102,6 +102,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/user/show/{id}', 'UserController@show');
     // update customer
     Route::patch('/user/{user}', 'UserController@update');
+    // reactivate dormant customer
+    Route::patch('/user/reactivate/{id}', 'UserController@reactivate');
     //delete user
     Route::delete('/user/{id}', 'UserController@destroy');
 

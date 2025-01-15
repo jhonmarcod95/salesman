@@ -37,6 +37,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexData(){
+        // return User::orderBy('id','desc')->get();
         return  User::with('roles','companies')->orderBy('id','desc')->get();
     }
 
@@ -109,6 +110,18 @@ class UserController extends Controller
         }
 
         return view('user.edit', compact('id', 'notification'));
+    }
+
+    //Reactivate dormant account
+    public function reactivate($id)
+    {
+        $user=User::find($id);
+        $user->dormant_days = 0;
+        $user->remarks='';
+
+        $user->save();
+
+        return ['redirect' => route('users_list')];
     }
 
     /**
