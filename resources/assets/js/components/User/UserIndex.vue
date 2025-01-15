@@ -43,8 +43,11 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+user.id">Edit</a>
-                                                    <a class="dropdown-item" href="javascript:;" @click="reactivateAccount(user.id,user.name)">Reactivate</a>
-                                                    <a class="dropdown-item text-danger" href="#deleteModal" data-toggle="modal" @click="SelectUser(user.id,user.name)">Delete</a>
+                                                    <a class="dropdown-item" href="javascript:;"
+                                                    v-if="user.dormant_days>=90&&(user.remarks!=null||user.remarks!='')"
+                                                    @click="reactivateAccount(user.id,user.name)">Reactivate</a>
+                                                    <a class="dropdown-item text-danger" href="#deleteModal"
+                                                    data-toggle="modal" @click="SelectUser(user.id,user.name)">Delete</a>
                                                 </div>
                                             </div>
                                         </td>
