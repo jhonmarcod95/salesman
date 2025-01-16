@@ -226,6 +226,13 @@
                                         <i class="ni ni-paper-diploma text-green"></i> Survey
                                     </a>
                                 </li>
+                                @if (Auth::user()->hasRole(['it']))
+                                <li>
+                                    <a class="nav-link" href="{{ url('/forced-close') }}">
+                                        <i class="ni ni-calendar-grid-58 text-orange"></i> Force Close Schedule
+                                    </a>
+                                </li>
+                                @endif
                             </ul>
                         </div>
                     </li>

@@ -286,7 +286,17 @@ Route::group(['middleware' => ['auth', 'role:it|tsr|coordinator|coordinator-2|ma
 
 });
 
+Route::group(['middleware' => ['auth', 'role:it']], function () {
 
+    // Forced close a visit
+    Route::get('/forced-close','SupportForcedCloseController@index');
+    // Request schedules
+    Route::get('/change-schedule', 'ScheduleController@changeScheduleIndex');
+    // Fetch all companies
+    Route::post('/change-schedule-bydate', 'ScheduleController@changeScheduleIndexData');
+    // Disapproved request schedules
+    Route::post('/change-schedule-disapproved', 'ScheduleController@changeScheduleDisapproved');
+});
 
 // AP Routes
 Route::group(['middleware' => ['auth', 'role:ap|tax|audit|finance-gl']], function(){
