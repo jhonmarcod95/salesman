@@ -39,6 +39,19 @@ Route::get('logout', function(){
     return redirect('/');
   });
 
+// Version Release
+Route::group(['prefix' => 'version-release'], function () {
+    Route::get('/main', 'VersionReleaseController@index')->name('version-release');
+    Route::get('/all', 'VersionReleaseController@all');
+    Route::get('/plain', 'VersionReleaseController@indexPlain');
+    //Version Submission
+    Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|approver|tax|finance-gl']], function () {
+        Route::post('/store', 'VersionReleaseController@store');
+        Route::post('/submit-item', 'VersionReleaseController@submitItem');
+        //Route::post('/update/{$id}', 'VersionReleaseController@submitItem');
+    });
+});
+
 // Authenticated Routes
 Route::group(['middleware' => 'auth'], function(){
     // Provinces
@@ -697,5 +710,4 @@ Route::get('/get-all-customer-hana', function () {
     return $hana_data;
 
 });
-
 

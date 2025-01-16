@@ -2,10 +2,10 @@
 @if (Request::is('schedules'))
     <script src="{{ url('js/popper.min.js') }}" ></script>
     {{--Fullcalendar--}}
-    <script src='{{ url('fullcalendar/moment.min.js') }}'></script>
-    <script src='{{ url('fullcalendar/jquery.min.js') }}'></script>
-    <script src='{{ url('fullcalendar/jquery-ui.min.js') }}'></script>
-    <script src='{{ url('fullcalendar/fullcalendar.min.js') }}'></script>
+    <script src="{{ url('fullcalendar/moment.min.js') }}"></script>
+    <script src="{{ url('fullcalendar/jquery.min.js') }}"></script>
+    <script src="{{ url('fullcalendar/jquery-ui.min.js') }}"></script>
+    <script src="{{ url('fullcalendar/fullcalendar.min.js') }}"></script>
 @else
     <script src="{{ asset('js/all.js') }}" defer></script>
 @endif
@@ -14,7 +14,7 @@
 <script src="{{ url('js/bootstrap.min.js') }}" defer></script>
 
 <!-- Select2 -->
-<script src='{{ url('select2/select2.min.js') }}'></script>
+<script src="{{ url('select2/select2.min.js') }}"></script>
 <script>
     /*---------- allow select2 in bootstrap modal -----------*/
     $('.addScheduleModalSel2').select2({
@@ -25,13 +25,13 @@
     });
     $('.updateScheduleModalSel2').select2({
         dropdownParent: $('#updateScheduleModal'),
-        width: '100%',
+        width: "100%",
         placeholder: "Select a record"
     });
     /*-------------------------------------------------------*/
 
     $('.sel2').select2({
-        width: '100%',
+        width: "100%",
         placeholder: "Select a record"
     });
 </script>

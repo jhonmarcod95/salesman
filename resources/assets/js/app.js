@@ -15,6 +15,9 @@ require('./mixins.js'); // Global reusable functions
 import Multiselect from 'vue-multiselect';
 Vue.component('multiselect', Multiselect);
 
+import VModal from 'vue-js-modal';
+Vue.use(VModal);
+
 import HighchartsVue from 'highcharts-vue'
 Vue.use(HighchartsVue)
 
@@ -141,10 +144,17 @@ Vue.component('authority-to-deduct-index', require('./components/AuthorityToDedu
 
 //Common
 Vue.component('table-pagination', require('./components/Common/TablePagination.vue'));
+Vue.component('table-pagination-basic', require('./components/Common/TablePaginationBasic.vue'));
 Vue.component('app-block-ui', require('./components/Common/BlockUi.vue'));
 Vue.component('app-select', require('./components/Common/Select2.vue'));
 Vue.component('error-messages', require('./components/Common/ErrorMessage.vue'));
 Vue.component('expense-report-nav', require('./components/Common/ExpenseReportNav.vue'));
+Vue.component('spinner', require('./components/Common/Spinner.vue'));
+Vue.component('table-spinner', require('./components/Common/SpinnerBlockUI.vue'));
+
+//Version Release
+Vue.component('version-release', require('./components/VersionRelease/VersionRelease.vue'));
+Vue.component('app-breadcrumbs', require('./components/Common/Breadcrumbs.vue'));
 
 const app = new Vue({
     el: '#app',

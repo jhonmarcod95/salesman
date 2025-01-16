@@ -18,9 +18,9 @@ export default {
 				data: {},
 				formAction: 'add',
 				defaultDataValue: {},
-                errors: {},
+                errors: [],
 				requestProcessing: false,
-				//activeModal: ''
+				activeModal: ''
 			}
 		},		
 		created() {
@@ -59,9 +59,9 @@ export default {
 				.catch(error => {
 					if(error.response.status === 422) {
 						this.errors = error.response.data.errors;
-						toastr.error('Please check all fields.', 'Error');
+						//toastr.error('Please check all fields.', 'Error');
 					} else {
-						toastr.error('API error: Contact administrator.', 'API Error');
+						//toastr.error('API error: Contact administrator.', 'API Error');
 					}
 					this.isProcessing = false;
 				});
@@ -109,20 +109,20 @@ export default {
 					this.successResponse();
 					this.requestProcessing = false;
 					this.closeModal();
-					toastr.success('Data submitted successfully.', 'Success');
+					//toastr.success('Data submitted successfully.', 'Success');
 				})
 				.catch(error => {
 					if(error.response.status === 422) {
 						this.errors = error.response.data.errors;
-						toastr.error('Please check all fields.', 'Error');
+						//toastr.error('Please check all fields.', 'Error');
 					} 
 					else if(error.response.status === 501) {
 						//Error message specifically for backend pdf parser
 						this.setPdfVersionError(error);
-						toastr.warning(error.response.data.message);
+						//toastr.warning(error.response.data.message);
 					}
 					else {
-						toastr.error('API error: Contact administrator.', 'API Error');
+						//toastr.error('API error: Contact administrator.', 'API Error');
 					}
 					this.requestProcessing = false;
 				});
@@ -155,15 +155,15 @@ export default {
 			},
 
 			//Modal methods =============================
-			// showModal(modalName) {
-			// 	this.activeModal = modalName;
-			// 	this.$modal.show(modalName);
-			// },
-			// closeModal() {
-			// 	this.$modal.hide(this.activeModal);
-			// 	this.activeModal = '';
-			// 	this.doResetData();
-			// },
+			showModal(modalName) {
+				this.activeModal = modalName;
+				this.$modal.show(modalName);
+			},
+			closeModal() {
+				this.$modal.hide(this.activeModal);
+				this.activeModal = '';
+				this.doResetData();
+			},
 			//===========================================
 
 			//Pagination methods =============================
