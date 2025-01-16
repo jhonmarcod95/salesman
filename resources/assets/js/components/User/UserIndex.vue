@@ -24,42 +24,41 @@
                         </div>
                         <div class="table-responsive">
                             <table class="table align-items-center table-flush">
+                                <!--TABLE HEADER-->
                                 <thead class="thead-light">
                                 <tr>
-                                    <th scope="col"></th>
+                                    <th scope="col" class="pl-6">ID</th>
+                                    <th scope="col">Status</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Email</th>
-                                    <!-- <th scope="col">Role</th>
-                                    <th scope="col">Company</th> -->
                                 </tr>
                                 </thead>
+                                <!--TABLE BODY-->
                                 <tbody>
                                     <tr v-for="(user, u) in filteredQueues" v-bind:key="u">
-                                        <td class="text-right">
-                                            <div class="dropdown" v-if="role === 'It'">
+                                        <td>
+                                            <div class="dropdown text-right" v-if="role === 'It'">
+                                                <!--DROPDOWN OPTIONS-->
                                                 <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" :href="editLink+user.id">Edit</a>
-                                                    <a class="dropdown-item" href="javascript:;"
-                                                    v-if="user.dormant_days>=90&&(user.remarks!=null||user.remarks!='')"
+                                                    <a class="dropdown-item" href="javascript:;" v-if="!isActive(user)"
                                                     @click="reactivateAccount(user.id,user.name)">Reactivate</a>
                                                     <a class="dropdown-item text-danger" href="#deleteModal"
                                                     data-toggle="modal" @click="SelectUser(user.id,user.name)">Delete</a>
                                                 </div>
                                             </div>
+                                            {{ user.id }}
+                                        </td>
+                                        <td>
+                                            <div v-if="isActive(user)" class="text-green">Active</div>
+                                            <div v-else class="text-red">Inactive</div>
                                         </td>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email }}</td>
-                                        <!-- <td>{{ user.roles[0].name }}</td>
-                                        <td>
-                                            <span v-for="(company, c) in user.companies" :key="c">
-                                                {{ company.name }} <br/>
-                                            </span>
-                                        </td>
-                                        <td></td> -->
                                     </tr>
                                 </tbody>
                             </table>
@@ -167,8 +166,10 @@ export default {
             })
             this.users.splice(userIndex,1);
         },
+        isActive(user){
+            return user.dormant_days < 90 && (user.remarks == null||user.remarks == '');
+        },
         reactivateAccount(id, name){
-            // console.log(id);
             Swal.fire({
             title: "Account Reactivation",
             text: "Are you sure you want to reactivate " + name + "'s account?",
@@ -190,7 +191,7 @@ export default {
             text: "User " + name + " has been successfully reactivated.",
             confirmButtonColor: "#666666",
             confirmButtonText: "Okay"
-            }).then(window.location.reload());
+            }).then(response=>{if (response.isConfirmed) window.location.reload()});
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
