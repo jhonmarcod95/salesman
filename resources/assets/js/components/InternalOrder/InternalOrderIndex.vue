@@ -13,9 +13,9 @@
                                 <div class="col">
                                     <h3 class="mb-0">Internal Order List</h3>
                                 </div>
-<!--                                <div class="col text-right">-->
-<!--                                    <a href="#addModal" data-toggle="modal" class="btn btn-sm btn-primary">Add New</a>-->
-<!--                                </div>-->
+                               <div class="col text-right">
+                                   <a href="#addModal" data-toggle="modal" class="btn btn-sm btn-primary">Add New</a>
+                               </div>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -82,173 +82,95 @@
             </div>
         </div>
 
-<!--        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">-->
-<!--            <div class="modal-dialog modal-dialog-centered" role="document">-->
-<!--                <div class="modal-content">-->
-<!--                    <div class="modal-header">-->
-<!--                        <h5 class="modal-title" id="exampleModalLabel">Add Internal Order</h5>-->
-<!--                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
-<!--                            <span aria-hidden="true">&times;</span>-->
-<!--                        </button>-->
-<!--                    </div>-->
-<!--                    <div class="modal-body">-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-lg-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="classification">User</label>-->
-<!--                                    <select class="form-control" v-model="internal_order.tsr">-->
-<!--                                        <option v-for="(tsr, t) in tsrs" v-bind:key="t" :value="tsr.user.id">{{ tsr.first_name + ' ' + tsr.last_name}}</option>  -->
-<!--                                    </select>-->
-<!--                                    <span class="text-danger small" v-if="errors.user_id">{{ errors.user_id[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-lg-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="classification">Expense Type</label>-->
-<!--                                    <select class="form-control" v-model="internal_order.expense_type">-->
-<!--                                        <option v-for="(expense_type, e) in expense_types" v-bind:key="e" :value="expense_type.expense_charge_type.charge_type.name">{{ expense_type.name }}</option>  -->
-<!--                                    </select>-->
-<!--                                    <span class="text-danger small" v-if="errors.charge_type">{{ errors.charge_type[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="internal_order">Internal Order</label>-->
-<!--                                    <input type="text" id="internal_order" class="form-control form-control-alternative" v-model="internal_order.internal_order">-->
-<!--                                    <span class="text-danger small" v-if="errors.internal_order">{{ errors.internal_order[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="sap_server">SAP Server</label>-->
-<!--                                    <select class="form-control" v-model="internal_order.sap_server">-->
-<!--                                        <option v-for="(server, s) in servers" v-bind:key="s" :value="server.sap_server">{{ server.sap_server }}</option>  -->
-<!--                                    </select>-->
-<!--                                    <span class="text-danger small" v-if="errors.sap_server">{{ errors.sap_server[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="amount">Amount</label>-->
-<!--                                    <input type="text" id="amount" class="form-control form-control-alternative" v-model="internal_order.amount">-->
-<!--                                    <span class="text-danger small" v-if="errors.amount">{{ errors.amount[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="modal-footer">-->
-<!--                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>-->
-<!--                        <button class="btn btn-primary" @click="addInternalOrder(internal_order)">Save</button>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
+        <!-- Add New Internal Order Modal -->
+        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add Internal Order</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                            <div class="col-lg-12">
+                               <div class="form-group bmd-form-group">
+                                   <label class="form-control-label" for="user">User</label>
+                                   <select id="user_id" class="form-control" v-model="internal_order.tsr">
+                                       <option v-for="(tsr, t) in tsrs" :key="t" :value="tsr.user_id">{{ tsr.first_name + ' ' + tsr.last_name}}</option> 
+                                   </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                               <div class="form-group bmd-form-group">
+                                   <label class="form-control-label" for="expense_type">Expense Type</label> 
+                                   <select class="form-control" v-model="internal_order.expense_type">
+                                       <option v-for="(expense_type, e) in expense_types" :key="e" :value="expense_type.expense_charge_type.charge_type.name">{{ expense_type.name }}</option> 
+                                   </select>
+                                   <span class="text-danger small" v-if="errors.charge_type">{{ errors.charge_type[0] }}</span>
+                               </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="internal_order">Internal Order</label>
+                                    <input type="text" id="internal_order" class="form-control form-control-alternative" v-model="internal_order.internal_order">
+                                    <span class="text-danger small" v-if="errors.internal_order">{{ errors.internal_order[0] }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="sap_server">SAP Server</label>
+                                    <select class="form-control" v-model="internal_order.sap_server">
+                                        <option v-for="(server, s) in servers" v-bind:key="s" :value="server.sap_server">{{ server.sap_server }}</option>  
+                                    </select>
+                                    <span class="text-danger small" v-if="errors.sap_server">{{ errors.sap_server[0] }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="amount">Amount</label>
+                                    <input type="text" id="amount" class="form-control form-control-alternative" v-model="internal_order.amount">
+                                    <span class="text-danger small" v-if="errors.amount">{{ errors.amount[0] }}</span>
+                                </div>
+                            </div>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
+                        <button class="btn btn-primary" @click="addInternalOrder(internal_order)">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!--        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">-->
-<!--            <div class="modal-dialog modal-dialog-centered" role="document">-->
-<!--                <div class="modal-content">-->
-<!--                    <div class="modal-header">-->
-<!--                        <h5 class="modal-title" id="exampleModalLabel">Edit Internal Order</h5>-->
-<!--                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
-<!--                            <span aria-hidden="true">&times;</span>-->
-<!--                        </button>-->
-<!--                    </div>-->
-<!--                    <div class="modal-body">-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-lg-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="classification">User</label>-->
-<!--                                    <select class="form-control" v-model="internal_order_copied.user_id" disabled>-->
-<!--                                        <option v-for="(tsr, t) in tsrs" v-bind:key="t" :value="tsr.user.id">{{ tsr.first_name + ' ' + tsr.last_name}}</option>  -->
-<!--                                    </select>-->
-<!--                                    <span class="text-danger small" v-if="errors.user_id">{{ errors.user_id[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-lg-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="classification">Expense Type</label>  -->
-<!--                                    <select class="form-control" v-model="internal_order_copied_charge_type">-->
-<!--                                        <option v-for="(expense_type, e) in expense_types" v-bind:key="e" :value="expense_type.expense_charge_type.charge_type.name">{{ expense_type.name }}</option>  -->
-<!--                                    </select>-->
-<!--                                    <span class="text-danger small" v-if="errors.charge_type">{{ errors.charge_type[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="internal_order">Internal Order</label>-->
-<!--                                    <input type="text" id="internal_order" class="form-control form-control-alternative" v-model="internal_order_copied.internal_order">-->
-<!--                                    <span class="text-danger small" v-if="errors.internal_order">{{ errors.internal_order[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="sap_server">SAP Server</label>-->
-<!--                                    <select class="form-control" v-model="internal_order_copied.sap_server">-->
-<!--                                        <option v-for="(server, s) in servers" v-bind:key="s" :value="server.sap_server">{{ server.sap_server }}</option>  -->
-<!--                                    </select>-->
-<!--                                    <span class="text-danger small" v-if="errors.sap_server">{{ errors.sap_server[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    <label class="form-control-label" for="amount">Amount</label>-->
-<!--                                    <input type="text" id="amount" class="form-control form-control-alternative" v-model="default_amount">-->
-<!--                                    <span class="text-danger small" v-if="errors.amount">{{ errors.amount[0] }}</span>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="modal-footer">-->
-<!--                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>-->
-<!--                        <button class="btn btn-primary" @click="updateInternalOrder(internal_order_copied,internal_order_copied_charge_type,default_amount)">Save</button>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Delete Interal</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    Are you sure you want to delete this Internal Order?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
+                        <button class="btn btn-warning" @click="deleteInternalOrder()">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!--        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">-->
-<!--            <div class="modal-dialog modal-dialog-centered" role="document">-->
-<!--                <div class="modal-content">-->
-<!--                    <div class="modal-header">-->
-<!--                        <h5 class="modal-title" id="exampleModalLabel">Delete Interal</h5>-->
-<!--                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
-<!--                            <span aria-hidden="true">&times;</span>-->
-<!--                        </button>-->
-<!--                    </div>-->
-<!--                    <div class="modal-body">-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="form-group">-->
-<!--                                    Are you sure you want to delete this Internal Order?-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="modal-footer">-->
-<!--                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>-->
-<!--                        <button class="btn btn-warning" @click="deleteInternalOrder()">Delete</button>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!-- edit modal -->
+        <!-- Edit Modal -->
         <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
            <div class="modal-dialog modal-dialog-centered" role="document">
                <div class="modal-content">
@@ -340,7 +262,6 @@ export default {
             this.internal_order_copied = Object.assign({}, internalOrder);
             this.internal_order_copied_charge_type = this.internal_order_copied.charge_type.name;
             this.default_expense_type = internalOrder.charge_type.expense_charge_type.expense_type.id;
-            console.log(this.default_expense_type);
             this.default_amount = this.getExpenseRate(internalOrder);
         },
         getInternalOrderId(id){
@@ -395,16 +316,17 @@ export default {
                 $('#addModal').modal('hide');
                 alert('Internal Order successfully added');
                 this.internal_orders.unshift(response.data);
+                this.internal_order=[];
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
             })
         },
-        updateInternalOrder(internal_order_copied,internal_order_copied_charge_type,default_amount, default_expense_type){
+        updateInternalOrder(internal_order_copied,internal_order_copied_charge_type,default_amount){
             this.errors = [];
+            var default_expense_type = [];
+            default_expense_type = this.internal_order_copied.charge_type.expense_charge_type.expense_type.id;
             var index = this.internal_orders.findIndex(item => item.id == internal_order_copied.id);
-            console.log(internal_order_copied);
-
             axios.post(`/internal-order/${internal_order_copied.id}`,{
                 user_id: internal_order_copied.user_id,
                 charge_type: internal_order_copied_charge_type, 
@@ -412,6 +334,7 @@ export default {
                 sap_server: internal_order_copied.sap_server,
                 amount : default_amount,
                 default_expense_type: default_expense_type,
+                _method: 'PATCH'
             })
             .then(response => {
                 $('#editModal').modal('hide');
