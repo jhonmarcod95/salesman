@@ -2,20 +2,20 @@
 	<div>
         <div class="header bg-green pb-6 pt-5 pt-md-6 mb--8"></div>
 		<app-breadcrumbs :breadcrumbs="breadcrumbs">
-			<div class="btn btn-white font-weight-bold p-3 mr-3" 
+			<div class="btn btn-white font-weight-bold p-3 mr-3 container-fluid" 
 				v-if="isAdministrator"
 				@click="showModal('form_modal')">
 				Add New Version
 			</div>
 		</app-breadcrumbs>
 
-		<div class="container">
+		<div class="container-fluid">
 			<div class="d-flex flex-row">
 				<!--begin::Aside-->
 				<div class="flex-row offcanvas-mobile w-300px w-xl-350px min-h-550px" id="kt_profile_aside">
 					<!--begin::Profile Card-->
 					<div class="card card-custom card-stretch shadow-sm">
-						<div class="card-header border-0 pt-10 pl-15">
+						<div class="card-header border-0">
 							<h3 class="card-title font-weight-bolder text-dark">Version Release</h3>
 						</div>
 						<!--begin::Body-->
