@@ -85,15 +85,15 @@
 								<!--New features-->
 								<VersionItems type="new" :version_release_id="selectedVersion.id"
 								:items="selectedVersion.release_note.new" @submitSuccess="submitSuccess"
-								:isAdministrator="isAdministrator"/>
+								:lastItem="lastItem" :isAdministrator="isAdministrator"/>
 								<!--Updates-->
 								<VersionItems type="updates" :version_release_id="selectedVersion.id"
 								:items="selectedVersion.release_note.updates" @submitSuccess="submitSuccess"
-								:isAdministrator="isAdministrator"/>
+								:lastItem="lastItem" :isAdministrator="isAdministrator"/>
 								<!--Fixes-->
 								<VersionItems type="fixes" :version_release_id="selectedVersion.id"
 								:items="selectedVersion.release_note.fixes" @submitSuccess="submitSuccess"
-								:isAdministrator="isAdministrator"/>
+								:lastItem="lastItem" :isAdministrator="isAdministrator"/>
 							</div>
 							<div v-else>
 								<span class="spinner spinner-primary mr-10"></span>
@@ -208,6 +208,12 @@
 			isAdministrator() {
 				return this.authenticated && (this.userRoles == "It" || this.userRoles == "Admin");
 				// return true;
+			},
+			lastItem() {
+				let new_features = this.selectedVersion.release_note.new ? this.selectedVersion.release_note.new.length : 0;
+				let updates = this.selectedVersion.release_note.updates ? this.selectedVersion.release_note.updates.length : 0;
+				let fixes = this.selectedVersion.release_note.fixes ? this.selectedVersion.release_note.fixes.length : 0;
+				return new_features + updates + fixes <= 1;
 			}
 		}
 	}

@@ -79,6 +79,10 @@ export default {
             if(_.isEmpty(data)) return;
             
             this.selectedItem = data;
+            if (this.lastItem) this.deleteVersion();
+            else this.deleteNote();
+        },
+        deleteNote() {
             Swal.fire({
               title: "Delete from " + this.selectedItem.type + "?",
               text: "'" + this.selectedItem.description + "'",
@@ -101,6 +105,30 @@ export default {
                 }
             });
         },
+        deleteVersion() {
+            Swal.fire({
+              title: "Deleting last item!",
+              text: "This is the last item on the list. Deleting this will erase the entire version. Proceed?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#e24444",
+              cancelButtonColor: "#666666",
+              confirmButtonText: "Delete",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                  axios.delete(`delete-item/${this.selectedItem.id}`);
+                  axios.delete(`delete/${this.selectedItem.version_release_id}`);
+                  Swal.fire({
+                    title: "Version deleted!",
+                    icon: "success",
+                    confirmButtonColor: "666666",
+                    confirmButtonText: "Close",
+                  }).then((result) => {
+                      if (result.isConfirmed) window.location.reload();
+                  });
+                }
+            });
+        }
 
     },
     watch:{
