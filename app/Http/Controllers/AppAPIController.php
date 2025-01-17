@@ -979,7 +979,11 @@ class AppAPIController extends Controller
                         // })
                         ->whereNotIn('expenses_type_id',[1,3]);
 
-        if($findExpense->exists()) {
+        $receiptExpenseExists = ReceiptExpense::where('receipt_number', $request->input('receipt_number'))
+                        ->where('tin_number', $request->input('tin_number'))
+                        ->exists();
+
+        if($findExpense->exists() && $receiptExpenseExists) {
             $this->validate($request,[
                 'receipt_number' => 'required|unique:receipt_expenses',
             ]);
