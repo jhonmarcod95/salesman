@@ -27,7 +27,7 @@
 							<!--begin::Nav-->
 							<div class="navi navi-bold navi-hover navi-active navi-link-rounded">
 								<div class="navi-item mb-1" v-for="(item, index) in items" :key="index">
-									<a class="btn active border-0 navi-link py-1" @click="viewVersion(item)">
+									<a class="btn active border-0 navi-link py-1 pr-0" @click="viewVersion(item)">
 										<span class="navi-icon mr-2">
 											<span class="svg-icon">
 												<!--begin::Svg Icon | path:assets/media/svg/icons/Design/Layers.svg-->
@@ -46,7 +46,7 @@
 											<span class="label p-1 label-inline text-white bg-green rounded">new</span>
 										</span>
 									</a>
-									<a href="javascript:;" class="text-danger ml--4" @click="deleteVersion(item)" v-if="isAdministrator">
+									<a href="javascript:;" class="text-danger" @click="deleteVersion(item)" v-if="isAdministrator">
 										<i class="fas fa-trash icon-xs"></i></a>
 								</div> 
 
