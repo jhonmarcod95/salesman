@@ -123,4 +123,20 @@ class VersionReleaseController extends Controller
             ]);
         }
     }
+
+    //FOR THE ENTIRE VERSION
+    public function delete($id) {
+        $versionRelease = VersionRelease::find($id);
+        $versionRelease->delete();
+
+        return $versionRelease;
+    }
+
+    //FOR INDIVIDUAL NOTES
+    public function deleteItem($id) {
+        $versionReleaseNote = VersionReleaseNote::find($id);
+        $versionReleaseNote->delete();
+
+        return $versionReleaseNote;
+    }
 }

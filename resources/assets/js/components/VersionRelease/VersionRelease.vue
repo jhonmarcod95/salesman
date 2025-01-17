@@ -46,6 +46,8 @@
 											<span class="label p-1 label-inline text-white bg-green rounded">new</span>
 										</span>
 									</a>
+									<a href="javascript:;" class="text-danger ml--4" @click="deleteVersion(item)" v-if="isAdministrator">
+										<i class="fas fa-trash icon-xs"></i></a>
 								</div> 
 
 								<div v-if="!items.length">
@@ -122,6 +124,7 @@
 	import FormModal from './FormModal.vue';
 	import listFormMixins from '../../list-form-mixins.vue';
 	import VersionItems from './VersionItems.vue';
+	import Swal from 'sweetalert2';
 
 	export default {
 		name: "VersionRelease",
@@ -175,7 +178,31 @@
 				// let index = !_.isEmpty(this.selectedVersion) ? _.findIndex(this.items, ['id', this.selectedVersion.id]) : 0
 				// const selectedIndex = _.findIndex(this.items, ['id', this.selectedVersion.id]);
 				this.fetchList()
-			}
+			},
+			deleteVersion(data = null){
+            if(_.isEmpty(data)) return;
+            
+            Swal.fire({
+              title: "Delete Version " + data.version + "?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#e24444",
+              cancelButtonColor: "#666666",
+              confirmButtonText: "Delete",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                axios.delete(`delete/${data.id}`);
+                Swal.fire({
+                  title: "Version deleted!",
+                  icon: "success",
+                  confirmButtonColor: "666666",
+                  confirmButtonText: "Close",
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.reload();
+                });
+              }
+            });
+        }
 		},
 		computed: {
 			isAdministrator() {
