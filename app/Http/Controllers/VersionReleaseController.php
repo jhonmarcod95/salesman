@@ -55,7 +55,7 @@ class VersionReleaseController extends Controller
 
     public function store(Request $request) {
         $request->validate([
-            'version' => 'required|regex:/(.+).(.+)\.(.+)/i|unique:version_releases',
+            'version' => 'required|regex:/(.+).(.+)\.(.+)/i|unique:version_releases,version,NULL,id,deleted_at,NULL',
             'release_date' => 'required',
             'new_features.*.*' => 'required_without_all:updates.*.*,fixes.*.*',
             // 'updates.*.*' => 'required_without_all:new_features.*.*,fixes.*.*',
