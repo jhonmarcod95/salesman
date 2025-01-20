@@ -10,20 +10,32 @@
                         <div class="card-header border-0">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h3 class="mb-0">User List</h3>
+                                    <h3 class="mb-0">Agents Schedules</h3>
                                 </div>`
-                                <div class="col text-right">
+                                <!-- <div class="col text-right">
                                     <a :href="addLink" class="btn btn-sm btn-primary">Add New</a>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div class="mb-3">
                             <div class="row mx-2">
-                                <div class="col-md-4">
-                                    <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
-                                </div>
                                 <div class="col-md-3">
-                                    <app-select :options="roles" v-model="filter_role" placeholder="Roles"/>
+                                    <!-- <app-select :options="agents" v-model="filter_agent" :custom-label="customLabel" placeholder="Agents"/> -->
+                                
+                                    <multiselect
+                                        v-model="filter_agent"
+                                        :options="agents"
+                                        :multiple="false"
+                                        track-by="id"
+                                        :custom-label="customLabel"
+                                        placeholder="Select Agent or User"
+                                        @input="fetchSchedule"
+                                    />
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="date" id="start_date" class="form-control form-control-alternative" v-model="startDate" @change="fetchSchedule">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -32,38 +44,27 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col"></th>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Email</th>
-                                    <th scope="col">Role</th>
-                                    <th scope="col">Company</th>
+                                    <th scope="col">Customer Name</th>
+                                    <th scope="col">Customer Code</th>
+                                    <th scope="col">Schedule</th>
+                                    <th scope="col">Sign In</th>
+                                    <th scope="col">Sign Out</th>
                                     <th scope="col">Status</th>
+                                    <th scope="col">Current</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(user, u) in filteredQueues" v-bind:key="u">
+                                    <tr v-for="(schedule, u) in filteredQueues" v-bind:key="u">
                                         <td class="text-right">
-                                            <div class="dropdown" v-if="role === 'It'">
-                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </a>
-                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" :href="editLink+user.id">Edit</a>
-                                                    <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getUserId(user.id)">Delete</a>
-                                                </div>
-                                            </div>
+                                            <a v-if="schedule.status == 2" class="btn btn-sm btn-danger" href="#forceCloseModal" data-toggle="modal" @click="getUserId(schedule.id,schedule.name,u)">Force Close</a>
                                         </td>
-                                        <td>{{ user.name }}</td>
-                                        <td>{{ user.email }}</td>
-                                        <td>{{ user.roles[0].name }}</td>
-                                        <td>
-                                            <span v-for="(company, c) in user.companies" :key="c">
-                                                {{ company.name }} <br/>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-danger" @click="deleteUser(user.id)">Disable</button>
-                                        </td>
+                                        <td>{{ schedule.name }}</td>
+                                        <td>{{ schedule.code }}</td>
+                                        <td>{{ schedule.date }}</td>
+                                        <td>{{ schedule.schedule_attendances ? schedule.schedule_attendances.sign_in : 'No Attendance' }}</td>
+                                        <td>{{ schedule.schedule_attendances ? schedule.schedule_attendances.sign_out : 'No Attendance' }}</td>
+                                        <td>{{ schedule.status }}</td>
+                                        <td>{{ schedule.isCurrent }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -87,12 +88,12 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="forceCloseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <input type="hidden" v-model="user_id">
-                        <h5 class="modal-title" id="exampleModalLabel">Delete Schedule</h5>
+                        <input type="hidden" v-model="schedule_id">
+                        <h5 class="modal-title" id="exampleModalLabel">Force Close Schedule - {{ customer_name }}</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -101,85 +102,132 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    Are you sure you want to delete this User?
+                                    <label for="new_date">Attendance Date</label>
+                                    <input type="date" id="new_date" class="form-control form-control-alternative" v-model="newDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="new_time">Attendance Time</label>
+                                    <input type="time" id="new_time" class="form-control form-control-alternative" v-model="newTime">
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
-                        <button class="btn btn-warning" @click="deleteUser(user_id)">Delete</button>
+                        <button class="btn btn-warning" @click="forcedCloseSchedule(schedule_id)">Proceed</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
-
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <script>
+import { isEmpty } from 'lodash';
+import Multiselect from 'vue-multiselect';
 export default {
     data(){
         return{
             users:[],
+            agents:[],
+            schedules:[],
             roles:[],
             errors:[],
+            schedIndex: '',
+            startDate: '',
+            newDate: '',
+            newTime: '',
             keywords: '',
-            user_id: '',
+            schedule_id: '',
+            customer_name: '',
             role: '',
+            filter_agent: '',
             filter_role: '',
             currentPage: 0,
             itemsPerPage: 10,
         }
     },
     created(){
-        this.fectUsers();
-        this.getAuthRole();
-        this.getSelectOptions('roles', '/selection-roles')
+        this.fectAgents();
+        // this.setDate();
     },
     methods:{
-        getUserId(id){
-            return this.user_id = id;
+        getUserId(id,name,index){
+            this.schedule_id = id;
+            this.customer_name = name;
+            this.schedIndex = index;
         },
-        getAuthRole(){
-            axios.get('/auth-role')
+        fectAgents(){
+            axios.get('/forced-closes')
+            .then(response => {
+                this.agents = response.data.agents;
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
+        },
+        fetchSchedule(){
+            if (this.filter_agent !== '' && this.startDate) {
+                axios.post('/fetch-schedules',{
+                    agent: this.filter_agent,
+                    date: this.startDate
+                })
                 .then(response => {
-                    this.role = response.data;
+                    this.schedules = response.data;
                 })
                 .catch(error => {
                     this.errors = error.response.data.errors;
                 })
+            }
         },
-        fectRoles(){
-            axios.get('/selection-roles')
-            .then(response => {
-                this.roles = response.data;
-            })
-            .catch(error => {
-                this.errors = error.response.data.errors;
-            })
-        },
-        fectUsers(){
-            axios.get('/users-all')
-            .then(response => {
-                this.users = response.data;
-            })
-            .catch(error => {
-                this.errors = error.response.data.errors;
-            })
-        },
-        deleteUser(id){
-            if(confirm("Are you sure you want to delete this user?")) {
-                let userIndex = this.users.findIndex(item => item.id == id);
-                axios.delete(`/user/${id}`)
+        forcedCloseSchedule(id){
+            if(confirm("Are you sure you want to force close this schedule?")) {
+                axios.post('close-attendance',{
+                    schedule_id: id,
+                    new_date: this.newDate,
+                    new_time: this.newTime
+                })
                 .then(response =>{
-                    $('#deleteModal').modal('hide');
-                    alart('User Succesfully deleted');
+                    this.schedules.splice(this.schedIndex,1,response.data)
+                    $('#forceCloseModal').modal('hide');
+                    alart('User Succesfully Closed Schedule');
                 })
                 .catch(error => {
                     this.errors = error.response.data.error;
                 })
                 this.users.splice(userIndex,1);
             }
+        },
+        customLabel(data) {
+            var companies = '';
+            if(data){
+                if (data.companies) {
+                    data.companies.forEach((element,index) => {
+                        if (index > 0) {
+                            companies += ','+element.name;
+                        } else {
+                            companies += element.name;
+                        }
+                    });
+                }
+                return `${data.name}` + ` - ` + `${companies}`
+            }else{
+                return '';
+            }
+
+        },
+        setDate(){
+            var date = new Date(Date.now());
+            // var tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
+            this.startDate = this.DateFormat(date);
+            // this.endDate = this.DateFormat(tomorrow);
+        },
+        DateFormat(d){
+            return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0"+(d.getDate())).slice(-2);
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
@@ -200,10 +248,10 @@ export default {
     computed:{
         filteredUsers(){
             let self = this;
-            return self.users.filter(user => {
-                let user_name = user.name.toLowerCase().includes(this.keywords.toLowerCase());
-                let user_email = user.name.toLowerCase().includes(this.keywords.toLowerCase());
-                return (user_name || user_email) &&  (this.filter_role ? user.roles[0].id == this.filter_role : true);
+            return self.schedules.filter(schedule => {
+                if(schedule.name.toLowerCase().includes(this.keywords.toLowerCase())) {
+                    return schedule;
+                }
             });
         },
         totalPages() {

@@ -290,12 +290,11 @@ Route::group(['middleware' => ['auth', 'role:it']], function () {
 
     // Forced close a visit
     Route::get('/forced-close','SupportForcedCloseController@index');
-    // Request schedules
-    Route::get('/change-schedule', 'ScheduleController@changeScheduleIndex');
-    // Fetch all companies
-    Route::post('/change-schedule-bydate', 'ScheduleController@changeScheduleIndexData');
-    // Disapproved request schedules
-    Route::post('/change-schedule-disapproved', 'ScheduleController@changeScheduleDisapproved');
+    // Request index data
+    Route::get('/forced-closes', 'SupportForcedCloseController@indexData');
+    // Request user schedules
+    Route::post('/fetch-schedules', 'SupportForcedCloseController@fetchSchedule');
+    Route::post('/close-attendance', 'SupportForcedCloseController@closeAttendance');
 });
 
 // AP Routes
