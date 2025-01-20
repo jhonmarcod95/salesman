@@ -87,7 +87,7 @@
                                             </tr>
                                             <tr v-else v-for="(expense, e) in items" v-bind:key="e">
                                                 <td class="text-right">
-                                                    <button class="btn btn-sm text-black-50">View</button>
+                                                     <button class="btn btn-sm text-black-50" @click="viewDeductedExpense(expense.deductions)">View</button>
                                                 </td>
                                                 <td>
                                                     <strong>{{ expense.user.name }}</strong> <br>
@@ -257,38 +257,14 @@ export default {
         }
     },
     computed:{
-        filteredQueues() {},
         imageLink(){
             return window.location.origin+'/storage/';
-        },
-        expenseVerifierRole() {
-            let userLevel = [
-                4, // Coordinator
-            ];
-
-            return _.includes(userLevel, this.userLevel) || this.expenseVerifier;
         },
         isItRole() {
             return this.userRole == 1  // IT
         },
-        presidentRole() {
-            let userRole = [
-                2,  // President,
-                // 3,  // EVP,
-            ];
-            return _.includes(userRole, this.userRole);
-        },
-        salesHeadRole() {
-            return this.userRole == 4  // VP/Sales Head
-        },
-        filterVerified() {
-            return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '1';
-        },
-        filterUnverified() {
-            return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '2';
-        },
-        filterRejected() {
-            return this.filterData.expense_status == null || this.filterData.expense_status == '' || this.filterData.expense_status == '3';
+        viewDeductedExpense(deductions){
+
         }
     },
 }
