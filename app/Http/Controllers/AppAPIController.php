@@ -983,11 +983,11 @@ class AppAPIController extends Controller
                         ->where('tin_number', $request->input('tin_number'))
                         ->exists();
 
-        if($findExpense->exists() && $receiptExpenseExists) {
-            $this->validate($request,[
-                'receipt_number' => 'required|unique:receipt_expenses',
-            ]);
-        }
+        // if($findExpense->exists() && $receiptExpenseExists) {
+        //     $this->validate($request,[
+        //         'receipt_number' => 'required|unique:receipt_expenses',
+        //     ]);
+        // }
 
         $existingTinNumber = $this->checkTinNumber($request->input('tin_number'));
 
