@@ -1338,7 +1338,7 @@ class ExpenseController extends Controller
         $user_id = $request->user_id;
 
         return EmployeeMonthlyExpense::whereHas('deductions')
-            ->with('user.companies','deductions')
+            ->with('user.companies','deductions.expense.expensesType')
             ->where('month',$month)
             ->where('year',$year)
             ->when($company_id,function($q) use($company_id){
