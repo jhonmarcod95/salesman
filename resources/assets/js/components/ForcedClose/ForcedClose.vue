@@ -102,16 +102,32 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="new_date">Attendance Date</label>
-                                    <input type="date" id="new_date" class="form-control form-control-alternative" v-model="newDate">
+                                    <label for="new_date">Attendance Start Date</label>
+                                    <input type="date" id="new_date" class="form-control form-control-alternative" v-model="newStartDate">
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="new_time">Attendance Time</label>
-                                    <input type="time" id="new_time" class="form-control form-control-alternative" v-model="newTime">
+                                    <label for="new_time">Attendance Start Time</label>
+                                    <input type="time" id="new_time" class="form-control form-control-alternative" v-model="newStartTime">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="new_date">Attendance End Date</label>
+                                    <input type="date" id="new_date" class="form-control form-control-alternative" v-model="newEndDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="new_time">Attendance End Time</label>
+                                    <input type="time" id="new_time" class="form-control form-control-alternative" v-model="newEndTime">
                                 </div>
                             </div>
                         </div>
@@ -139,8 +155,10 @@ export default {
             errors:[],
             schedIndex: '',
             startDate: '',
-            newDate: '',
-            newTime: '',
+            newStartDate: '',
+            newStartTime: '',
+            newEndDate: '',
+            newEndTime: '',
             keywords: '',
             schedule_id: '',
             customer_name: '',
@@ -188,8 +206,10 @@ export default {
             if(confirm("Are you sure you want to force close this schedule?")) {
                 axios.post('close-attendance',{
                     schedule_id: id,
-                    new_date: this.newDate,
-                    new_time: this.newTime
+                    new_start_date: this.newStartDate,
+                    new_start_time: this.newStartTime,
+                    new_end_date: this.newEndDate,
+                    new_end_time: this.newEndTime
                 })
                 .then(response =>{
                     this.schedules.splice(this.schedIndex,1,response.data)

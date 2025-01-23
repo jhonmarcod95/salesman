@@ -45,22 +45,48 @@ class SupportForcedCloseController extends Controller
         ]);
 
         DB::beginTransaction();
-        $sched = Schedule::where('id',intval($request->schedule_id))->first();
+        $sched = Schedule::with('schedule_attendances')->where('id',intval($request->schedule_id))->first();
         $sched->status = 1;
         $sched->isCurrent = 0;
         $sched->save();
 
         $attend = Attendance::where('schedule_id',intval($request->schedule_id))->get();
         if ($attend) {
-            $signOut = date('Y-m-d H:i:s',strtotime($request->new_date . ' ' . $request->new_time));
-            Attendance::where('schedule_id',intval($request->schedule_id))->update([
-                'sign_out' => $signOut,
-                'remarks' => 'Requested to force close',
-                'isSync' => 1,
-            ]);
+            $signIn = date('Y-m-d H:i:s',strtotime($request->new_start_date . ' ' . $request->new_start_time));
+            $signOut = date('Y-m-d H:i:s',strtotime($request->new_end_date . ' ' . $request->new_end_time));
+
+            if ($request->new_start_date && $request->new_start_time && $request->new_end_date && $request->new_end_time) {
+                Attendance::where('schedule_id',intval($request->schedule_id))->update([
+                    'sign_in' => $signIn,
+                    'sign_out' => $signOut,
+                    'force_close_sign_in_date' => date('Y-m-d H:i:s'),
+                    'force_close_sign_out_time' => date('Y-m-d H:i:s'),
+                    'sign_in_remarks' => 'Requested to force close Sign In.',
+                    'sign_out_remarks' => 'Requested to force close Sign Out.',
+                    'isSync' => 1,
+                    'sign_in_by' => auth()->user()->id,
+                    'sign_out_by' => auth()->user()->id,
+                ]);
+            } elseif ($request->new_start_date && $request->new_start_time) {
+                Attendance::where('schedule_id',intval($request->schedule_id))->update([
+                    'sign_in' => $signIn,
+                    'force_close_sign_in_date' => date('Y-m-d H:i:s'),
+                    'sign_in_remarks' => 'Requested to force close Sign In.',
+                    'isSync' => 1,
+                    'sign_in_by' => auth()->user()->id,
+                ]);
+            } else {
+                Attendance::where('schedule_id',intval($request->schedule_id))->update([
+                    'sign_out' => $signOut,
+                    'force_close_sign_in_date' => date('Y-m-d H:i:s'),
+                    'sign_out_remarks' => 'Requested to force close Sign Out.',
+                    'isSync' => 1,
+                    'sign_out_by' => auth()->user()->id,
+                ]);
+            }
         }
         DB::commit();
 
-        return $sched;
+        return Schedule::with('schedule_attendances')->where('id',intval($request->schedule_id))->first();
     }
 }
