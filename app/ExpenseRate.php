@@ -12,7 +12,8 @@ class ExpenseRate extends Model
         'amount',
         'expenses_type_id',
         'user_id',
-        'created_by'
+        'created_by',
+        'validity_date'
     ];
 
     public function user()
