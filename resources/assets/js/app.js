@@ -142,6 +142,9 @@ Vue.component('aapc-farmer-index', require('./components/AapcFarmer/AapcFarmerIn
 // Authority To Deduct
 Vue.component('authority-to-deduct-index', require('./components/AuthorityToDeduct/AuthorityToDeductIndex.vue'));
 
+// Expense Deduction
+Vue.component('expense-deduction-index', require('./components/Expense/ExpenseDeductionIndex.vue'));
+
 //Common
 Vue.component('table-pagination', require('./components/Common/TablePagination.vue'));
 Vue.component('table-pagination-basic', require('./components/Common/TablePaginationBasic.vue'));

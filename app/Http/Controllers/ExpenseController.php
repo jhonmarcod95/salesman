@@ -20,7 +20,8 @@ use App\{
     ExpenseSapIoBudget,
     ExpenseVerificationStatus,
     ExpenseVerificationRejectedRemarks,
-    Audit
+    Audit,
+    EmployeeMonthlyExpense
 };
 use App\Exports\ExpenseVerifiedReportPerUserExport;
 use App\Exports\ExpenseVerifiedReportPerBuExport;
@@ -1332,5 +1333,40 @@ class ExpenseController extends Controller
             'expense_histories' => $expenseHistory,
             'audit_histories' => $auditHistory
         ];
+    }
+
+
+     /**
+     * Show Expense Deduction page
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function expenseDeductionReportIndex(){
+        session(['header_text' => 'Expense Deduction']);
+        return view('expense.expense-deduction-index-report');
+    }
+
+    public function expenseDeductionReportAll(Request $request) {
+        $month_year = explode("-", $request->month_year);
+        $month = Carbon::createFromDate(null, $month_year[1])->format('F');
+        $year =  $month_year[0];
+        $company_id = $request->company_id;
+        $user_id = $request->user_id;
+
+        return EmployeeMonthlyExpense::whereHas('deductions')
+            ->with('user.companies','deductions.expense.expensesType')
+            ->where('month',$month)
+            ->where('year',$year)
+            ->when($company_id,function($q) use($company_id){
+                $q->whereHas('user.companies',function($q2) use($company_id){
+                    $q2->where('company_id',$company_id);
+                });
+            })
+            ->when($user_id,function($q) use($user_id){
+                $q->whereHas('user',function($q2) use($user_id){
+                    $q2->where('id',$user_id);
+                });
+            })
+            ->paginate($request->limit);
     }
 }

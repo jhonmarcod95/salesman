@@ -231,6 +231,16 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
         // Route::get('/export', 'ExpenseController@export');
     });
 
+     //Expense Deduction report
+     Route::group(['prefix' => '/expenses-deduction-report'], function() {
+        Route::get('/', 'ExpenseController@expenseDeductionReportIndex');
+        Route::get('/all', 'ExpenseController@expenseDeductionReportAll');
+        // Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
+        // Route::get('/expenses/{user_id}', 'ExpenseController@show2');
+        // Route::get('/export', 'ExpenseController@export');
+        // Route::get('/receipt-history/{rexpense_id}', 'ExpenseController@getReceiptHistory');
+    });
+
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
     Route::post('/expense-io-report-data', 'ExpenseController@expenseIOReportData');
 
