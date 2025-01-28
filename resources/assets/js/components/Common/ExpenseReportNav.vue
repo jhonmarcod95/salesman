@@ -21,6 +21,13 @@
                  DMS Submitted Expense
             </a>
         </div>
+        <div v-if="salesHeadRole || isItRole">
+            <a class="btn btn-sm mr-2" 
+                href="/expenses-deduction-report" 
+                :class="pathName == '/expenses-deduction-report' ? 'btn-default' : 'btn-outline-default'">
+                 Expense Deduction Report
+            </a>
+        </div>
         <div>
             <a class="btn btn-sm mr-2" 
                 href="/expenses-top-spender-report" 

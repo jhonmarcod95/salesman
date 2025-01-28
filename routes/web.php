@@ -39,6 +39,19 @@ Route::get('logout', function(){
     return redirect('/');
   });
 
+// Version Release
+Route::group(['prefix' => 'version-release'], function () {
+    Route::get('/main', 'VersionReleaseController@index')->name('version-release');
+    Route::get('/all', 'VersionReleaseController@all');
+    Route::get('/plain', 'VersionReleaseController@indexPlain');
+    //Version Submission
+    Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|approver|tax|finance-gl']], function () {
+        Route::post('/store', 'VersionReleaseController@store');
+        Route::post('/submit-item', 'VersionReleaseController@submitItem');
+        //Route::post('/update/{$id}', 'VersionReleaseController@submitItem');
+    });
+});
+
 // Authenticated Routes
 Route::group(['middleware' => 'auth'], function(){
     // Provinces
@@ -216,6 +229,16 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
         //     'ExpenseController@show2'
         // );
         // Route::get('/export', 'ExpenseController@export');
+    });
+
+     //Expense Deduction report
+     Route::group(['prefix' => '/expenses-deduction-report'], function() {
+        Route::get('/', 'ExpenseController@expenseDeductionReportIndex');
+        Route::get('/all', 'ExpenseController@expenseDeductionReportAll');
+        // Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
+        // Route::get('/expenses/{user_id}', 'ExpenseController@show2');
+        // Route::get('/export', 'ExpenseController@export');
+        // Route::get('/receipt-history/{rexpense_id}', 'ExpenseController@getReceiptHistory');
     });
 
     Route::get('/expense-io-report', 'ExpenseController@expenseIOReport');
@@ -697,5 +720,4 @@ Route::get('/get-all-customer-hana', function () {
     return $hana_data;
 
 });
-
 

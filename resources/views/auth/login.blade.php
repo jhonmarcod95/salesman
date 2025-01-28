@@ -71,6 +71,10 @@
                                 <button type="submit" class="btn btn-primary my-4">Sign in</button>
                             </div>
                         </form>
+                        <!--Version release-->
+                        </div>
+                            <a class="text-xs text-gray m-2" href="{{ url('version-release/plain') }}">Check the latest version </a>
+                        </div>
 
                     </div>
                 </div>

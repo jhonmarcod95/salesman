@@ -10,9 +10,9 @@
     @include('layouts.sidebar')
 
     <div class="main-content">
-        @include('layouts.nav')
+        <div class="pb-6"> @include('layouts.nav') </div>
 
-        @yield('content')
+        <div> @yield('content') </div>
 
         @include('layouts.footer')
     </div>

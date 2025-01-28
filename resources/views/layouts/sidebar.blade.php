@@ -226,6 +226,11 @@
                                         <i class="ni ni-paper-diploma text-green"></i> Survey
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="nav-link" href="{{ url('version-release/main') }}">
+                                        <i class="ni ni-settings-gear-65 text-gray"></i> Version Release
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </li>
@@ -317,7 +322,7 @@
                 </li>
             </ul>
             @endif
-
+            
         </div>
     </div>
 </nav>

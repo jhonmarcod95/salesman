@@ -34,4 +34,8 @@ class EmployeeMonthlyExpense extends Model
     public function weeklyExpense() {
         return $this->hasMany(EmployeeWeeklyExpense::class);
     }
+
+    public function deductions(){
+        return $this->hasMany(ExpenseDeduction::class);
+    }
 }
