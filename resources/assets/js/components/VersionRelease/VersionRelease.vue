@@ -12,7 +12,7 @@
 		<div class="container-fluid">
 			<div class="d-flex flex-row">
 				<!--begin::Aside-->
-				<div class="flex-row offcanvas-mobile w-300px w-xl-350px min-h-550px" id="kt_profile_aside">
+				<div class="flex-row offcanvas-mobile w-450px w-xl-500px min-h-550px" id="kt_profile_aside">
 					<!--begin::Profile Card-->
 					<div class="card card-custom card-stretch shadow-sm">
 						<div class="card-header border-0">
@@ -21,12 +21,13 @@
 						<!--begin::Body-->
 						<div class="card-body pt-4 position-relative">
 							<!--begin::Block UI spinner-->
-							<table-spinner v-if="isProcessing && items.length"/>
+							<table-spinner v-if="isProcessing"/>
 							<!--end::Block UI spinner-->
 
 							<!--begin::Nav-->
 							<div class="navi navi-bold navi-hover navi-active navi-link-rounded">
-								<div class="navi-item mb-1" v-for="(item, index) in items" :key="index">
+								<div v-if="!isProcessing && isEmpty(items)" class="navi-item text-muted">No data available</div>
+								<div v-else class="navi-item mb-1" v-for="(item, index) in items" :key="index">
 									<a class="btn active border-0 navi-link py-1 pr-0" @click="viewVersion(item)">
 										<span class="navi-icon mr-2">
 											<span class="svg-icon">
@@ -50,7 +51,7 @@
 										<i class="fas fa-trash icon-xs"></i></a>
 								</div> 
 
-								<div v-if="!items.length">
+								<div v-if="isProcessing && isEmpty(items)">
 									<span class="spinner spinner-primary mr-10"></span>
 									<span>Loading Data...</span>
 								</div>
@@ -73,10 +74,11 @@
 					<div class="card card-custom card-stretch px-8 shadow-sm">
 						<!--begin::Header-->
 						<div class="card-header border-0 pt-10">
-							<h3 class="card-title align-items-start flex-column">
-								<span class="card-label font-weight-bold font-size-h4 text-dark-75" >Vsn {{ selectedVersion.version || "0000.00.00" }}</span>
-								<span class="text-muted mt-3 font-weight-bold font-size-sm">Release Date: {{ selectedVersion.release_date || "0000-00-00"}}</span>
+							<h3 class="card-title align-items-start flex-column" v-if="!isEmpty(selectedVersion)">
+								<span class="card-label font-weight-bolder font-size-h4 text-dark" >Vsn {{ selectedVersion.version }}</span>
+								<span class="text-muted mt-3 font-weight-bold font-size-sm">Release Date: {{ selectedVersion.release_date }}</span>
 							</h3>
+							<h2 v-else>No data available</h2>
 						</div>
 						<!--end::Header-->
 						<!--begin::Body-->
@@ -95,7 +97,7 @@
 								:items="selectedVersion.release_note.fixes" @submitSuccess="submitSuccess"
 								:lastItem="lastItem" :isAdministrator="isAdministrator"/>
 							</div>
-							<div v-else>
+							<div v-if="isProcessing">
 								<span class="spinner spinner-primary mr-10"></span>
 								<span>Loading Data...</span>
 							</div>
