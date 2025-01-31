@@ -118,6 +118,14 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
+                                    <input name="customFile" id="customFile" class='form-control custom-file-input' type="file" @change="onFileChange" style="cursor: pointer"/>
+                                    <!-- <label class="custom-file-label" for="customFile">Choose file/s for signout  reference</label> -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
                                     <label for="new_date">Attendance End Date</label>
                                     <input type="date" id="new_date" class="form-control form-control-alternative" v-model="newEndDate">
                                 </div>
@@ -153,6 +161,7 @@ export default {
             schedules:[],
             roles:[],
             errors:[],
+            file:[],
             schedIndex: '',
             startDate: '',
             newStartDate: '',
@@ -204,13 +213,19 @@ export default {
         },
         forcedCloseSchedule(id){
             if(confirm("Are you sure you want to force close this schedule?")) {
-                axios.post('close-attendance',{
-                    schedule_id: id,
-                    new_start_date: this.newStartDate,
-                    new_start_time: this.newStartTime,
-                    new_end_date: this.newEndDate,
-                    new_end_time: this.newEndTime
-                })
+                const config = {
+                    headers: { 'content-type': 'multipart/form-data' }
+                }
+
+                const formData = new FormData();
+                formData.append('schedule_id', id);
+                formData.append('file', this.file);
+                formData.append('new_start_date', this.newStartDate);
+                formData.append('new_start_time', this.newStartTime);
+                formData.append('new_end_date', this.newEndDate);
+                formData.append('new_end_time', this.newEndTime);
+
+                axios.post('close-attendance',formData,config)
                 .then(response =>{
                     this.schedules.splice(this.schedIndex,1,response.data)
                     $('#forceCloseModal').modal('hide');
@@ -221,6 +236,10 @@ export default {
                 })
                 this.users.splice(userIndex,1);
             }
+        },
+        onFileChange(e){
+            this.file = e.target.files[0];
+            console.log(this.file);
         },
         customLabel(data) {
             var companies = '';
