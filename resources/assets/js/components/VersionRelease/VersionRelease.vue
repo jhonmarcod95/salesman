@@ -2,32 +2,33 @@
 	<div>
         <div class="header bg-green pb-6 pt-5 pt-md-6 mb--8"></div>
 		<app-breadcrumbs :breadcrumbs="breadcrumbs">
-			<div class="btn btn-white font-weight-bold p-3 mr-3" 
+			<div class="btn btn-white font-weight-bold p-3 mr-3 container-fluid" 
 				v-if="isAdministrator"
 				@click="showModal('form_modal')">
 				Add New Version
 			</div>
 		</app-breadcrumbs>
 
-		<div class="container">
+		<div class="container-fluid">
 			<div class="d-flex flex-row">
 				<!--begin::Aside-->
-				<div class="flex-row offcanvas-mobile w-300px w-xl-350px min-h-550px" id="kt_profile_aside">
+				<div class="flex-row offcanvas-mobile w-600px w-xl-500px min-h-550px" id="kt_profile_aside">
 					<!--begin::Profile Card-->
 					<div class="card card-custom card-stretch shadow-sm">
-						<div class="card-header border-0 pt-10 pl-15">
+						<div class="card-header border-0">
 							<h3 class="card-title font-weight-bolder text-dark">Version Release</h3>
 						</div>
 						<!--begin::Body-->
 						<div class="card-body pt-4 position-relative">
 							<!--begin::Block UI spinner-->
-							<table-spinner v-if="isProcessing && items.length"/>
+							<table-spinner v-if="isProcessing"/>
 							<!--end::Block UI spinner-->
 
 							<!--begin::Nav-->
 							<div class="navi navi-bold navi-hover navi-active navi-link-rounded">
-								<div class="navi-item mb-1" v-for="(item, index) in items" :key="index">
-									<a class="btn active border-0 navi-link py-1" @click="viewVersion(item)">
+								<div v-if="!isProcessing && isEmpty(items)" class="navi-item text-muted">No data available</div>
+								<div v-else class="navi-item mb-1" v-for="(item, index) in items" :key="index">
+									<a class="btn active border-0 navi-link py-1 pr-0" @click="viewVersion(item)">
 										<span class="navi-icon mr-2">
 											<span class="svg-icon">
 												<!--begin::Svg Icon | path:assets/media/svg/icons/Design/Layers.svg-->
@@ -46,9 +47,11 @@
 											<span class="label p-1 label-inline text-white bg-green rounded">new</span>
 										</span>
 									</a>
+									<a href="javascript:;" class="text-danger" @click="deleteVersion(item)" v-if="isAdministrator">
+										<i class="fas fa-trash icon-xs"></i></a>
 								</div> 
 
-								<div v-if="!items.length">
+								<div v-if="isProcessing && isEmpty(items)">
 									<span class="spinner spinner-primary mr-10"></span>
 									<span>Loading Data...</span>
 								</div>
@@ -71,10 +74,11 @@
 					<div class="card card-custom card-stretch px-8 shadow-sm">
 						<!--begin::Header-->
 						<div class="card-header border-0 pt-10">
-							<h3 class="card-title align-items-start flex-column">
-								<span class="card-label font-weight-bold font-size-h4 text-dark-75" >Vsn {{ selectedVersion.version || "0000.00.00" }}</span>
-								<span class="text-muted mt-3 font-weight-bold font-size-sm">Release Date: {{ selectedVersion.release_date || "0000-00-00"}}</span>
+							<h3 class="card-title align-items-start flex-column" v-if="!isEmpty(selectedVersion)">
+								<span class="card-label font-weight-bolder font-size-h4 text-dark" >Vsn {{ selectedVersion.version }}</span>
+								<span class="text-muted mt-3 font-weight-bold font-size-sm">Release Date: {{ selectedVersion.release_date }}</span>
 							</h3>
+							<h2 v-else>No data available</h2>
 						</div>
 						<!--end::Header-->
 						<!--begin::Body-->
@@ -83,17 +87,17 @@
 								<!--New features-->
 								<VersionItems type="new" :version_release_id="selectedVersion.id"
 								:items="selectedVersion.release_note.new" @submitSuccess="submitSuccess"
-								:isAdministrator="isAdministrator"/>
+								:lastItem="lastItem" :isAdministrator="isAdministrator"/>
 								<!--Updates-->
 								<VersionItems type="updates" :version_release_id="selectedVersion.id"
 								:items="selectedVersion.release_note.updates" @submitSuccess="submitSuccess"
-								:isAdministrator="isAdministrator"/>
+								:lastItem="lastItem" :isAdministrator="isAdministrator"/>
 								<!--Fixes-->
 								<VersionItems type="fixes" :version_release_id="selectedVersion.id"
 								:items="selectedVersion.release_note.fixes" @submitSuccess="submitSuccess"
-								:isAdministrator="isAdministrator"/>
+								:lastItem="lastItem" :isAdministrator="isAdministrator"/>
 							</div>
-							<div v-else>
+							<div v-if="isProcessing">
 								<span class="spinner spinner-primary mr-10"></span>
 								<span>Loading Data...</span>
 							</div>
@@ -122,6 +126,7 @@
 	import FormModal from './FormModal.vue';
 	import listFormMixins from '../../list-form-mixins.vue';
 	import VersionItems from './VersionItems.vue';
+	import Swal from 'sweetalert2';
 
 	export default {
 		name: "VersionRelease",
@@ -175,12 +180,42 @@
 				// let index = !_.isEmpty(this.selectedVersion) ? _.findIndex(this.items, ['id', this.selectedVersion.id]) : 0
 				// const selectedIndex = _.findIndex(this.items, ['id', this.selectedVersion.id]);
 				this.fetchList()
-			}
+			},
+			deleteVersion(data = null){
+            if(_.isEmpty(data)) return;
+            
+            Swal.fire({
+              title: "Delete Version " + data.version + "?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#e24444",
+              cancelButtonColor: "#666666",
+              confirmButtonText: "Delete",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                axios.delete(`delete/${data.id}`);
+                Swal.fire({
+                  title: "Version deleted!",
+                  icon: "success",
+                  confirmButtonColor: "666666",
+                  confirmButtonText: "Close",
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.reload();
+                });
+              }
+            });
+        }
 		},
 		computed: {
 			isAdministrator() {
 				return this.authenticated && (this.userRoles == "It" || this.userRoles == "Admin");
 				// return true;
+			},
+			lastItem() {
+				let new_features = this.selectedVersion.release_note.new ? this.selectedVersion.release_note.new.length : 0;
+				let updates = this.selectedVersion.release_note.updates ? this.selectedVersion.release_note.updates.length : 0;
+				let fixes = this.selectedVersion.release_note.fixes ? this.selectedVersion.release_note.fixes.length : 0;
+				return new_features + updates + fixes <= 1;
 			}
 		}
 	}

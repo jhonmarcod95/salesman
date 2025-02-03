@@ -129,7 +129,11 @@ import moment from 'moment';
             submit() {
                 // Format version
                 //this.formData.version = '';
-                this.formData.version = `${this.currentYear}.${this.version}`
+                this.formData.version = `${this.currentYear}.${this.version}`;
+
+                this.formData.new_features = this.clearEmptyFields(this.formData.new_features);
+                this.formData.updates = this.clearEmptyFields(this.formData.updates);
+                this.formData.fixes = this.clearEmptyFields(this.formData.fixes);
 
                 //Submit data
                 this.$emit('submit', this.formData)
@@ -147,7 +151,7 @@ import moment from 'moment';
                 this.formData[itemType].splice(index, 1)
                 console.log(this.formData[itemType])
             },
-           setDefaultData() {
+            setDefaultData() {
                 if(this.formAction == 'edit') {
                     this.formData = this.data;
                     this.version = this.data.version;
@@ -162,8 +166,17 @@ import moment from 'moment';
                     }
                     this.currentYear = moment().format('YY');
                 }
+            },
+            clearEmptyFields(data) { //Clears all additional empty fields in the data sheet
+                if (data.length > 1)
+                {
+                    for (var i = 0; i < data.length; i++)
+                    {
+                        if (!data[i].description) data.splice(i,1);
+                    }
+                }
+                return data;
             }
-
 
         },
 

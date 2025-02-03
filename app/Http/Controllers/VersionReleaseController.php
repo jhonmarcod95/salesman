@@ -31,7 +31,7 @@ class VersionReleaseController extends Controller
         $versionRelease = VersionRelease::select('id','version','release_date')
             ->with('releaseNotes:id,version_release_id,description,type')
             ->orderBy('release_date', 'desc')
-            ->orderBy('id','desc') //doesnt sort by date properly for some reason
+            ->orderBy('id','desc') //in case release date doesnt sort properly
             ->paginate($request->limit);
 
         $versionRelease->getCollection()->transform(function($item) {
@@ -55,13 +55,14 @@ class VersionReleaseController extends Controller
 
     public function store(Request $request) {
         $request->validate([
-            'version' => 'required|regex:/(.+).(.+)\.(.+)/i',
+            'version' => 'required|regex:/(.+).(.+)\.(.+)/i|unique:version_releases,version,NULL,id,deleted_at,NULL',
             'release_date' => 'required',
             'new_features.*.*' => 'required_without_all:updates.*.*,fixes.*.*',
             // 'updates.*.*' => 'required_without_all:new_features.*.*,fixes.*.*',
             // 'fixes.*.*' => 'required_without_all:new_features.*.*,updates.*.*'
         ],[
-            'version.regex' => 'Invalid version format (please use year.version.fixes).',
+            'version.unique' => 'Version number already in database',
+            'version.regex' => 'Invalid version format (please use year.version.fixes)',
             'required_without_all' => 'Please indicate your changes'
         ]);
 
@@ -121,5 +122,21 @@ class VersionReleaseController extends Controller
                 'type'               => $request->type
             ]);
         }
+    }
+
+    //FOR THE ENTIRE VERSION
+    public function delete($id) {
+        $versionRelease = VersionRelease::find($id);
+        $versionRelease->delete();
+
+        return $versionRelease;
+    }
+
+    //FOR INDIVIDUAL NOTES
+    public function deleteItem($id) {
+        $versionReleaseNote = VersionReleaseNote::find($id);
+        $versionReleaseNote->delete();
+
+        return $versionReleaseNote;
     }
 }
