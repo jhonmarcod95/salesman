@@ -12,7 +12,7 @@
 		<div class="container-fluid">
 			<div class="d-flex flex-row">
 				<!--begin::Aside-->
-				<div class="flex-row offcanvas-mobile w-450px w-xl-500px min-h-550px" id="kt_profile_aside">
+				<div class="flex-row offcanvas-mobile w-600px w-xl-500px min-h-550px" id="kt_profile_aside">
 					<!--begin::Profile Card-->
 					<div class="card card-custom card-stretch shadow-sm">
 						<div class="card-header border-0">
