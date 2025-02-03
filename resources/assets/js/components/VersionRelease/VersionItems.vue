@@ -15,7 +15,10 @@
                 :data="item.description" @submit="submit" @close="toggleInput()"/>
                 <span v-else>
                     <span>{{ item.description }}</span>
-                    <a href="javascript:;" @click="toggleInput(item)" v-if="isAdministrator"><i class="fas fa-edit icon-xs"></i></a>
+                    <a href="javascript:;" class="text-primary" @click="toggleInput(item)" v-if="isAdministrator">
+                        <i class="fas fa-edit icon-xs"></i></a>
+                    <a href="javascript:;" class="text-danger" @click="deleteItem(item)" v-if="isAdministrator">
+                        <i class="fas fa-trash icon-xs"></i></a>
                 </span>
             </li>
             <li v-if="(inputOpen && inputMode == 'add') && isAdministrator">
@@ -25,12 +28,15 @@
     </div>
 </template>
 <script>
+import Swal from 'sweetalert2';
 import InputForm from './InputForm.vue';
+
 export default {
     props: {
         type: String,
         version_release_id: Number,
         items: Array,
+        lastItem: Boolean, //true if version release has only 1 note
         isAdministrator: Boolean
     },
     components: {InputForm},
@@ -68,7 +74,62 @@ export default {
                 this.$emit('submitSuccess');
                 // toastr.success('Data submitted successfuly.', 'Success');
             })
+        },
+        deleteItem(data = null){
+            if(_.isEmpty(data)) return;
+            
+            this.selectedItem = data;
+            if (this.lastItem) this.deleteVersion();
+            else this.deleteNote();
+        },
+        deleteNote() {
+            Swal.fire({
+              title: "Delete from " + this.selectedItem.type + "?",
+              text: "'" + this.selectedItem.description + "'",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#e24444",
+              cancelButtonColor: "#666666",
+              confirmButtonText: "Delete",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                  axios.delete(`delete-item/${this.selectedItem.id}`);
+                  Swal.fire({
+                    title: "Note deleted!",
+                    icon: "success",
+                    confirmButtonColor: "666666",
+                    confirmButtonText: "Close",
+                  }).then((result) => {
+                      if (result.isConfirmed) window.location.reload();
+                  });
+                }
+            });
+        },
+        deleteVersion() {
+            Swal.fire({
+              title: "Deleting last item!",
+              text: "This is the last item on the list. Deleting this will erase the entire version. Proceed?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#e24444",
+              cancelButtonColor: "#666666",
+              confirmButtonText: "Delete",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                  axios.delete(`delete-item/${this.selectedItem.id}`);
+                  axios.delete(`delete/${this.selectedItem.version_release_id}`);
+                  Swal.fire({
+                    title: "Version deleted!",
+                    icon: "success",
+                    confirmButtonColor: "666666",
+                    confirmButtonText: "Close",
+                  }).then((result) => {
+                      if (result.isConfirmed) window.location.reload();
+                  });
+                }
+            });
         }
+
     },
     watch:{
         version_release_id:function(){

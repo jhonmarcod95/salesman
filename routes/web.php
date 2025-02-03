@@ -48,6 +48,8 @@ Route::group(['prefix' => 'version-release'], function () {
     Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|approver|tax|finance-gl']], function () {
         Route::post('/store', 'VersionReleaseController@store');
         Route::post('/submit-item', 'VersionReleaseController@submitItem');
+        Route::delete('/delete-item/{id}', 'VersionReleaseController@deleteItem');
+        Route::delete('/delete/{id}', 'VersionReleaseController@delete');
         //Route::post('/update/{$id}', 'VersionReleaseController@submitItem');
     });
 });
