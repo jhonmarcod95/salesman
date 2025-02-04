@@ -144,6 +144,8 @@ Vue.component('authority-to-deduct-index', require('./components/AuthorityToDedu
 
 // Expense Deduction
 Vue.component('expense-deduction-index', require('./components/Expense/ExpenseDeductionIndex.vue'));
+// SUPPORT FORCED CLOSE
+Vue.component('forced-close', require('./components/ForcedClose/ForcedClose.vue'));
 
 //Common
 Vue.component('table-pagination', require('./components/Common/TablePagination.vue'));
