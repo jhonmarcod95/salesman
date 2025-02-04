@@ -311,7 +311,16 @@ Route::group(['middleware' => ['auth', 'role:it|tsr|coordinator|coordinator-2|ma
 
 });
 
+Route::group(['middleware' => ['auth', 'role:it']], function () {
 
+    // Forced close a visit
+    Route::get('/forced-close','SupportForcedCloseController@index');
+    // Request index data
+    Route::get('/forced-closes', 'SupportForcedCloseController@indexData');
+    // Request user schedules
+    Route::post('/fetch-schedules', 'SupportForcedCloseController@fetchSchedule');
+    Route::post('/close-attendance', 'SupportForcedCloseController@closeAttendance');
+});
 
 // AP Routes
 Route::group(['middleware' => ['auth', 'role:ap|tax|audit|finance-gl']], function(){

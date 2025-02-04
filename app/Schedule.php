@@ -71,6 +71,10 @@ class Schedule extends Model implements Auditable
         return $this->hasOne(Attendance::class, 'schedule_id', 'id')->whereNotNull('sign_out')->orderBy('created_at','DESC');
     }
 
+    public function schedule_attendances(){
+        return $this->hasOne(Attendance::class, 'schedule_id', 'id')->orderBy('created_at','DESC');
+    }
+
     public function signinwithoutout()
     {
         return $this->hasOne(Attendance::class, 'schedule_id', 'id')->whereNull('sign_out')->orderBy('created_at','DESC');
