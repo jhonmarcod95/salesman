@@ -62,6 +62,7 @@ class PaymentAutoPostingReprocessing extends Command
             //  '18th_week' => ['2025-01-13','2025-01-19',true],
             //  '19th_week' => ['2025-01-20','2025-01-26',true],
              '20th_week' => ['2025-01-27','2025-02-02',true],
+             '21st_week' => ['2025-02-03','2025-02-09',true]
         ];
 
         foreach($back_dates as $back_date){
