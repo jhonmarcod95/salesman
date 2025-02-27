@@ -126,6 +126,7 @@ class AppAPIController extends Controller
     {
         $checkEntries = Expense::where('user_id',Auth::user()->id)
                         ->where('expenses_type_id', $expense_type)
+                        ->whereNotIn('status_id', [3,4])
                         ->whereBetween('created_at', [Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()]);
 
         if ($checkEntries->count() > 0) {
