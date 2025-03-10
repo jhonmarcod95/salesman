@@ -119,7 +119,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <input name="customFile" id="customFile" class='form-control custom-file-input' type="file" @change="onFileChange" style="cursor: pointer"/>
-                                    <!-- <label class="custom-file-label" for="customFile">Choose file/s for signout  reference</label> -->
+                                    <label class="custom-file-label" for="customFile">Choose file/s for signout  reference</label>
                                 </div>
                             </div>
                         </div>
