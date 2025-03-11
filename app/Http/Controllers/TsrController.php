@@ -129,7 +129,7 @@ class TsrController extends Controller
                 // Insert to salesman vendor table
                 $array = [
                     'user_id' => $user->id,
-                    'vendor_code' => $request->vendor_code,
+                    'vendor_code' => str_pad($request->vendor_code, 10, '0', STR_PAD_LEFT),
                     'sap_server' =>  $user->company->sapServers[0]->sap_server
                 ];
                 SalesmanVendor::create($array);
@@ -187,7 +187,7 @@ class TsrController extends Controller
             'date_of_birth' => 'required',
             'company' => 'required',
             'location' => 'required',
-//            'vendor_code' => 'required'
+            // 'vendor_code' => 'required'
         ]);
 
         $technicalSalesRepresentative->last_name = $request->last_name;
@@ -221,7 +221,7 @@ class TsrController extends Controller
                 // Update to salesman vendor table
                 $array = [
                     'user_id' => $user->id,
-                    'vendor_code' => $request->vendor_code,
+                    'vendor_code' => str_pad($request->vendor_code, 10, '0', STR_PAD_LEFT),
                     'sap_server' =>  $user->company->sapServers[0]->sap_server
                 ];
                 $salemanVendor = SalesmanVendor::where('user_id', $user->id)->first();

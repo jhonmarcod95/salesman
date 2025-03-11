@@ -20,41 +20,41 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-username">Last Name</label>
-                                                <input type="text" id="input-username" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.last_name">
+                                                <label class="form-control-label" for="input-last_name">Last Name</label>
+                                                <input type="text" id="input-last_name" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.last_name">
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-email">First Name</label>
-                                                <input type="email" id="input-email" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.first_name">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label class="form-control-label" for="input-first-name">Middle Name</label>
-                                                <input type="text" id="input-first-name" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.middle_name">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label class="form-control-label" for="middle_initial">Middle Initial</label>
-                                                <input type="text" id="middle_initial" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.middle_initial">
+                                                <label class="form-control-label" for="input-first_name">First Name</label>
+                                                <input type="text" id="input-first_name" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.first_name">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-last-name">Suffix</label>
-                                                <input type="text" id="input-last-name" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.suffix">
+                                                <label class="form-control-label" for="input-middle_name">Middle Name</label>
+                                                <input type="text" id="input-middle_name" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.middle_name">
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="role">Company</label>
+                                                <label class="form-control-label" for="input-middle_initial">Middle Initial</label>
+                                                <input type="text" id="input-middle_initial" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.middle_initial">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="input-suffix">Suffix</label>
+                                                <input type="text" id="input-suffix" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.suffix">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label">Company</label>
                                                 <select class="form-control" :disabled="defaultFields" v-model="tsr.company_id">
                                                     <option v-for="(company,c) in companies" v-bind:key="c" :value="company.id"> {{ company.name }}</option>
                                                 </select>
@@ -65,7 +65,7 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="role">Location</label>
+                                                <label class="form-control-label">Location</label>
                                                 <select class="form-control" :disabled="defaultFields" v-model="tsr.user.location[0].id">
                                                     <option v-for="(location,l) in locations" v-bind:key="l" :value="location.id"> {{ location.name }}</option>
                                                 </select>
@@ -74,8 +74,8 @@
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-last-name">Vendor Code</label>
-                                                <input type="text" id="vendor-code" :disabled="vendorCodeField" class="form-control form-control-alternative" v-model="tsr.user.vendor.vendor_code" maxlength="10">
+                                                <label class="form-control-label" for="input-vendor_code">Vendor Code</label>
+                                                <input type="text" id="input-vendor_code" :disabled="vendorCodeField" class="form-control form-control-alternative" v-model="tsr.user.vendor.vendor_code" maxlength="10">
                                             </div>
                                         </div>
                                     </div>
@@ -94,64 +94,65 @@
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-city">Email</label>
-                                                <input type="text" id="input-city" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.email">
+                                                <label class="form-control-label" for="input-email">Email</label>
+                                                <input type="email" id="input-email" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.email">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-country">Contact Number</label>
-                                                <input type="text" id="input-country" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.contact_number">
+                                                <label class="form-control-label" for="input-contact_number">Contact Number</label>
+                                                <input type="text" id="input-contact_number" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.contact_number">
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="input-city">Bithday</label>
-                                                <input type="date" id="date_of_birth" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.date_of_birth">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label class="form-control-label" for="input-city">Date Hired</label>
-                                                <input type="date" id="date_hired" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.date_hired">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label class="form-control-label" for="contact_person">Contact Person</label>
-                                                <input type="text" id="contact_person" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.contact_person">
+                                                <label class="form-control-label" for="input-date_of_birth">Birthday</label>
+                                                <input type="date" id="input-date_of_birth" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.date_of_birth">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="personal_email">Personal Email</label>
-                                                <input type="text" id="personal_email" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.personal_email">
+                                                <label class="form-control-label" for="input-date_hired">Date Hired</label>
+                                                <input type="date" id="input-date_hired" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.date_hired">
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="plate_number">Plate Number</label>
-                                                <input type="text" id="plate_number" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.plate_number">
+                                                <label class="form-control-label" for="input-contact_person">Contact Person</label>
+                                                <input type="text" id="input-contact_person" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.contact_person">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="form-control-label" for="monthly_qouta">Monthly Qouta</label>
-                                                <input type="text" id="monthly_qouta" class="form-control form-control-alternative" v-model="tsr.monthly_qouta">
+                                                <label class="form-control-label" for="input-personal_email">Personal Email</label>
+                                                <input type="email" id="input-personal_email" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.personal_email">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="input-plate_number">Plate Number</label>
+                                                <input type="text" id="input-plate_number" :disabled="defaultFields" class="form-control form-control-alternative" v-model="tsr.plate_number">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="input-monthly_qouta">Monthly Qouta</label>
+                                                <input type="text" id="input-monthly_qouta" class="form-control form-control-alternative" v-model="tsr.monthly_qouta">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="text">
-                                            <button @click="updateTsr(tsr)"  type="button" class="btn btn-primary mt-4">Save</button>
+                                            <button @click="updateTsr(tsr)"  type="button" class="btn btn-primary m-2">Save</button>
+                                            <!-- <a href="/tsr"  type="button" class="btn btn-primary m-2">Cancel</a> -->
                                         </div>
                                     </div>
                                 </div>
