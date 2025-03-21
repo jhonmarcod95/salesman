@@ -15,7 +15,9 @@ class SalesmanInternalOrder extends Model implements Auditable
         'user_id',
         'charge_type',
         'internal_order',
-        'sap_server'
+        'sap_server',
+        'uom',
+        'gl_account_id'
     ];
 
     public function user(){
