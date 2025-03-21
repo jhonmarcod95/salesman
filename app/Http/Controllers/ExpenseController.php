@@ -336,7 +336,7 @@ class ExpenseController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexExpenseData(){
-        return ExpensesType::with('expenseChargeType.chargeType')->orderBy('id', 'desc')->get();
+        return ExpensesType::with('expenseChargeType.chargeType')->where('status', 1)->orderBy('id', 'desc')->get();
     }
 
     /**
