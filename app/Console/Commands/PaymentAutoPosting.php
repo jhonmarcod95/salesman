@@ -901,6 +901,7 @@ class PaymentAutoPosting extends Command
             ->whereYear('created_at', '=', $year)
             ->whereMonth('created_at', '=', $month)
             ->where('expenses_entry_id','!=',0)
+            ->where('verified_status_id',1)
             ->where('status_id',3)
             ->first();
 
