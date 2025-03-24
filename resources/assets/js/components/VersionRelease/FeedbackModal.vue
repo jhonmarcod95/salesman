@@ -14,12 +14,11 @@
                         <span v-else-if="formAction == 'delete'">DELETE</span>
                          FEEDBACK</h4>
                 </div>
-                <span class="pt-8" @click="closeModal()"><i class="flaticon2-cross font-size-sm"></i></span>
             </div>
 
             <div class="card-body">
-                <div class="mb-8">
-                    <div v-if="!authenticated" class="form-group mb-8">
+                <div class="my-1">
+                    <div v-if="!authenticated" class="form-group mb-2">
                         <div><strong>Enter account details to proceed</strong></div>
                         <label>Email Address:<span class="text-danger">*</span></label>
                         <input type="text" class="form-control mb-2" v-model="email" placeholder="juan.delacruz@lafilgroup.com" />
@@ -28,7 +27,7 @@
                     </div>
                     <div v-if="formAction == 'add'">
                         <label>Feedback:<span class="text-danger">*</span></label>
-                        <textarea class="form-control mb-4" v-model="feedback"></textarea>
+                        <textarea class="form-control mb-1" v-model="feedback"></textarea>
                     </div>
                     <div v-else-if="formAction == 'delete'">
                         <div class="text-center">Press confirm to delete feedback.</div>
@@ -40,11 +39,10 @@
             </div>
 
             <div class="card-footer text-right">
-                <div class="btn btn-sm btn-secondary" @click="closeModal()">Cancel</div>
+                <div class="btn btn-secondary" @click="closeModal()">Cancel</div>
 
-                <div class="btn btn-sm btn-primary"
-                     :class="{ 'spinner spinner-primary spinner-right': requestProcessing }"
-                     @click="submit()">
+                <div class="btn btn-primary" @click="submit()">
+                     <span :class="{ 'spinner spinner-primary spinner-right': requestProcessing }"></span>
                     {{ this.formAction == 'add'? 'Submit': 'Confirm' }}
                 </div>
             </div>
@@ -54,6 +52,7 @@
 </template>
 
 <script>
+	import Swal from 'sweetalert2';
     export default {
         props: [ 
             'versionReleaseId', 
@@ -74,6 +73,7 @@
             submit() {
                 if (this.requestProcessing) return;
                 this.requestProcessing = true;
+                
                 if (this.formAction == 'add') {
                     let data = {
                         'version_release_id' : this.versionReleaseId,
@@ -84,14 +84,19 @@
                     };
                     axios.post('/version-release/submit-feedback', data)
                     .then(res => {
-                        this.$emit('submitSuccess');
                         this.closeModal();
-                        toastr.success('Thank you for your feedback!', 'Success');
                         this.requestProcessing = false;
+            	  	  	Swal.fire({
+            	  	  	  	title: "Feedback submitted!",
+            	  	  	  	icon: "success",
+            	  	  	  	confirmButtonColor: "666666",
+            	  	  	  	confirmButtonText: "Close",
+            	  	  	}).then((result) => {
+            	  	  	    if (result.isConfirmed) window.location.reload();
+            	  	  	});
                     })
 			        .catch( error => {
                         this.formErrors = error.response.data.errors;
-			        	toastr.error('Please try again.', 'Error');
                         this.requestProcessing = false;
 			        });
                 }
@@ -104,14 +109,19 @@
                     };
                     axios.post('/version-release/delete-feedback', data)
                     .then(res => {
-                        this.$emit('submitSuccess');
                         this.closeModal();
-                        toastr.success('Your feedback has been deleted.', 'Success');
                         this.requestProcessing = false;
+            	  	  	Swal.fire({
+            	  	  	  	title: "Feedback deleted!",
+            	  	  	  	icon: "success",
+            	  	  	  	confirmButtonColor: "666666",
+            	  	  	  	confirmButtonText: "Close",
+            	  	  	}).then((result) => {
+            	  	  	    if (result.isConfirmed) window.location.reload();
+            	  	  	});
                     })
 			        .catch( error => {
                         this.formErrors = error.response.data.errors;
-			        	toastr.error('Please try again.', 'Error');
                         this.requestProcessing = false;
 			        });
                 }

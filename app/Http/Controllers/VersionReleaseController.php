@@ -151,8 +151,8 @@ class VersionReleaseController extends Controller
     public function submitFeedback(Request $request) {
         $validator = Validator::make($request->all(), [
             'version_release_id' => 'required',
-            'email' => 'exclude_if:authenticated,true|required|regex:/(.+)@(.+)\.(.+)/i|exists:users,email',
-            'password' => 'exclude_if:authenticated,true|required',
+            'email' => 'required_if:authenticated,false',
+            'password' => 'required_if:authenticated,false',
             'feedback' => 'required',
             'authenticated' => 'required',
         ],[
@@ -173,6 +173,7 @@ class VersionReleaseController extends Controller
             $password = $request->password;
 
             $validator->after(function($validator) use ($user, $password) {
+                if (!$user) $validator->errors()->add('email', 'User not found.');
                 if (!Hash::check($password, $user->password)) $validator->errors()->add('password', 'Password is incorrect.');
             })->validate();
 
@@ -188,8 +189,8 @@ class VersionReleaseController extends Controller
     //Delete feedback item
     public function deleteFeedback(Request $request) {
         $validator = Validator::make($request->all(), [
-            'email' => 'exclude_if:authenticated,true|required|regex:/(.+)@(.+)\.(.+)/i|exists:users,email',
-            'password' => 'exclude_if:authenticated,true|required',
+            'email' => 'required_if:authenticated,false',
+            'password' => 'required_if:authenticated,false',
             'authenticated' => 'required',
             'feedbackId' => 'required|exists:version_release_feedbacks,id'
         ],[
@@ -211,6 +212,7 @@ class VersionReleaseController extends Controller
             $password = $request->password;
 
             $validator->after(function($validator) use ($user, $password, $feedback) {
+                if (!$user) $validator->errors()->add('email', 'User not found.');
                 if (!Hash::check($password, $user->password)) $validator->errors()->add('password', 'Password is incorrect.');
                 if ($feedback->user_id != $user->id) $validator->errors()->add(null, 'Unable to delete the feedback of another user.');
             })->validate();

@@ -108,15 +108,15 @@
 				</div>
 				<!--end::Content-->
 			</div>
-			<div class="card card-custom card-stretch my-8">
+			<div class="card card-custom card-stretch my-2">
 				<div class="card-body">
 					<!--begin::Feedbacks Table-->
 					<div v-if="!isEmpty(selectedVersion.feedbacks)">
-						<h6>Vsn {{ selectedVersion.version || "0000.00.00" }} Feedback</h6>
-						<div style="max-height: 360px" class="table-responsive my-6">
-							<table class="table table-head-custom table-vertical-center mb-6">
+						<h2>Vsn {{ selectedVersion.version || "0000.00.00" }} Feedback</h2>
+						<div style="max-height: 360px" class="table-responsive my-4">
+							<table class="table table-head-custom table-vertical-center mb-4">
  							    <thead>
- 							    	<tr class="text-uppercase">
+ 							    	<tr class="text-uppercase text-dark">
 										<th class="col-2">Username</th>
 										<th class="col-2">Email</th>
  										<th class="col-2">Date</th>
@@ -131,7 +131,7 @@
  									    <td>{{ feedback.feedback }}</td>
 										<td>
 											<a href="javascript:;" @click="deleteFeedback(feedback.id)">
-												<i class="flaticon2-trash font-size-sm text-danger"></i>
+												<i class="fas fa-trash font-size-sm text-danger"></i>
 											</a>
 										</td>
  							        </tr>
