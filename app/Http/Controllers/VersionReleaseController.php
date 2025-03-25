@@ -156,7 +156,8 @@ class VersionReleaseController extends Controller
             'feedback' => 'required',
             'authenticated' => 'required',
         ],[
-            'email.exists' => 'User not found.'
+            'email.required_if' => 'The email field is required.',
+            'password.required_if' => 'The password field is required.',
         ]);
         $validator->validate();
 
@@ -194,7 +195,8 @@ class VersionReleaseController extends Controller
             'authenticated' => 'required',
             'feedbackId' => 'required|exists:version_release_feedbacks,id'
         ],[
-            'email.exists' => 'User not found.',
+            'email.required_if' => 'The email field is required.',
+            'password.required_if' => 'The password field is required.',
             'feedbackId.exists' => 'The feedback you are trying to delete does not exist.' //extra just in case lmao
         ]);
         $validator->validate();
