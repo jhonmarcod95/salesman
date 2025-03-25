@@ -175,7 +175,7 @@ class VersionReleaseController extends Controller
 
             $validator->after(function($validator) use ($user, $password) {
                 if (!$user) $validator->errors()->add('email', 'User not found.');
-                if (!Hash::check($password, $user->password)) $validator->errors()->add('password', 'Password is incorrect.');
+                else if (!Hash::check($password, $user->password)) $validator->errors()->add('password', 'Password is incorrect.');
             })->validate();
 
             VersionReleaseFeedback::create([
@@ -215,8 +215,10 @@ class VersionReleaseController extends Controller
 
             $validator->after(function($validator) use ($user, $password, $feedback) {
                 if (!$user) $validator->errors()->add('email', 'User not found.');
-                if (!Hash::check($password, $user->password)) $validator->errors()->add('password', 'Password is incorrect.');
-                if ($feedback->user_id != $user->id) $validator->errors()->add(null, 'Unable to delete the feedback of another user.');
+                else {
+                    if (!Hash::check($password, $user->password)) $validator->errors()->add('password', 'Password is incorrect.');
+                    if ($feedback->user_id != $user->id) $validator->errors()->add(null, 'Unable to delete the feedback of another user.');
+                }
             })->validate();
         }
 
