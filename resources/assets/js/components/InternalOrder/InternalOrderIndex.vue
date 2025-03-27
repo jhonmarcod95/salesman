@@ -18,9 +18,31 @@
                                </div>
                             </div>
                         </div>
-                        <div class="mb-3">
+                        <div class="d-flex">
                             <div class="col-md-4">
-                                <input type="text" class="form-control form-control-sm" placeholder="Search" v-model="keywords" id="name">
+                                <label class="form-control-label" for="expense_type">Filter by: </label> 
+                                <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                   <label class="form-control-label" for="expense_type">Company </label> 
+                                   <select class="form-control" v-model="company">
+                                       <option v-for="(comp, e) in companies" :key="e" :value="comp.id">{{ comp.name }}</option> 
+                                   </select>
+                               </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                   <label class="form-control-label" for="expense_type">Expense Type </label> 
+                                   <select class="form-control" v-model="expense_type">
+                                       <option v-for="(exp, e) in expense_types" :key="e" :value="exp.id">{{ exp.name }}</option> 
+                                   </select>
+                               </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="col-6 text-left">
+                                <small>Showing {{ filteredQueues.length }} of {{ filteredInternalOrders.length }} Total Internal Order(s)</small>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -83,7 +105,7 @@
         </div>
 
         <!-- Add New Internal Order Modal -->
-        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" @click.self="clearFields">
             <loader v-if="isLoading"></loader>
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
@@ -97,9 +119,8 @@
                             <div class="col-lg-12">
                                <div class="form-group bmd-form-group">
                                    <label class="form-control-label" for="user">User</label>
-                                   <select id="user_id" class="form-control" v-model="internal_order.tsr">
-                                       <option v-for="(tsr, t) in tsrs" :key="t" :value="tsr">{{ tsr.first_name + ' ' + tsr.last_name}}</option> 
-                                   </select>
+                                   <!-- add search function -->
+                                   <app-select :options="formattedTsrs" label="name" v-model="internal_order.tsr" placeholder="Salesman"/>
                                 </div>
                             </div>
                             <div class="col-lg-12">
@@ -135,7 +156,7 @@
                         
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
+                        <button class="btn btn-secondary" data-dismiss='modal' @click="clearFields">Close</button>
                         <button class="btn btn-primary" @click="addInternalOrder(internal_order)">Save</button>
                     </div>
                 </div>
@@ -238,7 +259,6 @@
 <script>
 import { min } from 'lodash';
 
-;
 export default {
     data(){
         return{
@@ -249,6 +269,7 @@ export default {
             },
             tsrs: [],
             expense_types: [],
+            expense_type: '',
             internal_order_id: '',
             internal_order_copied: [],
             errors: [],
@@ -258,6 +279,8 @@ export default {
             internal_order_copied_charge_type: '',
             default_expense_type:'',
             default_amount: '',
+            companies: [],
+            company: '',
             servers: [],
             expense_id: '',
             isLoading: false
@@ -268,6 +291,7 @@ export default {
         this.fetchTsrs();
         this.fetchExpensesTypes();
         this.fetchServer();
+        this.fetchCompanies();
     },
     methods:{
         getExpenseRate(internalOrder){
@@ -285,6 +309,10 @@ export default {
             this.internal_order_copied_charge_type = internalOrder.charge_type.name;
             this.default_expense_type = internalOrder.charge_type.expense_charge_type.expense_type.id;
             this.default_amount = this.getExpenseRate(internalOrder);
+        },
+        clearFields(){
+            this.errors = [];
+            this.internal_order = [];
         },
         getInternalOrderId(id){
             this.internal_order_id = id;
@@ -310,7 +338,7 @@ export default {
         fetchExpensesTypes(){
             axios.get('/expenses-all')
             .then(response => {
-                this.expense_types = response.data;
+                this.expense_types = response.data.sort((a, b) => a.name.localeCompare(b.name));
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -320,6 +348,15 @@ export default {
             axios.get('/sap/server')
             .then(response => { 
                 this.servers = response.data;
+            })
+            .catch(error => { 
+                this.errors = response.data.errors;
+            });
+        },
+        fetchCompanies(){
+            axios.get('/companies-all')
+            .then(response => { 
+                this.companies = response.data;
             })
             .catch(error => { 
                 this.errors = response.data.errors;
@@ -412,7 +449,15 @@ export default {
         filteredInternalOrders(){
             let self = this;
             return self.internal_orders.filter(internal_order => {
-                return internal_order.user.name.toLowerCase().includes(this.keywords.toLowerCase())
+                let filterSearch = internal_order.user && 
+                (
+                    internal_order.user.name.toLowerCase().includes(this.keywords.toLowerCase()) 
+                    || internal_order.internal_order.toLowerCase().includes(this.keywords.toLowerCase())
+                );
+                
+                let filterCompany = self.company ? (internal_order.user && internal_order.user.company_id === self.company) : true;
+                let filterExpType = self.expense_type ? (internal_order.charge_type && internal_order.charge_type.id === self.expense_type) : true;
+                return filterSearch && filterCompany && filterExpType;
             });
         },
         totalPages() {
@@ -431,6 +476,12 @@ export default {
             }
 
             return queues_array;
+        },
+        formattedTsrs() {
+            return this.tsrs.map(user => ({
+                ...user,
+                name: `${user.first_name} ${user.last_name}`
+            }));
         }
     }
     
