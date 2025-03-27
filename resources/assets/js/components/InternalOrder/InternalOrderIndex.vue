@@ -14,7 +14,10 @@
                                     <h3 class="mb-0">Internal Order List</h3>
                                 </div>
                                <div class="col text-right">
-                                   <a href="#addModal" data-toggle="modal" class="btn btn-sm btn-primary">Add New</a>
+                                    <button v-if="(company || expense_type || keywords)"
+                                        class="btn btn-sm btn-warning" @click="clearFilter()"> Clear Filter </button>
+                                    <button v-if="filteredInternalOrders.length!=0" class="btn btn-sm btn-default" @click="exportToExcel()"> Export Excel </button>
+                                    <a href="#addModal" data-toggle="modal" class="btn btn-sm btn-primary">Add New</a>
                                </div>
                             </div>
                         </div>
@@ -258,6 +261,7 @@
 
 <script>
 import { min } from 'lodash';
+import moment from 'moment';
 
 export default {
     data(){
@@ -313,6 +317,11 @@ export default {
         clearFields(){
             this.errors = [];
             this.internal_order = [];
+        },
+        clearFilter(){
+            this.company = '';
+            this.expense_type = '';
+            this.keywords = ''
         },
         getInternalOrderId(id){
             this.internal_order_id = id;
@@ -428,6 +437,22 @@ export default {
                 this.errors = error.response.data.errors;
                 this.isLoading = false;
             })
+        },
+        exportToExcel() {
+            axios.post('/internal-order/export', { data: this.filteredInternalOrders }, { responseType: 'blob' })
+                .then(response => {
+                    let now =  moment().format('YYYYMMDDHHmmss');
+                    const fileName = `internal-orders-${now}.xlsx`;
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', fileName);
+                    document.body.appendChild(link);
+                    link.click();
+                })
+                .catch(error => {
+                    console.error('Error exporting:', error);
+                });
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
