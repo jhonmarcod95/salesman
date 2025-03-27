@@ -39,7 +39,7 @@ class SalesmanInternalOrderController extends Controller
      */
     public function indexData()
     {
-        return SalesmanInternalOrder::with('user', 'user.company', 'user.expenseRate', 'chargeType.expenseChargeType.expenseType')
+        return SalesmanInternalOrder::with('user', 'user.company', 'user.expenseRate', 'chargeType.expenseChargeType.expenseType', 'gl_account')
             ->whereHas('user', function ($q){
                 $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
             })

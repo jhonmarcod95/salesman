@@ -124,14 +124,13 @@
                                    <label class="form-control-label" for="user">User</label>
                                    <!-- add search function -->
                                    <app-select :options="formattedTsrs" label="name" v-model="internal_order.tsr" placeholder="Salesman"/>
+                                   <span class="text-danger small" v-if="errors.user_id">{{ errors.user_id[0] }}</span>
                                 </div>
                             </div>
                             <div class="col-lg-12">
                                <div class="form-group bmd-form-group">
                                    <label class="form-control-label" for="expense_type">Expense Type</label> 
-                                   <select class="form-control" v-model="internal_order.expense_type">
-                                       <option v-for="(expense_type, e) in expense_types" :key="e" :value="expense_type.expense_charge_type.charge_type.name">{{ expense_type.name }}</option> 
-                                   </select>
+                                   <app-select :options="expense_types" label="name" v-model="internal_order.expense_type"  @input="getChargeType()" placeholder="Expense Type"/>
                                    <span class="text-danger small" v-if="errors.charge_type">{{ errors.charge_type[0] }}</span>
                                </div>
                             </div>
@@ -145,7 +144,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="form-control-label" for="amount">Desired Amount</label>
-                                    <input type="text" id="amount" class="form-control form-control-alternative" v-model="internal_order.amount">
+                                    <input type="number" id="amount" class="form-control form-control-alternative" v-model="internal_order.amount">
                                     <span class="text-danger small" v-if="errors.amount">{{ errors.amount[0] }}</span>
                                 </div>
                             </div>
@@ -287,7 +286,8 @@ export default {
             company: '',
             servers: [],
             expense_id: '',
-            isLoading: false
+            isLoading: false,
+            charge_type : null
         }
     },
     created(){
@@ -338,7 +338,7 @@ export default {
         fetchTsrs(){
             axios.get('/tsr-all')
             .then(response => {
-                this.tsrs = response.data;
+                this.tsrs = response.data.sort((a, b) => a.last_name.localeCompare(b.last_name));
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
@@ -371,6 +371,9 @@ export default {
                 this.errors = response.data.errors;
             });
         },
+        getChargeType() {
+            this.charge_type = this.expense_types.filter(o=> o.id == this.internal_order.expense_type)[0];
+        },
         addInternalOrder(internal_order){
             this.isLoading = true;
             this.errors = [];
@@ -378,7 +381,7 @@ export default {
             var user_id = internal_order.tsr.user_id;
             axios.post('/internal-order',{
                 'user_id': user_id,
-                'charge_type': internal_order.expense_type, 
+                'charge_type': this.charge_type.expense_charge_type.charge_type.name, 
                 'internal_order': internal_order.internal_order,
                 'company_id': company_id,
                 'amount': internal_order.amount,
