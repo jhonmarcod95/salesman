@@ -280,6 +280,7 @@ export default {
             currentPage: 0,
             itemsPerPage: 10,
             internal_order_copied_charge_type: '',
+            internal_order_copied_charge_type_id: '',
             default_expense_type:'',
             default_amount: '',
             companies: [],
@@ -311,6 +312,7 @@ export default {
             this.errors = [];
             this.internal_order_copied = Object.assign({}, internalOrder);
             this.internal_order_copied_charge_type = internalOrder.charge_type.name;
+            this.internal_order_copied_charge_type_id = internalOrder.charge_type;
             this.default_expense_type = internalOrder.charge_type.expense_charge_type.expense_type.id;
             this.default_amount = this.getExpenseRate(internalOrder);
         },
