@@ -217,10 +217,8 @@
                             </div>
                             <div class="col-lg-12">
                                <div class="form-group bmd-form-group">
-                                   <label class="form-control-label" for="classification">Expense Type</label> 
-                                   <select class="form-control" v-model="internal_order_copied_charge_type">
-                                       <option v-for="(expense_type, e) in expense_types" :key="e" :value="expense_type.expense_charge_type.charge_type.name">{{ expense_type.name }}</option> 
-                                   </select>
+                                   <label class="form-control-label" for="classification">Expense Type</label>
+                                   <multiselect :options="expense_types" label="name" v-model="internal_order_copied_charge_type" @input="editChargeType()"/>
                                    <span class="text-danger small" v-if="errors.charge_type">{{ errors.charge_type[0] }}</span>
                                </div>
                            </div>
@@ -249,7 +247,7 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
-                        <button class="btn btn-primary" @click="updateInternalOrder(internal_order_copied, internal_order_copied_charge_type, default_amount)">Save Changes</button>
+                        <button class="btn btn-primary" @click="updateInternalOrder(internal_order_copied, default_amount)">Save Changes</button>
                     </div>
                 </div>
             </div>
@@ -311,8 +309,10 @@ export default {
         copyObject(internalOrder){
             this.errors = [];
             this.internal_order_copied = Object.assign({}, internalOrder);
-            this.internal_order_copied_charge_type = internalOrder.charge_type.name;
-            this.internal_order_copied_charge_type_id = internalOrder.charge_type;
+            // this.internal_order_copied_charge_type = internalOrder.charge_type.name;
+            this.internal_order_copied_charge_type = this.expense_types.find(
+                (expense) => expense.id === internalOrder.charge_type.id
+                ) || null;
             this.default_expense_type = internalOrder.charge_type.expense_charge_type.expense_type.id;
             this.default_amount = this.getExpenseRate(internalOrder);
         },
@@ -376,6 +376,9 @@ export default {
         getChargeType() {
             this.charge_type = this.expense_types.filter(o=> o.id == this.internal_order.expense_type)[0];
         },
+        editChargeType() {
+            this.charge_type = this.expense_types.filter(o=> o.id == this.internal_order_copied_charge_type)[0];
+        },
         addInternalOrder(internal_order){
             this.isLoading = true;
             this.errors = [];
@@ -401,7 +404,7 @@ export default {
                 this.isLoading = false;
             })
         },
-        updateInternalOrder(internal_order_copied,internal_order_copied_charge_type,default_amount){
+        updateInternalOrder(internal_order_copied,default_amount){
             this.isLoading = true;
             this.errors = [];
             var default_expense_type = [];
@@ -409,7 +412,7 @@ export default {
             var index = this.internal_orders.findIndex(item => item.id == internal_order_copied.id);
             axios.post(`/internal-order/${internal_order_copied.id}`,{
                 user_id: internal_order_copied.user_id,
-                charge_type: internal_order_copied_charge_type, 
+                charge_type: this.charge_type, 
                 internal_order: internal_order_copied.internal_order,
                 sap_server: internal_order_copied.sap_server,
                 amount : default_amount.amount,
