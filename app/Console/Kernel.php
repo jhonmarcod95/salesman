@@ -100,7 +100,10 @@ class Kernel extends ConsoleKernel
             ->monthlyOn(date('t'), '23:00');
 
         $schedule->command('payment:autopostingreprocessing LFUG')
-            ->monthlyOn(date('t'), '23:07');
+            ->monthlyOn(date('t'), '23:05');
+
+        $schedule->command('payment:autoposting LFUG')
+            ->monthlyOn(date('t'), '23:10');
 
         $schedule->command('payment:autopostingmonthend HANA')
             ->monthlyOn(date('t'), '23:15');

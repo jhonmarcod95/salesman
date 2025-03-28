@@ -73,6 +73,7 @@ class PaymentAutoPosting extends Command
         $companies = Company::whereHas('sapServers', function ($q) use ($sap_server) {
                 $q->where('sap_server', $sap_server);
             })
+            ->where('id',4)
             ->where('hasSAP', 1)
             ->orderBy('id', 'desc')
             ->get();
