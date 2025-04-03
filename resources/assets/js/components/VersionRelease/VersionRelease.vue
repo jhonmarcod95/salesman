@@ -108,6 +108,42 @@
 				</div>
 				<!--end::Content-->
 			</div>
+			<div class="card card-custom card-stretch my-2">
+				<div class="card-body">
+					<!--begin::Feedbacks Table-->
+					<div v-if="!isEmpty(selectedVersion.feedbacks)">
+						<h2>Vsn {{ selectedVersion.version || "0000.00.00" }} Feedback</h2>
+						<div style="max-height: 360px" class="table-responsive my-4">
+							<table class="table table-head-custom table-vertical-center mb-4">
+ 							    <thead>
+ 							    	<tr class="text-uppercase text-dark">
+										<th class="col-2">Username</th>
+										<th class="col-2">Email</th>
+ 										<th class="col-2">Date</th>
+ 										<th class="col-8">Feedback Notes</th>
+ 							    	</tr>
+ 							    </thead>
+ 							    <tbody>
+ 							        <tr v-for="feedback in selectedVersion.feedbacks">
+										<td>{{ feedback.user.name }}</td>
+										<td>{{ feedback.user.email }}</td>
+ 									    <td>{{ feedback.created_at.slice(0, 10) }}</td>
+ 									    <td>{{ feedback.feedback }}</td>
+										<td>
+											<a href="javascript:;" @click="deleteFeedback(feedback.id)">
+												<i class="fas fa-trash font-size-sm text-danger"></i>
+											</a>
+										</td>
+ 							        </tr>
+ 							    </tbody>
+ 							</table>
+						</div>
+					</div>
+					<!--end::Feedbacks Table-->
+					<span>Comments? Suggestions? </span>
+					<a href="javascript:;" @click="showModal('feedback_modal')">Send your feedback!</a>
+				</div>
+			</div>
 		</div>
 
 		<!-- begin:Add Modal -->
@@ -119,11 +155,20 @@
 			@submit="submit"
 			@formClose="closeModal()"/>
 		<!-- end:Add Modal -->
+		<!-- begin:Feedback Modal -->
+		<feedback-modal
+			:versionReleaseId="selectedVersion.id"
+			:authenticated="authenticated"
+			:formAction="formAction"
+			:feedbackId="feedbackId"
+			@formClose="closeModal()"/>
+		<!-- end:Feedback Modal -->
 	</div>
 </template>
 
 <script>
 	import FormModal from './FormModal.vue';
+	import FeedbackModal from './FeedbackModal.vue';
 	import listFormMixins from '../../list-form-mixins.vue';
 	import VersionItems from './VersionItems.vue';
 	import Swal from 'sweetalert2';
@@ -133,7 +178,7 @@
 
 		props: ['user-roles','authenticated'],
 		mixins: [listFormMixins],
-		components: {FormModal,VersionItems},
+		components: {FormModal,FeedbackModal,VersionItems},
 
 		data() {
 			return {
@@ -148,7 +193,8 @@
 				data: {},
 				items: [],
 				page_limit: 10,
-				selectedVersion: {}
+				selectedVersion: {},
+				feedbackId: 0 //for feedback deletion
 			}
 		},
 		created() {
@@ -182,29 +228,34 @@
 				this.fetchList()
 			},
 			deleteVersion(data = null){
-            if(_.isEmpty(data)) return;
-            
-            Swal.fire({
-              title: "Delete Version " + data.version + "?",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#e24444",
-              cancelButtonColor: "#666666",
-              confirmButtonText: "Delete",
-            }).then((result) => {
-              if (result.isConfirmed) {
-                axios.delete(`delete/${data.id}`);
-                Swal.fire({
-                  title: "Version deleted!",
-                  icon: "success",
-                  confirmButtonColor: "666666",
-                  confirmButtonText: "Close",
-                }).then((result) => {
-                    if (result.isConfirmed) window.location.reload();
-                });
-              }
-            });
-        }
+            	if(_.isEmpty(data)) return;
+				
+            	Swal.fire({
+            		title: "Delete Version " + data.version + "?",
+            		icon: "warning",
+            		showCancelButton: true,
+            		confirmButtonColor: "#e24444",
+            		cancelButtonColor: "#666666",
+            		confirmButtonText: "Delete",
+            	}).then((result) => {
+            	  	if (result.isConfirmed) {
+            	  	  	axios.delete(`delete/${data.id}`);
+            	  	  	Swal.fire({
+            	  	  	  	title: "Version deleted!",
+            	  	  	  	icon: "success",
+            	  	  	  	confirmButtonColor: "666666",
+            	  	  	  	confirmButtonText: "Close",
+            	  	  	}).then((result) => {
+            	  	  	    if (result.isConfirmed) window.location.reload();
+            	  	  	});
+            	  	}
+            	});
+        	},
+			deleteFeedback(feedbackId) {
+				this.formAction = 'delete';
+				this.feedbackId = feedbackId;
+				this.showModal('feedback_modal');
+			}
 		},
 		computed: {
 			isAdministrator() {

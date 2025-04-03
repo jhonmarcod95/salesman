@@ -18,4 +18,8 @@ class VersionRelease extends Model implements Auditable
     public function releaseNotes() {
         return $this->hasMany(VersionReleaseNote::class);
     }
+    
+    public function feedbacks() {
+        return $this->hasMany(VersioNReleaseFeedback::class);
+    }
 }
