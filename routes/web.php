@@ -44,6 +44,8 @@ Route::group(['prefix' => 'version-release'], function () {
     Route::get('/main', 'VersionReleaseController@index')->name('version-release');
     Route::get('/all', 'VersionReleaseController@all');
     Route::get('/plain', 'VersionReleaseController@indexPlain');
+    Route::post('/submit-feedback', 'VersionReleaseController@submitFeedback');
+    Route::post('/delete-feedback', 'VersionReleaseController@deleteFeedback');
     //Version Submission
     Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|approver|tax|finance-gl']], function () {
         Route::post('/store', 'VersionReleaseController@store');
@@ -416,6 +418,7 @@ Route::group(['middleware' => ['auth', 'role:it|finance-gl']], function () {
     Route::patch('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@update');
     Route::delete('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@destroy');
     Route::get('/internal-orders', 'SalesmanInternalOrderController@indexData')->name('internal-order');
+    Route::post('/internal-order/export', 'SalesmanInternalOrderController@exportToExcel');
 });
 
 //Customer Master Role

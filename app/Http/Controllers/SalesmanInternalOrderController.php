@@ -13,8 +13,10 @@ use App\{
     SapServer,
     SapUser
 };
+use App\Exports\SalesmanInternalOrderExport;
 use Auth;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SalesmanInternalOrderController extends Controller
 {
@@ -37,11 +39,28 @@ class SalesmanInternalOrderController extends Controller
      */
     public function indexData()
     {
-        return SalesmanInternalOrder::with('user', 'user.expenseRate', 'chargeType.expenseChargeType.expenseType')
+        return SalesmanInternalOrder::with('user', 'user.company', 'user.expenseRate', 'chargeType.expenseChargeType.expenseType', 'gl_account')
             ->whereHas('user', function ($q){
                 $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
             })
             ->orderBy('id', 'desc')->get();
+    }
+
+    /**
+     * Export to excel
+     *
+     */
+    public function exportToExcel(Request $request)
+    {
+        // Get data from Vue request
+        $data = $request->input('data', []);
+        if (empty($data)) {
+            return response()->json(['message' => 'No data available for export'], 400);
+        }
+        $date = Carbon::now();
+        $filename = "internal_orders-{$date}.xlsx";
+
+        return Excel::download(new SalesmanInternalOrderExport($data), $filename);
     }
 
     /**

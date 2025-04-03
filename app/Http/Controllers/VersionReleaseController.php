@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\VersionRelease;
 use App\VersionReleaseNote;
+use App\VersionReleaseFeedback;
+use App\User;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class VersionReleaseController extends Controller
@@ -30,6 +35,8 @@ class VersionReleaseController extends Controller
     public function all(Request $request) {
         $versionRelease = VersionRelease::select('id','version','release_date')
             ->with('releaseNotes:id,version_release_id,description,type')
+            ->with('feedbacks:id,version_release_id,user_id,feedback,created_at')
+            ->with('feedbacks.user')
             ->orderBy('release_date', 'desc')
             ->orderBy('id','desc') //in case release date doesnt sort properly
             ->paginate($request->limit);
@@ -138,5 +145,83 @@ class VersionReleaseController extends Controller
         $versionReleaseNote->delete();
 
         return $versionReleaseNote;
+    }
+
+    //Feedback Submission
+    public function submitFeedback(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'version_release_id' => 'required',
+            'email' => 'required_if:authenticated,false',
+            'password' => 'required_if:authenticated,false',
+            'feedback' => 'required',
+            'authenticated' => 'required',
+        ],[
+            'email.required_if' => 'The email field is required.',
+            'password.required_if' => 'The password field is required.',
+        ]);
+        $validator->validate();
+
+        if ($request->authenticated) {
+            VersionReleaseFeedback::create([
+                'version_release_id' => $request->version_release_id,
+                'user_id' => Auth::id(),
+                'feedback' => $request->feedback
+            ]);
+        }
+        else {
+            //add password validation before submitting if not authenticated
+            $user = User::where('email', $request->email)->first();
+            $password = $request->password;
+
+            $validator->after(function($validator) use ($user, $password) {
+                if (!$user) $validator->errors()->add('email', 'User not found.');
+                else if (!Hash::check($password, $user->password)) $validator->errors()->add('password', 'Password is incorrect.');
+            })->validate();
+
+            VersionReleaseFeedback::create([
+               'version_release_id' => $request->version_release_id,
+               'user_id' => $user->id,
+               'feedback' => $request->feedback
+            ]);
+        }
+
+    }
+
+    //Delete feedback item
+    public function deleteFeedback(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required_if:authenticated,false',
+            'password' => 'required_if:authenticated,false',
+            'authenticated' => 'required',
+            'feedbackId' => 'required|exists:version_release_feedbacks,id'
+        ],[
+            'email.required_if' => 'The email field is required.',
+            'password.required_if' => 'The password field is required.',
+            'feedbackId.exists' => 'The feedback you are trying to delete does not exist.' //extra just in case lmao
+        ]);
+        $validator->validate();
+
+        $feedback = VersionReleaseFeedback::where('id', $request->feedbackId)->first();
+
+        if ($request->authenticated) { //if authenticated, simply check if feedback belongs to user
+            $user = Auth::user();
+            $validator->after(function($validator) use ($user, $feedback) {
+                if ($feedback->user_id != $user->id) $validator->errors()->add(null, 'Unable to delete the feedback of another user.');
+            })->validate();
+        }
+        else { //if not authenticated, verify email and password, then check if feedback belongs to user
+            $user = User::where('email', $request->email)->first();
+            $password = $request->password;
+
+            $validator->after(function($validator) use ($user, $password, $feedback) {
+                if (!$user) $validator->errors()->add('email', 'User not found.');
+                else {
+                    if (!Hash::check($password, $user->password)) $validator->errors()->add('password', 'Password is incorrect.');
+                    if ($feedback->user_id != $user->id) $validator->errors()->add(null, 'Unable to delete the feedback of another user.');
+                }
+            })->validate();
+        }
+
+        $feedback->delete();
     }
 }
