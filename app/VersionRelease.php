@@ -20,6 +20,6 @@ class VersionRelease extends Model implements Auditable
     }
     
     public function feedbacks() {
-        return $this->hasMany(VersioNReleaseFeedback::class);
+        return $this->hasMany(VersionReleaseFeedback::class);
     }
 }
