@@ -123,7 +123,7 @@
                                <div class="form-group bmd-form-group">
                                    <label class="form-control-label" for="user">User</label>
                                    <!-- add search function -->
-                                   <app-select :options="formattedTsrs" label="name" v-model="internal_order.tsr" placeholder="Salesman"/>
+                                   <app-select :options="formattedTsrs" label="name" v-model="internal_order.tsr" @input="getTsrSelected()" placeholder="Salesman"/>
                                    <span class="text-danger small" v-if="errors.user_id">{{ errors.user_id[0] }}</span>
                                 </div>
                             </div>
@@ -286,7 +286,8 @@ export default {
             servers: [],
             expense_id: '',
             isLoading: false,
-            charge_type : null
+            charge_type : null,
+            salesman : null
         }
     },
     created(){
@@ -373,6 +374,9 @@ export default {
                 this.errors = response.data.errors;
             });
         },
+        getTsrSelected() {
+            this.salesman = this.formattedTsrs.filter(o=> o.id == this.internal_order.tsr)[0];
+        },
         getChargeType() {
             this.charge_type = this.expense_types.filter(o=> o.id == this.internal_order.expense_type)[0];
         },
@@ -382,13 +386,11 @@ export default {
         addInternalOrder(internal_order){
             this.isLoading = true;
             this.errors = [];
-            var company_id = internal_order.tsr.company_id;
-            var user_id = internal_order.tsr.user_id;
             axios.post('/internal-order',{
-                'user_id': user_id,
+                'user_id': this.salesman.user_id,
                 'charge_type': this.charge_type.expense_charge_type.charge_type.name, 
                 'internal_order': internal_order.internal_order,
-                'company_id': company_id,
+                'company_id': this.salesman.company_id,
                 'amount': internal_order.amount,
                 'validity_date': internal_order.validity_date
             })
