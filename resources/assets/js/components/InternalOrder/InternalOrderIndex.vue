@@ -218,7 +218,7 @@
                             <div class="col-lg-12">
                                <div class="form-group bmd-form-group">
                                    <label class="form-control-label" for="classification">Expense Type</label>
-                                   <multiselect :options="expense_types" label="name" v-model="internal_order_copied_charge_type" @input="editChargeType()"/>
+                                   <multiselect :options="expense_types" label="name" v-model="internal_order_copied_charge_type"/>
                                    <span class="text-danger small" v-if="errors.charge_type">{{ errors.charge_type[0] }}</span>
                                </div>
                            </div>
@@ -239,7 +239,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="form-control-label" for="amount">Validity Date</label>
-                                    <input type="date" id="validity_date" class="form-control form-control-alternative" v-model="default_amount.validity_date" :disabled="!default_amount.amount">
+                                    <input type="date" id="validity_date" class="form-control form-control-alternative" v-model="default_amount.validity_date">
                                     <span class="text-danger small" v-if="errors.validity_date">{{ errors.validity_date[0] }}</span>
                                 </div>
                             </div>
@@ -277,10 +277,9 @@ export default {
             keywords: '',
             currentPage: 0,
             itemsPerPage: 10,
-            internal_order_copied_charge_type: '',
-            internal_order_copied_charge_type_id: '',
+            internal_order_copied_charge_type: [],
             default_expense_type:'',
-            default_amount: '',
+            default_amount: [],
             companies: [],
             company: '',
             servers: [],
@@ -380,9 +379,6 @@ export default {
         getChargeType() {
             this.charge_type = this.expense_types.filter(o=> o.id == this.internal_order.expense_type)[0];
         },
-        editChargeType() {
-            this.charge_type = this.expense_types.filter(o=> o.id == this.internal_order_copied_charge_type)[0];
-        },
         addInternalOrder(internal_order){
             this.isLoading = true;
             this.errors = [];
@@ -406,7 +402,7 @@ export default {
                 this.isLoading = false;
             })
         },
-        updateInternalOrder(internal_order_copied,default_amount){
+        updateInternalOrder(internal_order_copied,default_amount, internal_order_copied_charge_type){
             this.isLoading = true;
             this.errors = [];
             var default_expense_type = [];
@@ -414,7 +410,7 @@ export default {
             var index = this.internal_orders.findIndex(item => item.id == internal_order_copied.id);
             axios.post(`/internal-order/${internal_order_copied.id}`,{
                 user_id: internal_order_copied.user_id,
-                charge_type: this.charge_type, 
+                charge_type: this.internal_order_copied_charge_type.expense_charge_type.charge_type.name, 
                 internal_order: internal_order_copied.internal_order,
                 sap_server: internal_order_copied.sap_server,
                 amount : default_amount.amount,
