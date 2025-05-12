@@ -78,19 +78,19 @@ class Kernel extends ConsoleKernel
         $schedule->command('payment:autoposting HANA')
             ->weekly()
             ->tuesdays()
-            ->at('00:45');
+            ->at('00:50');
 
         // auto cv
         $schedule->command('payment:autocv')
             ->weekly()
             ->tuesdays()
-            ->at('01:00');
+            ->at('01:10');
 
         // auto check
         $schedule->command('payment:autocheck')
             ->weekly()
             ->tuesdays()
-            ->at('01:15');
+            ->at('01:30');
 
         /* end:: every tuesday **********************/
 
