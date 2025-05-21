@@ -187,7 +187,7 @@ class AppAPIController extends Controller
                         }
 
                         // if there are entries found within the month
-                        if($expenseQty > 0) {
+                        if($expenseQty >= 0) {
 
                             $simulatedAllowedExpenseQty = (float) $toJson[0]['balance_qty'] -  $expenseQty;
                             
