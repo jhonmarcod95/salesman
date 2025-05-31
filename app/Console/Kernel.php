@@ -97,22 +97,22 @@ class Kernel extends ConsoleKernel
 
         /* begin:: every month end *******************/
         $schedule->command('payment:autopostingreprocessing HANA')
-            ->monthlyOn(date('t'), '23:00');
+            ->monthlyOn(date('t'), '22:30');
 
         $schedule->command('payment:autopostingreprocessing LFUG')
-            ->monthlyOn(date('t'), '23:05');
+            ->monthlyOn(date('t'), '22:45');
 
         $schedule->command('payment:autopostingmonthend HANA')
-            ->monthlyOn(date('t'), '23:10');
+            ->monthlyOn(date('t'), '23:00');
 
         $schedule->command('payment:autopostingmonthend LFUG')
             ->monthlyOn(date('t'), '23:15');
 
         $schedule->command('payment:autocv')
-            ->monthlyOn(date('t'), '23:20');
+            ->monthlyOn(date('t'), '23:30');
 
         $schedule->command('payment:autocheck')
-            ->monthlyOn(date('t'), '23:25');
+            ->monthlyOn(date('t'), '23:35');
 
         /* end:: every month end *********************/
 
