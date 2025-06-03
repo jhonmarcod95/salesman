@@ -226,6 +226,11 @@
                                         <i class="ni ni-paper-diploma text-green"></i> Survey
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="nav-link" href="{{ url('posting-error') }}">
+                                        <i class="fa fa-window-close text-danger"></i> Posting Errors
+                                    </a>
+                                </li>
                                 @if (Auth::user()->hasRole(['it']))
                                 <li>
                                     <a class="nav-link" href="{{ url('version-release/main') }}">

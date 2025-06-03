@@ -137,6 +137,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::patch('/users/update/{id}', 'UserController@update');
 
 
+    //Auto Posting Error
+    Route::get('/posting-error', 'PostingErrorController@index')->name('posting_error');
+    Route::get('/posting-error/all', 'PostingErrorController@indexData');
+
+
     //Tsr
     // show tsr page
     Route::get('/tsr', 'TsrController@index')->name('tsr_list');
