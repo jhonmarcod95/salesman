@@ -48,7 +48,6 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <!-- <button class="btn btn-primary" @click="resetKeywords()">Reset</button> -->
                                     <button class="btn btn-success" @click="fetchList()">Search</button>
                                 </div>
                             </div>
@@ -95,6 +94,9 @@
                             <nav aria-label="...">
                                 <ul class="pagination justify-content-end mb-0">
                                     <li class="page-item">
+                                        <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(0)"> <i class="fas fa-angle-double-left"></i> </button>
+                                    </li>
+                                    <li class="page-item">
                                         <button :disabled="!showPreviousLink()" class="page-link" v-on:click="setPage(currentPage - 1)"> <i class="fas fa-angle-left"></i> </button>
                                     </li>
                                     <li class="page-item">  
@@ -102,6 +104,9 @@
                                     </li>
                                     <li class="page-item">
                                         <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(currentPage + 1)"><i class="fas fa-angle-right"></i> </button>
+                                    </li>
+                                    <li class="page-item">
+                                        <button :disabled="!showNextLink()" class="page-link" v-on:click="setPage(totalPages - 1)"><i class="fas fa-angle-double-right"></i> </button>
                                     </li>
                                 </ul>
                             </nav>
@@ -119,7 +124,6 @@ export default {
     components: { 'downloadExcel': JsonExcel },
     data(){
         return{
-            filterVerified : '',
             verifiedStatuses : ['Verified' , 'All'],
             postingErrors: [],
             errors: [],
@@ -142,12 +146,12 @@ export default {
             }
         }
     },
-    created(){
-        // this.fetchList();
-    },
+    // created(){
+    //     this.fetchList();
+    // },
     methods:{
         fetchList() {
-            //Set date range to current date if null
+            //default date range 2018-present
             if (!this.keywords.end_date) this.keywords.end_date = new Date().toJSON().slice(0, 10);
             if (!this.keywords.start_date) this.keywords.start_date = '2018-01-01';
 
@@ -162,11 +166,6 @@ export default {
         setPage(pageNumber) {
             this.currentPage = pageNumber;
         },
-
-        resetStartRow() {
-            this.currentPage = 0;
-        },
-
         showPreviousLink() {
             return this.currentPage == 0 ? false : true;
         },
@@ -182,27 +181,13 @@ export default {
         }
     },
     computed:{
-        filteredList(){
-            let list = this.postingErrors;
-            
-            // //filter by username
-            // if (this.keywords.username) list = list.filter( e => { 
-            //     return e.username.toLowerCase().includes(this.keywords.username) 
-            // });
-            // //filter by date range
-            // if (this.keywords.start_date && this.keywords.end_date) list = list.filter ( e => {
-            //     return Date.parse(e.creation_date) >= Date.parse(this.keywords.start_date) &&
-            //     Date.parse(e.creation_date) <= Date.parse(this.keywords.end_date)
-            // } );
-
-            return list;
-        },
         totalPages() {
-            return Math.ceil(this.filteredList.length / this.itemsPerPage);
+            return Math.ceil(this.postingErrors.length / this.itemsPerPage);
         },
         filteredQueues() {
+            var list = this.postingErrors;
             var index = this.currentPage * this.itemsPerPage;
-            var queues_array = this.filteredList.slice(index, index + this.itemsPerPage);
+            var queues_array = list.slice(index, index + this.itemsPerPage);
 
             if(this.currentPage >= this.totalPages) {
                 this.currentPage = this.totalPages - 1;
