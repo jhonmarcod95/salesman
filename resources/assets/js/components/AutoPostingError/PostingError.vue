@@ -27,19 +27,37 @@
                             </div>
                         </div>
                         <!--Search Filter-->
-                        <!-- <div class="mb-3">
-                            <div class="row ml-2">
+                        <div class="mb-3">
+                            <div class="row ml-2 align-items-center">
                                 <div class="col-md-3 float-left">
                                     <div class="form-group">
-                                        <label for="name" class="form-control-label">Search</label> 
-                                        <input type="text" class="form-control" placeholder="Search" v-model="keywords" id="name">
+                                        <label for="name" class="form-control-label">Username</label> 
+                                        <input type="text" class="form-control" placeholder="Search" v-model="keywords.username" id="name">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 float-left">
+                                    <div class="form-group">
+                                        <label for="start_date" class="form-control-label">Start Date</label> 
+                                        <input type="date" class="form-control" v-model="keywords.start_date" id="start_date" :max="keywords.end_date">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 float-left">
+                                    <div class="form-group">
+                                        <label for="end_date" class="form-control-label">End Date</label> 
+                                        <input type="date" class="form-control" v-model="keywords.end_date" id="end_date" :min="keywords.start_date">
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <button class="btn btn-sm btn-primary" @click="fetchFilterCustomers()"> Apply Filter</button>
+                                    <!-- <button class="btn btn-primary" @click="resetKeywords()">Reset</button> -->
+                                    <button class="btn btn-success" @click="fetchList()">Search</button>
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
+
+                        <!--Error Messages-->
+                        <div class="float-left m-3">
+                            <div v-for="error in errors" class="text-danger">-{{ error }}</div>
+                        </div>
 
                         <!--Table-->
                         <div class="table-responsive">
@@ -57,7 +75,10 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="item in filteredQueues">
+                                    <tr v-if="filteredQueues.length <= 0">
+                                        <div class="text-muted text-center p-3">No results found</div>
+                                    </tr>
+                                    <tr v-else v-for="item in filteredQueues">
                                         <td>{{ item.id }}</td>
                                         <td>{{ item.username }}</td>
                                         <td>{{ item.return_message }}</td>
@@ -102,7 +123,11 @@ export default {
             verifiedStatuses : ['Verified' , 'All'],
             postingErrors: [],
             errors: [],
-            keywords: '',
+            keywords: {
+                username: '',
+                start_date: '',
+                end_date: ''
+            },
             currentPage: 0,
             itemsPerPage: 10,
             // json_fields: {
@@ -111,15 +136,26 @@ export default {
         }
     },
     created(){
-        axios.get('/posting-error/all')
-        .then(response => {
-            this.postingErrors = response.data;
-        })
-        .catch(error => {
-            this.errors = this.errors.response.data.errors;
-        });
+        // this.fetchList();
     },
     methods:{
+        fetchList() {
+            //Set date range to current date if null
+            if (!this.keywords.end_date) {
+                this.keywords.end_date = new Date().toJSON().slice(0, 10);
+            }
+            if (!this.keywords.start_date) {
+                this.keywords.start_date = '2018-01-01';
+            }
+
+            axios.post('/posting-error/all', this.keywords)
+            .then(response => {
+                this.postingErrors = response.data;
+            })
+            .catch(error => {
+                this.errors = this.errors.response.data.errors;
+            });
+        },
         setPage(pageNumber) {
             this.currentPage = pageNumber;
         },
@@ -131,27 +167,32 @@ export default {
         showPreviousLink() {
             return this.currentPage == 0 ? false : true;
         },
-
         showNextLink() {
             return this.currentPage == (this.totalPages - 1) ? false : true;
-        }  
+        },
+        resetKeywords() {
+            this.keywords =  {
+                username: '',
+                start_date: '',
+                end_date: ''
+            };
+        }
     },
     computed:{
         filteredList(){
-            let self = this;
-            return self.postingErrors.filter(e => {
-                if(e){
-                    // if(customer.name && customer.customer_code){
-                    //     return customer.name.toLowerCase().includes(this.keywords.toLowerCase()) || customer.customer_code.toLowerCase().includes(this.keywords.toLowerCase())
-                    // }else if(customer.name){
-                    //     return customer.name.toLowerCase().includes(this.keywords.toLowerCase());
-                    // }else if(customer.customer_code){
-                    //     return customer.customer_code.toLowerCase().includes(this.keywords.toLowerCase());
-                    // }   
-                    return true;
-                }
-                
-            });
+            let list = this.postingErrors;
+            
+            // //filter by username
+            // if (this.keywords.username) list = list.filter( e => { 
+            //     return e.username.toLowerCase().includes(this.keywords.username) 
+            // });
+            // //filter by date range
+            // if (this.keywords.start_date && this.keywords.end_date) list = list.filter ( e => {
+            //     return Date.parse(e.creation_date) >= Date.parse(this.keywords.start_date) &&
+            //     Date.parse(e.creation_date) <= Date.parse(this.keywords.end_date)
+            // } );
+
+            return list;
         },
         totalPages() {
             return Math.ceil(this.filteredList.length / this.itemsPerPage);

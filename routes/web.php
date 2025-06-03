@@ -139,7 +139,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     //Auto Posting Error
     Route::get('/posting-error', 'PostingErrorController@index')->name('posting_error');
-    Route::get('/posting-error/all', 'PostingErrorController@indexData');
+    Route::post('/posting-error/all', 'PostingErrorController@indexData');
 
 
     //Tsr

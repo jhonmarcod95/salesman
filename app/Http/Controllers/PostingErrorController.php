@@ -29,7 +29,7 @@ class PostingErrorController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexData(){
+    public function indexData(Request $request){
         $postingErrors = DB::table('payment_header_errors')
         ->select('payment_header_errors.id',
         'payment_header_errors.cover_week',
@@ -42,6 +42,9 @@ class PostingErrorController extends Controller
         ->join('users','users.id','=','payment_header_errors.user_id')
         ->join('payment_detail_errors','payment_detail_errors.payment_header_error_id','=','payment_header_errors.id')
         ->join('companies','companies.id','=','users.company_id')
+        //search filters
+        ->where('users.name','like','%'.$request->username.'%')
+        ->whereBetween('payment_detail_errors.updated_at',[date($request->start_date),date($request->end_date)])
         ->orderBy('update_date','desc')
         ->get();
 
