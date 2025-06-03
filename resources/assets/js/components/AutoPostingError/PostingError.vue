@@ -15,13 +15,13 @@
                                 </div>
                                 <div class="col text-right">
 
-                                    <!-- <download-excel
-                                        :data   = "customers"
+                                    <download-excel
+                                        :data   = "postingErrors"
                                         :fields = "json_fields"
                                         class   = "btn btn-sm btn-default"
-                                        name    = "Customers.xls">
+                                        name    = "PostingErrors.xls">
                                             Export to excel
-                                    </download-excel> -->
+                                    </download-excel>
 
                                 </div>
                             </div>
@@ -130,9 +130,16 @@ export default {
             },
             currentPage: 0,
             itemsPerPage: 10,
-            // json_fields: {
-            //     'CUSTOMER NAME': 'name',
-            // }
+            json_fields: {
+                'ID': 'id',
+                'Username': 'username',
+                'Return Message': 'return_message',
+                'Created at': 'creation_date' ,
+                'Updated at': 'update_date',
+                'Email': 'email',
+                'Company Name': 'company_name',
+                'Cover Week': 'cover_week'
+            }
         }
     },
     created(){
@@ -141,12 +148,8 @@ export default {
     methods:{
         fetchList() {
             //Set date range to current date if null
-            if (!this.keywords.end_date) {
-                this.keywords.end_date = new Date().toJSON().slice(0, 10);
-            }
-            if (!this.keywords.start_date) {
-                this.keywords.start_date = '2018-01-01';
-            }
+            if (!this.keywords.end_date) this.keywords.end_date = new Date().toJSON().slice(0, 10);
+            if (!this.keywords.start_date) this.keywords.start_date = '2018-01-01';
 
             axios.post('/posting-error/all', this.keywords)
             .then(response => {
