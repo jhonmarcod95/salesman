@@ -73,6 +73,7 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" href="#editModal" data-toggle="modal" @click="copyObject(internalOrder)">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getInternalOrderId(internalOrder.id)">Delete</a>
+                                                    <a class="dropdown-item" href="#updateUomGlModal" data-toggle="modal" @click="copyObject(internalOrder)">Update UOM GL</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -193,6 +194,34 @@
             </div>
         </div>
 
+        <!-- Update UOM-GL Modal -->
+        <div class="modal fade" id="updateUomGlModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <loader v-if="isLoading"></loader>
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Update UOM-GL</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    Are you sure you want to update UOM and GL of this Internal Order?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
+                        <button class="btn btn-warning" @click="updateUomGl()">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Edit Modal -->
         <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <loader v-if="isLoading"></loader>
@@ -232,7 +261,7 @@
                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="form-control-label" for="amount">Desired Amount</label>
-                                    <input type="number" id="amount" class="form-control form-control-alternative" v-model="default_amount.amount" :min="1">
+                                    <input type="number" id="amount" class="form-control form-control-alternative" v-model="default_amount.amount">
                                     <span class="text-danger small" v-if="errors.amount">{{ errors.amount[0] }}</span>
                                 </div>
                             </div>
@@ -273,6 +302,7 @@ export default {
             expense_type: '',
             internal_order_id: '',
             internal_order_copied: [],
+            io_sap_details: [],
             errors: [],
             keywords: '',
             currentPage: 0,
@@ -315,6 +345,23 @@ export default {
                 ) || null;
             this.default_expense_type = internalOrder.charge_type.expense_charge_type.expense_type.id;
             this.default_amount = this.getExpenseRate(internalOrder);
+            console.log(internalOrder, this.default_amount);
+        },
+        updateUomGl(){
+            axios.post('/internal-order/update-uom-gl', {
+                internal_order_id: this.internal_order_copied.id,
+                internal_order: this.internal_order_copied.internal_order,
+                company_id: this.internal_order_copied.user.company_id
+                })
+            .then(response => {
+                this.io_sap_details = response.data;
+                $('#updateUomGlModal').modal('hide');
+
+                toastr.success("UOM & GL Account successfully updated.", "Success");
+            })
+            .catch(error => {
+                this.errors = error.response.data.errors;
+            })
         },
         clearFields(){
             this.errors = [];

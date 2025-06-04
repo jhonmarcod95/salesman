@@ -416,6 +416,7 @@ Route::group(['middleware' => ['auth', 'role:it|finance-gl']], function () {
     Route::get('/internal-order', 'SalesmanInternalOrderController@index')->name('internal-order');
     Route::post('/internal-order', 'SalesmanInternalOrderController@store');
     Route::patch('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@update');
+    Route::post('/internal-order/update-uom-gl/', 'SalesmanInternalOrderController@updateUomGl');
     Route::delete('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@destroy');
     Route::get('/internal-orders', 'SalesmanInternalOrderController@indexData')->name('internal-order');
     Route::post('/internal-order/export', 'SalesmanInternalOrderController@exportToExcel');
