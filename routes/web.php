@@ -268,6 +268,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Expense Unposted
     Route::get('/expense-unposted', 'ExpenseController@expenseUnPostedIndex');
     Route::post('/expense-unposteds', 'ExpenseController@expenseUnPostedIndexData');
+    Route::delete('/expense-unposted-delete/{id}', 'ExpenseController@expenseUnPostedDelete');
 
 
     //Map Analytic Report
