@@ -51,8 +51,8 @@
                                         <span class="text-danger" v-if="errors.week">{{ errors.week[0] }}</span>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-sm btn-primary" @click="fetchExpenses"> Filter</button>
+                                <div class="col-md-2 align-content-center">
+                                    <button class="btn btn-primary" @click="fetchExpenses"> Filter</button>
                                 </div>
                             </div>
                         </div>
@@ -195,7 +195,7 @@
                         <div>Amount: PHP {{ deleteTarget.amount? deleteTarget.amount.toFixed(2): '--' }} </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-danger" @click="deleteExpense" data-dismiss="modal" aria-label="Close">Delete</button>
+                        <button class="btn btn-sm btn-danger" @click="deleteExpense" data-dismiss="modal" aria-label="Close">Delete</button>
                         <button type="button" class="btn btn-muted" data-dismiss="modal" aria-label="Close">Cancel</button>
                     </div>
                 </div>
