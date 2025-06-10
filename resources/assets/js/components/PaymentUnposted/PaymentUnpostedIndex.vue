@@ -144,7 +144,7 @@
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
                                     <td>
-                                        <a class="btn btn-danger" href="javascript:;" data-toggle="modal" data-target="#deleteModal" @click="deleteTarget=expenseBy">Delete</a>
+                                        <a class="btn btn-danger" href="javascript:;" @click="deleteExpense(expenseBy)">Delete</a>
                                     </td>
                                 </tr>
                             </tbody>
@@ -177,35 +177,13 @@
                 </div>
             </div>
         </div>
-        <!--Delete Modal-->
-        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <span class="closed" data-dismiss="modal">&times;</span>
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Delete Entry?</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body text-center">
-                        Delete this entry?
-                        <div>Expense type: {{ deleteTarget.expenses_type? deleteTarget.expenses_type.name: '--' }}</div>
-                        <div>Date: {{ deleteTarget.created_at? moment(deleteTarget.created_at).format('ll'): '--' }}</div>
-                        <div>Amount: PHP {{ deleteTarget.amount? deleteTarget.amount.toFixed(2): '--' }} </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-sm btn-danger" @click="deleteExpense" data-dismiss="modal" aria-label="Close">Delete</button>
-                        <button type="button" class="btn btn-muted" data-dismiss="modal" aria-label="Close">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
     </div>
 </template>
 <script>
 import moment from 'moment';
-import loader from '../Loader'
+import loader from '../Loader';
+import Swal from 'sweetalert2';
 
 export default {
     components: { loader },
@@ -214,7 +192,6 @@ export default {
             expenses: [],
             expenses_id: [],
             expenseByTsr: [],
-            deleteTarget: {},
             weeks: [],
             current_week: '',
             year: '',
@@ -256,14 +233,25 @@ export default {
             this.expenseByTsr = expenses;
             this.errorDetails = errors;
         },
-        deleteExpense(){
-            axios.delete(`/expense-unposted-delete/${this.deleteTarget.id}`)
-            .then(response => { 
-                this.companies = response.data;
-                window.location.reload();
+        deleteExpense(target){
+            Swal.fire({
+                title: "Delete Expense?",
+                text: 'Delete expense type ' + target.expenses_type.name + ' with amount PHP ' + target.amount + '?',
+                showCancelButton: true,
+                showConfirmButton: true,
+                ConfirmButtonText: "Delete",
             })
-            .catch(error => { 
-                this.errors = error.response.data.errors;
+            .then(response => {
+                if (response.isConfirmed) {
+                    axios.delete(`/expense-unposted-delete/${target.id}`)
+                    .then(response => { 
+                        this.companies = response.data;
+                        window.location.reload();
+                    })
+                    .catch(error => { 
+                        this.errors = error.response.data.errors;
+                    });
+                }
             });
         },
         fetchExpenses(){
