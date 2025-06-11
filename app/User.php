@@ -43,7 +43,7 @@ class User extends Authenticatable implements Auditable
     // Relationships
 
     public function expenses() {
-        return $this->hasMany(Expense::class);
+        return $this->hasMany(Expense::class)->withTrashed();
     }
 
     public function validatedExpenses() {

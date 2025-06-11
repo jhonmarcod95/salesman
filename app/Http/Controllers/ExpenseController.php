@@ -650,9 +650,19 @@ class ExpenseController extends Controller
         ->where('posting_type', 'POST')->orderBy('id', 'desc')->get();
     }
 
-    public function expenseUnPostedDelete($id){
+    public function deleteUnpostedExpense($id){
         $expense = Expense::where('id',$id)->first();
         $expense->delete();
+
+        return $expense;
+    }
+
+    public function restoreUnpostedExpense($id) {
+        $expense = Expense::where('id',$id)->where('deleted_at','!=',null)->withTrashed()->first();
+        $expense->deleted_at = null;
+        $expense->save();
+
+        return $expense;
     }
 
     public function historicalExpenseReport(){

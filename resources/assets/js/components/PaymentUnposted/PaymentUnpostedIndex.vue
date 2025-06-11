@@ -134,6 +134,7 @@
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Date</th>
                                 <th scope="col">Amount</th>
+                                <th scope="col">Status</th>
                                 <th scope="col">Action</th>
                             </tr>
                             </thead>
@@ -143,8 +144,10 @@
                                     <td>{{ expenseBy.expenses_type.name }}</td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
+                                    <td :class="expenseBy.deleted_at? 'text-danger': 'text-primary'">{{ expenseBy.deleted_at? 'Deleted': 'Unposted' }}</td>
                                     <td>
-                                        <a class="btn btn-danger" href="javascript:;" @click="deleteExpense(expenseBy)">Delete</a>
+                                        <button v-if="!expenseBy.deleted_at" class="btn btn-sm btn-danger" @click="deleteExpense(expenseBy)">Delete</button>
+                                        <button v-else class="btn btn-sm btn-secondary" @click="cancelDeletion(expenseBy)">Restore</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -239,18 +242,40 @@ export default {
                 text: 'Delete expense type ' + target.expenses_type.name + ' with amount PHP ' + target.amount + '?',
                 showCancelButton: true,
                 showConfirmButton: true,
-                ConfirmButtonText: "Delete",
+                confirmButtonColor: "#e24444",
+                confirmButtonText: "Delete",
             })
             .then(response => {
                 if (response.isConfirmed) {
                     axios.delete(`/expense-unposted-delete/${target.id}`)
-                    .then(response => { 
-                        this.companies = response.data;
-                        window.location.reload();
+                    .then(response => {
+                        this.fetchExpenses();
+                        this.getExpenseSubmitted(this.tsrName,this.expenseByTsr,this.errorDetails);
                     })
-                    .catch(error => { 
-                        this.errors = error.response.data.errors;
-                    });
+                    // .catch(error => { 
+                    //     this.errors = error.response.data.errors;
+                    // });
+                }
+            });
+        },
+        cancelDeletion(target){
+            Swal.fire({
+                title: "Restore Expense?",
+                text: 'Restore expense type ' + target.expenses_type.name + ' with amount PHP ' + target.amount + '?',
+                showCancelButton: true,
+                showConfirmButton: true,
+                confirmButtonText: "Restore",
+            })
+            .then(response => {
+                if (response.isConfirmed) {
+                    axios.delete(`/expense-unposted-restore/${target.id}`)
+                    .then(response => {
+                        this.fetchExpenses();
+                        this.getExpenseSubmitted(this.tsrName,this.expenseByTsr,this.errorDetails);
+                    })
+                    // .catch(error => { 
+                    //     this.errors = error.response.data.errors;
+                    // });
                 }
             });
         },
