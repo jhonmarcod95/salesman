@@ -75,7 +75,8 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#viewModal" @click="getExpenseSubmitted(expense.user.name,expense.user.expenses,expense.payment_header_detail_error)">View</a>
+                                                    <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#viewModal"
+                                                    @click="getExpenseSubmitted(e,expense.user.name,expense.user.expenses,expense.payment_header_detail_error)">View</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -192,6 +193,7 @@ export default {
     components: { loader },
     data(){
         return{
+            currentIndex: '',
             expenses: [],
             expenses_id: [],
             expenseByTsr: [],
@@ -231,10 +233,11 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        getExpenseSubmitted(name,expenses, errors){
-            this.tsrName = name;
-            this.expenseByTsr = expenses;
-            this.errorDetails = errors;
+        getExpenseSubmitted(index,name,expenses,errors){
+            this.currentIndex = index;
+            this.tsrName = name? name: this.filteredQueues[index].user.name;
+            this.expenseByTsr = expenses? expenses: this.filteredQueues[index].user.expenses;
+            this.errorDetails = errors? errors: this.filteredQueues[index].payment_header_detail_error;
         },
         deleteExpense(target){
             Swal.fire({
@@ -250,8 +253,7 @@ export default {
                     axios.delete(`/expense-unposted-delete/${target.id}`)
                     .then(response => {
                         this.fetchExpenses();
-                        this.getExpenseSubmitted(this.tsrName,this.expenseByTsr,this.errorDetails);
-                    })
+                    });
                     // .catch(error => { 
                     //     this.errors = error.response.data.errors;
                     // });
@@ -271,7 +273,6 @@ export default {
                     axios.delete(`/expense-unposted-restore/${target.id}`)
                     .then(response => {
                         this.fetchExpenses();
-                        this.getExpenseSubmitted(this.tsrName,this.expenseByTsr,this.errorDetails);
                     })
                     // .catch(error => { 
                     //     this.errors = error.response.data.errors;
@@ -298,6 +299,8 @@ export default {
                 this.expenses = response.data;
                 this.errors = [];
                 this.loading = false;
+                //updates the view modal if open
+                if (this.currentIndex || this.currentIndex == 0) this.getExpenseSubmitted(this.currentIndex);
             })
             .catch(error => {
                 this.errors = error.response.data.errors;
