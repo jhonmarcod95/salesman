@@ -13,7 +13,7 @@ class PaymentHeaderError extends Model
 
     // Relationship
     public function paymentHeaderDetailError() {
-        return $this->hasMany(PaymentDetailError::class);
+        return $this->hasMany(PaymentDetailError::class)->withTrashed();
     }
 
     public function user(){

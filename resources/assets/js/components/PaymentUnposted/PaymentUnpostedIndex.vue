@@ -134,7 +134,7 @@
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Date</th>
                                 <th scope="col">Amount</th>
-                                <th scope="col">Action</th>
+                                <!-- <th scope="col">Action</th> -->
                             </tr>
                             </thead>
                             <tbody>
@@ -143,9 +143,9 @@
                                     <td>{{ expenseBy.expenses_type.name }}</td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
-                                    <td>
-                                        <a class="btn btn-danger" href="javascript:;" @click="deleteExpense(expenseBy)">Delete</a>
-                                    </td>
+                                    <!-- <td>
+                                        <a class="btn btn-sm btn-danger" href="javascript:;" @click="deleteExpense(expenseBy)">Delete</a>
+                                    </td> -->
                                 </tr>
                             </tbody>
                         </table>
@@ -161,6 +161,7 @@
                                 <th scope="col">Id</th>
                                 <th scope="col">Number</th>
                                 <th scope="col">Description</th>
+                                <th scope="col">Action</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -169,6 +170,10 @@
                                     <td>{{ errorDetail.return_message_id }}</td>
                                     <td>{{ errorDetail.return_message_number }}</td>
                                     <td>{{ errorDetail.return_message_description }}</td>
+                                    <td>
+                                        <a v-if="!errorDetail.deleted_at" class="btn btn-sm btn-danger" href="javascript:;" @click="deleteErrorDetail(errorDetail)">Delete</a>
+                                        <a v-else class="btn btn-sm btn-secondary" href="javascript:;" @click="cancelDeletion(errorDetail)">Cancel Deletion</a>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -244,6 +249,48 @@ export default {
             .then(response => {
                 if (response.isConfirmed) {
                     axios.delete(`/expense-unposted-delete/${target.id}`)
+                    .then(response => { 
+                        this.companies = response.data;
+                        window.location.reload();
+                    })
+                    .catch(error => { 
+                        this.errors = error.response.data.errors;
+                    });
+                }
+            });
+        },
+        deleteErrorDetail(target){
+            Swal.fire({
+                title: "Delete Error?",
+                text: 'Delete entry: ' + target.return_message_description + '?',
+                showCancelButton: true,
+                showConfirmButton: true,
+                ConfirmButtonText: "Delete",
+            })
+            .then(response => {
+                if (response.isConfirmed) {
+                    axios.delete(`/payments/delete-error/${target.id}`)
+                    .then(response => { 
+                        this.companies = response.data;
+                        window.location.reload();
+                    })
+                    .catch(error => { 
+                        this.errors = error.response.data.errors;
+                    });
+                }
+            });
+        },
+        cancelDeletion(target){
+            Swal.fire({
+                title: "Cancel Deletion?",
+                text: 'Restore entry: ' + target.return_message_description + '?',
+                showCancelButton: true,
+                showConfirmButton: true,
+                ConfirmButtonText: "Delete",
+            })
+            .then(response => {
+                if (response.isConfirmed) {
+                    axios.delete(`/payments/cancel-delete/${target.id}`)
                     .then(response => { 
                         this.companies = response.data;
                         window.location.reload();
