@@ -48,7 +48,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <button class="btn btn-success" @click="fetchList()">Search</button>
+                                    <button class="btn btn-success" @click="fetchList()">Filter</button>
                                 </div>
                             </div>
                         </div>
@@ -74,7 +74,10 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-if="filteredQueues.length <= 0">
+                                    <tr v-if="loading">
+                                        <div class="text-muted text-center p-3">Loading...</div>
+                                    </tr>
+                                    <tr v-else-if="filteredQueues.length <= 0">
                                         <div class="text-muted text-center p-3">No results found</div>
                                     </tr>
                                     <tr v-else v-for="item in filteredQueues">
@@ -124,6 +127,7 @@ export default {
     components: { 'downloadExcel': JsonExcel },
     data(){
         return{
+            loading: false,
             verifiedStatuses : ['Verified' , 'All'],
             postingErrors: [],
             errors: [],
@@ -151,6 +155,7 @@ export default {
     // },
     methods:{
         fetchList() {
+            this.loading = true;
             //default date range 2018-present
             if (!this.keywords.end_date) this.keywords.end_date = new Date().toJSON().slice(0, 10);
             if (!this.keywords.start_date) this.keywords.start_date = '2018-01-01';
@@ -158,9 +163,11 @@ export default {
             axios.post('/posting-error/all', this.keywords)
             .then(response => {
                 this.postingErrors = response.data;
+                this.loading = false;
             })
             .catch(error => {
                 this.errors = this.errors.response.data.errors;
+                this.loading = false;
             });
         },
         setPage(pageNumber) {
