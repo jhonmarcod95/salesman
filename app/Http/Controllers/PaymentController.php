@@ -395,15 +395,4 @@ class PaymentController extends Controller
             return array ($data);
         }
     }
-
-    public function deletePaymentHeaderError($id) {
-        $error = PaymentDetailError::where('id',$id)->first();
-        $error->delete();
-    }
-
-    public function cancelErrorDeletion($id) {
-        $error = PaymentDetailError::where('id',$id)->where('deleted_at','!=',null)->withTrashed()->first();
-        $error->deleted_at = null;
-        $error->save();
-    }
 }

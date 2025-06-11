@@ -269,9 +269,6 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/expense-unposted', 'ExpenseController@expenseUnPostedIndex');
     Route::post('/expense-unposteds', 'ExpenseController@expenseUnPostedIndexData');
     Route::delete('/expense-unposted-delete/{id}', 'ExpenseController@expenseUnPostedDelete');
-    // Delete payment error
-    Route::delete('/payments/delete-error/{id}', 'PaymentController@deletePaymentHeaderError');
-    Route::delete('/payments/cancel-delete/{id}', 'PaymentController@cancelErrorDeletion');
 
 
     //Map Analytic Report
