@@ -75,7 +75,8 @@
                                 </thead>
                                 <tbody>
                                     <tr v-if="loading">
-                                        <div class="text-muted text-center p-3">Loading...</div>
+								        <span class="spinner spinner-primary mr-10"></span>
+                                        <span class="text-muted text-center p-3">Loading...</span>
                                     </tr>
                                     <tr v-else-if="filteredQueues.length <= 0">
                                         <div class="text-muted text-center p-3">No results found</div>
