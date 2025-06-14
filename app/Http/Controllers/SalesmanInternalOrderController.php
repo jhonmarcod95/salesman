@@ -16,6 +16,7 @@ use App\{
 use App\Exports\SalesmanInternalOrderExport;
 use Auth;
 use Carbon\Carbon;
+use DateTime;
 use Maatwebsite\Excel\Facades\Excel;
 
 class SalesmanInternalOrderController extends Controller
@@ -166,6 +167,36 @@ class SalesmanInternalOrderController extends Controller
                 return $return;
             }
         
+    }
+
+    public function getExpenseAmount(Request $request){
+
+        $sap_server = SapServer::where('sap_server', $request->sap_server)->first();
+        $sap_user = SapUser::where('user_id', 175)->where('sap_server', $sap_server->sap_server)->first();
+        $sap_connection = [
+            'ashost' => $sap_server->app_server,
+            'sysnr' => $sap_server->system_number,
+            'client' => $sap_server->client,
+            'user' => $sap_user->sap_id,
+            'passwd' => $sap_user->sap_password
+        ];
+        $budget_date = (new DateTime($request->date))->format('Ymd');
+        $parameters = [
+            'P_AUFNR' => $request->internal_order,
+            'P_BUDAT' => $budget_date
+        ];
+
+        $fm = 'ZFI_BUDGET_CHK_INTEG';
+        $get_details = APIController::executeSapFunction($sap_connection, $fm, $parameters, null, $request->sap_server);
+        return $get_details;
+        $amount = SalesmanInternalOrder::with('user', 'user.company', 'user.expenseRate', 'chargeType.expenseChargeType.expenseType', 'gl_account', 'balanceHistory')
+            ->whereHas('user', function ($q){
+                $q->whereIn('company_id', Auth::user()->companies->pluck('id'));
+            })
+            ->where('id', $id)
+            ->orderBy('id', 'desc')->get();
+
+        return $amount;
     }
 
     /**

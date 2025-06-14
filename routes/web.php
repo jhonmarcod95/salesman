@@ -419,6 +419,7 @@ Route::group(['middleware' => ['auth', 'role:it|finance-gl']], function () {
     Route::delete('/internal-order/{salesmanInternalOrder}', 'SalesmanInternalOrderController@destroy');
     Route::get('/internal-orders', 'SalesmanInternalOrderController@indexData')->name('internal-order');
     Route::post('/internal-order/export', 'SalesmanInternalOrderController@exportToExcel');
+    Route::get('/internal-order/get-amount', 'SalesmanInternalOrderController@getExpenseAmount');
 });
 
 //Customer Master Role

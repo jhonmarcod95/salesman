@@ -73,6 +73,7 @@
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                     <a class="dropdown-item" href="#editModal" data-toggle="modal" @click="copyObject(internalOrder)">Edit</a>
                                                     <a class="dropdown-item" href="#deleteModal" data-toggle="modal" @click="getInternalOrderId(internalOrder.id)">Delete</a>
+                                                    <a class="dropdown-item" href="#viewModal" data-toggle="modal" @click="copyObject(internalOrder)">View Budget</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -253,6 +254,65 @@
             </div>
         </div>
 
+        <!-- View Modal -->
+        <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <loader v-if="isLoading"></loader>
+           <div class="modal-dialog modal-dialog-centered" role="document">
+               <div class="modal-content">
+                   <div class="modal-header">
+                       <h5 class="modal-title" id="exampleModalLabel">View Internal Order - Amount</h5>
+                       <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="clearFields">
+                           <span aria-hidden="true">&times;</span>
+                       </button>
+                   </div>
+                   <div class="modal-body">
+                       <!-- <div class="row"> -->
+                        
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="amount">Select Date</label>
+                                    <input type="date" id="validity_date" class="form-control form-control-alternative" @change="getExpenseAmount(internal_order_copied, view_date)" v-model="view_date">
+                                    <span class="text-danger small" v-if="errors.view_date">{{ errors.view_date[0] }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <!-- <label class="form-control-label" for="internal_order">User: {{ internal_order_copied.user }}</label><br> -->
+                                    <label class="form-control-label" for="internal_order">Internal Order: {{ internal_order_copied.internal_order }}</label><br>
+                                    <label class="form-control-label" for="internal_order">Expense Type: {{ internal_order_copied_charge_type.name }}</label><br>
+                                </div>
+                            </div>
+                            <div class="col-md-12" style="margin-top: 5px;" v-if="expense_amount && !isLoading">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="internal_order">PLANNED AMOUNT: {{ expense_amount.GV_T_PLAN_AMT }}</label><br>
+                                    <label class="form-control-label" for="internal_order">PLANNED QUANTITY: {{ expense_amount.GV_T_PLAN_QTY }}</label><br>
+                                    <label class="form-control-label" for="internal_order">AVAILABLE AMOUNT: {{ expense_amount.GV_OUTPUT }}</label><br>
+                                    <label class="form-control-label" for="internal_order">AVAILABLE QUANTITY: {{ expense_amount.GV_OUTPUT_QTY }}</label><br>
+                                    
+                                    <div v-if="expense_amount.BREAKDOWN == null">
+                                        <label class="form-control-label" for="internal_order" style="margin-top: 10px;">VERSIONS</label><br>
+                                        <div v-for="(expense,i) in expense_amount.BREAKDOWN" v-bind:key="i">
+                                            <label class="form-control-label" for="internal_order">Version: {{ expense.VERSN }}</label><br>
+                                            <label class="form-control-label" for="internal_order">PLANNED AMOUNT: {{ expense.PAMOUNT }}</label><br>
+                                            <label class="form-control-label" for="internal_order">PLANNED QUANTITY: {{ expense.PQTY }}</label><br>
+                                            <label class="form-control-label" for="internal_order">AVAILABLE AMOUNT: {{ expense.AAMOUNT }}</label><br>
+                                            <label class="form-control-label" for="internal_order">AVAILABLE QUANTITY: {{ expense.AQTY }}</label><br>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12" v-if="isLoading">
+                                <spinner/>
+                            </div>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss='modal' @click="clearFields">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -286,7 +346,9 @@ export default {
             expense_id: '',
             isLoading: false,
             charge_type : null,
-            salesman : null
+            salesman : null,
+            expense_amount: null,
+            view_date: null
         }
     },
     created(){
@@ -319,6 +381,8 @@ export default {
         clearFields(){
             this.errors = [];
             this.internal_order = [];
+            this.expense_amount = null;
+            this.view_date = null;
         },
         clearFilter(){
             this.company = '';
@@ -378,6 +442,26 @@ export default {
         },
         getChargeType() {
             this.charge_type = this.expense_types.filter(o=> o.id == this.internal_order.expense_type)[0];
+        },
+        getExpenseAmount(internal_order, date) {
+            this.isLoading = true;
+            this.errors = [];
+            axios.get('/internal-order/get-amount', {
+                params: 
+                {
+                    id: internal_order.id,
+                    sap_server: internal_order.sap_server,
+                    internal_order: internal_order.internal_order,
+                    date: date
+                }
+            }).
+            then(response => {
+                this.expense_amount = response.data
+                this.isLoading = false;
+            }).catch(error => {
+                this.errors = error.response.data.errors;
+                this.isLoading = false;
+            })
         },
         addInternalOrder(internal_order){
             this.isLoading = true;
