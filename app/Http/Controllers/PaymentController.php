@@ -395,4 +395,30 @@ class PaymentController extends Controller
             return array ($data);
         }
     }
+    
+    //Voucherless payments
+    public function indexNoVoucher(){
+        session(['header_text' => 'No Voucher Payments']);
+
+        return view('no-voucher-payment.index');
+    }
+
+    public function noVoucherData(Request $request){
+        // $payments = PaymentHeader::without('checkVoucher')
+        // ->whereBetween('created_at',[$request->start_date, $request->end_date])
+        // ->get();
+        $payments = PaymentHeader::whereBetween('created_at',[$request->start_date, $request->end_date])
+        ->whereNotExists(function ($q) {
+            $q->select(DB::raw(1))
+            ->from('check_vouchers')
+            ->where(function ($e) {
+                $e->whereRaw('check_vouchers.reference_number = payment_headers.reference_number')
+                ->orWhereRaw('check_vouchers.apv = payment_headers.document_code');
+            });
+        })
+        ->get();
+
+        return $payments;
+    }
+
 }

@@ -135,6 +135,11 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     Route::get('/selection-users/show/{id}', 'UserController@show');
     Route::patch('/users/update/{id}', 'UserController@update');
+    
+
+    //No voucher payments
+    Route::get('/no-voucher-payment', 'PaymentController@indexNoVoucher')->name('no-voucher-payment');
+    Route::post('/no-voucher-payment/all', 'PaymentController@noVoucherData');
 
 
     //Tsr
