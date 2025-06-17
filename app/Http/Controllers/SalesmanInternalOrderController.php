@@ -182,7 +182,7 @@ class SalesmanInternalOrderController extends Controller
             'charge_type' => ['required', new ChargeTypeRule($request->user_id, $salesmanInternalOrder->id, 'Edit')], 
             'internal_order' => 'required',
             'sap_server' => 'required',
-            'amount' => 'nullable|integer|min:1',
+            'amount' => 'nullable|integer',
             'default_expense_type' => 'required'
         ]);
 
@@ -191,14 +191,16 @@ class SalesmanInternalOrderController extends Controller
             $chargeType = ChargeType::with('expenseChargeType.expenseType')->where('name', $request->charge_type)->first();
             $expenseRate = ExpenseRate::where('user_id',$request->user_id)->where('expenses_type_id', $request->default_expense_type)->first();
 
-            $array = [
-                'created_by' => Auth::user()->id,
-                'user_id' => $request->user_id,
-                'expenses_type_id' => $chargeType->expenseChargeType->expenseType->id,
-                'amount' => $request->amount,
-                'validity_date' => $request->validity_date,
-            ];
-            $expenseRate ? $expenseRate->update($array) : ExpenseRate::create($array);
+            if($request->filled('amount')){
+                $array = [
+                    'created_by' => Auth::user()->id,
+                    'user_id' => $request->user_id,
+                    'expenses_type_id' => $chargeType->expenseChargeType->expenseType->id,
+                    'amount' => $request->amount,
+                    'validity_date' => $request->validity_date,
+                ];
+                $expenseRate ? $expenseRate->update($array) : ExpenseRate::create($array);
+            }
 
             return SalesmanInternalOrder::with('user','user.expenseRate','chargeType.expenseChargeType.expenseType')->where('id', $salesmanInternalOrder->id)->first();
         }

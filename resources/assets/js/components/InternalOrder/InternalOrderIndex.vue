@@ -231,15 +231,15 @@
                            </div>
                            <div class="col-md-12">
                                 <div class="form-group">
-                                    <label class="form-control-label" for="amount">Desired Amount</label>
-                                    <input type="number" id="amount" class="form-control form-control-alternative" v-model="default_amount.amount" :min="1">
+                                    <label class="form-control-label" for="amount">Desired Amount </label> 
+                                    <input type="number" id="amount" class="form-control form-control-alternative" v-model="edit_default_amount.amount">
                                     <span class="text-danger small" v-if="errors.amount">{{ errors.amount[0] }}</span>
                                 </div>
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="form-control-label" for="amount">Validity Date</label>
-                                    <input type="date" id="validity_date" class="form-control form-control-alternative" v-model="default_amount.validity_date">
+                                    <input type="date" id="validity_date" class="form-control form-control-alternative" v-model="edit_default_amount.validity_date">
                                     <span class="text-danger small" v-if="errors.validity_date">{{ errors.validity_date[0] }}</span>
                                 </div>
                             </div>
@@ -247,7 +247,7 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss='modal'>Close</button>
-                        <button class="btn btn-primary" @click="updateInternalOrder(internal_order_copied, default_amount)">Save Changes</button>
+                        <button class="btn btn-primary" @click="updateInternalOrder(internal_order_copied, edit_default_amount)">Save Changes</button>
                     </div>
                 </div>
             </div>
@@ -280,6 +280,7 @@ export default {
             internal_order_copied_charge_type: [],
             default_expense_type:'',
             default_amount: [],
+            edit_default_amount: [],
             companies: [],
             company: '',
             servers: [],
@@ -315,6 +316,7 @@ export default {
                 ) || null;
             this.default_expense_type = internalOrder.charge_type.expense_charge_type.expense_type.id;
             this.default_amount = this.getExpenseRate(internalOrder);
+            this.edit_default_amount = this.default_amount ? this.default_amount: [];
         },
         clearFields(){
             this.errors = [];
@@ -402,7 +404,7 @@ export default {
                 this.isLoading = false;
             })
         },
-        updateInternalOrder(internal_order_copied,default_amount, internal_order_copied_charge_type){
+        updateInternalOrder(internal_order_copied,edit_default_amount){
             this.isLoading = true;
             this.errors = [];
             var default_expense_type = [];
@@ -413,8 +415,8 @@ export default {
                 charge_type: this.internal_order_copied_charge_type.expense_charge_type.charge_type.name, 
                 internal_order: internal_order_copied.internal_order,
                 sap_server: internal_order_copied.sap_server,
-                amount : default_amount.amount,
-                validity_date : default_amount.validity_date,
+                amount : edit_default_amount.amount,
+                validity_date : edit_default_amount.validity_date,
                 default_expense_type: default_expense_type,
                 _method: 'PATCH'
             })
