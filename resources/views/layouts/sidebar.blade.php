@@ -234,7 +234,7 @@
                                 </li>
                                 <li>
                                     <a class="nav-link" href="{{ url('no-voucher-payment') }}">
-                                        <i class="fa fa-window-close text-danger"></i> No Voucher Payments
+                                        <i class="ni ni-money-coins text-gray"></i> No Voucher Payments
                                     </a>
                                 </li>
                                 <li>
