@@ -79,7 +79,8 @@ class PaymentAutoPostingReprocessing extends Command
             // '35th_week' => ['2025-05-12','2025-05-18',true],
             // '36th_week' => ['2025-05-19','2025-05-25',true],
                 '37th_week' => ['2025-05-26','2025-06-01',true],
-                '38th_week' => ['2025-06-02','2025-06-08',true]
+                '38th_week' => ['2025-06-02','2025-06-08',true],
+                '39th_week' => ['2025-06-09','2025-06-15',true]
         ];
 
         foreach($back_dates as $back_date){
