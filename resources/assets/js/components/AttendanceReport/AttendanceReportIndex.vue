@@ -105,6 +105,7 @@
                                     <th scope="col"></th>
                                     <th scope="col">TSR</th>
                                     <th scope="col">Customer</th>
+                                    <th scope="col">Classification</th>
                                     <!-- <th scope="col">Date</th>
                                     <th scope="col">Schedule</th> -->
                                     <th scope="col">In / Out</th>
@@ -140,6 +141,10 @@
                                                      Region: {{  schedule.customer.provinces.regions ? schedule.customer.provinces.regions.name : ""  }}
                                                 </p>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <div v-if="schedule.customer && schedule.customer.classifications">{{ schedule.customer.classifications.description }}</div>
+                                            <div v-else>--</div>
                                         </td>
                                         <td>
                                             <div v-if="schedule.attendances">
