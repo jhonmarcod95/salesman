@@ -282,6 +282,15 @@ export default {
                 },
                 'NAME': 'name',
                 'ADDRESS': 'address',
+                'CLASSIFICATION': {
+                    callback: (value) => {
+                        if(value.customer && value.customer.classifications){
+                            return value.customer.classifications.description;
+                        }else{
+                            return "";
+                        }
+                    }
+                },
                 'REGION': {
                     callback: (value) => {
                         if(value.customer){
