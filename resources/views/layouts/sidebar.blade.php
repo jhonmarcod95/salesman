@@ -238,6 +238,11 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a class="nav-link" href="{{ url('no-voucher-payment') }}">
+                                        <i class="ni ni-money-coins text-gray"></i> No Voucher Payments
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="nav-link" href="{{ url('/forced-close') }}">
                                         <i class="ni ni-calendar-grid-58 text-orange"></i> Force Close Schedule
                                     </a>
