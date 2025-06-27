@@ -268,6 +268,11 @@
                                         <i class="ni ni-chart-pie-35 text-danger"></i> Unposted Expenses
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="nav-link" href="{{ url('/run-command') }}">
+                                        <i class="ni ni-tv-2 text-primary"></i> Run Command
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </li>

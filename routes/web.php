@@ -146,6 +146,13 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     Route::get('/posting-error', 'PostingErrorController@index')->name('posting_error');
     Route::post('/posting-error/all', 'PostingErrorController@indexData');
 
+    //Run Command
+    Route::get('/run-command', 'RunCommandController@index');
+    Route::get('/auto-posting/{server}', 'RunCommandController@runAutoPosting');
+    Route::get('/auto-posting-reprocessing/{server}', 'RunCommandController@runAutoPostingReProcessing');
+    Route::get('/auto-cv', 'RunCommandController@runAutoCV');
+    Route::get('/auto-check', 'RunCommandController@runAutoCheck');
+
 
     //Tsr
     // show tsr page
