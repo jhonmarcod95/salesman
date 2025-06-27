@@ -22,14 +22,14 @@ class RunCommandController extends Controller
     //php artisan payment:autoposting {HANA/LFUG}
     public function runAutoPosting($server)
     {
-        Artisan::call('payment:autoposting', ['--server' => $server]);
+        Artisan::call('payment:autoposting', ['sap_server' => $server]);
         return Artisan::output();
     }
 
     //php artisan payment:autopostingreprocessing {HANA/LFUG}
     public function runAutoPostingReProcessing($server)
     {
-        Artisan::call('payment:autopostingreprocessing', ['--server' => $server]);
+        Artisan::call('payment:autopostingreprocessing', ['sap_server' => $server]);
         return Artisan::output();
     }
 

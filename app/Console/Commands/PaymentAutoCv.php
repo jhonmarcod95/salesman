@@ -117,6 +117,7 @@ class PaymentAutoCv extends Command
                  ]);
             }
         }
+        echo 'Auto CV successful';
         return;
     }
 }

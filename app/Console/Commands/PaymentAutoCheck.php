@@ -105,6 +105,7 @@ class PaymentAutoCheck extends Command
                 ]);
             }
         }
+        echo 'Auto check successful';
         return;
     }
 
