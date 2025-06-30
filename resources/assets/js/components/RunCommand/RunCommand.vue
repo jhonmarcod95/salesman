@@ -9,11 +9,11 @@
             <button :disabled="loading" class="btn btn-primary" @click="runCommand('/auto-cv','Post check voucher expenses?')">Auto CV</button>
             <button :disabled="loading" class="btn btn-primary" @click="runCommand('/auto-check','Post check expenses?')">Auto Check</button>
 
-            <div v-if="this.output != ''" class="border border-dark rounded mt-2 p-2">
+            <div v-if="this.output != ''" class="border border-success text-success rounded mt-4 p-2">
                 {{ this.loading? "Loading...": this.output }}
             </div>
-            <div v-if="this.errors != ''" class="border border-danger text-danger rounded mt-2 p-2">
-                {{ this.loading? "Loading...": this.output }}
+            <div v-if="this.errors != ''" class="border border-danger text-danger rounded mt-4 p-2">
+                {{ this.loading? "Loading...": this.errors }}
             </div>
         </div>
         
@@ -43,6 +43,8 @@ export default {
             }).then((result) => {
                 if (result.isConfirmed) {
                     this.loading = true;
+                    this.output = '';
+                    this.errors = '';
                     axios.get(command)
                     .then(response => {
                         this.output = response.data;
@@ -55,7 +57,7 @@ export default {
                         this.loading = false;
                     })
                     .catch (error => {
-                        this.errors = error.response.data.errors;
+                        this.errors = error.response.data.message;
                         this.loading = false;
                     });
                 }

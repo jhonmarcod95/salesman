@@ -748,7 +748,6 @@ class PaymentAutoPosting extends Command
             dd('#Error: ' . $e);
             //write file here
         }
-        echo 'Simulated expense';
         return;
     }
 
@@ -777,7 +776,6 @@ class PaymentAutoPosting extends Command
                 // 'reference_number' => 175 . $reference_number + 1
             ];
 
-            echo 'Expense submitted';
             return array ($data);
         }
     }
@@ -923,7 +921,6 @@ class PaymentAutoPosting extends Command
                 'expense_grouping' => $posting_date->format('y-m-d').'+'.$grouped_expenses[0]->user_id.'+'.$index,
                 'status_id' => 2
             ]);
-        echo 'Recorded for reposting';
     }
 
     /**

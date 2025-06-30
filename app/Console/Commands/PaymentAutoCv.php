@@ -117,7 +117,7 @@ class PaymentAutoCv extends Command
                  ]);
             }
         }
-        echo 'Auto CV successful';
+        echo 'Command successful! '.count($payment_headers).' entries processed between '.$thisMonday.' and '.$thisSunday;
         return;
     }
 }

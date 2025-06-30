@@ -85,6 +85,6 @@ class PaymentAutoPostingReprocessing extends Command
             $paymentAutoPosting->generateExpense($back_date[0],$back_date[1], $sap_server,$back_date[2]);
         }
 
-        echo $sap_server.' reprocess successful';
+        echo $sap_server.' payment postings reprocessed.';
     }
 }

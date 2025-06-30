@@ -105,7 +105,7 @@ class PaymentAutoCheck extends Command
                 ]);
             }
         }
-        echo 'Auto check successful';
+        echo 'Command successful! '.count($check_vouchers).' entries processed between '.$thisMonday.' and '.$thisSunday;
         return;
     }
 
