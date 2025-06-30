@@ -295,7 +295,7 @@
                         </a>
                     </li>
                 @endif
-                @if(Auth::user()->level() > 5 || Auth::user()->level() == 3 || Auth::user()->hasRole('coordinator-2'))
+                @if(Auth::user()->level() > 5 || Auth::user()->level() == 3 || Auth::user()->hasRole('coordinator') || Auth::user()->hasRole('coordinator-2'))
                     <li>
                         <a data-toggle="collapse" href="#Request" class="collapsed" aria-expanded="false">
                             <div class="nav-link">
