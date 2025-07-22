@@ -37,7 +37,8 @@ function get_google_map_place($url_str){
     foreach ($map_strings as $k => $map_string){
         if ($map_string == 'place') {
             $place = $map_strings[$k + 1];
-            $place = str_replace('+', ' ', $place);
+            $place = urldecode($place);
+            // $place = str_replace('+', ' ', $place);
             $status = 'S';
             break;
         }
