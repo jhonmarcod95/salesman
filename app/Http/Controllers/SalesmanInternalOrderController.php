@@ -13,6 +13,7 @@ use App\{
     SapServer,
     SapUser
 };
+use Illuminate\Support\Facades\DB;
 use App\Exports\SalesmanInternalOrderExport;
 use Auth;
 use Carbon\Carbon;
@@ -166,6 +167,24 @@ class SalesmanInternalOrderController extends Controller
                 return $return;
             }
         
+    }
+
+    public function updateUomGl(Request $request){
+        //get sap server
+        $sap_server = optional(Company::with('sapServers')->where('id', $request->company_id)->first())->sapServers->pluck('sap_server')->first();
+        //get uom and gl_account via SAP
+        $request_sap = $this->fetchFromSap($sap_server, $request->internal_order);
+        
+        $salesmanInternalOrder = SalesmanInternalOrder::find($request->internal_order_id);
+        DB::beginTransaction();
+
+        $salesmanInternalOrder->uom = $request_sap['message']['uom'];
+        $salesmanInternalOrder->gl_account_id = $request_sap['message']['gl_account_id'];
+        $salesmanInternalOrder->save();
+
+        DB::commit();
+
+        return $salesmanInternalOrder;
     }
 
     /**
