@@ -135,6 +135,23 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
 
     Route::get('/selection-users/show/{id}', 'UserController@show');
     Route::patch('/users/update/{id}', 'UserController@update');
+    
+
+    //No voucher payments
+    Route::get('/no-voucher-payment', 'PaymentController@indexNoVoucher')->name('no-voucher-payment');
+    Route::post('/no-voucher-payment/all', 'PaymentController@noVoucherData');
+
+
+    //Auto Posting Error
+    Route::get('/posting-error', 'PostingErrorController@index')->name('posting_error');
+    Route::post('/posting-error/all', 'PostingErrorController@indexData');
+
+    //Run Command
+    Route::get('/run-command', 'RunCommandController@index');
+    Route::get('/auto-posting/{server}', 'RunCommandController@runAutoPosting');
+    Route::get('/auto-posting-reprocessing/{server}', 'RunCommandController@runAutoPostingReProcessing');
+    Route::get('/auto-cv', 'RunCommandController@runAutoCV');
+    Route::get('/auto-check', 'RunCommandController@runAutoCheck');
 
 
     //Tsr
@@ -268,6 +285,8 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // Expense Unposted
     Route::get('/expense-unposted', 'ExpenseController@expenseUnPostedIndex');
     Route::post('/expense-unposteds', 'ExpenseController@expenseUnPostedIndexData');
+    Route::delete('/expense-unposted-delete/{id}', 'ExpenseController@deleteUnpostedExpense');
+    Route::delete('/expense-unposted-restore/{id}', 'ExpenseController@restoreUnpostedExpense');
 
 
     //Map Analytic Report

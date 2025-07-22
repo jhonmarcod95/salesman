@@ -161,6 +161,15 @@ Vue.component('table-spinner', require('./components/Common/SpinnerBlockUI.vue')
 Vue.component('version-release', require('./components/VersionRelease/VersionRelease.vue'));
 Vue.component('app-breadcrumbs', require('./components/Common/Breadcrumbs.vue'));
 
+//Auto Posting Error
+Vue.component('posting-error', require('./components/AutoPostingError/PostingError.vue'));
+
+//No Voucher Payments
+Vue.component('no-voucher-payment', require('./components/NoVoucherPayment/NoVoucherPaymentIndex.vue'));
+
+//Run Command
+Vue.component('run-command', require('./components/RunCommand/RunCommand.vue'));
+
 const app = new Vue({
     el: '#app',
 });

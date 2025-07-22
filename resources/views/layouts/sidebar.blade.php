@@ -142,12 +142,6 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ url('/expense-unposted') }}">
-                                        <i class="ni ni-chart-pie-35 text-danger"></i> Unposted Expenses
-                                    </a>
-                                </li>
-
-                                <li class="nav-item">
                                     <a class="nav-link" href="{{ url('/sales-report') }}">
                                         <i class="ni ni-book-bookmark text-green"></i> Sales Report
                                     </a>
@@ -242,6 +236,47 @@
                         </div>
                     </li>
                     @endif
+                    @if(Auth::user()->hasRole(['manager', 'it']))
+                    <li>
+                        <a data-toggle="collapse" href="#Support" class="collapsed" aria-expanded="false">
+                            <div class="nav-link">
+                                <i class="ni ni-settings-gear-65 text-gray"></i>
+                                <span>Support</span>
+                            </div>
+                        </a>
+                        <div class="collapse space-left" id="Support" style="">
+                            <ul class="nav" style="list-style-type: none;">
+                                <li>
+                                    @if(Auth::user()->hasRole(['it', 'finance-gl']))
+                                    <a class="nav-link" href="{{ url('/internal-order') }}">
+                                        <i class="ni ni-money-coins text-indigo"></i> Internal Order
+                                    </a>
+                                    @endif
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{{ url('posting-error') }}">
+                                        <i class="fa fa-window-close text-danger"></i> Posting Errors
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{{ url('no-voucher-payment') }}">
+                                        <i class="ni ni-money-coins text-gray"></i> No Voucher Payments
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{{ url('/expense-unposted') }}">
+                                        <i class="ni ni-chart-pie-35 text-danger"></i> Unposted Expenses
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{{ url('/run-command') }}">
+                                        <i class="ni ni-tv-2 text-primary"></i> Run Command
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    @endif
                 </ul>
             @else
             <ul class="navbar-nav">
@@ -320,15 +355,6 @@
                     </li>
                 @endif
             </ul>
-            @if(Auth::user()->hasRole(['it', 'finance-gl']))
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/internal-order') }}">
-                        <i class="ni ni-money-coins text-indigo"></i> Internal Order
-                    </a>
-                </li>
-            </ul>
-            @endif
             
         </div>
     </div>

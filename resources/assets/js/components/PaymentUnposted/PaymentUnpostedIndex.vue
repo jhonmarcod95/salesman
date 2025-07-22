@@ -51,8 +51,8 @@
                                         <span class="text-danger" v-if="errors.week">{{ errors.week[0] }}</span>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-sm btn-primary" @click="fetchExpenses"> Filter</button>
+                                <div class="col-md-2 align-content-center">
+                                    <button class="btn btn-primary" @click="fetchExpenses"> Filter</button>
                                 </div>
                             </div>
                         </div>
@@ -75,7 +75,8 @@
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#viewModal" @click="getExpenseSubmitted(expense.user.name,expense.user.expenses,expense.payment_header_detail_error)">View</a>
+                                                    <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#viewModal"
+                                                    @click="getExpenseSubmitted(e,expense.user.name,expense.user.expenses,expense.payment_header_detail_error)">View</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -134,6 +135,8 @@
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Date</th>
                                 <th scope="col">Amount</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -142,6 +145,11 @@
                                     <td>{{ expenseBy.expenses_type.name }}</td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
+                                    <td :class="expenseBy.deleted_at? 'text-danger': 'text-primary'">{{ expenseBy.deleted_at? 'Deleted': 'Unposted' }}</td>
+                                    <td>
+                                        <button v-if="!expenseBy.deleted_at" class="btn btn-sm btn-danger" @click="deleteExpense(expenseBy)">Delete</button>
+                                        <button v-else class="btn btn-sm btn-secondary" @click="cancelDeletion(expenseBy)">Restore</button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -173,16 +181,19 @@
                 </div>
             </div>
         </div>
+        
     </div>
 </template>
 <script>
 import moment from 'moment';
-import loader from '../Loader'
+import loader from '../Loader';
+import Swal from 'sweetalert2';
 
 export default {
     components: { loader },
     data(){
         return{
+            currentIndex: '',
             expenses: [],
             expenses_id: [],
             expenseByTsr: [],
@@ -222,10 +233,52 @@ export default {
                 this.errors = error.response.data.errors;
             })
         },
-        getExpenseSubmitted(name,expenses, errors){
-            this.tsrName = name;
-            this.expenseByTsr = expenses;
-            this.errorDetails = errors;
+        getExpenseSubmitted(index,name,expenses,errors){
+            this.currentIndex = index;
+            this.tsrName = name? name: this.filteredQueues[index].user.name;
+            this.expenseByTsr = expenses? expenses: this.filteredQueues[index].user.expenses;
+            this.errorDetails = errors? errors: this.filteredQueues[index].payment_header_detail_error;
+        },
+        deleteExpense(target){
+            Swal.fire({
+                title: "Delete Expense?",
+                text: 'Delete expense type ' + target.expenses_type.name + ' with amount PHP ' + target.amount + '?',
+                showCancelButton: true,
+                showConfirmButton: true,
+                confirmButtonColor: "#e24444",
+                confirmButtonText: "Delete",
+            })
+            .then(response => {
+                if (response.isConfirmed) {
+                    axios.delete(`/expense-unposted-delete/${target.id}`)
+                    .then(response => {
+                        this.fetchExpenses();
+                    });
+                    // .catch(error => { 
+                    //     this.errors = error.response.data.errors;
+                    // });
+                }
+            });
+        },
+        cancelDeletion(target){
+            Swal.fire({
+                title: "Restore Expense?",
+                text: 'Restore expense type ' + target.expenses_type.name + ' with amount PHP ' + target.amount + '?',
+                showCancelButton: true,
+                showConfirmButton: true,
+                confirmButtonText: "Restore",
+            })
+            .then(response => {
+                if (response.isConfirmed) {
+                    axios.delete(`/expense-unposted-restore/${target.id}`)
+                    .then(response => {
+                        this.fetchExpenses();
+                    })
+                    // .catch(error => { 
+                    //     this.errors = error.response.data.errors;
+                    // });
+                }
+            });
         },
         fetchExpenses(){
             this.loading = true;
@@ -246,6 +299,8 @@ export default {
                 this.expenses = response.data;
                 this.errors = [];
                 this.loading = false;
+                //updates the view modal if open
+                if (this.currentIndex || this.currentIndex == 0) this.getExpenseSubmitted(this.currentIndex);
             })
             .catch(error => {
                 this.errors = error.response.data.errors;

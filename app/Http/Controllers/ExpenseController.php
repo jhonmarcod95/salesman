@@ -627,7 +627,7 @@ class ExpenseController extends Controller
 
     public function expenseUnpostedIndexData(Request $request){
         $request->validate([
-            'company' => 'required',
+            // 'company' => 'required',
             'startDate' => 'required',
             'endDate' => 'required'
         ]);
@@ -640,12 +640,29 @@ class ExpenseController extends Controller
         return PaymentHeaderError::with('paymentHeaderDetailError','user','user.expenses.expensesType')
         ->whereHas('user' , function($q) use ($companyId){
             $q->whereHas('companies', function($q) use ($companyId){
-                $q->where('company_id', $companyId);
+                $q->when($companyId, function($q) use ($companyId){
+                    $q->where('company_id', $companyId);
+                });
             });
         })->with(['user.expenses' => function ($q) use ($startDate, $endDate){
             $q->whereDate('created_at', '>=',  $startDate)->whereDate('created_at' ,'<=', $endDate);
         }])->where('cover_week','SALESFORCE REIMBURSEMENT; '. $coveredWeek)
         ->where('posting_type', 'POST')->orderBy('id', 'desc')->get();
+    }
+
+    public function deleteUnpostedExpense($id){
+        $expense = Expense::where('id',$id)->first();
+        $expense->delete();
+
+        return $expense;
+    }
+
+    public function restoreUnpostedExpense($id) {
+        $expense = Expense::where('id',$id)->where('deleted_at','!=',null)->withTrashed()->first();
+        $expense->deleted_at = null;
+        $expense->save();
+
+        return $expense;
     }
 
     public function historicalExpenseReport(){
