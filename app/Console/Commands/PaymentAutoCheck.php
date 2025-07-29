@@ -70,7 +70,7 @@ class PaymentAutoCheck extends Command
             $fiscal_year = Carbon::now()->format('Y');
             $house_bank = $bankCheck->house_bank;
             $account_id = $bankCheck->account_id;
-            $check_number = $this->checkNumber($connection, $company_code, $bankCheck,$sap_server);
+            $check_number = strval($this->checkNumber($connection, $company_code, $bankCheck,$sap_server));
 
             //api cv posting
             $posted_check = APIController::executeSapFunction($connection, 'ZFI_CHECKINFO', [
@@ -79,7 +79,7 @@ class PaymentAutoCheck extends Command
                 'FISCAL_YEAR' => $fiscal_year,
                 'HOUSE_BANK' => $house_bank,
                 'ACCT_ID' => $account_id,
-                'CHECK_NUM' => $check_number,
+                'CHECK_NUM' => strval($check_number),
             ], [
                 'RESULT' => 'result',
                 'RETURN' => 'return'
@@ -94,7 +94,7 @@ class PaymentAutoCheck extends Command
                     'fiscal_year' => $fiscal_year,
                     'house_bank' => $house_bank,
                     'account_id' => $account_id,
-                    'check_number' => $check_number,
+                    'check_number' => strval($check_number),
                 ]);
             }
             else{

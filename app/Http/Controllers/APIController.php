@@ -17,12 +17,19 @@ class APIController extends Controller
     public static function executeSapFunction($connection, $function, $parameters, $return,$sap_server){
         $client = new \GuzzleHttp\Client();
         $response = $client->request('POST', ($sap_server == 'HANA' ? env('SAP_API_S4') : env('SAP_API')) . '/execute-fm', [
-            'form_params' => [
+            // 'form_params' => [
+            //     'connection' => $connection,
+            //     'function' => $function,
+            //     'parameters' => $parameters,
+            //     'return' => $return,
+            // ]
+            'headers' => ['Content-Type' => 'application/json', 'Accept' => 'application/json'],
+            'body'=> json_encode([
                 'connection' => $connection,
                 'function' => $function,
                 'parameters' => $parameters,
-                'return' => $return,
-            ]
+                'return' => $return
+            ])
         ]);
         return collect(json_decode($response->getBody()));
     }

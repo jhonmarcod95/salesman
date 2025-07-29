@@ -82,7 +82,7 @@ class PaymentAutoCv extends Command
                 'POST_DATE' => $date_today,
                 'REFERENCE' => $reference,
                 'DOC_HDR_TXT' => $header_text,
-                'BANK_ACCT' => $bank_account,
+                'BANK_ACCT' => strval($bank_account),
                 'AMOUNT:double' => $amount,
                 'BUS_AREA' => $business_area,
                 'VEN_CODE' => $vendor_code,

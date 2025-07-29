@@ -395,7 +395,7 @@ class PaymentAutoPosting extends Command
             for ($i = 1; $i <= $versionCount; $i++){
                 $keys = [];
                 for ($j = 0; $j < $keyCount; $j++){
-                    $keys['REF_KEY_' . ($j + 1)] = $i + $j;
+                    $keys['REF_KEY_' . ($j + 1)] = (string)((int)($i + $j));
                 }
                 $refKeyCombinations[] = $keys;
                 if ($keys['REF_KEY_' . $keyCount] >= $versionCount) break;
@@ -432,7 +432,7 @@ class PaymentAutoPosting extends Command
                 'FISC_YEAR' => $posting_date->format('Y'),
                 'FIS_PERIOD' => $posting_date->format('m'),
                 'DOC_TYPE' => $accounting_entry['document_type'],
-                'REF_DOC_NO' => $accounting_entry['reference_number'],
+                'REF_DOC_NO' => (string)($accounting_entry['reference_number']),
             ]
         ];
 
@@ -450,7 +450,7 @@ class PaymentAutoPosting extends Command
             // AP
             if ($item['tag'] == 'ap'){
                 $values = [
-                    'ITEMNO_ACC' => $item['item_no'],
+                    'ITEMNO_ACC' => strval($item['item_no']),
                     'VENDOR_NO' => $item['gl_account'],
                     'COMP_CODE' => $company_code,
                     'BLINE_DATE' => $baseline_date->format('Ymd'),
@@ -462,7 +462,7 @@ class PaymentAutoPosting extends Command
                 $accountPayable[] = $values;
 
                 $currencyAmount[] = [
-                    'ITEMNO_ACC' => $item['item_no'],
+                    'ITEMNO_ACC' => strval($item['item_no']),
                     'CURRENCY' => 'PHP',
                     'AMT_DOCCUR:double' => $item['amount'],
                 ];
@@ -475,7 +475,7 @@ class PaymentAutoPosting extends Command
                 unset($ref_keys['internal_order']);
 
                 $values = array_merge([
-                    'ITEMNO_ACC' => $item['item_no'],
+                    'ITEMNO_ACC' => strval($item['item_no']),
                     'GL_ACCOUNT' => $item['gl_account'],
                     'COMP_CODE' => $company_code,
                     'TAX_CODE' => $item['input_tax_code'],
@@ -489,7 +489,7 @@ class PaymentAutoPosting extends Command
                 $accountGL[] = $values;
 
                 $currencyAmount[] = [
-                    'ITEMNO_ACC' => $item['item_no'],
+                    'ITEMNO_ACC' => strval($item['item_no']),
                     'CURRENCY' => 'PHP',
                     'AMT_DOCCUR:double' => $item['amount'],
                 ];
@@ -516,7 +516,7 @@ class PaymentAutoPosting extends Command
             // Tax
             elseif ($item['tag'] == 'tax'){
                 $accountTax[] = [
-                    'ITEMNO_ACC' => $item['item_no'],
+                    'ITEMNO_ACC' => strval($item['item_no']),
                     'GL_ACCOUNT' => $item['gl_account'],
                     'TAX_CODE' => $item['input_tax_code'],
                     'TAX_RATE:int' => '12',
@@ -525,7 +525,7 @@ class PaymentAutoPosting extends Command
 
                 if ($item['input_tax_code'] == 'I7'){
                     $currencyAmount[] = [
-                        'ITEMNO_ACC' => $item['item_no'],
+                        'ITEMNO_ACC' => strval($item['item_no']),
                         'CURRENCY' => 'PHP',
                         'AMT_DOCCUR:double' => $item['amount'],
                         'AMT_BASE:double' => $totalAmountI7,
@@ -533,7 +533,7 @@ class PaymentAutoPosting extends Command
                 }
                 elseif ($item['input_tax_code'] == 'I3'){
                     $currencyAmount[] = [
-                        'ITEMNO_ACC' => $item['item_no'],
+                        'ITEMNO_ACC' => strval($item['item_no']),
                         'CURRENCY' => 'PHP',
                         'AMT_DOCCUR:double' => $item['amount'],
                         'AMT_BASE:double' => $totalAmountI3,
@@ -556,7 +556,7 @@ class PaymentAutoPosting extends Command
         try{
             //sap posting
             $paymentPosting = APIController::executeSapFunction($sapConnection, 'BAPI_ACC_DOCUMENT_POST', $payment, null,$sap_server);
-            $postingResults = $paymentPosting['RETURN'];
+            $postingResults = isset($paymentPosting['RETURN']) ? $paymentPosting['RETURN'] : dd($payment);
 
             foreach ($postingResults as $postingResult){
                 //success posting
