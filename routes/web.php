@@ -386,6 +386,7 @@ Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator
     // fetch attendance report by date
     Route::post('/attendance-report-bydate', 'AttendanceReportController@generateBydate');
     Route::get('/attendance-report-today', 'AttendanceReportController@generateByToday');
+    Route::get('/attendance-report-schedule-types-all', 'AttendanceReportController@scheduleTypes');
 
     // fetch searched TSR
     Route::get('/tsr-filter', 'AttendanceReportController@generateBydate');

@@ -458,7 +458,7 @@ export default {
 
         },
         getScheduleTypes(){
-            axios.get('/schedule-types-all')
+            axios.get('/attendance-report-schedule-types-all')
             .then(response => {
                 this.schedule_types = response.data;
             })
