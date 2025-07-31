@@ -556,7 +556,7 @@ class PaymentAutoPosting extends Command
         try{
             //sap posting
             $paymentPosting = APIController::executeSapFunction($sapConnection, 'BAPI_ACC_DOCUMENT_POST', $payment, null,$sap_server);
-            $postingResults = isset($paymentPosting['RETURN']) ? $paymentPosting['RETURN'] : dd($payment);
+            $postingResults = isset($paymentPosting['RETURN']) ? $paymentPosting['RETURN'] : [];
 
             foreach ($postingResults as $postingResult){
                 //success posting
