@@ -7,6 +7,7 @@ use Carbon;
 use App\Message;
 use App\Attendance;
 use App\Schedule;
+use App\ScheduleTypes;
 use App\User;
 use Illuminate\Http\Request;
 
@@ -265,6 +266,10 @@ class AttendanceReportController extends Controller
         }
 
         return $new_schedule; */
+    }
+
+    public function scheduleTypes(){
+        return ScheduleTypes::orderBy('id', 'desc')->get();
     }
 
     public function generateByToday(Request $request){
