@@ -326,7 +326,7 @@
                 <div class="modal-body text-center">
                   <div class="row">
                         <div class="col"><h3>TSR: {{ selectedUser.name }}</h3></div>
-                        <div class="col"><h3>Expense Entry: {{ selectedUser.expenses_model_count }} </h3></div>
+                        <div class="col"><h3>Expense Entries: {{ selectedUser.expenses_model_count }} </h3></div>
                     </div>
                     <div class="table-responsive" style="overflow-x:unset">
                         <table class="table align-items-center table-flush">
@@ -430,7 +430,7 @@
                                     </td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
-                                    <td>{{ getExpenseStatusName(expenseBy.status_id) }} </td>
+                                    <td>{{ getExpenseStatusName(expenseBy.status_id) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -634,7 +634,7 @@ export default {
                 case 4:
                     return "Deducted";
                 default:
-                    return expense;
+                    return "Status Pending";
             }
         },
         getVerifiedStats() {
