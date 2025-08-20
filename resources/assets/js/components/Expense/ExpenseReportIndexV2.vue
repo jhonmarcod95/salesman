@@ -337,6 +337,7 @@
                                 <th scope="col">Type of Expense</th>
                                 <th scope="col">Entry Date</th>
                                 <th scope="col">Amount</th>
+                                <th scope="col">Status</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -429,6 +430,7 @@
                                     </td>
                                     <td>{{ moment(expenseBy.created_at).format('ll') }}</td>
                                     <td>PHP {{ expenseBy.amount.toFixed(2) }} </td>
+                                    <td>{{ getExpenseStatusName(expenseBy.status_id) }} </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -618,6 +620,21 @@ export default {
                 unverified: unverified_expense_count,
                 rejected: rejected_expense_count,
                 pending: pending_expense_count
+            }
+        },
+        //Based on the expense status id, not receipt status
+        getExpenseStatusName(expense) {
+            switch (expense) {
+                case 1:
+                    return "For Posting";
+                case 2:
+                    return "For Re-posting";
+                case 3:
+                    return "Posted";
+                case 4:
+                    return "Deducted";
+                default:
+                    return expense;
             }
         },
         getVerifiedStats() {
