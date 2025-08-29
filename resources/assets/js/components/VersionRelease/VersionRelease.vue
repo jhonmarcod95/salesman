@@ -114,7 +114,24 @@
 					<div v-if="!isEmpty(selectedVersion.feedbacks)">
 						<h2>Vsn {{ selectedVersion.version || "0000.00.00" }} Feedback</h2>
 						<div style="max-height: 360px" class="table-responsive my-4">
-							<table class="table table-head-custom table-vertical-center mb-4">
+							<!--Tabloid Format-->
+							<div v-for="feedback in selectedVersion.feedbacks"
+							class="my-3 p-3 border border-2 rounded d-flex flex-row justify-content-between align-items-center">
+								<div>
+									<span class="text-dark fw-bold">{{ feedback.user.name }}</span>
+									<span class="text-muted">({{ feedback.user.email }})</span><br>
+									<div>{{ formatDate(feedback.created_at) }}</div><br>
+									<div>{{ feedback.feedback }}</div>
+								</div>
+								<a href="javascript:;"
+									@click="deleteFeedback(feedback.id)"
+          							data-bs-toggle="modal"
+          							data-bs-target="#feedbackModal">
+									<i class="fas fa-trash font-size-sm text-danger"></i>
+								</a>
+							</div>
+							<!--Table Format-->
+							<!-- <table class="table table-head-custom table-vertical-center mb-4">
  							    <thead>
  							    	<tr class="text-uppercase text-dark">
 										<th class="col-2">Username</th>
@@ -136,7 +153,7 @@
 										</td>
  							        </tr>
  							    </tbody>
- 							</table>
+ 							</table> -->
 						</div>
 					</div>
 					<!--end::Feedbacks Table-->
@@ -172,6 +189,7 @@
 	import listFormMixins from '../../list-form-mixins.vue';
 	import VersionItems from './VersionItems.vue';
 	import Swal from 'sweetalert2';
+	import moment from 'moment';
 
 	export default {
 		name: "VersionRelease",
@@ -255,6 +273,9 @@
 				this.formAction = 'delete';
 				this.feedbackId = feedbackId;
 				this.showModal('feedback_modal');
+			},
+			formatDate(date) {
+				return moment(date).format('MMMM D, YYYY');
 			}
 		},
 		computed: {
