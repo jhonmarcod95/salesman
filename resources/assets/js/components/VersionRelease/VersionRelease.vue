@@ -9,7 +9,7 @@
 			</div>
 		</app-breadcrumbs>
 
-		<div class="container-fluid">
+		<div class="container">
 			<div class="d-flex flex-row">
 				<!--begin::Aside-->
 				<div class="flex-row offcanvas-mobile w-600px w-xl-500px min-h-550px" id="kt_profile_aside">
@@ -28,7 +28,7 @@
 							<div class="navi navi-bold navi-hover navi-active navi-link-rounded">
 								<div v-if="!isProcessing && isEmpty(items)" class="navi-item text-muted">No data available</div>
 								<div v-else class="navi-item mb-1" v-for="(item, index) in items" :key="index">
-									<a class="btn active border-0 navi-link py-1 pr-0" @click="viewVersion(item)">
+									<a class="btn active border-0 navi-link py-1 pr--2" @click="viewVersion(item)">
 										<span class="navi-icon mr-2">
 											<span class="svg-icon">
 												<!--begin::Svg Icon | path:assets/media/svg/icons/Design/Layers.svg-->
@@ -44,7 +44,7 @@
 										</span>
 										<span class="navi-text font-size-lg">{{ `Vsn ${item.version}` }}</span>
 										<span class="navi-label" v-if="index == 0 && pagination.current_page == 1">
-											<span class="label p-1 label-inline text-white bg-green rounded">new</span>
+											<span class="label p-1 label-inline text-white bg-green rounded">NEW</span>
 										</span>
 									</a>
 									<a href="javascript:;" class="text-danger" @click="deleteVersion(item)" v-if="isAdministrator">
@@ -71,11 +71,11 @@
 				<!--begin::Content-->
 				<div class="flex-row-fluid col-9">
 					<!--begin::Advance Table: Widget 7-->
-					<div class="card card-custom card-stretch px-8 shadow-sm">
+					<div class="card card-custom card-stretch shadow-sm">
 						<!--begin::Header-->
-						<div class="card-header border-0 pt-10">
+						<div class="card-header border-0 px-8 pt-10">
 							<h3 class="card-title align-items-start flex-column" v-if="!isEmpty(selectedVersion)">
-								<span class="card-label font-weight-bolder font-size-h4 text-dark" >Vsn {{ selectedVersion.version }}</span>
+								<span class="card-label font-weight-bolder font-size-h3 text-dark" >Vsn {{ selectedVersion.version }}</span>
 								<span class="text-muted mt-3 font-weight-bold font-size-sm">Release Date: {{ selectedVersion.release_date }}</span>
 							</h3>
 							<h2 v-else>No data available</h2>
@@ -108,13 +108,30 @@
 				</div>
 				<!--end::Content-->
 			</div>
-			<div class="card card-custom card-stretch my-2">
+			<div class="card card-custom card-stretch my-2 mr-2">
 				<div class="card-body">
 					<!--begin::Feedbacks Table-->
 					<div v-if="!isEmpty(selectedVersion.feedbacks)">
 						<h2>Vsn {{ selectedVersion.version || "0000.00.00" }} Feedback</h2>
 						<div style="max-height: 360px" class="table-responsive my-4">
-							<table class="table table-head-custom table-vertical-center mb-4">
+							<!--Tabloid Format-->
+							<div v-for="feedback in selectedVersion.feedbacks"
+							class="my-3 p-3 border border-2 rounded d-flex flex-row justify-content-between align-items-center">
+								<div>
+									<span class="text-dark fw-bold">{{ feedback.user.name }}</span>
+									<span class="text-muted">({{ feedback.user.email }})</span><br>
+									<div>{{ formatDate(feedback.created_at) }}</div><br>
+									<div>{{ feedback.feedback }}</div>
+								</div>
+								<a href="javascript:;"
+									@click="deleteFeedback(feedback.id)"
+          							data-bs-toggle="modal"
+          							data-bs-target="#feedbackModal">
+									<i class="fas fa-trash font-size-sm text-danger"></i>
+								</a>
+							</div>
+							<!--Table Format-->
+							<!-- <table class="table table-head-custom table-vertical-center mb-4">
  							    <thead>
  							    	<tr class="text-uppercase text-dark">
 										<th class="col-2">Username</th>
@@ -136,7 +153,7 @@
 										</td>
  							        </tr>
  							    </tbody>
- 							</table>
+ 							</table> -->
 						</div>
 					</div>
 					<!--end::Feedbacks Table-->
@@ -172,6 +189,7 @@
 	import listFormMixins from '../../list-form-mixins.vue';
 	import VersionItems from './VersionItems.vue';
 	import Swal from 'sweetalert2';
+	import moment from 'moment';
 
 	export default {
 		name: "VersionRelease",
@@ -255,6 +273,9 @@
 				this.formAction = 'delete';
 				this.feedbackId = feedbackId;
 				this.showModal('feedback_modal');
+			},
+			formatDate(date) {
+				return moment(date).format('MMMM D, YYYY');
 			}
 		},
 		computed: {

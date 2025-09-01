@@ -153,7 +153,7 @@ class VersionReleaseController extends Controller
             'version_release_id' => 'required',
             'email' => 'required_if:authenticated,false',
             'password' => 'required_if:authenticated,false',
-            'feedback' => 'required',
+            'feedback' => 'required|max:500',
             'authenticated' => 'required',
         ],[
             'email.required_if' => 'The email field is required.',

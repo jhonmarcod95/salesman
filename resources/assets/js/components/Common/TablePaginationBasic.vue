@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex justify-content-between align-items-center flex-wrap" v-if="hasPagination">
-        <div class="d-flex align-items-center py-3">
+        <div class="d-flex align-items-center">
             <select class="form-control form-control-sm font-weight-bold mr-1" @change="changeLimit($event)" style="width: 55px;">
                 <option value="10" :selected="pagination.per_page === '10'">10</option>
                 <option value="20" :selected="pagination.per_page === '20'">20</option>
