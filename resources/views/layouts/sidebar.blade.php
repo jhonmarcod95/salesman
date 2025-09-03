@@ -320,6 +320,13 @@
                         <i class="ni ni-basket text-orange"></i> Posted Expenses
                     </a>
                 </li>
+                @if(Auth::user()->hasRole('audit'))
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/expenses-deduction-report') }}">
+                        <i class="fa fa-window-close text-danger"></i> Expense Deductions
+                    </a>
+                </li>
+                @endif
             </ul>
             @endif
             <ul class="navbar-nav">
