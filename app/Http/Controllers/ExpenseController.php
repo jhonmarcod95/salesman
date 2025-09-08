@@ -413,16 +413,16 @@ class ExpenseController extends Controller
         $expense_date = date('Y-m-t h:m:s', strtotime($created_date));
 
         //If expense date is past the first day of last month, the verification period will be expired
-        // if (strtotime($first_day_of_last_month) > strtotime($expense_date)) {
-        //     return true;
-        // }
+        if (strtotime($first_day_of_last_month) > strtotime($expense_date)) {
+            return true;
+        }
 
-        // if (date('d') > '10') {
-        //     //If the expense date is past of last day of last month, the verification period will be expired
-        //     if (strtotime($last_day_of_last_month) > strtotime($expense_date)) {
-        //         return true;
-        //     }
-        // }
+        if (date('d') > '10') {
+            //If the expense date is past of last day of last month, the verification period will be expired
+            if (strtotime($last_day_of_last_month) > strtotime($expense_date)) {
+                return true;
+            }
+        }
 
         return false;
     }
