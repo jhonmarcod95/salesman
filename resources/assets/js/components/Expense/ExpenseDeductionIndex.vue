@@ -149,7 +149,7 @@
                                     <td>{{ deduction.expense.expenses_type.name }}</td>
                                     <td>{{ deduction.expense.created_at }} </td>
                                     <td>PHP {{ deduction.expense.amount.toFixed(2) }} </td>
-                                    <td>PHP {{ (deduction.expense.amount - deduction.expense.posted_amount).toFixed(2) }} </td>
+                                    <td>PHP {{ deduction.balance_deducted_amount }} </td>
                                     <td>{{ deduction.created_at }}</td>
                                 </tr>
                             </tbody>
