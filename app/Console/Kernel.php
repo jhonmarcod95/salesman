@@ -92,7 +92,7 @@ class Kernel extends ConsoleKernel
             ->tuesdays()
             ->at('01:30');
 
-        /* end:: every tuesday **********************/
+        // /* end:: every tuesday **********************/
 
 
         /* begin:: every month end *******************/

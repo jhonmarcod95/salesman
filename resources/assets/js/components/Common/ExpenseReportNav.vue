@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex">
-        <div>
+        <div v-if="salesHeadRole || isItRole">
             <a class="btn btn-sm mr-2" 
                 href="/expenses-report" 
                 :class="pathName == '/expenses-report' ? 'btn-default' : 'btn-outline-default'">
@@ -28,7 +28,7 @@
                  Expense Deduction Report
             </a>
         </div>
-        <div>
+        <div v-if="salesHeadRole || isItRole">
             <a class="btn btn-sm mr-2" 
                 href="/expenses-top-spender-report" 
                 :class="pathName == '/expenses-top-spender-report' ? 'btn-default' : 'btn-outline-default'">
