@@ -173,7 +173,7 @@ Route::group(['middleware' => ['portal_logger']], function() {
         Route::post('surveys/edit-questionnaire','SurveysController@editQuestionnaire');
 
         // Admin Routes
-        Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|approver|tax|finance-gl']], function () {
+        Route::group(['middleware' => ['auth', 'role:it|president|evp|vp|avp|coordinator|coordinator-2|manager|ap|approver|tax|finance-gl|audit']], function () {
             //Schedules
             Route::get('/schedules', 'ScheduleController@index');
             Route::get('/schedules/{date_from}/{date_to}', 'ScheduleController@indexData');
