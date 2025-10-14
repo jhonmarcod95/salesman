@@ -468,6 +468,17 @@ class AppAPIController extends Controller
             ]);
         }
 
+        // check if user has maintained budget IO
+        $internalOrders = SalesmanInternalOrder::where('user_id', Auth::user()->id)->count();
+        if($internalOrders == 0) {
+            $this->validate($request, [
+                'no_internal_order' => 'required'
+            ],[
+                'no_internal_order.required' => 'No budget IO found: Please contact your Sales Coordinator for assistance.'
+            ]);
+        }
+
+
         // determine if has success visit
         if($this->checkHasSuccessVisit() == 'false'){
             $this->validate($request, [
