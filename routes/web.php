@@ -20,7 +20,7 @@ use GuzzleHttp\Exception\BadResponseException;
 //    return view('welcome');
 //});
 
-Route::get('/sso-login', 'SSOLoginController@login');
+// Route::get('/sso-login', 'SSOLoginController@login');
 
 Auth::routes();
 
@@ -28,7 +28,7 @@ Route::get('logout', function(){
     return redirect('/');
 });
 
-Route::group(['middleware' => ['portal_logger']], function() {
+// Route::group(['middleware' => ['portal_logger']], function() {
     // Authenticated Routes
     Route::group(['middleware' => 'auth'], function(){
         // Provinces
@@ -648,7 +648,7 @@ Route::group(['middleware' => ['portal_logger']], function() {
         Route::post('/virtual-schedule-report-data-filter', 'ScheduleController@virtualScheduleReportDataFilter');
     });
 
-});
+// });
 
 //Get SAP Customer with sales
 Route::get('/get-sap-customer', function () {
