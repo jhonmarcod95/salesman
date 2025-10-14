@@ -48,10 +48,8 @@ class HRISPortalLoggerMiddleware
                     'portal' => Route::currentRouteName(),
                     'url' => $request->fullUrl(),
                     'url_name' => Route::currentRouteName(),
-                    // 'url_description' => Route::current()->getAction('description') ?? 'No description provided',
-                    // 'url_purpose' => Route::current()->getAction('purpose') ?? 'No purpose provided',
-                    'url_description' =>'No description provided',
-                    'url_purpose' => 'No purpose provided',
+                    'url_description' => Route::current()->getAction('description') ?? 'No description provided',
+                    'url_purpose' => Route::current()->getAction('purpose') ?? 'No purpose provided',
                     'url_method' => $request->method(),
                     'is_authenticated' => Auth::check() ? 1 : 0,
                 ]
