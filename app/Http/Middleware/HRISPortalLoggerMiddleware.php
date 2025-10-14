@@ -29,7 +29,7 @@ class HRISPortalLoggerMiddleware
         //     // Linux/Unix ping command
         //     $pingResult = exec("ping -c 1 -W 3 " . escapeshellarg(env('PORTAL_USER_LOGGER_HOST_URL')), $output, $status);
         // }
-        // if(!$pingResult){
+        // if(!$status){
         //     Log::error('Failed to log portal activity due to server down');
         //     return $next($request);
         // }
@@ -62,6 +62,6 @@ class HRISPortalLoggerMiddleware
         //     Log::error('Failed to log portal activity:'. $e->getMessage());
         // }
 
-        return $next($request);
+        // return $next($request);
     }
 }
