@@ -26,7 +26,7 @@ Route::get('internal-orders/{sap_server}', 'API\SalesmanInternalOrderController@
 
 // Route API setup for Mobile Client
 Route::group(['middleware' => 'auth:api'], function() {
-    Route::group(['middleware' => ['portal_logger']], function() {
+    // Route::group(['middleware' => ['portal_logger']], function() {
         // Expenses
         Route::get('expenses/types','AppAPIController@getExpensesType');
         Route::get('expenses','AppAPIController@getExpenses');
@@ -180,5 +180,5 @@ Route::group(['middleware' => 'auth:api'], function() {
         Route::post('expenses-docs','API\ExpenseDocumentControllerApi@expenseDmsReceived');
         Route::post('expenses-dms-received', 'API\ExpenseDocumentControllerApi@expenseDmsReceivedMonth');
         Route::get('tsr-users', "API\ExpenseDocumentControllerApi@getTsrUsers");
-    });
+    // });
 });
