@@ -20,7 +20,7 @@ use GuzzleHttp\Exception\BadResponseException;
 //    return view('welcome');
 //});
 
-// Route::get('/sso-login', 'SSOLoginController@login');
+Route::get('/sso-login', 'SSOLoginController@login');
 
 Auth::routes();
 
