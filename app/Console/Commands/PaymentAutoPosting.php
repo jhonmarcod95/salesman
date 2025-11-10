@@ -940,13 +940,13 @@ class PaymentAutoPosting extends Command
         // if(intval(Carbon::parse($posting_date)->format('d')) > 10){    
             $monthly_expenses = EmployeeMonthlyExpense::where('user_id',$expense->user_id)
                 ->where('balance_rejected_amount','>',0)
-                ->when($day > 10,function($query) use($posting_month,$posting_year){
+                ->when($day > 11,function($query) use($posting_month,$posting_year){
                     $query->where(function($q) use($posting_month,$posting_year){
                         $q->where('month','!=',$posting_month)
                         ->orWhere('year','!=',$posting_year);
                     });
                 })
-                ->when($day <= 10,function($query) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
+                ->when($day <= 11,function($query) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
                     $query->where(function($q) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
                         $q->where(function($q2) use($posting_month,$posting_year){
                             $q2->where('month','!=',$posting_month)
