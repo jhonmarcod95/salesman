@@ -1386,4 +1386,9 @@ class ExpenseController extends Controller
             })
             ->paginate($request->limit);
     }
+
+
+    public function rejectedExpensePerUser($userId,$month,$year){
+
+    }
 }

@@ -77,8 +77,8 @@
                                             </tr>
                                             <tr v-else v-for="(expense, e) in items" v-bind:key="e">
                                                 <td class="text-right">
-                                                    <button class="btn btn-sm text-black-50" @click="viewDeductedExpense(expense.month+ ' '+expense.year,
-                                                        expense.unverified_amount + expense.rejected_amount,expense.user.name,expense.deductions)">View</button>
+                                                    <button class="btn btn-sm text-black-50" @click="viewDeductedExpense(expense.month,expense.year,
+                                                        expense.unverified_amount + expense.rejected_amount,expense.user,expense.deductions)">View</button>
                                                 </td>
                                                 <td>
                                                     <strong>{{ expense.user.name }}</strong> <br>
@@ -181,10 +181,14 @@ export default {
             },
             users: [],
             companies: [],
+            tsr_id: '',
             tsr_name: '',
+            deduction_month: '',
+            deduction_year: '',
             deduction_month_year: '',
             deduction_amount: 0,
-            deductions: []
+            deductions: [],
+            tsrRejectedExpenses: []
         }
     },
     created(){
@@ -203,12 +207,19 @@ export default {
             }
             this.fetchList();
         },
-        viewDeductedExpense(deduction_month_year,deduction_amount,tsr_name, deductions){
-            this.deduction_month_year = deduction_month_year;
+        viewDeductedExpense(month,year,deduction_amount,user, deductions){
+            this.deduction_month = month;
+            this.deduction_year = year;
+            this.deduction_month_year = month+ ' '+year;
             this.deduction_amount = deduction_amount;
-            this.tsr_name = tsr_name;
+            this.tsr_id = user.id;
+            this.tsr_name = user.name;
             this.deductions = deductions;
+            this.getTsrRejectedExpense();
             $('#viewModal').modal('show');
+        },
+        getTsrRejectedExpense(){
+            this.getSelectOptions('tsrRejectedExpenses', '/rejected-expense-per-user-month-year')	
         },
         exportReport() {
             //=============
