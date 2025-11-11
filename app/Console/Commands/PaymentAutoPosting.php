@@ -854,7 +854,7 @@ class PaymentAutoPosting extends Command
             // Complete receipt
             if($dms_submitteds->count() == count($months)) $result = true;
             // Exemption checking for 1 month only with no receipt and falls under 10 days leeway
-            if(!$result && intval(Carbon::now()->format('d')) < 12){
+            if(!$result && intval(Carbon::now()->format('d')) < 15){
                 // With 1 month reimbursement and no submitted receipt(Must be in previous months, proceed due to 7 days leeway)
                 if(count($months) == 1){
                     if($previous_month == (intval(Carbon::createFromFormat('F', $months[0])->format('m')) -1)) $result = true;
@@ -940,13 +940,13 @@ class PaymentAutoPosting extends Command
         // if(intval(Carbon::parse($posting_date)->format('d')) > 10){    
             $monthly_expenses = EmployeeMonthlyExpense::where('user_id',$expense->user_id)
                 ->where('balance_rejected_amount','>',0)
-                ->when($day > 11,function($query) use($posting_month,$posting_year){
+                ->when($day > 14,function($query) use($posting_month,$posting_year){
                     $query->where(function($q) use($posting_month,$posting_year){
                         $q->where('month','!=',$posting_month)
                         ->orWhere('year','!=',$posting_year);
                     });
                 })
-                ->when($day <= 11,function($query) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
+                ->when($day <= 14,function($query) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
                     $query->where(function($q) use($posting_month,$posting_year,$previous_posting_month,$previous_posting_year){
                         $q->where(function($q2) use($posting_month,$posting_year){
                             $q2->where('month','!=',$posting_month)

@@ -51,7 +51,7 @@ class MonthlyVerificationCapture extends Command
         $this->date_today = date('F Y');
         $date = date("Y-m");
 
-        $this->is_tenth_of_temonth = (now()->format('d') == '11') ? true : false;
+        $this->is_tenth_of_temonth = (now()->format('d') == '14') ? true : false;
         // Final recomputation of total amount for deduction
         if($this->is_tenth_of_temonth){
             $this->date_today = date('F Y', strtotime('-1 month'));
@@ -68,7 +68,7 @@ class MonthlyVerificationCapture extends Command
         $this->date_last_month = date("F Y", strtotime("first day of last month"));
 
         //Initialize if today is 9th day of month
-        $this->is_ninth_of_temonth = (now()->format('d') == '10') ? true : false;
+        $this->is_ninth_of_temonth = (now()->format('d') == '13') ? true : false;
     }
 
     /**
