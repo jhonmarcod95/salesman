@@ -854,7 +854,7 @@ class PaymentAutoPosting extends Command
             // Complete receipt
             if($dms_submitteds->count() == count($months)) $result = true;
             // Exemption checking for 1 month only with no receipt and falls under 10 days leeway
-            if(!$result && intval(Carbon::now()->format('d')) < 11){
+            if(!$result && intval(Carbon::now()->format('d')) < 12){
                 // With 1 month reimbursement and no submitted receipt(Must be in previous months, proceed due to 7 days leeway)
                 if(count($months) == 1){
                     if($previous_month == (intval(Carbon::createFromFormat('F', $months[0])->format('m')) -1)) $result = true;
