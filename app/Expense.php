@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 class Expense extends Model implements Auditable
 {
@@ -87,5 +88,14 @@ class Expense extends Model implements Auditable
 
     public function history() {
         return $this->hasMany(ExpenseHistory::class);
+    }
+
+    public static function rejectedExpensePerUser($userId,$month,$year){
+        return self::with('expensesType','expenseRejectedRemarks','payments')
+            ->where('user_id',$userId)
+            ->whereIn('verified_status_id',[2,3])
+            ->whereMonth('created_at',Carbon::parse($month)->format('m'))
+            ->whereYear('created_at',$year)
+            ->get();
     }
 }

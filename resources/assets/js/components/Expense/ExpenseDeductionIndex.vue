@@ -99,6 +99,7 @@
                                         </tbody> -->
                                     </table>
                                 </div>
+                                
                             </div>
                         </div>
                         <div class="card-footer">
@@ -151,6 +152,43 @@
                                     <td>PHP {{ deduction.expense.amount.toFixed(2) }} </td>
                                     <td>PHP {{ deduction.balance_deducted_amount }} </td>
                                     <td>{{ deduction.created_at }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row mt-5 mb-1">
+                        <div class="col-md-12 text-center"> <h3 class="text-danger"><i>{{ deduction_month_year }} Rejected Expenses</i></h3> </div>
+                    </div>
+
+                    <div class="table-responsive" style="overflow-x:unset">
+                        <table class="table align-items-center table-flush">
+                            <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Expense ID</th>
+                                <th scope="col">Attachment</th>
+                                <th scope="col">Type of Expense</th>
+                                <th scope="col">Entry Date</th>
+                                <th scope="col">Amount</th>
+                                <th scope="col">Details</th>
+                                <th scope="col">SAP Posting</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(rejected, d) in tsrRejectedExpenses" v-bind:key="d">
+                                    <td>{{ rejected.id }}</td>
+                                    <td>  <img class="rounded-circle" :src="imageLink+rejected.attachment" style="height: 70px; width:70px" @error="noImage"> </td>
+                                    <td>{{ rejected.expenses_type.name }}</td>
+                                    <td>{{ rejected.created_at }} </td>
+                                    <td>PHP {{ rejected.amount.toFixed(2) }} </td>
+                                    <td>
+                                        PHP {{ (rejected.expense_rejected_reason_id == 4 ? rejected.rejected_deducted_amount : rejected.amount).toFixed(2) }}<br>
+                                        <span style="text-wrap: balance;">{{ rejected.expense_rejected_remarks.remark }}</span>
+                                    </td>
+                                    <td>
+                                        {{ rejected.payments.document_code }}<br>
+                                        {{ rejected.payments.created_at }}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -219,7 +257,7 @@ export default {
             $('#viewModal').modal('show');
         },
         getTsrRejectedExpense(){
-            this.getSelectOptions('tsrRejectedExpenses', '/rejected-expense-per-user-month-year')	
+            this.getSelectOptions('tsrRejectedExpenses', this.endpoint+`/per-user/${this.tsr_id}/${this.deduction_month}/${this.deduction_year}`)	
         },
         exportReport() {
             //=============

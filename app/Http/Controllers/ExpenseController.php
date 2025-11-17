@@ -1389,6 +1389,6 @@ class ExpenseController extends Controller
 
 
     public function rejectedExpensePerUser($userId,$month,$year){
-
+        return Expense::rejectedExpensePerUser($userId,$month,$year);
     }
 }
