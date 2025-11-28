@@ -68,7 +68,7 @@ class PaymentAutoPosting extends Command
 //        RunningCommand::where('name', $this->signature)->delete();
     }
 
-    public function generateExpense($dateFrom, $dateTo, $sap_server, $isReprocessing = false){
+    public function generateExpense($dateFrom, $dateTo, $sap_server){
 
         $companies = Company::whereHas('sapServers', function ($q) use ($sap_server) {
                 $q->where('sap_server', $sap_server);
@@ -88,12 +88,7 @@ class PaymentAutoPosting extends Command
                 })->whereDate('created_at', '>=',  $dateFrom)
                 ->whereDate('created_at' ,'<=', $dateTo)
                 ->where('expenses_entry_id', '!=', 0)
-                ->when(!$isReprocessing, function($q){
-                    $q->where('status_id',0);//Not posted
-                })
-                ->when($isReprocessing, function($q){
-                    $q->where('status_id',2);//For reprocessing 
-                })
+                ->whereIn('status_id',[0,2])//Pending and for reprocessing
                 ->get()
                 ->groupBy('user.id');
                 
