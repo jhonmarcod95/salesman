@@ -42,17 +42,15 @@ class PaymentAutoPostingReprocessing extends Command
 
         $sap_server = $this->argument('sap_server');
         $back_dates = [
-            // '52nd_week' => ['2025-09-29','2025-10-05',true],
-            // '53rd_week' => ['2025-10-06','2025-10-12',true],
-            // '54th_week' => ['2025-10-13','2025-10-19',true],
-            '55th_week' => ['2025-10-27','2025-11-02',true],
-            '56th_week' => ['2025-11-03','2025-11-09',true],
-            '57th_week' => ['2025-11-10','2025-11-16',true],
+            '55th_week' => ['2025-10-27','2025-11-02'],
+            '56th_week' => ['2025-11-03','2025-11-09'],
+            '57th_week' => ['2025-11-10','2025-11-16'],
+            '58th_week' => ['2025-11-17','2025-11-23']
         ];
 
         foreach($back_dates as $back_date){
             $paymentAutoPosting = new PaymentAutoPosting();
-            $paymentAutoPosting->generateExpense($back_date[0],$back_date[1], $sap_server,$back_date[2]);
+            $paymentAutoPosting->generateExpense($back_date[0],$back_date[1], $sap_server);
         }
 
         echo $sap_server.' payment postings reprocessed.';
