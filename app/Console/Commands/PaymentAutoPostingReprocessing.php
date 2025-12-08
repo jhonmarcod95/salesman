@@ -45,7 +45,8 @@ class PaymentAutoPostingReprocessing extends Command
             '55th_week' => ['2025-10-27','2025-11-02'],
             '56th_week' => ['2025-11-03','2025-11-09'],
             '57th_week' => ['2025-11-10','2025-11-16'],
-            '58th_week' => ['2025-11-17','2025-11-23']
+            '58th_week' => ['2025-11-17','2025-11-23'],
+            '59th_week' => ['2025-11-24','2025-11-30']
         ];
 
         foreach($back_dates as $back_date){
