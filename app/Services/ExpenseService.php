@@ -66,13 +66,12 @@ class ExpenseService {
         // ]);
     }
 
-    public function computeVerifiedAndRejected($expenses)
+    public function computeVerifiedAndRejected($expenses, $is_10th_day = false)
     {
         $total_expense_amount = 0;
         $verified_amount = 0;
         $unverified_amount = 0;
         $rejected_amount = 0;
-        $is_10th_day = (now()->format('d') == '10') ? true : false;
 
         foreach ($expenses as $expense) {
             $is_credited = ($is_10th_day && in_array($expense->status_id,[3,4])) ? true : false;
