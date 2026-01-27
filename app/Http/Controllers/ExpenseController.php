@@ -12,6 +12,7 @@ use App\{
     ExpensesEntry,
     ExpensesType,
     User,
+    ReceiptExpense,
     SapUser,
     SapServer,
     PaymentHeader,
@@ -376,11 +377,12 @@ class ExpenseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
     public function show2(Request $request, $user_id) {
         $start_date = "$request->start_date 00:00:01";
         $end_date = "$request->end_date 23:59:59";
 
-        $expenses = Expense::with(
+        $expenses = Expense::with([
                 'expensesType', 
                 'payments',
                 'expenseVerificationStatus:id,name',
@@ -390,7 +392,9 @@ class ExpenseController extends Controller
                 'routeTransportation:id,expense_id,from,to,transportation_id,remarks',
                 'routeTransportation.transportation:id,mode',
                 'grassroots:id,grassroots_expense_type_id,expense_id,remarks',
-                'grassroots.grassrootExpenseType:id,name')
+                'grassroots.grassrootExpenseType:id,name',
+                'receiptExpense'  // vendor details
+            ])
             ->where('user_id', $user_id)
             ->whereBetween('created_at', [$start_date, $end_date])
             ->has('expensesEntry')
@@ -398,12 +402,13 @@ class ExpenseController extends Controller
             ->get();
 
         return $expenses->transform(function($item){
-            //Check if verification perion is expired
             $item['verification_perion_expired'] = $this->isVerificationPeriodExpired($item->created_at);
-
             return $item;
         });
     }
+
+
+
 
     public function isVerificationPeriodExpired($created_date) {
         $last_day_of_last_month = date("Y-m-t 23:59:59", strtotime("last day of last month"));

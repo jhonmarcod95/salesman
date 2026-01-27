@@ -153,7 +153,7 @@
                 </div>
                 <div class="modal-body text-center">
                   <div class="row">
-                        <div class="col"><h3>TSR: {{ selectedUser.name }}</h3></div>
+                        <div class="col"><h3>TSR: {{ selectedUser.id }} - {{ selectedUser.name }}</h3></div>
                         <div class="col"><h3>Expense Entry: {{ selectedUser.expenses_model_count }} </h3></div>
                     </div>
                     <div class="table-responsive" style="overflow-x:unset">

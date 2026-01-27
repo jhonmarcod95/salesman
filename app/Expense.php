@@ -88,4 +88,10 @@ class Expense extends Model implements Auditable
     public function history() {
         return $this->hasMany(ExpenseHistory::class);
     }
+
+    public function receiptExpense()
+    {
+        return $this->hasOne(ReceiptExpense::class);
+    }
+
 }

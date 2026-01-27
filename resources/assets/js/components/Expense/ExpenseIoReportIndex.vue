@@ -76,7 +76,7 @@
                                 <tbody>
                                     <tr v-for="(tsr, s) in filteredExpensePerIo" v-bind:key="s">
                                         <td>
-                                            {{ tsr.name }} <br>
+                                            {{ tsr.name }} {{ tsr.id }} <br>
                                             <small>{{ tsr.company }}</small>
                                         </td>
                                         <td>{{ tsr.total_planned_budget }}</td>

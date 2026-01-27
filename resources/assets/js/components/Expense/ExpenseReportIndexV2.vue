@@ -183,7 +183,7 @@
                                         </td>
                                         <td v-else></td>
                                         <td>
-                                            <strong>{{ user.name }}</strong> <br>
+                                            <strong>{{ user.id }} - {{ user.name }}</strong> <br>
                                             <span>{{ user.company }}</span>
                                         </td>
                                         <td>{{ user.expense_entry_count }}</td>
@@ -315,7 +315,7 @@
         <!-- View Expense Modal -->
         <div class="modal fade" id="viewModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <span class="closed" data-dismiss="modal">&times;</span>
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addCompanyLabel">Expenses Submitted</h5>
@@ -325,7 +325,7 @@
                 </div>
                 <div class="modal-body text-center">
                   <div class="row">
-                        <div class="col"><h3>TSR: {{ selectedUser.name }}</h3></div>
+                        <div class="col"><h3>TSR: {{ selectedUser.id }} - {{ selectedUser.name }}</h3></div>
                         <div class="col"><h3>Expense Entries: {{ selectedUser.expenses_model_count }} </h3></div>
                     </div>
                     <div class="table-responsive" style="overflow-x:unset">
@@ -402,6 +402,11 @@
                                                     ({{expenseBy.grassroots.grassroot_expense_type.name}})
                                                 </span>
                                             </span>
+                                            <div v-if="expenseBy.receipt_expense">
+                                                <div>{{ expenseBy.receipt_expense.vendor_name }}</div>
+                                                <div>{{ expenseBy.receipt_expense.vendor_address }}</div>
+                                                <div>{{ expenseBy.receipt_expense.tin_number }}</div>
+                                            </div>
                                         </div>
                                         
                                         <div v-if="!isEmpty(expenseBy.representaion)">
@@ -533,6 +538,7 @@ export default {
             axios.get(`${this.endpoint}/expenses/${user.id}`, {params: date_params})
             .then(response => { 
                 this.expenseByTsr = response.data;
+                console.log(this.expenseByTsr);
                 // this.date = created;
                 $('#viewModal').modal('show');
             })
@@ -549,6 +555,7 @@ export default {
             .then(response => { 
                 this.verifiyingId = null;
                 this.expenseByTsr = response.data;
+                console.log(this.expenseByTsr);
             })
             .catch(error => {
                 this.errors = error.response.data.errors;

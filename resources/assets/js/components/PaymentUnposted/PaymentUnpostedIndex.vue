@@ -125,7 +125,7 @@
                 </div>
                 <div class="modal-body text-center">
                     <div class="row">
-                        <div class="col"><h3>TSR: {{ this.tsrName }}</h3></div>
+                        <div class="col"><h3>TSR: {{ selectedUser.id }} - {{ selectedUser.name }}</h3></div>
                     </div>
                     <div class="table-responsive">
                         <table class="table align-items-center table-flush">
