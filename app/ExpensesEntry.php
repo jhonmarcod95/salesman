@@ -74,5 +74,4 @@ class ExpensesEntry extends Model
             $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
         }]);
     }
-
 }

@@ -26,6 +26,7 @@ use App\{
 use App\Exports\ExpenseVerifiedReportPerUserExport;
 use App\Exports\ExpenseVerifiedReportPerBuExport;
 use App\Exports\ExpenseDmsVerifiedReportPerBuExport;
+use App\Exports\ExpenseDeductionExport;
 use App\Services\ExpenseService;
 use DateTime;
 use App\Rules\ExpenseDeductionRule;
@@ -1272,6 +1273,18 @@ class ExpenseController extends Controller
             return Excel::download(new ExpenseVerifiedReportPerBuExport($request), "$month_year SFA RECEIPT VERIFICATION STATUS - as of $today.xlsx");
         }
     }
+
+    public function exportDeductions(Request $request) 
+    {
+        $filters = [
+            'company_id' => $request->company_id,
+            'user_id'    => $request->user_id,
+            'month_year' => $request->month_year // Received as YYYY-MM
+        ];
+
+        return Excel::download(new ExpenseDeductionExport($filters), 'Expense_Deductions_Report_' . $request->month_year . '.xlsx');
+    }
+
 
     public function exportDmsReport(Request $request) {
         $today = date_format(now(), "M-d-Y");

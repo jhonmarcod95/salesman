@@ -215,6 +215,8 @@ export default {
             endpoint: '/expenses-deduction-report',
             items: [],
             filterData: {
+                company_id: null,
+                user_id: null,
                 month_year: moment().subtract(1, 'months').format('YYYY-MM')
             },
             users: [],
@@ -241,6 +243,8 @@ export default {
         },
         resetSearch() {
             this.filterData = {
+                company_id: null,
+                user_id: null,
                 month_year: moment().subtract(1, 'months').format('YYYY-MM')
             }
             this.fetchList();
@@ -260,30 +264,22 @@ export default {
             this.getSelectOptions('tsrRejectedExpenses', this.endpoint+`/per-user/${this.tsr_id}/${this.deduction_month}/${this.deduction_year}`)	
         },
         exportReport() {
-            //=============
-            // Configuration object
-            let url = `${this.endpoint}/export`;
-            let params = this.filterData;
-            let queryString = new URLSearchParams(params).toString();
+            const params = new URLSearchParams({
+                company_id: this.filterData.company_id || '',
+                user_id: this.filterData.user_id || '',
+                month_year: this.filterData.month_year
+            }).toString();
 
-            // Manually constructing the URI
-            const requestUri = `${url}?${queryString}`;
-            //=============
-
-            //link to download
-            let link = document.createElement("a");
-
-            //donload/export excel
-            link.href = requestUri;
-            link.click();
+            window.location.href = `/expenses-deduction-report/export?${params}`;
         }
+
     },
     computed:{
         imageLink(){
             return window.location.origin+'/storage/';
         },
         isItRole() {
-            return this.userRole == 1  // IT
+            return this.userRole == 1;
         }
     },
 }
