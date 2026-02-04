@@ -198,7 +198,7 @@
                                         <td>
                                             <div>
                                                 Rejected Amount: PHP {{ user.rejected_amount | _amount }}<br>
-                                                Amount for Recovery: PHP {{ user.balance_rejected_amount | _amount }}
+                                                Pending Amount to Recover: PHP {{ user.balance_rejected_amount | _amount }}
                                             </div>
                                         </td>
                                     </tr>
