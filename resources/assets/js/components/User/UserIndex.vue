@@ -117,6 +117,7 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2';
 export default {
     data(){
         return{
@@ -168,18 +169,21 @@ export default {
             })
         },
         deleteUser(id){
-            if(confirm("Are you sure you want to delete this user?")) {
-                let userIndex = this.users.findIndex(item => item.id == id);
-                axios.delete(`/user/${id}`)
+            let userIndex = this.users.findIndex(item => item.id == id);
+            axios.post(`/user/delete/${id}`)
                 .then(response =>{
                     $('#deleteModal').modal('hide');
-                    alart('User Succesfully deleted');
+                    this.users.splice(userIndex,1);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'User Successfully deleted. Vendor and Internal Orders also deleted.',
+                        showConfirmButton: true,
+                        timer: 1500
+                    });
                 })
                 .catch(error => {
                     this.errors = error.response.data.error;
-                })
-                this.users.splice(userIndex,1);
-            }
+                });
         },
         setPage(pageNumber) {
             this.currentPage = pageNumber;

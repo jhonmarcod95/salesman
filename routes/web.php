@@ -213,7 +213,7 @@ Route::get('logout', function(){
             // update customer
             Route::patch('/user/{user}', 'UserController@update');
             //delete user
-            Route::delete('/user/{id}', 'UserController@destroy');
+            Route::post('/user/delete/{id}', 'UserController@destroy');
             //selection user
             Route::get('/selection-users', 'UserController@selectionUsers');
             Route::get('/selection-coordinators/{company_id}', 'UserController@selectionCoordinators');

@@ -121,7 +121,7 @@ class User extends Authenticatable implements Auditable
     }
 
     public function vendor(){
-        return $this->hasOne(SalesmanVendor::class);
+        return $this->hasOne(SalesmanVendor::class, 'user_id');
     }
 
     public function receiptExpenses()

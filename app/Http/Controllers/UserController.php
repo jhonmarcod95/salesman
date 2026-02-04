@@ -164,6 +164,10 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrfail($id);
+        if($user){
+            $user->vendor()->delete();
+            $user->internalOrders()->delete();
+        }
 
         if($user->delete()){
             return $user;
