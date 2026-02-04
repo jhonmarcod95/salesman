@@ -49,7 +49,8 @@ class SalesmanInternalOrderExport implements FromCollection, WithHeadings
                 'sap_server' => $item['sap_server'],
                 'expense_type' => $item['charge_type']['expense_charge_type']['expense_type']['name'] ?? '-',
                 'charge_type' => $item['charge_type']['name'] ?? '-',
-                'amount_rate' => $item['user']['expense_rate'][0]['amount'] ?? '-',
+                'amount_limit_per_day' => $item['user']['expense_rate'] ? collect($item['user']['expense_rate'])->where('expenses_type_id', $item['charge_type']['expense_charge_type']['expense_type_id'] ?? null)->first()['amount'] 
+                ?? '-' : '-',
                 'uom' => $item['uom'],
                 'gl_account' => $item['gl_account'] ? $item['gl_account']['code'] .' - '. $item['gl_account']['name'] : '-',
                 'created_at' => $item['created_at'],
