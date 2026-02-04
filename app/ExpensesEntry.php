@@ -40,6 +40,10 @@ class ExpensesEntry extends Model
         return $this->hasMany(Expense::class)->where('verified_status_id', 3);
     }
 
+    public function balanceRejectedExpense(){
+        return $this->hasMany(Expense::class)->where('verified_status_id', 3);
+    }
+
     public function pendingExpense() {
         return $this->hasMany(Expense::class)->where('verified_status_id', 0);
     }
@@ -65,6 +69,9 @@ class ExpensesEntry extends Model
             $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
         }])
         ->withCount(['rejectedExpense' => function ($expenseQuery) use ($start_date, $last_date) {
+            $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
+        }])
+        ->withCount(['balanceRejectedExpense' => function ($expenseQuery) use ($start_date, $last_date) {
             $expenseQuery->whereBetween('created_at', [$start_date, $last_date]);
         }])
         ->withCount(['pendingExpense' => function ($expenseQuery) use ($start_date, $last_date) {

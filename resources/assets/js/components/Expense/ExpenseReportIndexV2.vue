@@ -195,7 +195,12 @@
                                         </td>
                                         <td>PHP {{ user.total_expenses | _amount }}</td>
                                         <td>PHP {{ user.verified_amount | _amount }}</td>
-                                        <td>PHP {{ user.rejected_amount | _amount }}</td>
+                                        <td>
+                                            <div>
+                                                Rejected Amount: PHP {{ user.rejected_amount | _amount }}<br>
+                                                Amount for Recovery: PHP {{ user.balance_rejected_amount | _amount }}
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr v-if="isEmpty(items) && !isProcessing">
                                         <td>No data available in the table</td>

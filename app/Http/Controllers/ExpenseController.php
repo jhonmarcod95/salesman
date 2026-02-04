@@ -42,6 +42,7 @@ use DB;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use phpDocumentor\Reflection\Types\This;
 use ZipArchive;
+use Illuminate\Support\Facades\Log;
 
 class ExpenseController extends Controller
 {
@@ -89,7 +90,7 @@ class ExpenseController extends Controller
             ->userWithExpense()
             ->with('company:id,code,name', 'roles', 'expensesEntries')
             ->when(isset($request->user_id), function($q) use($request){
-                $q->where('id', $request->user_id);
+                $q->where('users.id', $request->user_id);
             })
             ->when(Auth::user()->level() < 8  && !Auth::user()->hasRole('ap'), function($q) {
                 $q->whereHas('companies', function ($companQuery){
@@ -144,11 +145,21 @@ class ExpenseController extends Controller
      * @return \Illuminate\Http\Response
      */
      public function getExpensePerUser(Request $request) {
-        $userExpense = ($this->expensePerUserCommonQuery($request))->orderBy('name', 'ASC')->paginate($request->limit);
+        $query = $this->expensePerUserCommonQuery($request);
+
+        $startDate = \Carbon\Carbon::parse($request->start_date);
+        $endDate = \Carbon\Carbon::parse($request->end_date);
+        $query->join('employee_monthly_expenses', function ($join) use ($startDate, $endDate) {
+            $join->on('users.id', '=', 'employee_monthly_expenses.user_id')
+                ->whereRaw("STR_TO_DATE(CONCAT(employee_monthly_expenses.year, '-', employee_monthly_expenses.month, '-', 1), '%Y-%M-%d') BETWEEN ? AND ?", 
+                    [$startDate->format('Y-m-d'), $endDate->endOfMonth()->format('Y-m-d')]);
+        })
+        ->select('users.*', 'employee_monthly_expenses.balance_rejected_amount');
+
+        $userExpense = $query->groupBy('users.name')->orderBy('users.name', 'ASC')->paginate($request->limit);
 
         $userExpense->getCollection()->transform(function($item) {
             if(!$item) return;
-
             $expenses_model_count   = 0;
             $verified_expense_count = 0;
             $unverified_expense_count = 0;
@@ -179,6 +190,8 @@ class ExpenseController extends Controller
             $data['verified_expense_count'] = $verified_expense_count;
             $data['unverified_expense_count'] = $unverified_expense_count;
             $data['rejected_expense_count'] = $rejected_expense_count;
+            $data['balance_rejected_amount'] = $item->balance_rejected_amount ?? 0; // Access the selected column
+            $data['final_total'] = $total_expenses - $data['balance_rejected_amount'];
             $data['total_expenses'] = $total_expenses;
             $data['verified_amount'] = $verified_amount;
             $data['rejected_amount'] = $rejected_amount;
@@ -187,10 +200,13 @@ class ExpenseController extends Controller
         });
 
         return $userExpense;
-     }
+    }
 
      public function getExpenseVerifiedStat(Request $request) {
-        $userExpenses = ($this->expensePerUserCommonQuery($request))->has('expensesEntries')->get();
+        $query = $this->expensePerUserCommonQuery($request);
+        $query->join('employee_monthly_expenses', 'users.id', '=', 'employee_monthly_expenses.user_id')
+            ->select('users.*', 'employee_monthly_expenses.balance_rejected_amount');
+        $userExpenses = $query->orderBy('users.name', 'ASC')->paginate($request->limit);
 
         $expenses_model_count   = 0;
         $verified_expense_count = 0;
@@ -228,11 +244,14 @@ class ExpenseController extends Controller
             'rejected_expense_count' => $rejected_expense_count,
             'verified_amount' => $verified_amount,
             'rejected_amount' => $rejected_amount,
+            'total_balance_rejected' => $query->sum('employee_monthly_expenses.balance_rejected_amount'),
+            'balance_rejected' => $query->sum('employee_monthly_expenses.balance_rejected_amount'),
             'total_expenses' => $total_expenses,
             'verified_percentage' => round($verified_percentage),
             'unverified_percentage' => round($unverified_percentage),
             'rejected_percentage' => round($rejected_percentage),
         ];
+
      }
 
      public function computeVerifiedAndRejected($expenses) {
@@ -1265,6 +1284,7 @@ class ExpenseController extends Controller
     public function export(Request $request) {
         $today = date_format(now(), "M-d-Y");
         $month_year = strtoupper(date('F Y', strtotime($request->month_year)));
+
         if($request->type == 'user') {
             $date_range = $this->expense_service->getWeekRangesOfMonthStartingMonday($request->month_year);
             return Excel::download(new ExpenseVerifiedReportPerUserExport($request, $date_range), "$month_year USER EXPENSE WEEKLY VERIFICATION STATUS REPORT - as of $today.xlsx");
@@ -1273,18 +1293,6 @@ class ExpenseController extends Controller
             return Excel::download(new ExpenseVerifiedReportPerBuExport($request), "$month_year SFA RECEIPT VERIFICATION STATUS - as of $today.xlsx");
         }
     }
-
-    public function exportDeductions(Request $request) 
-    {
-        $filters = [
-            'company_id' => $request->company_id,
-            'user_id'    => $request->user_id,
-            'month_year' => $request->month_year // Received as YYYY-MM
-        ];
-
-        return Excel::download(new ExpenseDeductionExport($filters), 'Expense_Deductions_Report_' . $request->month_year . '.xlsx');
-    }
-
 
     public function exportDmsReport(Request $request) {
         $today = date_format(now(), "M-d-Y");
@@ -1399,6 +1407,17 @@ class ExpenseController extends Controller
             })
             ->paginate($request->limit);
     }
+
+        public function exportDeductions(Request $request) 
+        {
+            $filters = [
+                'company_id' => $request->company_id,
+                'user_id'    => $request->user_id,
+                'month_year' => $request->month_year
+            ];
+
+            return Excel::download(new ExpenseDeductionExport($filters), 'Expense_Deductions_Report_' . $request->month_year . '.xlsx');
+        }
 
 
     public function rejectedExpensePerUser($userId,$month,$year){

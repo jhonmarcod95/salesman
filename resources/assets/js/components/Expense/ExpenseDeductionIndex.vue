@@ -12,7 +12,7 @@
                                 <div class="col">
                                     <h3 class="mb-0">Expense Deduction Report</h3>
                                 </div>
-                                <expense-report-nav :user-role="userRole"/>
+                                <expense-report-nav v-if="isItRole" :user-role="userRole"/>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -20,13 +20,13 @@
                                 <div class="col-md-2 float-left">
                                     <div class="form-group">
                                         <label for="name" class="form-control-label">Company</label> 
-                                        <app-select :options="companies" v-model="filterData.company_id" label="name" @input="searchKeyUp"/>
+                                        <app-select :key="'company-' + resetCount" :options="companies" v-model="filterData.company_id" label="name" @input="searchKeyUp"/>
                                     </div>
                                 </div>
                                 <div class="col-md-3 float-left">
                                     <div class="form-group">
                                         <label for="name" class="form-control-label">User</label> 
-                                        <app-select :options="users" v-model="filterData.user_id" label="name" @input="searchKeyUp"/>
+                                        <app-select :key="'user-' + resetCount" :options="users" v-model="filterData.user_id" label="name" @input="searchKeyUp"/>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -38,7 +38,7 @@
 
                                 <div class="col-md-3">
                                     <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">Clear Filter</button> 
-                                    <button v-if="isItRole" class="btn btn-sm btn-success mt-4" @click="exportReport()"> Export Excel</button>
+                                    <button v-if="hasTableData" class="btn btn-sm btn-success mt-4" @click="exportReport()"> Export Excel</button>
                                 </div>
                             </div>
                         </div>
@@ -183,7 +183,7 @@
                                     <td>PHP {{ rejected.amount.toFixed(2) }} </td>
                                     <td>
                                         PHP {{ (rejected.expense_rejected_reason_id == 4 ? rejected.rejected_deducted_amount : rejected.amount).toFixed(2) }}<br>
-                                        <span style="text-wrap: balance;">{{ rejected.expense_rejected_remarks.remark }}</span>
+                                        <!-- <span style="text-wrap: balance;">{{ rejected.expense_rejected_remarks.remark }}</span> -->
                                     </td>
                                     <td>
                                         {{ rejected.payments.document_code }}<br>
@@ -214,6 +214,7 @@ export default {
         return{
             endpoint: '/expenses-deduction-report',
             items: [],
+            resetCount: 0,
             filterData: {
                 company_id: null,
                 user_id: null,
@@ -242,11 +243,10 @@ export default {
             event.target.src = window.location.origin+'/img/brand/no-image.png';
         },
         resetSearch() {
-            this.filterData = {
-                company_id: null,
-                user_id: null,
-                month_year: moment().subtract(1, 'months').format('YYYY-MM')
-            }
+            this.filterData.company_id = null;
+            this.filterData.user_id = null;
+            this.filterData.month_year = moment().subtract(1, "months").format("YYYY-MM");
+            this.resetCount++; 
             this.fetchList();
         },
         viewDeductedExpense(month,year,deduction_amount,user, deductions){
@@ -278,9 +278,12 @@ export default {
         imageLink(){
             return window.location.origin+'/storage/';
         },
+        hasTableData() {
+            return this.items.length > 0;
+        },
         isItRole() {
             return this.userRole == 1;
         }
-    },
+    }
 }
 </script>
