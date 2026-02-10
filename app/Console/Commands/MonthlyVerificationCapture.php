@@ -138,7 +138,7 @@ class MonthlyVerificationCapture extends Command
                         $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
                         $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
 
-                        $verified = $this->expense_service->computeVerifiedAndRejected($expenses->expensesModel);
+                        $verified = $this->expense_service->computeVerifiedAndRejected($expenses->expensesModel, $this->is_tenth_of_temonth);
                         $total_expenses = $total_expenses + $verified['total_expense_amount'];
                         $verified_amount = $verified_amount + $verified['verified_amount'];
                         $unverified_amount = $unverified_amount + $verified['unverified_amount'];

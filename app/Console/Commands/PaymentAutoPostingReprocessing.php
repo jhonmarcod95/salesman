@@ -42,12 +42,12 @@ class PaymentAutoPostingReprocessing extends Command
 
         $sap_server = $this->argument('sap_server');
         $back_dates = [
-            '52nd_week' => ['2025-09-29','2025-10-05',true]
+            '1st_week' => ['2026-02-01','2026-02-01']
         ];
 
         foreach($back_dates as $back_date){
             $paymentAutoPosting = new PaymentAutoPosting();
-            $paymentAutoPosting->generateExpense($back_date[0],$back_date[1], $sap_server,$back_date[2]);
+            $paymentAutoPosting->generateExpense($back_date[0],$back_date[1], $sap_server);
         }
 
         echo $sap_server.' payment postings reprocessed.';
