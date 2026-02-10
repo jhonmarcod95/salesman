@@ -1095,10 +1095,11 @@ class AppAPIController extends Controller
 
     public function getTinNumbers() {
 
-        $tinNumbers = ReceiptExpense::where('receipt_transaction_id',1)
-                            ->orderBy('id','DESC')
+        $tinNumbers = ReceiptExpense::where('receipt_transaction_id', 1)
+                            ->orderBy('id', 'DESC')
                             ->get()
-                            ->unique('tin_number');
+                            ->unique('tin_number')
+                            ->take(100);
 
         return TinNumbersResource::collection($tinNumbers);
 
