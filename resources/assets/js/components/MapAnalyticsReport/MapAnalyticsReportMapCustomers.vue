@@ -426,7 +426,9 @@
                         }
                     },
                     'CUSTOMER CODE' : 'customer_code',
-                    // 'NAME' : 'name',
+                    'NAME' : 'name',
+                    'LAT' : 'lat',
+                    'LNG' : 'lng',
                     'CLASSIFICATION': {
                         callback: (value) => {
                             if(value.classifications){
