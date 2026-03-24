@@ -342,6 +342,7 @@ Route::get('logout', function(){
             Route::group(['prefix' => '/expenses-deduction-report'], function() {
                 Route::get('/', 'ExpenseController@expenseDeductionReportIndex');
                 Route::get('/all', 'ExpenseController@expenseDeductionReportAll');
+                Route::get('/per-user/{userId}/{month}/{year}', 'ExpenseController@rejectedExpensePerUser');
                 // Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
                 // Route::get('/expenses/{user_id}', 'ExpenseController@show2');
                 // Route::get('/export', 'ExpenseController@export');
