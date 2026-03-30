@@ -108,11 +108,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('payment:autopostingmonthend LFUG')
             ->monthlyOn(date('t'), '23:15');
 
-        $schedule->command('payment:autocv')
-            ->monthlyOn(date('t'), '23:30');
+        // $schedule->command('payment:autocv')
+        //     ->monthlyOn(date('t'), '23:30');
 
-        $schedule->command('payment:autocheck')
-            ->monthlyOn(date('t'), '23:35');
+        // $schedule->command('payment:autocheck')
+        //     ->monthlyOn(date('t'), '23:35');
 
         /* end:: every month end *********************/
 
