@@ -42,9 +42,9 @@ class PaymentAutoPostingReprocessing extends Command
 
         $sap_server = $this->argument('sap_server');
         $back_dates = [
-            '1st_week' => ['2026-04-27','2026-05-03'],
-            '2nd_week' => ['2026-05-04','2026-05-10'],
-            '3rd_week' => ['2026-05-11','2026-05-17']
+            '1st_week' => ['2026-07-01','2026-07-05'],
+            '2nd_week' => ['2026-07-06','2026-07-12'],
+            '3rd_week' => ['2026-07-13','2026-07-19']
         ];
 
         foreach($back_dates as $back_date){
