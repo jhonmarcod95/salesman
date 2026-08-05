@@ -6,12 +6,13 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;     
 use PhpOffice\PhpSpreadsheet\Shared\Date;  
@@ -20,7 +21,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Font;
 
-class ExpenseDeductionSheet implements FromQuery, WithHeadings, ShouldAutoSize, WithStyles, WithMapping, WithChunkReading, WithTitle, WithColumnFormatting
+class ExpenseDeductionSheet implements FromQuery, WithHeadings, ShouldAutoSize, WithEvents, WithMapping, WithChunkReading, WithTitle, WithColumnFormatting
 {
     protected $filters;
     protected $sheetType;
@@ -169,8 +170,17 @@ class ExpenseDeductionSheet implements FromQuery, WithHeadings, ShouldAutoSize, 
         ];
     }
 
-    public function styles(Worksheet $sheet) 
-    { 
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $this->applySheetStyles($event->sheet->getDelegate());
+            },
+        ];
+    }
+
+    private function applySheetStyles(Worksheet $sheet)
+    {
         $sheet->freezePane('B2');
         $sheet->getStyle('1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],

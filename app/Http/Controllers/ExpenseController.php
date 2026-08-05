@@ -144,59 +144,70 @@ class ExpenseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-     public function getExpensePerUser(Request $request) {
+    public function getExpensePerUser(Request $request) {
         $query = $this->expensePerUserCommonQuery($request);
 
-        $startDate = \Carbon\Carbon::parse($request->start_date);
-        $endDate = \Carbon\Carbon::parse($request->end_date);
-        $query->join('employee_monthly_expenses', function ($join) use ($startDate, $endDate) {
-            $join->on('users.id', '=', 'employee_monthly_expenses.user_id')
-                ->whereRaw("STR_TO_DATE(CONCAT(employee_monthly_expenses.year, '-', employee_monthly_expenses.month, '-', 1), '%Y-%M-%d') BETWEEN ? AND ?", 
-                    [$startDate->format('Y-m-d'), $endDate->endOfMonth()->format('Y-m-d')]);
-        })
-        ->select('users.*', 'employee_monthly_expenses.balance_rejected_amount');
+        $startDate = \Carbon\Carbon::parse($request->start_date)->startOfMonth();
+        $endDate = \Carbon\Carbon::parse($request->end_date)->endOfMonth();
 
-        $userExpense = $query->groupBy('users.name')->orderBy('users.name', 'ASC')->paginate($request->limit);
+        $monthlyExpenseSub = DB::table('employee_monthly_expenses')
+            ->select('user_id', DB::raw('ANY_VALUE(balance_rejected_amount) as balance_rejected_amount'))
+            ->whereRaw("STR_TO_DATE(CONCAT(employee_monthly_expenses.year, '-', employee_monthly_expenses.month, '-', 1), '%Y-%M-%e') BETWEEN ? AND ?", [
+                $startDate->format('Y-m-d'),
+                $endDate->format('Y-m-d')
+            ])
+            ->groupBy('user_id');
+
+        $query->joinSub($monthlyExpenseSub, 'employee_monthly_expenses_filtered', function ($join) {
+            $join->on('users.id', '=', 'employee_monthly_expenses_filtered.user_id');
+        })
+        ->select('users.*', 'employee_monthly_expenses_filtered.balance_rejected_amount');
+
+        $userExpense = $query->orderBy('users.name', 'ASC')->paginate($request->limit);
 
         $userExpense->getCollection()->transform(function($item) {
             if(!$item) return;
-            $expenses_model_count   = 0;
-            $verified_expense_count = 0;
+            
+            $expenses_model_count     = 0;
+            $verified_expense_count   = 0;
             $unverified_expense_count = 0;
-            $rejected_expense_count = 0;
-            $total_expenses         = 0;
-            $verified_amount        = 0;
-            $rejected_amount        = 0;
+            $rejected_expense_count   = 0;
+            $total_expenses           = 0;
+            $verified_amount          = 0;
+            $rejected_amount          = 0;
 
-            if(count($item->expensesEntries)) {
+            if($item->expensesEntries && count($item->expensesEntries)) {
                 foreach($item->expensesEntries as $expenses) {
-                    $expenses_model_count     = $expenses_model_count + $expenses->expenses_model_count;
-                    $verified_expense_count   = $verified_expense_count + $expenses->verified_expense_count;
-                    $unverified_expense_count = $unverified_expense_count + ($expenses->unverified_expense_count + $expenses->pending_expense_count);
-                    $rejected_expense_count   = $rejected_expense_count + $expenses->rejected_expense_count;
-                    $total_expenses           = $total_expenses + $expenses->expensesModel->sum('amount');
+                    $expenses_model_count     += $expenses->expenses_model_count;
+                    $verified_expense_count   += $expenses->verified_expense_count;
+                    $unverified_expense_count += ($expenses->unverified_expense_count + $expenses->pending_expense_count);
+                    $rejected_expense_count   += $expenses->rejected_expense_count;
+                    
+                    $modelSum = $expenses->expensesModel->sum('amount');
+                    $total_expenses += $modelSum;
 
                     $verified = $this->expense_service->computeVerifiedAndRejected($expenses->expensesModel);
-                    $verified_amount = $verified_amount + $verified['verified_amount'];
-                    $rejected_amount = $rejected_amount + $verified['rejected_amount'];
+                    $verified_amount += $verified['verified_amount'];
+                    $rejected_amount += $verified['rejected_amount'];
                 }
             }
 
-            $data['id'] = $item->id;
-            $data['name'] = $item->name;
-            $data['company'] = isset($item->company) ? $item->company->name : '-';
-            $data['expense_entry_count'] = count($item->expensesEntries);
-            $data['expenses_model_count'] = count($item->expensesEntries) ? $expenses_model_count : 0;
-            $data['verified_expense_count'] = $verified_expense_count;
-            $data['unverified_expense_count'] = $unverified_expense_count;
-            $data['rejected_expense_count'] = $rejected_expense_count;
-            $data['balance_rejected_amount'] = $item->balance_rejected_amount ?? 0; // Access the selected column
-            $data['final_total'] = $total_expenses - $data['balance_rejected_amount'];
-            $data['total_expenses'] = $total_expenses;
-            $data['verified_amount'] = $verified_amount;
-            $data['rejected_amount'] = $rejected_amount;
-            $data['roles'] = $item->roles;
-            return $data;
+            return [
+                'id'                       => $item->id,
+                'name'                     => $item->name,
+                'company'                  => $item->company->name ?? '-',
+                'expense_entry_count'      => count($item->expensesEntries ?? []),
+                'expenses_model_count'     => $expenses_model_count,
+                'verified_expense_count'   => $verified_expense_count,
+                'unverified_expense_count' => $unverified_expense_count,
+                'rejected_expense_count'   => $rejected_expense_count,
+                'balance_rejected_amount'  => $item->balance_rejected_amount ?? 0,
+                'final_total'              => $total_expenses - ($item->balance_rejected_amount ?? 0),
+                'total_expenses'           => $total_expenses,
+                'verified_amount'          => $verified_amount,
+                'rejected_amount'          => $rejected_amount,
+                'roles'                    => $item->roles,
+            ];
         });
 
         return $userExpense;
