@@ -116,8 +116,15 @@ class ExpenseDeductionSheet implements FromQuery, WithHeadings, ShouldAutoSize, 
 
     public function map($row): array
     {
-        $baseURL = "http://salesforce.lafilgroup.net:8666/storage/";
-        $fullPath = $baseURL . $row->attachment;
+        $fullPath = '';
+        if (!empty($row->attachment)) {
+            $fullPath = rtrim(url('/'), '/') . '/storage/' . ltrim($row->attachment, '/');
+
+            // Keep attachment links aligned with HTTPS requests in production.
+            if (request()->isSecure()) {
+                $fullPath = preg_replace('/^http:/i', 'https:', $fullPath);
+            }
+        }
         
         return [
             $row->name, 
