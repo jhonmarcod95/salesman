@@ -38,7 +38,14 @@
 
                                 <div class="col-md-3">
                                     <button class="btn btn-sm btn-primary mt-4" @click="resetSearch">Clear Filter</button> 
-                                    <button v-if="hasTableData" class="btn btn-sm btn-success mt-4" @click="exportReport()"> Export Excel</button>
+                                    <button
+                                        v-if="hasTableData"
+                                        class="btn btn-sm btn-success mt-4"
+                                        :disabled="isExporting"
+                                        @click="exportReport()"
+                                    >
+                                        {{ isExporting ? 'Exporting...' : 'Export Excel' }}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -229,7 +236,8 @@ export default {
             deduction_month_year: '',
             deduction_amount: 0,
             deductions: [],
-            tsrRejectedExpenses: []
+            tsrRejectedExpenses: [],
+            isExporting: false
         }
     },
     created(){
@@ -264,6 +272,9 @@ export default {
             this.getSelectOptions('tsrRejectedExpenses', this.endpoint+`/per-user/${this.tsr_id}/${this.deduction_month}/${this.deduction_year}`)	
         },
         exportReport() {
+            if (this.isExporting) return;
+            this.isExporting = true;
+
             const params = new URLSearchParams({
                 company_id: this.filterData.company_id || '',
                 user_id: this.filterData.user_id || '',
@@ -271,6 +282,11 @@ export default {
             }).toString();
 
             window.location.href = `/expenses-deduction-report/export?${params}`;
+
+            // Fallback reset in case navigation is interrupted.
+            setTimeout(() => {
+                this.isExporting = false;
+            }, 5000);
         }
 
     },
