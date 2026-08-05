@@ -21,7 +21,11 @@ class ExpenseDeduction extends Model implements Auditable
         'expense_remaining_amount'
     ];
 
-    public function expense(){
+    public function expense() {
         return $this->belongsTo(Expense::class);
+    }
+
+    public function monthlyExpense() {
+        return $this->belongsTo(EmployeeMonthlyExpense::class, 'employee_monthly_expense_id');
     }
 }

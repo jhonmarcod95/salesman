@@ -345,7 +345,7 @@ Route::get('logout', function(){
                 Route::get('/per-user/{userId}/{month}/{year}', 'ExpenseController@rejectedExpensePerUser');
                 // Route::get('/verified-stat', 'ExpenseController@getExpenseVerifiedStat');
                 // Route::get('/expenses/{user_id}', 'ExpenseController@show2');
-                // Route::get('/export', 'ExpenseController@export');
+                Route::get('/export', 'ExpenseController@exportDeductions');
                 // Route::get('/receipt-history/{rexpense_id}', 'ExpenseController@getReceiptHistory');
             });
 

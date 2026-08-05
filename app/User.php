@@ -152,6 +152,10 @@ class User extends Authenticatable implements Auditable
         return $this->hasMany(ExpenseBypass::class);
     }
 
+    public function monthlyExpenses() {
+        return $this->hasMany(EmployeeMonthlyExpense::class, 'user_id');
+    }
+
     public function closeVisits()
     {
         return $this->hasMany(CloseVisit::class);
