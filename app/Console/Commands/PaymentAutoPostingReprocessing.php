@@ -44,7 +44,8 @@ class PaymentAutoPostingReprocessing extends Command
         $back_dates = [
             '1st_week' => ['2026-08-01','2026-08-02'],
             '2nd_week' => ['2026-08-03','2026-08-09'],
-            '3rd_week' => ['2026-08-10','2026-08-16']
+            '3rd_week' => ['2026-08-10','2026-08-16'],
+            '4th_week' => ['2026-08-17','2026-08-23']
         ];
 
         foreach($back_dates as $back_date){
