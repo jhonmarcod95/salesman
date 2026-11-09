@@ -36,102 +36,102 @@ class Kernel extends ConsoleKernel
         /* begin:: every monday *******************/
 
         #Capture verified expenses
-        $schedule->command('capture:monthly-verified')
-            ->weekly()
-            ->mondays()
-            ->at('23:30');
+        // $schedule->command('capture:monthly-verified')
+        //     ->weekly()
+        //     ->mondays()
+        //     ->at('23:30');
 
-        /* end:: every monday *********************/
+        // /* end:: every monday *********************/
 
         
-        /* begin:: every month *********************/
+        // /* begin:: every month *********************/
 
-        #Capture verified expenses
-        $schedule->command('capture:monthly-verified')
-            ->monthlyOn(9, '23:30');
-
-
-        $schedule->command('capture:monthly-verified')
-            ->monthlyOn(10, '23:45');
-
-        /* end:: every month ***********************/
+        // #Capture verified expenses
+        // $schedule->command('capture:monthly-verified')
+        //     ->monthlyOn(9, '23:30');
 
 
-        /* begin:: every tuesday *******************/
+        // $schedule->command('capture:monthly-verified')
+        //     ->monthlyOn(10, '23:45');
 
-        // auto posting
-        $schedule->command('payment:autopostingreprocessing LFUG')
-            ->weekly()
-            ->tuesdays()
-            ->at('00:01');
+        // /* end:: every month ***********************/
+
+
+        // /* begin:: every tuesday *******************/
+
+        // // auto posting
+        // $schedule->command('payment:autopostingreprocessing LFUG')
+        //     ->weekly()
+        //     ->tuesdays()
+        //     ->at('00:01');
         
-        $schedule->command('payment:autopostingreprocessing HANA')
-            ->weekly()
-            ->tuesdays()
-            ->at('00:15');
+        // $schedule->command('payment:autopostingreprocessing HANA')
+        //     ->weekly()
+        //     ->tuesdays()
+        //     ->at('00:15');
 
-        $schedule->command('payment:autoposting LFUG')
-            ->weekly()
-            ->tuesdays()
-            ->at('00:30');
+        // $schedule->command('payment:autoposting LFUG')
+        //     ->weekly()
+        //     ->tuesdays()
+        //     ->at('00:30');
 
-        $schedule->command('payment:autoposting HANA')
-            ->weekly()
-            ->tuesdays()
-            ->at('00:50');
+        // $schedule->command('payment:autoposting HANA')
+        //     ->weekly()
+        //     ->tuesdays()
+        //     ->at('00:50');
 
-        // auto cv
-        $schedule->command('payment:autocv')
-            ->weekly()
-            ->tuesdays()
-            ->at('01:10');
-
-        // auto check
-        $schedule->command('payment:autocheck')
-            ->weekly()
-            ->tuesdays()
-            ->at('01:30');
-
-        // /* end:: every tuesday **********************/
-
-
-        /* begin:: every month end *******************/
-        $schedule->command('payment:autopostingreprocessing HANA')
-            ->monthlyOn(date('t'), '22:30');
-
-        $schedule->command('payment:autopostingreprocessing LFUG')
-            ->monthlyOn(date('t'), '22:45');
-
-        $schedule->command('payment:autopostingmonthend HANA')
-            ->monthlyOn(date('t'), '23:00');
-
-        $schedule->command('payment:autopostingmonthend LFUG')
-            ->monthlyOn(date('t'), '23:15');
-
+        // // auto cv
         // $schedule->command('payment:autocv')
-        //     ->monthlyOn(date('t'), '23:30');
+        //     ->weekly()
+        //     ->tuesdays()
+        //     ->at('01:10');
 
+        // // auto check
         // $schedule->command('payment:autocheck')
-        //     ->monthlyOn(date('t'), '23:35');
+        //     ->weekly()
+        //     ->tuesdays()
+        //     ->at('01:30');
 
-        /* end:: every month end *********************/
+        // // /* end:: every tuesday **********************/
 
 
-        /* begin:: daily *****************************/
+        // /* begin:: every month end *******************/
+        // $schedule->command('payment:autopostingreprocessing HANA')
+        //     ->monthlyOn(date('t'), '22:30');
 
-        //Get Customer Order
-        $schedule->command('command:customer_order')->dailyAt('6:00');
+        // $schedule->command('payment:autopostingreprocessing LFUG')
+        //     ->monthlyOn(date('t'), '22:45');
 
-        //Get Customer Order
-        $schedule->command('command:sap_customer_codes')->dailyAt('23:59');
+        // $schedule->command('payment:autopostingmonthend HANA')
+        //     ->monthlyOn(date('t'), '23:00');
 
-        /* end:: daily *******************************/
+        // $schedule->command('payment:autopostingmonthend LFUG')
+        //     ->monthlyOn(date('t'), '23:15');
 
-        // update IO details
-        $schedule->command('update:IODetails')
-            ->weekly()
-            ->mondays()
-            ->at('22:30');
+        // // $schedule->command('payment:autocv')
+        // //     ->monthlyOn(date('t'), '23:30');
+
+        // // $schedule->command('payment:autocheck')
+        // //     ->monthlyOn(date('t'), '23:35');
+
+        // /* end:: every month end *********************/
+
+
+        // /* begin:: daily *****************************/
+
+        // //Get Customer Order
+        // $schedule->command('command:customer_order')->dailyAt('6:00');
+
+        // //Get Customer Order
+        // $schedule->command('command:sap_customer_codes')->dailyAt('23:59');
+
+        // /* end:: daily *******************************/
+
+        // // update IO details
+        // $schedule->command('update:IODetails')
+        //     ->weekly()
+        //     ->mondays()
+        //     ->at('22:30');
     }
 
     /**
