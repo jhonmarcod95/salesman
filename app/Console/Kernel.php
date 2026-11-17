@@ -35,7 +35,7 @@ class Kernel extends ConsoleKernel
 
         /* begin:: every monday *******************/
 
-        #Capture verified expenses
+        // #Capture verified expenses
         // $schedule->command('capture:monthly-verified')
         //     ->weekly()
         //     ->mondays()
